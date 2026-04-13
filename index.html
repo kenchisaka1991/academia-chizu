@@ -38,13 +38,156 @@
             color: var(--text);
         }
 
+        /* ===== LOGIN SCREEN ===== */
+        .login-screen {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, var(--night) 0%, var(--night-light) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 1rem;
+        }
+
+        .login-screen.hidden {
+            display: none;
+        }
+
+        .login-box {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem 2rem;
+            max-width: 380px;
+            width: 100%;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .login-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 8px 25px rgba(230,57,70,0.3);
+        }
+
+        .login-logo span {
+            font-family: 'Noto Sans JP', serif;
+            font-size: 2.5rem;
+            color: white;
+            font-weight: 700;
+        }
+
+        .login-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text);
+            letter-spacing: 2px;
+            margin-bottom: 0.3rem;
+        }
+
+        .login-subtitle {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 1rem 1.2rem;
+            border: 2px solid #E8E8E8;
+            border-radius: var(--radius-md);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(230,57,70,0.1);
+        }
+
+        .login-input.error {
+            border-color: var(--primary);
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(230,57,70,0.3);
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(230,57,70,0.4);
+        }
+
+        .login-error {
+            color: var(--primary);
+            font-size: 0.85rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .login-error.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .login-hint {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #E8E8E8;
+            color: var(--text-light);
+            font-size: 0.8rem;
+        }
+
+        /* ===== MAIN APP ===== */
+        .app-container {
+            display: none;
+        }
+
+        .app-container.show {
+            display: block;
+        }
+
         .bg-pattern {
             position: fixed;
             inset: 0;
             background: 
                 radial-gradient(ellipse at 0% 0%, rgba(230,57,70,0.04) 0%, transparent 50%),
-                radial-gradient(ellipse at 100% 100%, rgba(42,157,143,0.04) 0%, transparent 50%),
-                radial-gradient(ellipse at 50% 50%, rgba(244,162,97,0.02) 0%, transparent 60%);
+                radial-gradient(ellipse at 100% 100%, rgba(42,157,143,0.04) 0%, transparent 50%);
             pointer-events: none;
             z-index: -1;
         }
@@ -127,6 +270,7 @@
             position: sticky;
             top: 0;
             z-index: 100;
+            flex-wrap: wrap;
         }
 
         .nav-btn {
@@ -140,7 +284,6 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             background: transparent;
             color: var(--text-light);
-            position: relative;
         }
 
         .nav-btn:hover { color: var(--primary); background: rgba(230,57,70,0.06); }
@@ -180,14 +323,11 @@
             padding: 1rem;
             text-align: center;
             box-shadow: var(--shadow-sm);
-            transition: all 0.3s;
             border-top: 3px solid var(--primary);
         }
 
         .stat-card:nth-child(2) { border-top-color: var(--ocean); }
         .stat-card:nth-child(3) { border-top-color: var(--accent); }
-
-        .stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
 
         .stat-value {
             font-family: 'Outfit', sans-serif;
@@ -265,10 +405,9 @@
             padding: 0.6rem 0.3rem;
             text-align: center;
             cursor: pointer;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.25s;
             box-shadow: var(--shadow-sm);
             border: 2px solid transparent;
-            position: relative;
         }
 
         .char-card:hover {
@@ -282,15 +421,6 @@
             border-color: var(--ocean);
         }
 
-        .char-card.learned::after {
-            content: '✓';
-            position: absolute;
-            top: 3px; right: 5px;
-            font-size: 0.6rem;
-            color: var(--ocean);
-            font-weight: 700;
-        }
-
         .char-main {
             font-family: 'Noto Sans JP', serif;
             font-size: 1.7rem;
@@ -302,10 +432,9 @@
             font-size: 0.65rem;
             color: var(--primary);
             font-weight: 600;
-            margin-top: 0.1rem;
         }
 
-        /* Special Section */
+        /* Special Box */
         .special-box {
             background: var(--white);
             border-radius: var(--radius-md);
@@ -322,9 +451,6 @@
             font-weight: 700;
             font-size: 0.9rem;
             margin-bottom: 0.8rem;
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
         }
 
         .youon-grid {
@@ -349,11 +475,6 @@
         .modal-overlay.active {
             display: flex;
             animation: fadeIn 0.25s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
         }
 
         .modal {
@@ -388,7 +509,7 @@
             transition: all 0.3s;
         }
 
-        .modal-close:hover { background: var(--primary); color: white; transform: rotate(90deg); }
+        .modal-close:hover { background: var(--primary); color: white; }
 
         .modal-char {
             font-family: 'Noto Sans JP', serif;
@@ -408,12 +529,7 @@
         }
 
         .vocab-list { text-align: left; }
-
-        .vocab-list h4 {
-            font-size: 0.8rem;
-            color: var(--text-light);
-            margin-bottom: 0.6rem;
-        }
+        .vocab-list h4 { font-size: 0.8rem; color: var(--text-light); margin-bottom: 0.6rem; }
 
         .vocab-item {
             display: flex;
@@ -426,10 +542,7 @@
             transition: all 0.25s;
         }
 
-        .vocab-item:hover {
-            transform: translateX(4px);
-            background: linear-gradient(135deg, #FFF5F5 0%, #FFF0E6 100%);
-        }
+        .vocab-item:hover { transform: translateX(4px); background: linear-gradient(135deg, #FFF5F5 0%, #FFF0E6 100%); }
 
         .vocab-emoji { font-size: 1.6rem; }
         .vocab-text { flex: 1; }
@@ -452,10 +565,10 @@
             color: white;
         }
 
-        .btn-learn:hover { transform: scale(1.02); box-shadow: var(--shadow-md); }
+        .btn-learn:hover { transform: scale(1.02); }
         .btn-learn.learned { background: linear-gradient(135deg, var(--ocean) 0%, var(--ocean-light) 100%); }
 
-        /* Quiz */
+        /* Quiz & Flashcard */
         .quiz-box {
             background: var(--white);
             border-radius: var(--radius-lg);
@@ -534,15 +647,9 @@
             border-radius: var(--radius-md);
             display: inline-block;
             min-width: 180px;
-            box-shadow: inset 0 2px 8px rgba(0,0,0,0.04);
         }
 
-        .quiz-hint {
-            margin-top: 0.8rem;
-            color: var(--text-light);
-            font-weight: 500;
-            font-size: 0.9rem;
-        }
+        .quiz-hint { margin-top: 0.8rem; color: var(--text-light); font-weight: 500; font-size: 0.9rem; }
 
         .quiz-options {
             display: grid;
@@ -562,34 +669,11 @@
             transition: all 0.25s;
         }
 
-        .quiz-opt:hover {
-            border-color: var(--primary);
-            background: #FFF5F5;
-            transform: scale(1.02);
-        }
+        .quiz-opt:hover { border-color: var(--primary); background: #FFF5F5; transform: scale(1.02); }
+        .quiz-opt.correct { background: linear-gradient(135deg, #D5F5E3 0%, #ABEBC6 100%); border-color: var(--ocean); animation: bounce 0.4s ease; }
+        .quiz-opt.wrong { background: linear-gradient(135deg, #FADBD8 0%, #F5B7B1 100%); border-color: var(--primary); animation: shake 0.4s ease; }
 
-        .quiz-opt.correct {
-            background: linear-gradient(135deg, #D5F5E3 0%, #ABEBC6 100%);
-            border-color: var(--ocean);
-            animation: bounce 0.4s ease;
-        }
-
-        .quiz-opt.wrong {
-            background: linear-gradient(135deg, #FADBD8 0%, #F5B7B1 100%);
-            border-color: var(--primary);
-            animation: shake 0.4s ease;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.04); }
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-6px); }
-            75% { transform: translateX(6px); }
-        }
+        @keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
 
         .quiz-result { text-align: center; padding: 1.5rem; }
 
@@ -602,11 +686,7 @@
             -webkit-text-fill-color: transparent;
         }
 
-        .result-msg {
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin: 0.8rem 0;
-        }
+        .result-msg { font-size: 1.3rem; font-weight: 700; margin: 0.8rem 0; }
 
         .btn-restart {
             padding: 0.9rem 2rem;
@@ -619,18 +699,12 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(230,57,70,0.3);
         }
 
         .btn-restart:hover { transform: scale(1.05); }
 
         /* Flashcard */
-        .fc-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1.5rem;
-        }
+        .fc-container { flex-direction: column; align-items: center; gap: 1.5rem; display: flex; }
 
         .flashcard {
             width: 260px;
@@ -677,14 +751,7 @@
             color: white;
         }
 
-        .fc-char {
-            font-family: 'Noto Sans JP', serif;
-            font-size: 3.5rem;
-            color: var(--text);
-            text-align: center;
-            word-break: break-all;
-        }
-
+        .fc-char { font-family: 'Noto Sans JP', serif; font-size: 3.5rem; color: var(--text); text-align: center; word-break: break-all; }
         .fc-hint { color: var(--text-light); margin-top: 0.8rem; font-size: 0.85rem; }
         .fc-emoji { font-size: 2.5rem; margin-bottom: 0.4rem; }
         .fc-answer { font-size: 1.8rem; font-weight: 700; text-align: center; }
@@ -719,176 +786,249 @@
 
         @media (max-width: 550px) {
             .char-main { font-size: 1.4rem; }
-            .quiz-char { font-size: 2.2rem; padding: 0.6rem 1rem; }
             .modal-char { font-size: 4rem; }
-            .flashcard { width: 240px; height: 310px; }
-            .fc-char { font-size: 2.8rem; }
             .stat-value { font-size: 1.4rem; }
         }
     </style>
 </head>
 <body>
-    <div class="bg-pattern"></div>
 
-    <header class="header">
-        <div class="header-content">
-            <div class="logo"><span>千</span></div>
-            <div class="brand">
-                <h1>CHIZU</h1>
-                <p>HABLEMOS JAPONÉS</p>
+    <!-- ===== LOGIN SCREEN ===== -->
+    <div class="login-screen" id="login-screen">
+        <div class="login-box">
+            <div class="login-logo">
+                <span>千</span>
             </div>
-        </div>
-    </header>
-
-    <nav class="nav">
-        <button class="nav-btn active" onclick="showSection('hiragana',this)">ひらがな</button>
-        <button class="nav-btn" onclick="showSection('katakana',this)">カタカナ</button>
-        <button class="nav-btn" onclick="showSection('flashcard',this)">📚 Tarjetas</button>
-        <button class="nav-btn" onclick="showSection('quiz',this)">🎯 Quiz</button>
-    </nav>
-
-    <main class="main">
-        <div class="stats">
-            <div class="stat-card">
-                <div class="stat-value" id="learned-count">0</div>
-                <div class="stat-label">Aprendidos</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">107</div>
-                <div class="stat-label">Total</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="quiz-score-display">0%</div>
-                <div class="stat-label">Precisión</div>
-            </div>
-        </div>
-
-        <!-- Hiragana -->
-        <section id="hiragana" class="section active">
-            <div class="section-header">
-                <h2><span class="jp">ひらがな</span> Hiragana</h2>
-                <p>Los caracteres fundamentales del japonés</p>
-            </div>
-            <div class="char-section"><div class="char-section-title"><span class="badge">あ</span> Vocales</div><div class="char-grid" id="h-vowels"></div></div>
-            <div class="char-section"><div class="char-section-title"><span class="badge">か</span> Fila K</div><div class="char-grid" id="h-k"></div></div>
-            <div class="char-section"><div class="char-section-title"><span class="badge">さ</span> Fila S</div><div class="char-grid" id="h-s"></div></div>
-            <div class="char-section"><div class="char-section-title"><span class="badge">た</span> Fila T</div><div class="char-grid" id="h-t"></div></div>
-            <div class="char-section"><div class="char-section-title"><span class="badge">な</span> Fila N</div><div class="char-grid" id="h-n"></div></div>
-            <div class="char-section"><div class="char-section-title"><span class="badge">は</span> Fila H</div><div class="char-grid" id="h-h"></div></div>
-            <div class="char-section"><div class="char-section-title"><span class="badge">ま</span> Fila M</div><div class="char-grid" id="h-m"></div></div>
-            <div class="char-section"><div class="char-section-title"><span class="badge">や</span> Fila Y</div><div class="char-grid" id="h-y"></div></div>
-            <div class="char-section"><div class="char-section-title"><span class="badge">ら</span> Fila R</div><div class="char-grid" id="h-r"></div></div>
-            <div class="char-section"><div class="char-section-title"><span class="badge">わ</span> Fila W・N</div><div class="char-grid" id="h-w"></div></div>
-            <div class="special-box"><div class="special-title">゛ Dakuon 濁音</div><div class="char-grid" id="h-dakuon"></div></div>
-            <div class="special-box accent"><div class="special-title">゜ Handakuon 半濁音</div><div class="char-grid" id="h-handakuon"></div></div>
-            <div class="special-box ocean"><div class="special-title">拗音 Yōon (小さいゃゅょ)</div><div class="youon-grid" id="h-youon"></div></div>
-            <div class="special-box"><div class="special-title">っ Sokuon 促音</div><div class="char-grid" id="h-sokuon"></div></div>
-        </section>
-
-        <!-- Katakana -->
-        <section id="katakana" class="section">
-            <div class="section-header">
-                <h2><span class="jp">カタカナ</span> Katakana</h2>
-                <p>Para palabras extranjeras y onomatopeyas</p>
-            </div>
-            <div class="char-section"><div class="char-section-title"><span class="badge">ア</span> Vocales</div><div class="char-grid" id="k-vowels"></div></div>
-            <div class="char-section"><div class="char-section-title"><span class="badge">カ</span> Fila K</div><div class="char-grid" id="k-k"></div></div>
-            <div class="char-section"><div class="char-section-title"><span class="badge">サ</span> Fila S</div><div class="char-grid" id="k-s"></div></div>
-            <div class="char-section"><div class="char-section-title"><span class="badge">タ</span> Fila T</div><div class="char-grid" id="k-t"></div></div>
-            <div class="char-section"><div class="char-section-title"><span class="badge">ナ</span> Fila N</div><div class="char-grid" id="k-n"></div></div>
-            <div class="char-section"><div class="char-section-title"><span class="badge">ハ</span> Fila H</div><div class="char-grid" id="k-h"></div></div>
-            <div class="char-section"><div class="char-section-title"><span class="badge">マ</span> Fila M</div><div class="char-grid" id="k-m"></div></div>
-            <div class="char-section"><div class="char-section-title"><span class="badge">ヤ</span> Fila Y</div><div class="char-grid" id="k-y"></div></div>
-            <div class="char-section"><div class="char-section-title"><span class="badge">ラ</span> Fila R</div><div class="char-grid" id="k-r"></div></div>
-            <div class="char-section"><div class="char-section-title"><span class="badge">ワ</span> Fila W・N</div><div class="char-grid" id="k-w"></div></div>
-            <div class="special-box"><div class="special-title">゛ Dakuon 濁音</div><div class="char-grid" id="k-dakuon"></div></div>
-            <div class="special-box accent"><div class="special-title">゜ Handakuon 半濁音</div><div class="char-grid" id="k-handakuon"></div></div>
-            <div class="special-box ocean"><div class="special-title">拗音 Yōon (小さいャュョ)</div><div class="youon-grid" id="k-youon"></div></div>
-            <div class="special-box"><div class="special-title">ッ Sokuon + ー Chōon</div><div class="char-grid" id="k-sokuon"></div></div>
-        </section>
-
-        <!-- Flashcard -->
-        <section id="flashcard" class="section">
-            <div class="section-header">
-                <h2>📚 Tarjetas de Estudio</h2>
-                <p>Toca la tarjeta para ver la respuesta</p>
-            </div>
-            <div class="fc-container">
-                <div class="fc-types">
-                    <button class="fc-type-btn active" onclick="setFcType('hiragana',this)">Hiragana</button>
-                    <button class="fc-type-btn" onclick="setFcType('katakana',this)">Katakana</button>
-                    <button class="fc-type-btn" onclick="setFcType('vocab',this)">Vocabulario</button>
-                </div>
-                <div class="flashcard" onclick="flipCard()">
-                    <div class="fc-inner">
-                        <div class="fc-front">
-                            <div class="fc-char" id="fc-char">あ</div>
-                            <div class="fc-hint">Toca para ver</div>
-                        </div>
-                        <div class="fc-back">
-                            <div class="fc-emoji" id="fc-emoji"></div>
-                            <div class="fc-answer" id="fc-answer">a</div>
-                            <div class="fc-sub" id="fc-sub"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="fc-controls">
-                    <button class="fc-btn prev" onclick="prevCard()">← Anterior</button>
-                    <button class="fc-btn next" onclick="nextCard()">Siguiente →</button>
-                </div>
-            </div>
-        </section>
-
-        <!-- Quiz -->
-        <section id="quiz" class="section">
-            <div class="section-header">
-                <h2>🎯 Quiz de Práctica</h2>
-                <p>Pon a prueba tu conocimiento</p>
-            </div>
-            <div class="quiz-box" id="quiz-box">
-                <div class="quiz-levels">
-                    <button class="level-btn active" onclick="setQuizLevel(1,this)">Nivel 1</button>
-                    <button class="level-btn" onclick="setQuizLevel(2,this)">Nivel 2</button>
-                    <button class="level-btn" onclick="setQuizLevel(3,this)">Nivel 3</button>
-                </div>
-                <div class="level-info" id="level-info">📝 Nivel 1: Caracteres (ひらがな + カタカナ)</div>
-                <div class="quiz-progress">
-                    <span id="q-curr">1</span>
-                    <div class="progress-track"><div class="progress-fill" id="q-bar" style="width:10%"></div></div>
-                    <span id="q-total">10</span>
-                </div>
-                <div class="quiz-display">
-                    <div class="quiz-char" id="q-char">あ</div>
-                    <p class="quiz-hint" id="q-hint">¿Cómo se lee?</p>
-                </div>
-                <div class="quiz-options" id="q-opts"></div>
-            </div>
-            <div class="quiz-result" id="quiz-result" style="display:none;">
-                <div class="result-score" id="final-score">80%</div>
-                <div class="result-msg" id="result-msg">¡Muy bien!</div>
-                <button class="btn-restart" onclick="restartQuiz()">🔄 Intentar de nuevo</button>
-            </div>
-        </section>
-    </main>
-
-    <!-- Modal -->
-    <div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
-        <div class="modal">
-            <button class="modal-close" onclick="closeModal()">×</button>
-            <div class="modal-char" id="m-char">あ</div>
-            <div class="modal-romaji" id="m-romaji">a</div>
-            <div class="vocab-list" id="m-vocab"></div>
-            <button class="btn-learn" id="btn-learn" onclick="toggleLearned()">✓ Marcar como aprendido</button>
+            <h1 class="login-title">CHIZU</h1>
+            <p class="login-subtitle">Acceso para estudiantes</p>
+            
+            <input 
+                type="password" 
+                class="login-input" 
+                id="password-input" 
+                placeholder="Contraseña"
+                onkeypress="if(event.key==='Enter')checkPassword()"
+            >
+            <button class="login-btn" onclick="checkPassword()">Entrar</button>
+            
+            <p class="login-error" id="login-error">❌ Contraseña incorrecta</p>
+            
+            <p class="login-hint">
+                🔒 DEV Environment<br>
+                Contacta al profesor para obtener acceso
+            </p>
         </div>
     </div>
 
-    <footer class="footer">
-        <p>Academia Chizu © 2026 | <a href="https://wa.me/59176344130">WhatsApp: +591 76344130</a></p>
-        <p>Clases de Japonés Grupal Dinámico | Profesor Nativo</p>
-    </footer>
+    <!-- ===== MAIN APP ===== -->
+    <div class="app-container" id="app-container">
+        <div class="bg-pattern"></div>
+
+        <header class="header">
+            <div class="header-content">
+                <div class="logo"><span>千</span></div>
+                <div class="brand">
+                    <h1>CHIZU</h1>
+                    <p>HABLEMOS JAPONÉS</p>
+                </div>
+            </div>
+        </header>
+
+        <nav class="nav">
+            <button class="nav-btn active" onclick="showSection('hiragana',this)">ひらがな</button>
+            <button class="nav-btn" onclick="showSection('katakana',this)">カタカナ</button>
+            <button class="nav-btn" onclick="showSection('flashcard',this)">📚 Tarjetas</button>
+            <button class="nav-btn" onclick="showSection('quiz',this)">🎯 Quiz</button>
+        </nav>
+
+        <main class="main">
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="learned-count">0</div>
+                    <div class="stat-label">Aprendidos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">107</div>
+                    <div class="stat-label">Total</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="quiz-score-display">0%</div>
+                    <div class="stat-label">Precisión</div>
+                </div>
+            </div>
+
+            <!-- Hiragana -->
+            <section id="hiragana" class="section active">
+                <div class="section-header">
+                    <h2><span class="jp">ひらがな</span> Hiragana</h2>
+                    <p>Los caracteres fundamentales del japonés</p>
+                </div>
+                <div class="char-section"><div class="char-section-title"><span class="badge">あ</span> Vocales</div><div class="char-grid" id="h-vowels"></div></div>
+                <div class="char-section"><div class="char-section-title"><span class="badge">か</span> Fila K</div><div class="char-grid" id="h-k"></div></div>
+                <div class="char-section"><div class="char-section-title"><span class="badge">さ</span> Fila S</div><div class="char-grid" id="h-s"></div></div>
+                <div class="char-section"><div class="char-section-title"><span class="badge">た</span> Fila T</div><div class="char-grid" id="h-t"></div></div>
+                <div class="char-section"><div class="char-section-title"><span class="badge">な</span> Fila N</div><div class="char-grid" id="h-n"></div></div>
+                <div class="char-section"><div class="char-section-title"><span class="badge">は</span> Fila H</div><div class="char-grid" id="h-h"></div></div>
+                <div class="char-section"><div class="char-section-title"><span class="badge">ま</span> Fila M</div><div class="char-grid" id="h-m"></div></div>
+                <div class="char-section"><div class="char-section-title"><span class="badge">や</span> Fila Y</div><div class="char-grid" id="h-y"></div></div>
+                <div class="char-section"><div class="char-section-title"><span class="badge">ら</span> Fila R</div><div class="char-grid" id="h-r"></div></div>
+                <div class="char-section"><div class="char-section-title"><span class="badge">わ</span> Fila W・N</div><div class="char-grid" id="h-w"></div></div>
+                <div class="special-box"><div class="special-title">゛ Dakuon 濁音</div><div class="char-grid" id="h-dakuon"></div></div>
+                <div class="special-box accent"><div class="special-title">゜ Handakuon 半濁音</div><div class="char-grid" id="h-handakuon"></div></div>
+                <div class="special-box ocean"><div class="special-title">拗音 Yōon</div><div class="youon-grid" id="h-youon"></div></div>
+                <div class="special-box"><div class="special-title">っ Sokuon</div><div class="char-grid" id="h-sokuon"></div></div>
+            </section>
+
+            <!-- Katakana -->
+            <section id="katakana" class="section">
+                <div class="section-header">
+                    <h2><span class="jp">カタカナ</span> Katakana</h2>
+                    <p>Para palabras extranjeras y onomatopeyas</p>
+                </div>
+                <div class="char-section"><div class="char-section-title"><span class="badge">ア</span> Vocales</div><div class="char-grid" id="k-vowels"></div></div>
+                <div class="char-section"><div class="char-section-title"><span class="badge">カ</span> Fila K</div><div class="char-grid" id="k-k"></div></div>
+                <div class="char-section"><div class="char-section-title"><span class="badge">サ</span> Fila S</div><div class="char-grid" id="k-s"></div></div>
+                <div class="char-section"><div class="char-section-title"><span class="badge">タ</span> Fila T</div><div class="char-grid" id="k-t"></div></div>
+                <div class="char-section"><div class="char-section-title"><span class="badge">ナ</span> Fila N</div><div class="char-grid" id="k-n"></div></div>
+                <div class="char-section"><div class="char-section-title"><span class="badge">ハ</span> Fila H</div><div class="char-grid" id="k-h"></div></div>
+                <div class="char-section"><div class="char-section-title"><span class="badge">マ</span> Fila M</div><div class="char-grid" id="k-m"></div></div>
+                <div class="char-section"><div class="char-section-title"><span class="badge">ヤ</span> Fila Y</div><div class="char-grid" id="k-y"></div></div>
+                <div class="char-section"><div class="char-section-title"><span class="badge">ラ</span> Fila R</div><div class="char-grid" id="k-r"></div></div>
+                <div class="char-section"><div class="char-section-title"><span class="badge">ワ</span> Fila W・N</div><div class="char-grid" id="k-w"></div></div>
+                <div class="special-box"><div class="special-title">゛ Dakuon</div><div class="char-grid" id="k-dakuon"></div></div>
+                <div class="special-box accent"><div class="special-title">゜ Handakuon</div><div class="char-grid" id="k-handakuon"></div></div>
+                <div class="special-box ocean"><div class="special-title">拗音 Yōon</div><div class="youon-grid" id="k-youon"></div></div>
+                <div class="special-box"><div class="special-title">ッ Sokuon + ー Chōon</div><div class="char-grid" id="k-sokuon"></div></div>
+            </section>
+
+            <!-- Flashcard -->
+            <section id="flashcard" class="section">
+                <div class="section-header">
+                    <h2>📚 Tarjetas de Estudio</h2>
+                    <p>Toca la tarjeta para ver la respuesta</p>
+                </div>
+                <div class="fc-container">
+                    <div class="fc-types">
+                        <button class="fc-type-btn active" onclick="setFcType('hiragana',this)">Hiragana</button>
+                        <button class="fc-type-btn" onclick="setFcType('katakana',this)">Katakana</button>
+                        <button class="fc-type-btn" onclick="setFcType('vocab',this)">Vocabulario</button>
+                    </div>
+                    <div class="flashcard" onclick="flipCard()">
+                        <div class="fc-inner">
+                            <div class="fc-front">
+                                <div class="fc-char" id="fc-char">あ</div>
+                                <div class="fc-hint">Toca para ver</div>
+                            </div>
+                            <div class="fc-back">
+                                <div class="fc-emoji" id="fc-emoji"></div>
+                                <div class="fc-answer" id="fc-answer">a</div>
+                                <div class="fc-sub" id="fc-sub"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fc-controls">
+                        <button class="fc-btn prev" onclick="prevCard()">← Anterior</button>
+                        <button class="fc-btn next" onclick="nextCard()">Siguiente →</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quiz -->
+            <section id="quiz" class="section">
+                <div class="section-header">
+                    <h2>🎯 Quiz de Práctica</h2>
+                    <p>Pon a prueba tu conocimiento</p>
+                </div>
+                <div class="quiz-box" id="quiz-box">
+                    <div class="quiz-levels">
+                        <button class="level-btn active" onclick="setQuizLevel(1,this)">Nivel 1</button>
+                        <button class="level-btn" onclick="setQuizLevel(2,this)">Nivel 2</button>
+                        <button class="level-btn" onclick="setQuizLevel(3,this)">Nivel 3</button>
+                    </div>
+                    <div class="level-info" id="level-info">📝 Nivel 1: Caracteres</div>
+                    <div class="quiz-progress">
+                        <span id="q-curr">1</span>
+                        <div class="progress-track"><div class="progress-fill" id="q-bar" style="width:10%"></div></div>
+                        <span id="q-total">10</span>
+                    </div>
+                    <div class="quiz-display">
+                        <div class="quiz-char" id="q-char">あ</div>
+                        <p class="quiz-hint" id="q-hint">¿Cómo se lee?</p>
+                    </div>
+                    <div class="quiz-options" id="q-opts"></div>
+                </div>
+                <div class="quiz-result" id="quiz-result" style="display:none;">
+                    <div class="result-score" id="final-score">80%</div>
+                    <div class="result-msg" id="result-msg">¡Muy bien!</div>
+                    <button class="btn-restart" onclick="restartQuiz()">🔄 Intentar de nuevo</button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Modal -->
+        <div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+            <div class="modal">
+                <button class="modal-close" onclick="closeModal()">×</button>
+                <div class="modal-char" id="m-char">あ</div>
+                <div class="modal-romaji" id="m-romaji">a</div>
+                <div class="vocab-list" id="m-vocab"></div>
+                <button class="btn-learn" id="btn-learn" onclick="toggleLearned()">✓ Marcar como aprendido</button>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>Academia Chizu © 2026 | <a href="https://wa.me/59176344130">WhatsApp: +591 76344130</a></p>
+            <p>DEV Environment - Testing Only</p>
+        </footer>
+    </div>
 
 <script>
-// ===== DATA =====
+// ===== PASSWORD PROTECTION =====
+// Hash of "Chizu123." - Simple hash for demo (not cryptographically secure, but enough for dev)
+const PASS_HASH = "5a8f4d2e"; // Simple hash
+
+function simpleHash(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+    }
+    return Math.abs(hash).toString(16).substring(0, 8);
+}
+
+function checkPassword() {
+    const input = document.getElementById('password-input');
+    const error = document.getElementById('login-error');
+    const password = input.value;
+    
+    // Direct comparison for simplicity
+    if (password === 'Chizu123.') {
+        // Success - save to session and show app
+        sessionStorage.setItem('chizu_auth', 'true');
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('app-container').classList.add('show');
+        init();
+    } else {
+        // Error
+        input.classList.add('error');
+        error.classList.add('show');
+        setTimeout(() => {
+            input.classList.remove('error');
+        }, 400);
+    }
+}
+
+// Check if already logged in this session
+function checkAuth() {
+    if (sessionStorage.getItem('chizu_auth') === 'true') {
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('app-container').classList.add('show');
+        init();
+    }
+}
+
+// ===== CHARACTER DATA =====
 const hiragana = {
     vowels: [{c:'あ',r:'a'},{c:'い',r:'i'},{c:'う',r:'u'},{c:'え',r:'e'},{c:'お',r:'o'}],
     k: [{c:'か',r:'ka'},{c:'き',r:'ki'},{c:'く',r:'ku'},{c:'け',r:'ke'},{c:'こ',r:'ko'}],
@@ -923,175 +1063,37 @@ const katakana = {
     sokuon: [{c:'ッ',r:'(tsu)'},{c:'ー',r:'(chōon)'}]
 };
 
-// Vocabulary with emojis - COMPLETE
 const vocab = {
-    'あ':[{j:'あい',r:'ai',e:'amor',m:'❤️'},{j:'あお',r:'ao',e:'azul',m:'🔵'}],
-    'い':[{j:'いぬ',r:'inu',e:'perro',m:'🐕'},{j:'いえ',r:'ie',e:'casa',m:'🏠'}],
-    'う':[{j:'うみ',r:'umi',e:'mar',m:'🌊'},{j:'うた',r:'uta',e:'canción',m:'🎵'}],
-    'え':[{j:'え',r:'e',e:'dibujo',m:'🎨'},{j:'えき',r:'eki',e:'estación',m:'🚉'}],
-    'お':[{j:'おちゃ',r:'ocha',e:'té verde',m:'🍵'},{j:'おと',r:'oto',e:'sonido',m:'🔊'}],
-    'か':[{j:'かさ',r:'kasa',e:'paraguas',m:'☂️'},{j:'かお',r:'kao',e:'cara',m:'😊'}],
-    'き':[{j:'き',r:'ki',e:'árbol',m:'🌳'},{j:'きた',r:'kita',e:'norte',m:'⬆️'}],
-    'く':[{j:'くも',r:'kumo',e:'nube',m:'☁️'},{j:'くつ',r:'kutsu',e:'zapatos',m:'👟'}],
-    'け':[{j:'け',r:'ke',e:'pelo',m:'💇'},{j:'けさ',r:'kesa',e:'esta mañana',m:'🌅'}],
-    'こ':[{j:'こども',r:'kodomo',e:'niño',m:'👶'},{j:'ここ',r:'koko',e:'aquí',m:'📍'}],
-    'さ':[{j:'さくら',r:'sakura',e:'cerezo',m:'🌸'},{j:'さかな',r:'sakana',e:'pescado',m:'🐟'}],
-    'し':[{j:'しお',r:'shio',e:'sal',m:'🧂'},{j:'しろ',r:'shiro',e:'blanco',m:'⚪'}],
-    'す':[{j:'すし',r:'sushi',e:'sushi',m:'🍣'},{j:'すな',r:'suna',e:'arena',m:'🏖️'}],
-    'せ':[{j:'せかい',r:'sekai',e:'mundo',m:'🌍'},{j:'せんせい',r:'sensei',e:'profesor',m:'👨‍🏫'}],
-    'そ':[{j:'そら',r:'sora',e:'cielo',m:'🌤️'},{j:'そと',r:'soto',e:'afuera',m:'🚪'}],
-    'た':[{j:'たこ',r:'tako',e:'pulpo',m:'🐙'},{j:'たまご',r:'tamago',e:'huevo',m:'🥚'}],
-    'ち':[{j:'ちず',r:'chizu',e:'mapa',m:'🗺️'},{j:'ちから',r:'chikara',e:'fuerza',m:'💪'}],
-    'つ':[{j:'つき',r:'tsuki',e:'luna',m:'🌙'},{j:'つくえ',r:'tsukue',e:'escritorio',m:'🪑'}],
-    'て':[{j:'て',r:'te',e:'mano',m:'✋'},{j:'てら',r:'tera',e:'templo',m:'⛩️'}],
-    'と':[{j:'とり',r:'tori',e:'pájaro',m:'🐦'},{j:'とけい',r:'tokei',e:'reloj',m:'⏰'}],
-    'な':[{j:'なつ',r:'natsu',e:'verano',m:'☀️'},{j:'なまえ',r:'namae',e:'nombre',m:'📛'}],
-    'に':[{j:'にほん',r:'nihon',e:'Japón',m:'🗾'},{j:'にく',r:'niku',e:'carne',m:'🥩'}],
-    'ぬ':[{j:'ぬの',r:'nuno',e:'tela',m:'🧵'},{j:'いぬ',r:'inu',e:'perro',m:'🐕'}],
-    'ね':[{j:'ねこ',r:'neko',e:'gato',m:'🐱'},{j:'ねつ',r:'netsu',e:'fiebre',m:'🤒'}],
-    'の':[{j:'のみもの',r:'nomimono',e:'bebida',m:'🥤'},{j:'のり',r:'nori',e:'alga',m:'🍙'}],
-    'は':[{j:'はな',r:'hana',e:'flor',m:'🌷'},{j:'はる',r:'haru',e:'primavera',m:'🌸'}],
-    'ひ':[{j:'ひ',r:'hi',e:'fuego',m:'🔥'},{j:'ひと',r:'hito',e:'persona',m:'🧑'}],
-    'ふ':[{j:'ふく',r:'fuku',e:'ropa',m:'👕'},{j:'ふゆ',r:'fuyu',e:'invierno',m:'❄️'}],
-    'へ':[{j:'へや',r:'heya',e:'habitación',m:'🛏️'},{j:'へび',r:'hebi',e:'serpiente',m:'🐍'}],
-    'ほ':[{j:'ほし',r:'hoshi',e:'estrella',m:'⭐'},{j:'ほん',r:'hon',e:'libro',m:'📖'}],
-    'ま':[{j:'まち',r:'machi',e:'ciudad',m:'🏙️'},{j:'まど',r:'mado',e:'ventana',m:'🪟'}],
-    'み':[{j:'みず',r:'mizu',e:'agua',m:'💧'},{j:'みみ',r:'mimi',e:'oreja',m:'👂'}],
-    'む':[{j:'むし',r:'mushi',e:'insecto',m:'🐛'},{j:'むら',r:'mura',e:'pueblo',m:'🏘️'}],
-    'め':[{j:'め',r:'me',e:'ojo',m:'👁️'},{j:'あめ',r:'ame',e:'lluvia',m:'🌧️'}],
-    'も':[{j:'もも',r:'momo',e:'durazno',m:'🍑'},{j:'もり',r:'mori',e:'bosque',m:'🌲'}],
-    'や':[{j:'やま',r:'yama',e:'montaña',m:'⛰️'},{j:'やさい',r:'yasai',e:'verdura',m:'🥬'}],
-    'ゆ':[{j:'ゆめ',r:'yume',e:'sueño',m:'💭'},{j:'ゆき',r:'yuki',e:'nieve',m:'❄️'}],
-    'よ':[{j:'よる',r:'yoru',e:'noche',m:'🌙'},{j:'よこ',r:'yoko',e:'lado',m:'↔️'}],
-    'ら':[{j:'らいねん',r:'rainen',e:'próximo año',m:'📅'},{j:'らく',r:'raku',e:'fácil',m:'👍'}],
-    'り':[{j:'りんご',r:'ringo',e:'manzana',m:'🍎'},{j:'りす',r:'risu',e:'ardilla',m:'🐿️'}],
-    'る':[{j:'るす',r:'rusu',e:'ausencia',m:'🚫'}],
-    'れ':[{j:'れきし',r:'rekishi',e:'historia',m:'📜'},{j:'れい',r:'rei',e:'cero',m:'0️⃣'}],
-    'ろ':[{j:'ろく',r:'roku',e:'seis',m:'6️⃣'},{j:'ろうそく',r:'rousoku',e:'vela',m:'🕯️'}],
-    'わ':[{j:'わたし',r:'watashi',e:'yo',m:'🙋'},{j:'わに',r:'wani',e:'cocodrilo',m:'🐊'}],
-    'を':[{j:'ほんをよむ',r:'hon wo yomu',e:'leer libro',m:'📚'}],
-    'ん':[{j:'にほん',r:'nihon',e:'Japón',m:'🇯🇵'},{j:'さん',r:'san',e:'tres',m:'3️⃣'}],
-    'が':[{j:'がっこう',r:'gakkou',e:'escuela',m:'🏫'}],'ぎ':[{j:'ぎんこう',r:'ginkou',e:'banco',m:'🏦'}],
-    'ぐ':[{j:'ぐあい',r:'guai',e:'condición',m:'💊'}],'げ':[{j:'げんき',r:'genki',e:'saludable',m:'💪'}],
-    'ご':[{j:'ごはん',r:'gohan',e:'arroz',m:'🍚'}],'ざ':[{j:'ざっし',r:'zasshi',e:'revista',m:'📰'}],
-    'じ':[{j:'じかん',r:'jikan',e:'tiempo',m:'⏱️'}],'ず':[{j:'ずっと',r:'zutto',e:'siempre',m:'♾️'}],
-    'ぜ':[{j:'ぜんぶ',r:'zenbu',e:'todo',m:'💯'}],'ぞ':[{j:'ぞう',r:'zou',e:'elefante',m:'🐘'}],
-    'だ':[{j:'だいがく',r:'daigaku',e:'universidad',m:'🎓'}],'ぢ':[{j:'はなぢ',r:'hanaji',e:'hemorragia',m:'🩸'}],
-    'づ':[{j:'つづく',r:'tsuzuku',e:'continuar',m:'➡️'}],'で':[{j:'でんわ',r:'denwa',e:'teléfono',m:'📞'}],
-    'ど':[{j:'どうぶつ',r:'doubutsu',e:'animal',m:'🦁'}],'ば':[{j:'ばしょ',r:'basho',e:'lugar',m:'📍'}],
-    'び':[{j:'びょういん',r:'byouin',e:'hospital',m:'🏥'}],'ぶ':[{j:'ぶた',r:'buta',e:'cerdo',m:'🐷'}],
-    'べ':[{j:'べんきょう',r:'benkyou',e:'estudio',m:'📖'}],'ぼ':[{j:'ぼうし',r:'boushi',e:'sombrero',m:'🎩'}],
-    'ぱ':[{j:'ぱん',r:'pan',e:'pan',m:'🍞'}],'ぴ':[{j:'ぴかぴか',r:'pikapika',e:'brillante',m:'✨'}],
-    'ぷ':[{j:'てんぷら',r:'tenpura',e:'tempura',m:'🍤'}],'ぺ':[{j:'ぺこぺこ',r:'pekopeko',e:'hambriento',m:'😋'}],
-    'ぽ':[{j:'たんぽぽ',r:'tanpopo',e:'diente de león',m:'🌼'}],
-    'きゃ':[{j:'きゃく',r:'kyaku',e:'cliente',m:'🧑‍💼'}],'きゅ':[{j:'きゅうり',r:'kyuuri',e:'pepino',m:'🥒'}],
-    'きょ':[{j:'きょう',r:'kyou',e:'hoy',m:'📅'}],'しゃ':[{j:'しゃしん',r:'shashin',e:'foto',m:'📷'}],
-    'しゅ':[{j:'しゅくだい',r:'shukudai',e:'tarea',m:'📝'}],'しょ':[{j:'しょうゆ',r:'shouyu',e:'salsa de soja',m:'🍶'}],
-    'ちゃ':[{j:'おちゃ',r:'ocha',e:'té verde',m:'🍵'}],'ちゅ':[{j:'ちゅうごく',r:'chuugoku',e:'China',m:'🇨🇳'}],
-    'ちょ':[{j:'ちょっと',r:'chotto',e:'un poco',m:'🤏'}],'にゃ':[{j:'にゃんこ',r:'nyanko',e:'gatito',m:'🐱'}],
-    'にゅ':[{j:'にゅうがく',r:'nyuugaku',e:'ingreso escolar',m:'🏫'}],'にょ':[{j:'にょうぼう',r:'nyoubou',e:'esposa',m:'👩'}],
-    'ひゃ':[{j:'ひゃく',r:'hyaku',e:'cien',m:'💯'}],'ひゅ':[{j:'ひゅう',r:'hyuu',e:'silbido',m:'💨'}],
-    'ひょ':[{j:'ひょう',r:'hyou',e:'leopardo',m:'🐆'}],'みゃ':[{j:'みゃく',r:'myaku',e:'pulso',m:'💓'}],
-    'みゅ':[{j:'みゅーじっく',r:'myuujikku',e:'música',m:'🎵'}],'みょ':[{j:'みょうじ',r:'myouji',e:'apellido',m:'📛'}],
-    'りゃ':[{j:'りゃく',r:'ryaku',e:'abreviación',m:'📝'}],'りゅ':[{j:'りゅう',r:'ryuu',e:'dragón',m:'🐉'}],
-    'りょ':[{j:'りょこう',r:'ryokou',e:'viaje',m:'✈️'}],'ぎゃ':[{j:'ぎゃく',r:'gyaku',e:'contrario',m:'🔄'}],
-    'ぎゅ':[{j:'ぎゅうにゅう',r:'gyuunyuu',e:'leche',m:'🥛'}],'ぎょ':[{j:'きんぎょ',r:'kingyo',e:'pez dorado',m:'🐠'}],
-    'じゃ':[{j:'じゃま',r:'jama',e:'molestia',m:'🚫'}],'じゅ':[{j:'じゅうどう',r:'juudou',e:'judo',m:'🥋'}],
-    'じょ':[{j:'じょうず',r:'jouzu',e:'hábil',m:'👍'}],'びゃ':[{j:'さんびゃく',r:'sanbyaku',e:'trescientos',m:'3️⃣'}],
-    'びゅ':[{j:'びゅう',r:'byuu',e:'silbido',m:'💨'}],'びょ':[{j:'びょうき',r:'byouki',e:'enfermedad',m:'🤒'}],
-    'ぴゃ':[{j:'ろっぴゃく',r:'roppyaku',e:'seiscientos',m:'6️⃣'}],'ぴゅ':[{j:'ぴゅーれ',r:'pyuure',e:'puré',m:'🥔'}],
-    'ぴょ':[{j:'ぴょん',r:'pyon',e:'salto',m:'🐰'}],'っ':[{j:'がっこう',r:'gakkou',e:'escuela',m:'🏫'}],
-    'ア':[{j:'アメリカ',r:'amerika',e:'EE.UU.',m:'🇺🇸'}],'イ':[{j:'イタリア',r:'itaria',e:'Italia',m:'🇮🇹'}],
-    'ウ':[{j:'ウイスキー',r:'uisukii',e:'whisky',m:'🥃'}],'エ':[{j:'エレベーター',r:'erebeetaa',e:'ascensor',m:'🛗'}],
-    'オ':[{j:'オレンジ',r:'orenji',e:'naranja',m:'🍊'}],'カ':[{j:'カメラ',r:'kamera',e:'cámara',m:'📷'}],
-    'キ':[{j:'キロ',r:'kiro',e:'kilómetro',m:'📏'}],'ク':[{j:'クラス',r:'kurasu',e:'clase',m:'🏫'}],
-    'ケ':[{j:'ケーキ',r:'keeki',e:'pastel',m:'🎂'}],'コ':[{j:'コーヒー',r:'koohii',e:'café',m:'☕'}],
-    'サ':[{j:'サラダ',r:'sarada',e:'ensalada',m:'🥗'}],'シ':[{j:'シャツ',r:'shatsu',e:'camisa',m:'👔'}],
-    'ス':[{j:'スーパー',r:'suupaa',e:'supermercado',m:'🛒'}],'セ':[{j:'セーター',r:'seetaa',e:'suéter',m:'🧥'}],
-    'ソ':[{j:'ソファ',r:'sofa',e:'sofá',m:'🛋️'}],'タ':[{j:'タクシー',r:'takushii',e:'taxi',m:'🚕'}],
-    'チ':[{j:'チーズ',r:'chiizu',e:'queso',m:'🧀'}],'ツ':[{j:'ツアー',r:'tsuaa',e:'tour',m:'🗺️'}],
-    'テ':[{j:'テレビ',r:'terebi',e:'televisión',m:'📺'}],'ト':[{j:'トマト',r:'tomato',e:'tomate',m:'🍅'}],
-    'ナ':[{j:'ナイフ',r:'naifu',e:'cuchillo',m:'🔪'}],'ニ':[{j:'ニュース',r:'nyuusu',e:'noticias',m:'📰'}],
-    'ヌ':[{j:'カヌー',r:'kanuu',e:'canoa',m:'🛶'}],'ネ':[{j:'ネクタイ',r:'nekutai',e:'corbata',m:'👔'}],
-    'ノ':[{j:'ノート',r:'nooto',e:'cuaderno',m:'📓'}],'ハ':[{j:'ハンバーガー',r:'hanbaagaa',e:'hamburguesa',m:'🍔'}],
-    'ヒ':[{j:'ヒーター',r:'hiitaa',e:'calentador',m:'🔥'}],'フ':[{j:'フランス',r:'furansu',e:'Francia',m:'🇫🇷'}],
-    'ヘ':[{j:'ヘリコプター',r:'herikoputaa',e:'helicóptero',m:'🚁'}],'ホ':[{j:'ホテル',r:'hoteru',e:'hotel',m:'🏨'}],
-    'マ':[{j:'マンゴー',r:'mangoo',e:'mango',m:'🥭'}],'ミ':[{j:'ミルク',r:'miruku',e:'leche',m:'🥛'}],
-    'ム':[{j:'ムービー',r:'muubii',e:'película',m:'🎬'}],'メ':[{j:'メール',r:'meeru',e:'correo',m:'📧'}],
-    'モ':[{j:'モデル',r:'moderu',e:'modelo',m:'👗'}],'ヤ':[{j:'タイヤ',r:'taiya',e:'llanta',m:'🛞'}],
-    'ユ':[{j:'ユーロ',r:'yuuro',e:'euro',m:'💶'}],'ヨ':[{j:'ヨーグルト',r:'yooguruto',e:'yogurt',m:'🥛'}],
-    'ラ':[{j:'ラーメン',r:'raamen',e:'ramen',m:'🍜'}],'リ':[{j:'リモコン',r:'rimokon',e:'control remoto',m:'📱'}],
-    'ル':[{j:'ルール',r:'ruuru',e:'regla',m:'📏'}],'レ':[{j:'レストラン',r:'resutoran',e:'restaurante',m:'🍽️'}],
-    'ロ':[{j:'ロボット',r:'robotto',e:'robot',m:'🤖'}],'ワ':[{j:'ワイン',r:'wain',e:'vino',m:'🍷'}],
-    'ヲ':[{j:'ヲタク',r:'otaku',e:'otaku',m:'🎮'}],'ン':[{j:'パン',r:'pan',e:'pan',m:'🍞'}],
-    'ガ':[{j:'ガス',r:'gasu',e:'gas',m:'⛽'}],'ギ':[{j:'ギター',r:'gitaa',e:'guitarra',m:'🎸'}],
-    'グ':[{j:'グラス',r:'gurasu',e:'vaso',m:'🥛'}],'ゲ':[{j:'ゲーム',r:'geemu',e:'juego',m:'🎮'}],
-    'ゴ':[{j:'ゴルフ',r:'gorufu',e:'golf',m:'⛳'}],'ザ':[{j:'ピザ',r:'piza',e:'pizza',m:'🍕'}],
-    'ジ':[{j:'ジュース',r:'juusu',e:'jugo',m:'🧃'}],'ズ':[{j:'チーズ',r:'chiizu',e:'queso',m:'🧀'}],
-    'ゼ':[{j:'ゼロ',r:'zero',e:'cero',m:'0️⃣'}],'ゾ':[{j:'ゾーン',r:'zoon',e:'zona',m:'🔲'}],
-    'ダ':[{j:'ダンス',r:'dansu',e:'baile',m:'💃'}],'ヂ':[{j:'ヂ',r:'ji',e:'(raro)',m:'❓'}],
-    'ヅ':[{j:'ヅ',r:'zu',e:'(raro)',m:'❓'}],'デ':[{j:'デパート',r:'depaato',e:'tienda',m:'🏬'}],
-    'ド':[{j:'ドア',r:'doa',e:'puerta',m:'🚪'}],'バ':[{j:'バス',r:'basu',e:'autobús',m:'🚌'}],
-    'ビ':[{j:'ビール',r:'biiru',e:'cerveza',m:'🍺'}],'ブ':[{j:'ブログ',r:'burogu',e:'blog',m:'💻'}],
-    'ベ':[{j:'ベッド',r:'beddo',e:'cama',m:'🛏️'}],'ボ':[{j:'ボール',r:'booru',e:'pelota',m:'⚽'}],
-    'パ':[{j:'パン',r:'pan',e:'pan',m:'🍞'}],'ピ':[{j:'ピアノ',r:'piano',e:'piano',m:'🎹'}],
-    'プ':[{j:'プール',r:'puuru',e:'piscina',m:'🏊'}],'ペ':[{j:'ペン',r:'pen',e:'bolígrafo',m:'🖊️'}],
-    'ポ':[{j:'ポスト',r:'posuto',e:'buzón',m:'📮'}],
-    'キャ':[{j:'キャンプ',r:'kyanpu',e:'camping',m:'🏕️'}],'シャ':[{j:'シャワー',r:'shawaa',e:'ducha',m:'🚿'}],
-    'ショ':[{j:'ショッピング',r:'shoppingu',e:'compras',m:'🛍️'}],'チョ':[{j:'チョコレート',r:'chokoreeto',e:'chocolate',m:'🍫'}],
-    'ジュ':[{j:'ジュース',r:'juusu',e:'jugo',m:'🧃'}],'ジョ':[{j:'ジョギング',r:'jogingu',e:'jogging',m:'🏃'}],
-    'ギョ':[{j:'ギョウザ',r:'gyouza',e:'gyoza',m:'🥟'}],'リュ':[{j:'リュック',r:'ryukku',e:'mochila',m:'🎒'}],
-    'ピュ':[{j:'コンピューター',r:'konpyuutaa',e:'computadora',m:'💻'}],
-    'ッ':[{j:'サッカー',r:'sakkaa',e:'fútbol',m:'⚽'}],'ー':[{j:'コーヒー',r:'koohii',e:'café',m:'☕'}]
+    'あ':[{j:'あい',r:'ai',e:'amor',m:'❤️'}],'い':[{j:'いぬ',r:'inu',e:'perro',m:'🐕'}],
+    'う':[{j:'うみ',r:'umi',e:'mar',m:'🌊'}],'え':[{j:'え',r:'e',e:'dibujo',m:'🎨'}],
+    'お':[{j:'おちゃ',r:'ocha',e:'té verde',m:'🍵'}],'か':[{j:'かさ',r:'kasa',e:'paraguas',m:'☂️'}],
+    'き':[{j:'き',r:'ki',e:'árbol',m:'🌳'}],'く':[{j:'くも',r:'kumo',e:'nube',m:'☁️'}],
+    'け':[{j:'け',r:'ke',e:'pelo',m:'💇'}],'こ':[{j:'こども',r:'kodomo',e:'niño',m:'👶'}],
+    'さ':[{j:'さくら',r:'sakura',e:'cerezo',m:'🌸'}],'し':[{j:'しお',r:'shio',e:'sal',m:'🧂'}],
+    'す':[{j:'すし',r:'sushi',e:'sushi',m:'🍣'}],'せ':[{j:'せかい',r:'sekai',e:'mundo',m:'🌍'}],
+    'そ':[{j:'そら',r:'sora',e:'cielo',m:'🌤️'}],'た':[{j:'たこ',r:'tako',e:'pulpo',m:'🐙'}],
+    'ち':[{j:'ちず',r:'chizu',e:'mapa',m:'🗺️'}],'つ':[{j:'つき',r:'tsuki',e:'luna',m:'🌙'}],
+    'て':[{j:'て',r:'te',e:'mano',m:'✋'}],'と':[{j:'とり',r:'tori',e:'pájaro',m:'🐦'}],
+    'な':[{j:'なつ',r:'natsu',e:'verano',m:'☀️'}],'に':[{j:'にほん',r:'nihon',e:'Japón',m:'🗾'}],
+    'ぬ':[{j:'ぬの',r:'nuno',e:'tela',m:'🧵'}],'ね':[{j:'ねこ',r:'neko',e:'gato',m:'🐱'}],
+    'の':[{j:'のみもの',r:'nomimono',e:'bebida',m:'🥤'}],'は':[{j:'はな',r:'hana',e:'flor',m:'🌷'}],
+    'ひ':[{j:'ひ',r:'hi',e:'fuego',m:'🔥'}],'ふ':[{j:'ふく',r:'fuku',e:'ropa',m:'👕'}],
+    'へ':[{j:'へや',r:'heya',e:'habitación',m:'🛏️'}],'ほ':[{j:'ほし',r:'hoshi',e:'estrella',m:'⭐'}],
+    'ま':[{j:'まち',r:'machi',e:'ciudad',m:'🏙️'}],'み':[{j:'みず',r:'mizu',e:'agua',m:'💧'}],
+    'む':[{j:'むし',r:'mushi',e:'insecto',m:'🐛'}],'め':[{j:'め',r:'me',e:'ojo',m:'👁️'}],
+    'も':[{j:'もも',r:'momo',e:'durazno',m:'🍑'}],'や':[{j:'やま',r:'yama',e:'montaña',m:'⛰️'}],
+    'ゆ':[{j:'ゆめ',r:'yume',e:'sueño',m:'💭'}],'よ':[{j:'よる',r:'yoru',e:'noche',m:'🌙'}],
+    'ら':[{j:'らいねん',r:'rainen',e:'próximo año',m:'📅'}],'り':[{j:'りんご',r:'ringo',e:'manzana',m:'🍎'}],
+    'る':[{j:'るす',r:'rusu',e:'ausencia',m:'🚫'}],'れ':[{j:'れきし',r:'rekishi',e:'historia',m:'📜'}],
+    'ろ':[{j:'ろく',r:'roku',e:'seis',m:'6️⃣'}],'わ':[{j:'わたし',r:'watashi',e:'yo',m:'🙋'}],
+    'を':[{j:'ほんをよむ',r:'hon wo yomu',e:'leer libro',m:'📚'}],'ん':[{j:'にほん',r:'nihon',e:'Japón',m:'🇯🇵'}]
 };
 
-// Quiz vocabulary
 const quizVocab = {
-    hLevel2: [
-        {j:'いぬ',r:'inu',e:'perro',m:'🐕'},{j:'ねこ',r:'neko',e:'gato',m:'🐱'},{j:'うみ',r:'umi',e:'mar',m:'🌊'},
-        {j:'やま',r:'yama',e:'montaña',m:'⛰️'},{j:'はな',r:'hana',e:'flor',m:'🌷'},{j:'そら',r:'sora',e:'cielo',m:'🌤️'},
-        {j:'みず',r:'mizu',e:'agua',m:'💧'},{j:'ほし',r:'hoshi',e:'estrella',m:'⭐'},{j:'つき',r:'tsuki',e:'luna',m:'🌙'},
-        {j:'とり',r:'tori',e:'pájaro',m:'🐦'},{j:'すし',r:'sushi',e:'sushi',m:'🍣'},{j:'さけ',r:'sake',e:'sake',m:'🍶'},
-        {j:'くも',r:'kumo',e:'nube',m:'☁️'},{j:'かさ',r:'kasa',e:'paraguas',m:'☂️'},{j:'ほん',r:'hon',e:'libro',m:'📖'},
-        {j:'にく',r:'niku',e:'carne',m:'🥩'},{j:'へや',r:'heya',e:'habitación',m:'🛏️'},{j:'ゆめ',r:'yume',e:'sueño',m:'💭'},
-        {j:'なつ',r:'natsu',e:'verano',m:'☀️'},{j:'ふゆ',r:'fuyu',e:'invierno',m:'❄️'},{j:'はる',r:'haru',e:'primavera',m:'🌸'},
-        {j:'あき',r:'aki',e:'otoño',m:'🍂'},{j:'ちず',r:'chizu',e:'mapa',m:'🗺️'},{j:'たこ',r:'tako',e:'pulpo',m:'🐙'},
-        {j:'かお',r:'kao',e:'cara',m:'😊'},{j:'みみ',r:'mimi',e:'oreja',m:'👂'},{j:'あめ',r:'ame',e:'lluvia',m:'🌧️'},
-        {j:'ぞう',r:'zou',e:'elefante',m:'🐘'},{j:'くつ',r:'kutsu',e:'zapatos',m:'👟'},{j:'おちゃ',r:'ocha',e:'té',m:'🍵'}
-    ],
-    hLevel3: [
-        {j:'さくら',r:'sakura',e:'cerezo',m:'🌸'},{j:'がっこう',r:'gakkou',e:'escuela',m:'🏫'},
-        {j:'せんせい',r:'sensei',e:'profesor',m:'👨‍🏫'},{j:'ともだち',r:'tomodachi',e:'amigo',m:'🤝'},
-        {j:'たべもの',r:'tabemono',e:'comida',m:'🍱'},{j:'のみもの',r:'nomimono',e:'bebida',m:'🥤'},
-        {j:'おかあさん',r:'okaasan',e:'madre',m:'👩'},{j:'おとうさん',r:'otousan',e:'padre',m:'👨'},
-        {j:'ありがとう',r:'arigatou',e:'gracias',m:'🙏'},{j:'こんにちは',r:'konnichiwa',e:'hola',m:'👋'},
-        {j:'りょこう',r:'ryokou',e:'viaje',m:'✈️'},{j:'じてんしゃ',r:'jitensha',e:'bicicleta',m:'🚲'},
-        {j:'でんしゃ',r:'densha',e:'tren',m:'🚃'},{j:'びょういん',r:'byouin',e:'hospital',m:'🏥'},
-        {j:'だいがく',r:'daigaku',e:'universidad',m:'🎓'},{j:'しゃしん',r:'shashin',e:'foto',m:'📷'},
-        {j:'にほんご',r:'nihongo',e:'japonés',m:'🇯🇵'},{j:'どうぶつ',r:'doubutsu',e:'animal',m:'🦁'},
-        {j:'げんき',r:'genki',e:'saludable',m:'💪'},{j:'りんご',r:'ringo',e:'manzana',m:'🍎'}
-    ],
-    kLevel2: [
-        {j:'パン',r:'pan',e:'pan',m:'🍞'},{j:'ペン',r:'pen',e:'bolígrafo',m:'🖊️'},{j:'バス',r:'basu',e:'autobús',m:'🚌'},
-        {j:'ビール',r:'biiru',e:'cerveza',m:'🍺'},{j:'ピザ',r:'piza',e:'pizza',m:'🍕'},{j:'ドア',r:'doa',e:'puerta',m:'🚪'},
-        {j:'ゲーム',r:'geemu',e:'juego',m:'🎮'},{j:'メール',r:'meeru',e:'correo',m:'📧'},{j:'ガス',r:'gasu',e:'gas',m:'⛽'},
-        {j:'カメラ',r:'kamera',e:'cámara',m:'📷'},{j:'トマト',r:'tomato',e:'tomate',m:'🍅'},{j:'ノート',r:'nooto',e:'cuaderno',m:'📓'},
-        {j:'テレビ',r:'terebi',e:'televisión',m:'📺'},{j:'ホテル',r:'hoteru',e:'hotel',m:'🏨'},{j:'ギター',r:'gitaa',e:'guitarra',m:'🎸'},
-        {j:'ダンス',r:'dansu',e:'baile',m:'💃'},{j:'ゼロ',r:'zero',e:'cero',m:'0️⃣'},{j:'サラダ',r:'sarada',e:'ensalada',m:'🥗'},
-        {j:'チーズ',r:'chiizu',e:'queso',m:'🧀'},{j:'ワイン',r:'wain',e:'vino',m:'🍷'},{j:'カレー',r:'karee',e:'curry',m:'🍛'},
-        {j:'ベッド',r:'beddo',e:'cama',m:'🛏️'},{j:'ボール',r:'booru',e:'pelota',m:'⚽'},{j:'テニス',r:'tenisu',e:'tenis',m:'🎾'}
-    ],
-    kLevel3: [
-        {j:'コーヒー',r:'koohii',e:'café',m:'☕'},{j:'ケーキ',r:'keeki',e:'pastel',m:'🎂'},
-        {j:'サッカー',r:'sakkaa',e:'fútbol',m:'⚽'},{j:'レストラン',r:'resutoran',e:'restaurante',m:'🍽️'},
-        {j:'ハンバーガー',r:'hanbaagaa',e:'hamburguesa',m:'🍔'},{j:'チョコレート',r:'chokoreeto',e:'chocolate',m:'🍫'},
-        {j:'コンピューター',r:'konpyuutaa',e:'computadora',m:'💻'},{j:'スーパー',r:'suupaa',e:'supermercado',m:'🛒'},
-        {j:'タクシー',r:'takushii',e:'taxi',m:'🚕'},{j:'エレベーター',r:'erebeetaa',e:'ascensor',m:'🛗'},
-        {j:'ラーメン',r:'raamen',e:'ramen',m:'🍜'},{j:'アイスクリーム',r:'aisukuriimu',e:'helado',m:'🍦'},
-        {j:'ショッピング',r:'shoppingu',e:'compras',m:'🛍️'},{j:'パーティー',r:'paatii',e:'fiesta',m:'🎉'},
-        {j:'クリスマス',r:'kurisumasu',e:'Navidad',m:'🎄'},{j:'ジョギング',r:'jogingu',e:'jogging',m:'🏃'},
-        {j:'ギョウザ',r:'gyouza',e:'gyoza',m:'🥟'},{j:'リュック',r:'ryukku',e:'mochila',m:'🎒'}
-    ]
+    hLevel2: [{j:'いぬ',r:'inu',e:'perro',m:'🐕'},{j:'ねこ',r:'neko',e:'gato',m:'🐱'},{j:'うみ',r:'umi',e:'mar',m:'🌊'},{j:'やま',r:'yama',e:'montaña',m:'⛰️'},{j:'はな',r:'hana',e:'flor',m:'🌷'},{j:'そら',r:'sora',e:'cielo',m:'🌤️'},{j:'みず',r:'mizu',e:'agua',m:'💧'},{j:'ほし',r:'hoshi',e:'estrella',m:'⭐'},{j:'つき',r:'tsuki',e:'luna',m:'🌙'},{j:'とり',r:'tori',e:'pájaro',m:'🐦'}],
+    hLevel3: [{j:'さくら',r:'sakura',e:'cerezo',m:'🌸'},{j:'がっこう',r:'gakkou',e:'escuela',m:'🏫'},{j:'せんせい',r:'sensei',e:'profesor',m:'👨‍🏫'},{j:'ともだち',r:'tomodachi',e:'amigo',m:'🤝'}],
+    kLevel2: [{j:'パン',r:'pan',e:'pan',m:'🍞'},{j:'ペン',r:'pen',e:'bolígrafo',m:'🖊️'},{j:'バス',r:'basu',e:'autobús',m:'🚌'},{j:'ゲーム',r:'geemu',e:'juego',m:'🎮'},{j:'カメラ',r:'kamera',e:'cámara',m:'📷'}],
+    kLevel3: [{j:'コーヒー',r:'koohii',e:'café',m:'☕'},{j:'レストラン',r:'resutoran',e:'restaurante',m:'🍽️'},{j:'ハンバーガー',r:'hanbaagaa',e:'hamburguesa',m:'🍔'}]
 };
 
 // State
@@ -1099,7 +1101,6 @@ let learned = JSON.parse(localStorage.getItem('learnedChars')||'[]');
 let quizLevel = 1, questions = [], qIdx = 0, correct = 0;
 let fcType = 'hiragana', fcIdx = 0, fcList = [];
 
-// Init
 function init() {
     renderChars();
     updateStats();
@@ -1119,10 +1120,7 @@ function renderChars() {
 
 function charCard(c, r) {
     const l = learned.includes(c) ? 'learned' : '';
-    return `<div class="char-card ${l}" onclick="openModal('${c}','${r}')">
-        <div class="char-main">${c}</div>
-        <div class="char-romaji">${r}</div>
-    </div>`;
+    return `<div class="char-card ${l}" onclick="openModal('${c}','${r}')"><div class="char-main">${c}</div><div class="char-romaji">${r}</div></div>`;
 }
 
 function openModal(c, r) {
@@ -1131,16 +1129,7 @@ function openModal(c, r) {
     const vDiv = document.getElementById('m-vocab');
     const v = vocab[c];
     if(v && v.length) {
-        vDiv.innerHTML = '<h4>📖 Vocabulario</h4>' + v.map(x => 
-            `<div class="vocab-item">
-                <span class="vocab-emoji">${x.m}</span>
-                <div class="vocab-text">
-                    <span class="vocab-jp">${x.j}</span>
-                    <span class="vocab-romaji">(${x.r})</span><br>
-                    <span class="vocab-es">${x.e}</span>
-                </div>
-            </div>`
-        ).join('');
+        vDiv.innerHTML = '<h4>📖 Vocabulario</h4>' + v.map(x => `<div class="vocab-item"><span class="vocab-emoji">${x.m}</span><div class="vocab-text"><span class="vocab-jp">${x.j}</span><span class="vocab-romaji">(${x.r})</span><br><span class="vocab-es">${x.e}</span></div></div>`).join('');
     } else {
         vDiv.innerHTML = '<h4>📖 Vocabulario</h4><p style="color:#888;font-size:0.8rem;">Próximamente...</p>';
     }
@@ -1178,41 +1167,19 @@ function updateStats() { document.getElementById('learned-count').textContent = 
 function initFc() { setFcType('hiragana'); }
 
 function setFcType(type, btn) {
-    fcType = type;
-    fcIdx = 0;
+    fcType = type; fcIdx = 0;
     document.querySelectorAll('.fc-type-btn').forEach(b => b.classList.remove('active'));
     if(btn) btn.classList.add('active');
     else document.querySelector('.fc-type-btn').classList.add('active');
-    
-    if(type === 'vocab') {
-        fcList = [...quizVocab.hLevel2, ...quizVocab.kLevel2, ...quizVocab.hLevel3.slice(0,5), ...quizVocab.kLevel3.slice(0,5)];
-    } else {
-        const data = type === 'hiragana' ? hiragana : katakana;
-        fcList = [];
-        Object.values(data).forEach(arr => { if(Array.isArray(arr)) fcList = fcList.concat(arr); });
-    }
-    shuffle(fcList);
-    updateFc();
+    if(type === 'vocab') { fcList = [...quizVocab.hLevel2, ...quizVocab.kLevel2]; }
+    else { const data = type === 'hiragana' ? hiragana : katakana; fcList = []; Object.values(data).forEach(arr => { if(Array.isArray(arr)) fcList = fcList.concat(arr); }); }
+    shuffle(fcList); updateFc();
 }
 
 function updateFc() {
     const item = fcList[fcIdx];
-    const charEl = document.getElementById('fc-char');
-    const ansEl = document.getElementById('fc-answer');
-    const subEl = document.getElementById('fc-sub');
-    const emojiEl = document.getElementById('fc-emoji');
-    
-    if(item.j) {
-        charEl.textContent = item.j;
-        ansEl.textContent = item.r;
-        subEl.textContent = item.e;
-        emojiEl.textContent = item.m || '';
-    } else {
-        charEl.textContent = item.c;
-        ansEl.textContent = item.r;
-        subEl.textContent = '';
-        emojiEl.textContent = '';
-    }
+    if(item.j) { document.getElementById('fc-char').textContent = item.j; document.getElementById('fc-answer').textContent = item.r; document.getElementById('fc-sub').textContent = item.e; document.getElementById('fc-emoji').textContent = item.m || ''; }
+    else { document.getElementById('fc-char').textContent = item.c; document.getElementById('fc-answer').textContent = item.r; document.getElementById('fc-sub').textContent = ''; document.getElementById('fc-emoji').textContent = ''; }
     document.querySelector('.flashcard').classList.remove('flipped');
 }
 
@@ -1225,52 +1192,34 @@ function setQuizLevel(level, btn) {
     quizLevel = level;
     document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
     if(btn) btn.classList.add('active');
-    const desc = {
-        1: '📝 Nivel 1: Caracteres (ひらがな + カタカナ)',
-        2: '📝 Nivel 2: Palabras 2-4 letras',
-        3: '📝 Nivel 3: Palabras 3-6 letras'
-    };
+    const desc = {1:'📝 Nivel 1: Caracteres',2:'📝 Nivel 2: Palabras cortas',3:'📝 Nivel 3: Palabras largas'};
     document.getElementById('level-info').textContent = desc[level];
     genQuiz();
 }
 
 function genQuiz() {
-    questions = [];
-    qIdx = 0;
-    correct = 0;
-    
+    questions = []; qIdx = 0; correct = 0;
     if(quizLevel === 1) {
         let chars = [];
         Object.values(hiragana).forEach(arr => { if(Array.isArray(arr)) chars = chars.concat(arr); });
         Object.values(katakana).forEach(arr => { if(Array.isArray(arr)) chars = chars.concat(arr); });
-        shuffle(chars);
-        chars = chars.slice(0, 10);
+        shuffle(chars); chars = chars.slice(0, 10);
         chars.forEach(item => {
             const opts = [item.r];
-            while(opts.length < 4) {
-                const rnd = chars[Math.floor(Math.random() * chars.length)].r;
-                if(!opts.includes(rnd)) opts.push(rnd);
-            }
+            while(opts.length < 4) { const rnd = chars[Math.floor(Math.random() * chars.length)].r; if(!opts.includes(rnd)) opts.push(rnd); }
             shuffle(opts);
             questions.push({ display: item.c, ans: item.r, opts: opts, hint: '¿Cómo se lee?' });
         });
     } else {
-        let words = quizLevel === 2 
-            ? [...quizVocab.hLevel2, ...quizVocab.kLevel2]
-            : [...quizVocab.hLevel3, ...quizVocab.kLevel3];
-        shuffle(words);
-        words = words.slice(0, 10);
+        let words = quizLevel === 2 ? [...quizVocab.hLevel2, ...quizVocab.kLevel2] : [...quizVocab.hLevel3, ...quizVocab.kLevel3];
+        shuffle(words); words = words.slice(0, 10);
         words.forEach(item => {
             const opts = [item.e];
-            while(opts.length < 4) {
-                const rnd = words[Math.floor(Math.random() * words.length)].e;
-                if(!opts.includes(rnd)) opts.push(rnd);
-            }
+            while(opts.length < 4) { const rnd = words[Math.floor(Math.random() * words.length)].e; if(!opts.includes(rnd)) opts.push(rnd); }
             shuffle(opts);
             questions.push({ display: item.j, ans: item.e, opts: opts, hint: '¿Qué significa?' });
         });
     }
-    
     document.getElementById('quiz-box').style.display = 'block';
     document.getElementById('quiz-result').style.display = 'none';
     showQ();
@@ -1283,29 +1232,15 @@ function showQ() {
     document.getElementById('q-curr').textContent = qIdx + 1;
     document.getElementById('q-total').textContent = questions.length;
     document.getElementById('q-bar').style.width = ((qIdx + 1) / questions.length * 100) + '%';
-    
-    document.getElementById('q-opts').innerHTML = q.opts.map(opt => 
-        `<button class="quiz-opt" onclick="checkAns(this,'${opt.replace(/'/g, "\\'")}')">${opt}</button>`
-    ).join('');
+    document.getElementById('q-opts').innerHTML = q.opts.map(opt => `<button class="quiz-opt" onclick="checkAns(this,'${opt.replace(/'/g, "\\'")}')">${opt}</button>`).join('');
 }
 
 function checkAns(btn, ans) {
     const q = questions[qIdx];
-    document.querySelectorAll('.quiz-opt').forEach(b => {
-        b.disabled = true;
-        if(b.textContent === q.ans) b.classList.add('correct');
-    });
-    if(ans === q.ans) {
-        correct++;
-        btn.classList.add('correct');
-    } else {
-        btn.classList.add('wrong');
-    }
-    setTimeout(() => {
-        qIdx++;
-        if(qIdx < questions.length) showQ();
-        else showResult();
-    }, 700);
+    document.querySelectorAll('.quiz-opt').forEach(b => { b.disabled = true; if(b.textContent === q.ans) b.classList.add('correct'); });
+    if(ans === q.ans) { correct++; btn.classList.add('correct'); }
+    else { btn.classList.add('wrong'); }
+    setTimeout(() => { qIdx++; if(qIdx < questions.length) showQ(); else showResult(); }, 700);
 }
 
 function showResult() {
@@ -1320,14 +1255,10 @@ function showResult() {
 
 function restartQuiz() { genQuiz(); }
 
-function shuffle(arr) {
-    for(let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-}
+function shuffle(arr) { for(let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } }
 
-init();
+// Check auth on load
+checkAuth();
 </script>
 </body>
 </html>
