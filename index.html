@@ -1,0 +1,2194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academia Chizu - Aprende Japonés</title>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #E63946;
+            --primary-light: #FF6B6B;
+            --accent: #F4A261;
+            --accent-gold: #E9C46A;
+            --ocean: #2A9D8F;
+            --ocean-light: #40C9B5;
+            --sky: #A8DADC;
+            --night: #1D3557;
+            --night-light: #457B9D;
+            --cream: #FDFBF7;
+            --white: #FFFFFF;
+            --text: #264653;
+            --text-light: #6B7B8C;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 20px rgba(0,0,0,0.1);
+            --shadow-lg: 0 8px 40px rgba(0,0,0,0.15);
+            --radius-sm: 12px;
+            --radius-md: 20px;
+            --radius-lg: 28px;
+            --radius-xl: 40px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', 'Zen Maru Gothic', sans-serif;
+            background: var(--cream);
+            min-height: 100vh;
+            color: var(--text);
+        }
+
+        .bg-pattern {
+            position: fixed;
+            inset: 0;
+            background: 
+                radial-gradient(ellipse at 0% 0%, rgba(230,57,70,0.04) 0%, transparent 50%),
+                radial-gradient(ellipse at 100% 100%, rgba(42,157,143,0.04) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(244,162,97,0.02) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--night) 0%, var(--night-light) 100%);
+            padding: 1rem 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -80%; right: -20%;
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(230,57,70,0.15) 0%, transparent 60%);
+            animation: float 8s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(-20px, 20px) scale(1.1); }
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo {
+            width: 48px; height: 48px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(230,57,70,0.3);
+            transform: rotate(-5deg);
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover { transform: rotate(0deg) scale(1.08); }
+
+        .logo span {
+            font-family: 'Noto Sans JP', serif;
+            font-size: 1.6rem;
+            color: white;
+            font-weight: 700;
+        }
+
+        .brand h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: white;
+            letter-spacing: 3px;
+        }
+
+        .brand p {
+            font-size: 0.65rem;
+            color: var(--sky);
+            letter-spacing: 2px;
+            font-weight: 500;
+        }
+
+        /* Navigation */
+        .nav {
+            display: flex;
+            justify-content: center;
+            gap: 0.4rem;
+            padding: 1rem;
+            background: var(--white);
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            padding: 0.6rem 1.1rem;
+            border: none;
+            border-radius: var(--radius-xl);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: transparent;
+            color: var(--text-light);
+            position: relative;
+        }
+
+        .nav-btn:hover { color: var(--primary); background: rgba(230,57,70,0.06); }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(230,57,70,0.25);
+        }
+
+        /* Main Content */
+        .main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 1.2rem;
+        }
+
+        .section { display: none; animation: slideUp 0.4s ease; }
+        .section.active { display: block; }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s;
+            border-top: 3px solid var(--primary);
+        }
+
+        .stat-card:nth-child(2) { border-top-color: var(--ocean); }
+        .stat-card:nth-child(3) { border-top-color: var(--accent); }
+
+        .stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+
+        .stat-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--ocean) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        /* Section Header */
+        .section-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .section-header .jp {
+            font-family: 'Noto Sans JP', sans-serif;
+            color: var(--primary);
+            margin-right: 0.3rem;
+        }
+
+        .section-header p {
+            color: var(--text-light);
+            font-size: 0.85rem;
+            margin-top: 0.3rem;
+        }
+
+        /* Character Grid */
+        .char-section { margin-bottom: 1.5rem; }
+
+        .char-section-title {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: var(--white);
+            padding: 0.4rem 0.8rem;
+            border-radius: var(--radius-sm);
+            margin-bottom: 0.8rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .char-section-title .badge {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 0.15rem 0.4rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+        }
+
+        .char-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.5rem;
+        }
+
+        .char-card {
+            background: var(--white);
+            border-radius: var(--radius-sm);
+            padding: 0.6rem 0.3rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-sm);
+            border: 2px solid transparent;
+            position: relative;
+        }
+
+        .char-card:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary);
+        }
+
+        .char-card.learned {
+            background: linear-gradient(135deg, #E8F8F5 0%, #D5F5E3 100%);
+            border-color: var(--ocean);
+        }
+
+        .char-card.learned::after {
+            content: '✓';
+            position: absolute;
+            top: 3px; right: 5px;
+            font-size: 0.6rem;
+            color: var(--ocean);
+            font-weight: 700;
+        }
+
+        .char-main {
+            font-family: 'Noto Sans JP', serif;
+            font-size: 1.7rem;
+            color: var(--text);
+            line-height: 1.1;
+        }
+
+        .char-romaji {
+            font-size: 0.65rem;
+            color: var(--primary);
+            font-weight: 600;
+            margin-top: 0.1rem;
+        }
+
+        /* Special Section */
+        .special-box {
+            background: var(--white);
+            border-radius: var(--radius-md);
+            padding: 1.2rem;
+            margin-top: 1.2rem;
+            box-shadow: var(--shadow-sm);
+            border-left: 4px solid var(--primary);
+        }
+
+        .special-box.ocean { border-left-color: var(--ocean); }
+        .special-box.accent { border-left-color: var(--accent); }
+
+        .special-title {
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .youon-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(29, 53, 87, 0.85);
+            backdrop-filter: blur(6px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            animation: fadeIn 0.25s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 1.8rem;
+            max-width: 380px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            box-shadow: var(--shadow-lg);
+            animation: modalPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        @keyframes modalPop {
+            from { transform: scale(0.85); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 0.8rem; right: 0.8rem;
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: var(--cream);
+            color: var(--text-light);
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .modal-close:hover { background: var(--primary); color: white; transform: rotate(90deg); }
+
+        .modal-char {
+            font-family: 'Noto Sans JP', serif;
+            font-size: 5rem;
+            background: linear-gradient(135deg, var(--text) 0%, var(--night-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+        }
+
+        .modal-romaji {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0.3rem 0 0.8rem;
+        }
+
+        .vocab-list { text-align: left; }
+
+        .vocab-list h4 {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-bottom: 0.6rem;
+        }
+
+        .vocab-item {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            padding: 0.7rem;
+            background: var(--cream);
+            border-radius: var(--radius-sm);
+            margin-bottom: 0.4rem;
+            transition: all 0.25s;
+        }
+
+        .vocab-item:hover {
+            transform: translateX(4px);
+            background: linear-gradient(135deg, #FFF5F5 0%, #FFF0E6 100%);
+        }
+
+        .vocab-emoji { font-size: 1.6rem; }
+        .vocab-text { flex: 1; }
+        .vocab-jp { font-family: 'Noto Sans JP', sans-serif; font-size: 1.1rem; font-weight: 500; }
+        .vocab-romaji { font-size: 0.7rem; color: var(--text-light); }
+        .vocab-es { font-size: 0.8rem; color: var(--primary); font-weight: 600; }
+
+        .btn-learn {
+            width: 100%;
+            padding: 0.9rem;
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: all 0.3s;
+            background: linear-gradient(135deg, var(--text) 0%, var(--night-light) 100%);
+            color: white;
+        }
+
+        .btn-learn:hover { transform: scale(1.02); box-shadow: var(--shadow-md); }
+        .btn-learn.learned { background: linear-gradient(135deg, var(--ocean) 0%, var(--ocean-light) 100%); }
+
+        /* Quiz */
+        .quiz-box {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-md);
+            max-width: 550px;
+            margin: 0 auto;
+        }
+
+        .quiz-levels, .fc-types {
+            display: flex;
+            justify-content: center;
+            gap: 0.4rem;
+            margin-bottom: 1.2rem;
+            flex-wrap: wrap;
+        }
+
+        .level-btn, .fc-type-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--night);
+            border-radius: var(--radius-xl);
+            background: transparent;
+            color: var(--night);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .level-btn.active { background: var(--night); color: white; }
+        .fc-type-btn { border-color: var(--accent); color: var(--accent); }
+        .fc-type-btn.active { background: var(--accent); color: white; }
+
+        .level-info {
+            text-align: center;
+            padding: 0.7rem;
+            background: linear-gradient(135deg, #FFF8F0 0%, #FFF0E6 100%);
+            border-radius: var(--radius-sm);
+            margin-bottom: 1.2rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .quiz-progress {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .quiz-progress span { font-weight: 700; min-width: 24px; }
+
+        .progress-track {
+            flex: 1;
+            height: 6px;
+            background: var(--cream);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+
+        .quiz-display { text-align: center; margin-bottom: 1.5rem; }
+
+        .quiz-char {
+            font-family: 'Noto Sans JP', serif;
+            font-size: 2.8rem;
+            color: var(--text);
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(135deg, var(--cream) 0%, #FFF8F0 100%);
+            border-radius: var(--radius-md);
+            display: inline-block;
+            min-width: 180px;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .quiz-hint {
+            margin-top: 0.8rem;
+            color: var(--text-light);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .quiz-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.6rem;
+        }
+
+        .quiz-opt {
+            padding: 0.9rem 0.5rem;
+            border: 2px solid #EEE;
+            border-radius: var(--radius-sm);
+            background: var(--white);
+            font-family: 'Noto Sans JP', 'DM Sans', sans-serif;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+
+        .quiz-opt:hover {
+            border-color: var(--primary);
+            background: #FFF5F5;
+            transform: scale(1.02);
+        }
+
+        .quiz-opt.correct {
+            background: linear-gradient(135deg, #D5F5E3 0%, #ABEBC6 100%);
+            border-color: var(--ocean);
+            animation: bounce 0.4s ease;
+        }
+
+        .quiz-opt.wrong {
+            background: linear-gradient(135deg, #FADBD8 0%, #F5B7B1 100%);
+            border-color: var(--primary);
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.04); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+
+        .quiz-result { text-align: center; padding: 1.5rem; }
+
+        .result-score {
+            font-family: 'Outfit', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .result-msg {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin: 0.8rem 0;
+        }
+
+        .btn-restart {
+            padding: 0.9rem 2rem;
+            border: none;
+            border-radius: var(--radius-xl);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(230,57,70,0.3);
+        }
+
+        .btn-restart:hover { transform: scale(1.05); }
+
+        /* Flashcard */
+        .fc-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .flashcard {
+            width: 260px;
+            height: 340px;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .fc-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+
+        .flashcard.flipped .fc-inner { transform: rotateY(180deg); }
+
+        .fc-front, .fc-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: var(--radius-lg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 1.2rem;
+        }
+
+        .fc-front {
+            background: var(--white);
+            box-shadow: var(--shadow-lg);
+            border: 3px solid transparent;
+            background-image: linear-gradient(white, white), linear-gradient(135deg, var(--primary), var(--accent));
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+        }
+
+        .fc-back {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            transform: rotateY(180deg);
+            color: white;
+        }
+
+        .fc-char {
+            font-family: 'Noto Sans JP', serif;
+            font-size: 3.5rem;
+            color: var(--text);
+            text-align: center;
+            word-break: break-all;
+        }
+
+        .fc-hint { color: var(--text-light); margin-top: 0.8rem; font-size: 0.85rem; }
+        .fc-emoji { font-size: 2.5rem; margin-bottom: 0.4rem; }
+        .fc-answer { font-size: 1.8rem; font-weight: 700; text-align: center; }
+        .fc-sub { font-size: 1rem; opacity: 0.9; margin-top: 0.2rem; }
+
+        .fc-controls { display: flex; gap: 0.8rem; }
+
+        .fc-btn {
+            padding: 0.7rem 1.3rem;
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .fc-btn.prev { background: var(--night); color: white; }
+        .fc-btn.next { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; }
+        .fc-btn:hover { transform: scale(1.05); }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--night);
+            color: white;
+            margin-top: 2rem;
+            font-size: 0.85rem;
+        }
+
+        .footer a { color: var(--accent); text-decoration: none; font-weight: 600; }
+
+        @media (max-width: 550px) {
+            .char-main { font-size: 1.4rem; }
+            .quiz-char { font-size: 2.2rem; padding: 0.6rem 1rem; }
+            .modal-char { font-size: 4rem; }
+            .flashcard { width: 240px; height: 310px; }
+            .fc-char { font-size: 2.8rem; }
+            .stat-value { font-size: 1.4rem; }
+        }
+
+        /* ===== LOGIN SCREEN ===== */
+        .login-screen {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, var(--night) 0%, var(--night-light) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 1rem;
+        }
+
+        .login-screen.hidden {
+            display: none;
+        }
+
+        .login-box {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem 2rem;
+            max-width: 380px;
+            width: 100%;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .login-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 8px 25px rgba(230,57,70,0.3);
+        }
+
+        .login-logo span {
+            font-family: 'Noto Sans JP', serif;
+            font-size: 2.5rem;
+            color: white;
+            font-weight: 700;
+        }
+
+        .login-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text);
+            letter-spacing: 2px;
+            margin-bottom: 0.3rem;
+        }
+
+        .login-subtitle {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 1rem 1.2rem;
+            border: 2px solid #E8E8E8;
+            border-radius: var(--radius-md);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(230,57,70,0.1);
+        }
+
+        .login-input.error {
+            border-color: var(--primary);
+            animation: shake 0.4s ease;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(230,57,70,0.3);
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(230,57,70,0.4);
+        }
+
+        .login-error {
+            color: var(--primary);
+            font-size: 0.85rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .login-error.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .login-hint {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #E8E8E8;
+            color: var(--text-light);
+            font-size: 0.8rem;
+        }
+
+        .app-container {
+            display: none;
+        }
+
+        .app-container.show {
+            display: block;
+        }
+
+        /* Grammar - New Styles */
+        .grammar-card{background:var(--white);border-radius:var(--radius-md);padding:1.2rem;margin-bottom:1rem;box-shadow:var(--shadow-sm)}
+        .grammar-title{font-family:'Noto Sans JP';font-size:1.8rem;color:var(--primary);font-weight:700;margin-bottom:0.3rem}
+        .grammar-subtitle{color:var(--text-light);font-size:0.95rem;font-style:italic;margin-bottom:1rem}
+        .grammar-desc{font-size:0.95rem;color:var(--text);line-height:1.7;margin-bottom:1rem}
+        .grammar-desc p{margin-bottom:0.6rem}
+        .grammar-desc strong{color:var(--primary)}
+        .grammar-point{background:linear-gradient(135deg,#FFF5F5,#FFF);padding:0.8rem;border-radius:var(--radius-sm);border-left:3px solid var(--primary);margin:0.8rem 0}
+        .grammar-examples{margin-top:1rem}
+        .grammar-examples h4{font-size:0.9rem;color:var(--text);margin-bottom:0.6rem}
+        .grammar-ex{background:var(--cream);padding:0.7rem;border-radius:var(--radius-sm);margin-bottom:0.5rem}
+        .ex-jp{display:block;font-family:'Noto Sans JP';font-size:1.05rem;margin-bottom:0.2rem}
+        .ex-jp ruby rt{font-size:0.6rem}
+        .ex-ro{display:block;color:var(--text-light);font-size:0.8rem}
+        .ex-es{display:block;color:var(--ocean);font-weight:600;font-size:0.85rem;margin-top:0.2rem}
+        .grammar-mode-tabs{display:flex;gap:0.5rem;margin-bottom:1rem}
+        .mode-tab{flex:1;padding:0.8rem;border:2px solid var(--primary);border-radius:var(--radius-md);background:transparent;color:var(--primary);font-size:0.95rem;font-weight:600;cursor:pointer;transition:all 0.3s}
+        .mode-tab.active{background:var(--primary);color:white}
+        .btn-practice{width:100%;padding:0.9rem;border:none;border-radius:var(--radius-md);background:linear-gradient(135deg,var(--ocean),var(--ocean-light));color:white;font-weight:600;font-size:1rem;cursor:pointer;margin-top:1rem;transition:all 0.3s}
+        .btn-practice:hover{transform:scale(1.02);box-shadow:var(--shadow-md)}
+        /* Reorder Quiz Styles */
+        .reorder-box{background:var(--white);border-radius:var(--radius-md);padding:1.2rem;margin-top:1rem;box-shadow:var(--shadow-md)}
+        .reorder-progress{font-size:0.85rem;color:var(--text-light);margin-bottom:0.8rem;text-align:center}
+        .reorder-hint{color:var(--ocean);font-size:0.95rem;margin-bottom:1rem;text-align:center;font-weight:500}
+        .reorder-words{display:flex;flex-wrap:wrap;gap:0.5rem;justify-content:center;margin-bottom:1rem;min-height:50px}
+        .word-btn{padding:0.6rem 1rem;border:2px solid var(--night);border-radius:var(--radius-sm);background:var(--white);font-family:'Noto Sans JP';font-size:1.1rem;cursor:pointer;transition:all 0.2s}
+        .word-btn:hover{background:var(--cream);transform:scale(1.05)}
+        .word-btn.selected{opacity:0.3;cursor:default}
+        .reorder-answer{min-height:60px;border:2px dashed #DDD;border-radius:var(--radius-sm);padding:0.8rem;display:flex;flex-wrap:wrap;gap:0.5rem;justify-content:center;align-items:center;margin-bottom:1rem;background:#FAFAFA}
+        .answer-btn{padding:0.6rem 1rem;border:none;border-radius:var(--radius-sm);background:var(--primary);color:white;font-family:'Noto Sans JP';font-size:1.1rem;cursor:pointer;transition:all 0.2s}
+        .answer-btn:hover{opacity:0.8}
+        .reorder-placeholder{color:#BBB;font-size:0.9rem}
+        .btn-check{padding:0.7rem 1.5rem;border:none;border-radius:var(--radius-md);background:var(--night);color:white;font-weight:600;cursor:pointer;font-size:1rem}
+        .btn-check:disabled{background:#CCC;cursor:not-allowed}
+        .reorder-feedback{margin-top:1rem;padding:1rem;border-radius:var(--radius-sm);text-align:center}
+        .reorder-feedback.correct{background:#D5F5E3;color:var(--ocean)}
+        .reorder-feedback.wrong{background:#FADBD8;color:var(--primary)}
+        /* Results Styles */
+        .grammar-result{text-align:center;padding:1.5rem;background:var(--white);border-radius:var(--radius-md);margin-top:1rem;box-shadow:var(--shadow-md)}
+        .gr-score{font-family:'Outfit';font-size:3.5rem;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--ocean));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .gr-msg{font-size:1.3rem;font-weight:700;margin:0.5rem 0}
+        .gr-detail{color:var(--text-light);font-size:0.95rem;margin-bottom:1rem}
+        .error-review{text-align:left;margin-top:1.5rem;padding-top:1rem;border-top:1px solid #EEE}
+        .error-review h4{color:var(--primary);margin-bottom:1rem}
+        .error-item{background:#FFF5F5;padding:1rem;border-radius:var(--radius-sm);margin-bottom:1rem;border-left:3px solid var(--primary)}
+        .error-q{font-weight:600;margin-bottom:0.5rem}
+        .error-your{color:var(--primary);font-size:0.9rem}
+        .error-correct{color:var(--ocean);font-size:0.9rem;margin-bottom:0.5rem}
+        .error-explain{background:white;padding:0.8rem;border-radius:var(--radius-sm);font-size:0.85rem;line-height:1.5}
+        /* Lesson tabs */
+        .grammar-lesson-tabs{display:flex;gap:0.5rem;margin-bottom:0.5rem}
+        .lesson-tab{flex:1;padding:0.7rem;border:2px solid var(--ocean);border-radius:var(--radius-md);background:transparent;color:var(--ocean);font-size:1.1rem;font-weight:700;cursor:pointer;transition:all 0.3s;font-family:'Noto Sans JP'}
+        .lesson-tab.active{background:var(--ocean);color:white}
+        /* Verb table styles */
+        .verb-group{margin:1.5rem 0;padding:1rem;background:#FAFAFA;border-radius:var(--radius-sm)}
+        .verb-group h4{color:var(--primary);margin-bottom:0.3rem;font-size:1rem}
+        .group-rule{color:var(--text-light);font-size:0.85rem;margin-bottom:0.8rem}
+        .verb-table-scroll{overflow-x:auto;margin:0 -0.5rem;padding:0 0.5rem}
+        .verb-table{width:100%;border-collapse:collapse;font-size:0.8rem;min-width:600px}
+        .verb-table th,.verb-table td{padding:0.5rem 0.4rem;text-align:center;border-bottom:1px solid #E8E8E8}
+        .verb-table th{background:var(--night);color:white;font-weight:600;font-size:0.75rem}
+        .verb-table td{font-family:'Noto Sans JP';background:white}
+        .verb-table tr:hover td{background:#F5F5F5}
+        /* Masu quiz styles */
+        .masu-q-verb{font-family:'Noto Sans JP';font-size:2rem;color:var(--primary);font-weight:700;text-align:center;margin-bottom:0.3rem}
+        .masu-q-form{font-size:1.1rem;color:var(--night);text-align:center;margin-bottom:0.2rem;font-weight:600}
+        .masu-q-form-jp{font-size:0.9rem;color:var(--ocean);text-align:center;margin-bottom:0.3rem;font-family:'Noto Sans JP'}
+        .masu-q-meaning{color:var(--text-light);text-align:center;margin-bottom:1rem;font-size:0.9rem}
+        .masu-options{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:1rem}
+        .masu-opt{padding:0.8rem;border:2px solid #E8E8E8;border-radius:var(--radius-sm);background:white;font-family:'Noto Sans JP';font-size:1rem;cursor:pointer;transition:all 0.2s}
+        .masu-opt:hover{border-color:var(--primary);background:#FFF5F5}
+        .masu-opt.correct{background:#D5F5E3;border-color:var(--ocean)}
+        .masu-opt.wrong{background:#FADBD8;border-color:var(--primary)}
+        /* Moji tabs */
+        .moji-tabs{display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:1rem;padding:0 0.5rem}
+        .moji-tab{padding:0.5rem 0.8rem;border:2px solid var(--primary);border-radius:var(--radius-xl);background:transparent;color:var(--primary);font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.3s;font-family:'Noto Sans JP'}
+        .moji-tab.active{background:var(--primary);color:white}
+        .moji-content{display:none}
+        .moji-content.active{display:block}
+    </style>
+</head>
+<body>
+    <!-- ===== LOGIN SCREEN ===== -->
+    <div class="login-screen" id="login-screen">
+        <div class="login-box">
+            <div class="login-logo">
+                <span>千</span>
+            </div>
+            <h1 class="login-title">CHIZU</h1>
+            <p class="login-subtitle">Acceso para estudiantes</p>
+            
+            <input 
+                type="password" 
+                class="login-input" 
+                id="password-input" 
+                placeholder="Contraseña"
+                onkeypress="if(event.key==='Enter')checkPassword()"
+            >
+            <button class="login-btn" onclick="checkPassword()">Entrar</button>
+            
+            <p class="login-error" id="login-error">❌ Contraseña incorrecta</p>
+            
+            <p class="login-hint">
+                🔒 DEV Environment<br>
+                Contacta al profesor para obtener acceso
+            </p>
+        </div>
+    </div>
+
+    <!-- ===== MAIN APP ===== -->
+    <div class="app-container" id="app-container">
+    <div class="bg-pattern"></div>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo"><span>千</span></div>
+            <div class="brand">
+                <h1>CHIZU</h1>
+                <p>HABLEMOS JAPONÉS</p>
+            </div>
+        </div>
+    </header>
+
+    <nav class="nav">
+        <button class="nav-btn active" onclick="showSection('moji',this)">✏️ <ruby>文字<rt>もじ</rt></ruby></button>
+        <button class="nav-btn" onclick="showSection('grammar',this)">📖 <ruby>文法<rt>ぶんぽう</rt></ruby></button>
+    </nav>
+
+    <main class="main">
+        <!-- ===== 文字 Section ===== -->
+        <section id="moji" class="section active">
+            <div class="moji-tabs">
+                <button class="moji-tab active" onclick="showMojiTab('hiragana',this)">ひらがな</button>
+                <button class="moji-tab" onclick="showMojiTab('katakana',this)">カタカナ</button>
+                <button class="moji-tab" onclick="showMojiTab('flashcard',this)">📚 Tarjetas</button>
+                <button class="moji-tab" onclick="showMojiTab('quiz',this)">🎯 Quiz</button>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="learned-count">0</div>
+                    <div class="stat-label">Aprendidos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">107</div>
+                    <div class="stat-label">Total</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="quiz-score-display">0%</div>
+                    <div class="stat-label">Precisión</div>
+                </div>
+            </div>
+
+            <!-- Hiragana -->
+            <div id="moji-hiragana" class="moji-content active">
+            <div class="section-header">
+                <h2><span class="jp">ひらがな</span> Hiragana</h2>
+                <p>Los caracteres fundamentales del japonés</p>
+            </div>
+            <div class="char-section"><div class="char-section-title"><span class="badge">あ</span> Vocales</div><div class="char-grid" id="h-vowels"></div></div>
+            <div class="char-section"><div class="char-section-title"><span class="badge">か</span> Fila K</div><div class="char-grid" id="h-k"></div></div>
+            <div class="char-section"><div class="char-section-title"><span class="badge">さ</span> Fila S</div><div class="char-grid" id="h-s"></div></div>
+            <div class="char-section"><div class="char-section-title"><span class="badge">た</span> Fila T</div><div class="char-grid" id="h-t"></div></div>
+            <div class="char-section"><div class="char-section-title"><span class="badge">な</span> Fila N</div><div class="char-grid" id="h-n"></div></div>
+            <div class="char-section"><div class="char-section-title"><span class="badge">は</span> Fila H</div><div class="char-grid" id="h-h"></div></div>
+            <div class="char-section"><div class="char-section-title"><span class="badge">ま</span> Fila M</div><div class="char-grid" id="h-m"></div></div>
+            <div class="char-section"><div class="char-section-title"><span class="badge">や</span> Fila Y</div><div class="char-grid" id="h-y"></div></div>
+            <div class="char-section"><div class="char-section-title"><span class="badge">ら</span> Fila R</div><div class="char-grid" id="h-r"></div></div>
+            <div class="char-section"><div class="char-section-title"><span class="badge">わ</span> Fila W・N</div><div class="char-grid" id="h-w"></div></div>
+            <div class="special-box"><div class="special-title">゛ Dakuon 濁音</div><div class="char-grid" id="h-dakuon"></div></div>
+            <div class="special-box accent"><div class="special-title">゜ Handakuon 半濁音</div><div class="char-grid" id="h-handakuon"></div></div>
+            <div class="special-box ocean"><div class="special-title">拗音 Yōon (小さいゃゅょ)</div><div class="youon-grid" id="h-youon"></div></div>
+            <div class="special-box"><div class="special-title">っ Sokuon 促音</div><div class="char-grid" id="h-sokuon"></div></div>
+            </div>
+
+            <!-- Katakana -->
+            <div id="moji-katakana" class="moji-content">
+                <div class="section-header">
+                    <h2><span class="jp">カタカナ</span> Katakana</h2>
+                    <p>Para palabras extranjeras y onomatopeyas</p>
+                </div>
+                <div class="char-section"><div class="char-section-title"><span class="badge">ア</span> Vocales</div><div class="char-grid" id="k-vowels"></div></div>
+                <div class="char-section"><div class="char-section-title"><span class="badge">カ</span> Fila K</div><div class="char-grid" id="k-k"></div></div>
+                <div class="char-section"><div class="char-section-title"><span class="badge">サ</span> Fila S</div><div class="char-grid" id="k-s"></div></div>
+                <div class="char-section"><div class="char-section-title"><span class="badge">タ</span> Fila T</div><div class="char-grid" id="k-t"></div></div>
+                <div class="char-section"><div class="char-section-title"><span class="badge">ナ</span> Fila N</div><div class="char-grid" id="k-n"></div></div>
+                <div class="char-section"><div class="char-section-title"><span class="badge">ハ</span> Fila H</div><div class="char-grid" id="k-h"></div></div>
+                <div class="char-section"><div class="char-section-title"><span class="badge">マ</span> Fila M</div><div class="char-grid" id="k-m"></div></div>
+                <div class="char-section"><div class="char-section-title"><span class="badge">ヤ</span> Fila Y</div><div class="char-grid" id="k-y"></div></div>
+                <div class="char-section"><div class="char-section-title"><span class="badge">ラ</span> Fila R</div><div class="char-grid" id="k-r"></div></div>
+                <div class="char-section"><div class="char-section-title"><span class="badge">ワ</span> Fila W・N</div><div class="char-grid" id="k-w"></div></div>
+                <div class="special-box"><div class="special-title">゛ Dakuon 濁音</div><div class="char-grid" id="k-dakuon"></div></div>
+                <div class="special-box accent"><div class="special-title">゜ Handakuon 半濁音</div><div class="char-grid" id="k-handakuon"></div></div>
+                <div class="special-box ocean"><div class="special-title">拗音 Yōon (小さいャュョ)</div><div class="youon-grid" id="k-youon"></div></div>
+                <div class="special-box"><div class="special-title">ッ Sokuon + ー Chōon</div><div class="char-grid" id="k-sokuon"></div></div>
+            </div>
+
+        <!-- Flashcard -->
+            <div id="moji-flashcard" class="moji-content">
+                <div class="section-header">
+                    <h2>📚 Tarjetas de Estudio</h2>
+                    <p>Toca la tarjeta para ver la respuesta</p>
+                </div>
+                <div class="fc-container">
+                    <div class="fc-types">
+                        <button class="fc-type-btn active" onclick="setFcType('hiragana',this)">Hiragana</button>
+                        <button class="fc-type-btn" onclick="setFcType('katakana',this)">Katakana</button>
+                        <button class="fc-type-btn" onclick="setFcType('vocab',this)">Vocabulario</button>
+                    </div>
+                    <div class="flashcard" onclick="flipCard()">
+                        <div class="fc-inner">
+                            <div class="fc-front">
+                                <div class="fc-char" id="fc-char">あ</div>
+                                <div class="fc-hint">Toca para ver</div>
+                            </div>
+                            <div class="fc-back">
+                                <div class="fc-emoji" id="fc-emoji"></div>
+                                <div class="fc-answer" id="fc-answer">a</div>
+                                <div class="fc-sub" id="fc-sub"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fc-controls">
+                        <button class="fc-btn prev" onclick="prevCard()">← Anterior</button>
+                        <button class="fc-btn next" onclick="nextCard()">Siguiente →</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz -->
+            <div id="moji-quiz" class="moji-content">
+                <div class="section-header">
+                    <h2>🎯 Quiz de Práctica</h2>
+                    <p>Pon a prueba tu conocimiento</p>
+                </div>
+                <div class="quiz-box" id="quiz-box">
+                    <div class="quiz-levels">
+                        <button class="level-btn active" onclick="setQuizLevel(1,this)">Nivel 1</button>
+                        <button class="level-btn" onclick="setQuizLevel(2,this)">Nivel 2</button>
+                        <button class="level-btn" onclick="setQuizLevel(3,this)">Nivel 3</button>
+                    </div>
+                    <div class="level-info" id="level-info">📝 Nivel 1: Caracteres (ひらがな + カタカナ)</div>
+                    <div class="quiz-progress">
+                        <span id="q-curr">1</span>
+                        <div class="progress-track"><div class="progress-fill" id="q-bar" style="width:10%"></div></div>
+                        <span id="q-total">10</span>
+                    </div>
+                    <div class="quiz-display">
+                        <div class="quiz-char" id="q-char">あ</div>
+                        <p class="quiz-hint" id="q-hint">¿Cómo se lee?</p>
+                    </div>
+                    <div class="quiz-options" id="q-opts"></div>
+                </div>
+                <div class="quiz-result" id="quiz-result" style="display:none;">
+                    <div class="result-score" id="final-score">80%</div>
+                    <div class="result-msg" id="result-msg">¡Muy bien!</div>
+                    <button class="btn-restart" onclick="restartQuiz()">🔄 Intentar de nuevo</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Grammar -->
+        <section id="grammar" class="section">
+            <div class="section-header">
+                <h2><span class="jp"><ruby>文法<rt>ぶんぽう</rt></ruby></span> Gramática N5</h2>
+                <p>Estructuras básicas del japonés</p>
+            </div>
+            <div id="grammar-list"></div>
+        </section>
+    </main>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal()">×</button>
+            <div class="modal-char" id="m-char">あ</div>
+            <div class="modal-romaji" id="m-romaji">a</div>
+            <div class="vocab-list" id="m-vocab"></div>
+            <button class="btn-learn" id="btn-learn" onclick="toggleLearned()">✓ Marcar como aprendido</button>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>Academia Chizu © 2026 | <a href="https://wa.me/59176344130">WhatsApp: +591 76344130</a></p>
+        <p>DEV Environment - Testing Only</p>
+    </footer>
+    </div> <!-- end app-container -->
+
+<script>
+// ===== PASSWORD PROTECTION =====
+function checkPassword() {
+    const input = document.getElementById('password-input');
+    const error = document.getElementById('login-error');
+    const password = input.value;
+    
+    if (password === 'Chizu123.') {
+        sessionStorage.setItem('chizu_auth', 'true');
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('app-container').classList.add('show');
+        init();
+    } else {
+        input.classList.add('error');
+        error.classList.add('show');
+        setTimeout(() => {
+            input.classList.remove('error');
+        }, 400);
+    }
+}
+
+function checkAuth() {
+    if (sessionStorage.getItem('chizu_auth') === 'true') {
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('app-container').classList.add('show');
+        init();
+    }
+}
+
+// ===== DATA =====
+const hiragana = {
+    vowels: [{c:'あ',r:'a'},{c:'い',r:'i'},{c:'う',r:'u'},{c:'え',r:'e'},{c:'お',r:'o'}],
+    k: [{c:'か',r:'ka'},{c:'き',r:'ki'},{c:'く',r:'ku'},{c:'け',r:'ke'},{c:'こ',r:'ko'}],
+    s: [{c:'さ',r:'sa'},{c:'し',r:'shi'},{c:'す',r:'su'},{c:'せ',r:'se'},{c:'そ',r:'so'}],
+    t: [{c:'た',r:'ta'},{c:'ち',r:'chi'},{c:'つ',r:'tsu'},{c:'て',r:'te'},{c:'と',r:'to'}],
+    n: [{c:'な',r:'na'},{c:'に',r:'ni'},{c:'ぬ',r:'nu'},{c:'ね',r:'ne'},{c:'の',r:'no'}],
+    h: [{c:'は',r:'ha'},{c:'ひ',r:'hi'},{c:'ふ',r:'fu'},{c:'へ',r:'he'},{c:'ほ',r:'ho'}],
+    m: [{c:'ま',r:'ma'},{c:'み',r:'mi'},{c:'む',r:'mu'},{c:'め',r:'me'},{c:'も',r:'mo'}],
+    y: [{c:'や',r:'ya'},{c:'ゆ',r:'yu'},{c:'よ',r:'yo'}],
+    r: [{c:'ら',r:'ra'},{c:'り',r:'ri'},{c:'る',r:'ru'},{c:'れ',r:'re'},{c:'ろ',r:'ro'}],
+    w: [{c:'わ',r:'wa'},{c:'を',r:'wo'},{c:'ん',r:'n'}],
+    dakuon: [{c:'が',r:'ga'},{c:'ぎ',r:'gi'},{c:'ぐ',r:'gu'},{c:'げ',r:'ge'},{c:'ご',r:'go'},{c:'ざ',r:'za'},{c:'じ',r:'ji'},{c:'ず',r:'zu'},{c:'ぜ',r:'ze'},{c:'ぞ',r:'zo'},{c:'だ',r:'da'},{c:'ぢ',r:'ji'},{c:'づ',r:'zu'},{c:'で',r:'de'},{c:'ど',r:'do'},{c:'ば',r:'ba'},{c:'び',r:'bi'},{c:'ぶ',r:'bu'},{c:'べ',r:'be'},{c:'ぼ',r:'bo'}],
+    handakuon: [{c:'ぱ',r:'pa'},{c:'ぴ',r:'pi'},{c:'ぷ',r:'pu'},{c:'ぺ',r:'pe'},{c:'ぽ',r:'po'}],
+    youon: [{c:'きゃ',r:'kya'},{c:'きゅ',r:'kyu'},{c:'きょ',r:'kyo'},{c:'しゃ',r:'sha'},{c:'しゅ',r:'shu'},{c:'しょ',r:'sho'},{c:'ちゃ',r:'cha'},{c:'ちゅ',r:'chu'},{c:'ちょ',r:'cho'},{c:'にゃ',r:'nya'},{c:'にゅ',r:'nyu'},{c:'にょ',r:'nyo'},{c:'ひゃ',r:'hya'},{c:'ひゅ',r:'hyu'},{c:'ひょ',r:'hyo'},{c:'みゃ',r:'mya'},{c:'みゅ',r:'myu'},{c:'みょ',r:'myo'},{c:'りゃ',r:'rya'},{c:'りゅ',r:'ryu'},{c:'りょ',r:'ryo'},{c:'ぎゃ',r:'gya'},{c:'ぎゅ',r:'gyu'},{c:'ぎょ',r:'gyo'},{c:'じゃ',r:'ja'},{c:'じゅ',r:'ju'},{c:'じょ',r:'jo'},{c:'びゃ',r:'bya'},{c:'びゅ',r:'byu'},{c:'びょ',r:'byo'},{c:'ぴゃ',r:'pya'},{c:'ぴゅ',r:'pyu'},{c:'ぴょ',r:'pyo'}],
+    sokuon: [{c:'っ',r:'(tsu)'}]
+};
+
+const katakana = {
+    vowels: [{c:'ア',r:'a'},{c:'イ',r:'i'},{c:'ウ',r:'u'},{c:'エ',r:'e'},{c:'オ',r:'o'}],
+    k: [{c:'カ',r:'ka'},{c:'キ',r:'ki'},{c:'ク',r:'ku'},{c:'ケ',r:'ke'},{c:'コ',r:'ko'}],
+    s: [{c:'サ',r:'sa'},{c:'シ',r:'shi'},{c:'ス',r:'su'},{c:'セ',r:'se'},{c:'ソ',r:'so'}],
+    t: [{c:'タ',r:'ta'},{c:'チ',r:'chi'},{c:'ツ',r:'tsu'},{c:'テ',r:'te'},{c:'ト',r:'to'}],
+    n: [{c:'ナ',r:'na'},{c:'ニ',r:'ni'},{c:'ヌ',r:'nu'},{c:'ネ',r:'ne'},{c:'ノ',r:'no'}],
+    h: [{c:'ハ',r:'ha'},{c:'ヒ',r:'hi'},{c:'フ',r:'fu'},{c:'ヘ',r:'he'},{c:'ホ',r:'ho'}],
+    m: [{c:'マ',r:'ma'},{c:'ミ',r:'mi'},{c:'ム',r:'mu'},{c:'メ',r:'me'},{c:'モ',r:'mo'}],
+    y: [{c:'ヤ',r:'ya'},{c:'ユ',r:'yu'},{c:'ヨ',r:'yo'}],
+    r: [{c:'ラ',r:'ra'},{c:'リ',r:'ri'},{c:'ル',r:'ru'},{c:'レ',r:'re'},{c:'ロ',r:'ro'}],
+    w: [{c:'ワ',r:'wa'},{c:'ヲ',r:'wo'},{c:'ン',r:'n'}],
+    dakuon: [{c:'ガ',r:'ga'},{c:'ギ',r:'gi'},{c:'グ',r:'gu'},{c:'ゲ',r:'ge'},{c:'ゴ',r:'go'},{c:'ザ',r:'za'},{c:'ジ',r:'ji'},{c:'ズ',r:'zu'},{c:'ゼ',r:'ze'},{c:'ゾ',r:'zo'},{c:'ダ',r:'da'},{c:'ヂ',r:'ji'},{c:'ヅ',r:'zu'},{c:'デ',r:'de'},{c:'ド',r:'do'},{c:'バ',r:'ba'},{c:'ビ',r:'bi'},{c:'ブ',r:'bu'},{c:'ベ',r:'be'},{c:'ボ',r:'bo'}],
+    handakuon: [{c:'パ',r:'pa'},{c:'ピ',r:'pi'},{c:'プ',r:'pu'},{c:'ペ',r:'pe'},{c:'ポ',r:'po'}],
+    youon: [{c:'キャ',r:'kya'},{c:'キュ',r:'kyu'},{c:'キョ',r:'kyo'},{c:'シャ',r:'sha'},{c:'シュ',r:'shu'},{c:'ショ',r:'sho'},{c:'チャ',r:'cha'},{c:'チュ',r:'chu'},{c:'チョ',r:'cho'},{c:'ニャ',r:'nya'},{c:'ニュ',r:'nyu'},{c:'ニョ',r:'nyo'},{c:'ヒャ',r:'hya'},{c:'ヒュ',r:'hyu'},{c:'ヒョ',r:'hyo'},{c:'ミャ',r:'mya'},{c:'ミュ',r:'myu'},{c:'ミョ',r:'myo'},{c:'リャ',r:'rya'},{c:'リュ',r:'ryu'},{c:'リョ',r:'ryo'},{c:'ギャ',r:'gya'},{c:'ギュ',r:'gyu'},{c:'ギョ',r:'gyo'},{c:'ジャ',r:'ja'},{c:'ジュ',r:'ju'},{c:'ジョ',r:'jo'},{c:'ビャ',r:'bya'},{c:'ビュ',r:'byu'},{c:'ビョ',r:'byo'},{c:'ピャ',r:'pya'},{c:'ピュ',r:'pyu'},{c:'ピョ',r:'pyo'}],
+    sokuon: [{c:'ッ',r:'(tsu)'},{c:'ー',r:'(chōon)'}]
+};
+
+// Vocabulary with emojis - COMPLETE
+const vocab = {
+    'あ':[{j:'あい',r:'ai',e:'amor',m:'❤️'},{j:'あお',r:'ao',e:'azul',m:'🔵'}],
+    'い':[{j:'いぬ',r:'inu',e:'perro',m:'🐕'},{j:'いえ',r:'ie',e:'casa',m:'🏠'}],
+    'う':[{j:'うみ',r:'umi',e:'mar',m:'🌊'},{j:'うた',r:'uta',e:'canción',m:'🎵'}],
+    'え':[{j:'え',r:'e',e:'dibujo',m:'🎨'},{j:'えき',r:'eki',e:'estación',m:'🚉'}],
+    'お':[{j:'おちゃ',r:'ocha',e:'té verde',m:'🍵'},{j:'おと',r:'oto',e:'sonido',m:'🔊'}],
+    'か':[{j:'かさ',r:'kasa',e:'paraguas',m:'☂️'},{j:'かお',r:'kao',e:'cara',m:'😊'}],
+    'き':[{j:'き',r:'ki',e:'árbol',m:'🌳'},{j:'きた',r:'kita',e:'norte',m:'⬆️'}],
+    'く':[{j:'くも',r:'kumo',e:'nube',m:'☁️'},{j:'くつ',r:'kutsu',e:'zapatos',m:'👟'}],
+    'け':[{j:'け',r:'ke',e:'pelo',m:'💇'},{j:'けさ',r:'kesa',e:'esta mañana',m:'🌅'}],
+    'こ':[{j:'こども',r:'kodomo',e:'niño',m:'👶'},{j:'ここ',r:'koko',e:'aquí',m:'📍'}],
+    'さ':[{j:'さくら',r:'sakura',e:'cerezo',m:'🌸'},{j:'さかな',r:'sakana',e:'pescado',m:'🐟'}],
+    'し':[{j:'しお',r:'shio',e:'sal',m:'🧂'},{j:'しろ',r:'shiro',e:'blanco',m:'⚪'}],
+    'す':[{j:'すし',r:'sushi',e:'sushi',m:'🍣'},{j:'すな',r:'suna',e:'arena',m:'🏖️'}],
+    'せ':[{j:'せかい',r:'sekai',e:'mundo',m:'🌍'},{j:'せんせい',r:'sensei',e:'profesor',m:'👨‍🏫'}],
+    'そ':[{j:'そら',r:'sora',e:'cielo',m:'🌤️'},{j:'そと',r:'soto',e:'afuera',m:'🚪'}],
+    'た':[{j:'たこ',r:'tako',e:'pulpo',m:'🐙'},{j:'たまご',r:'tamago',e:'huevo',m:'🥚'}],
+    'ち':[{j:'ちず',r:'chizu',e:'mapa',m:'🗺️'},{j:'ちから',r:'chikara',e:'fuerza',m:'💪'}],
+    'つ':[{j:'つき',r:'tsuki',e:'luna',m:'🌙'},{j:'つくえ',r:'tsukue',e:'escritorio',m:'🪑'}],
+    'て':[{j:'て',r:'te',e:'mano',m:'✋'},{j:'てら',r:'tera',e:'templo',m:'⛩️'}],
+    'と':[{j:'とり',r:'tori',e:'pájaro',m:'🐦'},{j:'とけい',r:'tokei',e:'reloj',m:'⏰'}],
+    'な':[{j:'なつ',r:'natsu',e:'verano',m:'☀️'},{j:'なまえ',r:'namae',e:'nombre',m:'📛'}],
+    'に':[{j:'にほん',r:'nihon',e:'Japón',m:'🗾'},{j:'にく',r:'niku',e:'carne',m:'🥩'}],
+    'ぬ':[{j:'ぬの',r:'nuno',e:'tela',m:'🧵'},{j:'いぬ',r:'inu',e:'perro',m:'🐕'}],
+    'ね':[{j:'ねこ',r:'neko',e:'gato',m:'🐱'},{j:'ねつ',r:'netsu',e:'fiebre',m:'🤒'}],
+    'の':[{j:'のみもの',r:'nomimono',e:'bebida',m:'🥤'},{j:'のり',r:'nori',e:'alga',m:'🍙'}],
+    'は':[{j:'はな',r:'hana',e:'flor',m:'🌷'},{j:'はる',r:'haru',e:'primavera',m:'🌸'}],
+    'ひ':[{j:'ひ',r:'hi',e:'fuego',m:'🔥'},{j:'ひと',r:'hito',e:'persona',m:'🧑'}],
+    'ふ':[{j:'ふく',r:'fuku',e:'ropa',m:'👕'},{j:'ふゆ',r:'fuyu',e:'invierno',m:'❄️'}],
+    'へ':[{j:'へや',r:'heya',e:'habitación',m:'🛏️'},{j:'へび',r:'hebi',e:'serpiente',m:'🐍'}],
+    'ほ':[{j:'ほし',r:'hoshi',e:'estrella',m:'⭐'},{j:'ほん',r:'hon',e:'libro',m:'📖'}],
+    'ま':[{j:'まち',r:'machi',e:'ciudad',m:'🏙️'},{j:'まど',r:'mado',e:'ventana',m:'🪟'}],
+    'み':[{j:'みず',r:'mizu',e:'agua',m:'💧'},{j:'みみ',r:'mimi',e:'oreja',m:'👂'}],
+    'む':[{j:'むし',r:'mushi',e:'insecto',m:'🐛'},{j:'むら',r:'mura',e:'pueblo',m:'🏘️'}],
+    'め':[{j:'め',r:'me',e:'ojo',m:'👁️'},{j:'あめ',r:'ame',e:'lluvia',m:'🌧️'}],
+    'も':[{j:'もも',r:'momo',e:'durazno',m:'🍑'},{j:'もり',r:'mori',e:'bosque',m:'🌲'}],
+    'や':[{j:'やま',r:'yama',e:'montaña',m:'⛰️'},{j:'やさい',r:'yasai',e:'verdura',m:'🥬'}],
+    'ゆ':[{j:'ゆめ',r:'yume',e:'sueño',m:'💭'},{j:'ゆき',r:'yuki',e:'nieve',m:'❄️'}],
+    'よ':[{j:'よる',r:'yoru',e:'noche',m:'🌙'},{j:'よこ',r:'yoko',e:'lado',m:'↔️'}],
+    'ら':[{j:'らいねん',r:'rainen',e:'próximo año',m:'📅'},{j:'らく',r:'raku',e:'fácil',m:'👍'}],
+    'り':[{j:'りんご',r:'ringo',e:'manzana',m:'🍎'},{j:'りす',r:'risu',e:'ardilla',m:'🐿️'}],
+    'る':[{j:'るす',r:'rusu',e:'ausencia',m:'🚫'}],
+    'れ':[{j:'れきし',r:'rekishi',e:'historia',m:'📜'},{j:'れい',r:'rei',e:'cero',m:'0️⃣'}],
+    'ろ':[{j:'ろく',r:'roku',e:'seis',m:'6️⃣'},{j:'ろうそく',r:'rousoku',e:'vela',m:'🕯️'}],
+    'わ':[{j:'わたし',r:'watashi',e:'yo',m:'🙋'},{j:'わに',r:'wani',e:'cocodrilo',m:'🐊'}],
+    'を':[{j:'ほんをよむ',r:'hon wo yomu',e:'leer libro',m:'📚'}],
+    'ん':[{j:'にほん',r:'nihon',e:'Japón',m:'🇯🇵'},{j:'さん',r:'san',e:'tres',m:'3️⃣'}],
+    'が':[{j:'がっこう',r:'gakkou',e:'escuela',m:'🏫'}],'ぎ':[{j:'ぎんこう',r:'ginkou',e:'banco',m:'🏦'}],
+    'ぐ':[{j:'ぐあい',r:'guai',e:'condición',m:'💊'}],'げ':[{j:'げんき',r:'genki',e:'saludable',m:'💪'}],
+    'ご':[{j:'ごはん',r:'gohan',e:'arroz',m:'🍚'}],'ざ':[{j:'ざっし',r:'zasshi',e:'revista',m:'📰'}],
+    'じ':[{j:'じかん',r:'jikan',e:'tiempo',m:'⏱️'}],'ず':[{j:'ずっと',r:'zutto',e:'siempre',m:'♾️'}],
+    'ぜ':[{j:'ぜんぶ',r:'zenbu',e:'todo',m:'💯'}],'ぞ':[{j:'ぞう',r:'zou',e:'elefante',m:'🐘'}],
+    'だ':[{j:'だいがく',r:'daigaku',e:'universidad',m:'🎓'}],'ぢ':[{j:'はなぢ',r:'hanaji',e:'hemorragia',m:'🩸'}],
+    'づ':[{j:'つづく',r:'tsuzuku',e:'continuar',m:'➡️'}],'で':[{j:'でんわ',r:'denwa',e:'teléfono',m:'📞'}],
+    'ど':[{j:'どうぶつ',r:'doubutsu',e:'animal',m:'🦁'}],'ば':[{j:'ばしょ',r:'basho',e:'lugar',m:'📍'}],
+    'び':[{j:'びょういん',r:'byouin',e:'hospital',m:'🏥'}],'ぶ':[{j:'ぶた',r:'buta',e:'cerdo',m:'🐷'}],
+    'べ':[{j:'べんきょう',r:'benkyou',e:'estudio',m:'📖'}],'ぼ':[{j:'ぼうし',r:'boushi',e:'sombrero',m:'🎩'}],
+    'ぱ':[{j:'ぱん',r:'pan',e:'pan',m:'🍞'}],'ぴ':[{j:'ぴかぴか',r:'pikapika',e:'brillante',m:'✨'}],
+    'ぷ':[{j:'てんぷら',r:'tenpura',e:'tempura',m:'🍤'}],'ぺ':[{j:'ぺこぺこ',r:'pekopeko',e:'hambriento',m:'😋'}],
+    'ぽ':[{j:'たんぽぽ',r:'tanpopo',e:'diente de león',m:'🌼'}],
+    'きゃ':[{j:'きゃく',r:'kyaku',e:'cliente',m:'🧑‍💼'}],'きゅ':[{j:'きゅうり',r:'kyuuri',e:'pepino',m:'🥒'}],
+    'きょ':[{j:'きょう',r:'kyou',e:'hoy',m:'📅'}],'しゃ':[{j:'しゃしん',r:'shashin',e:'foto',m:'📷'}],
+    'しゅ':[{j:'しゅくだい',r:'shukudai',e:'tarea',m:'📝'}],'しょ':[{j:'しょうゆ',r:'shouyu',e:'salsa de soja',m:'🍶'}],
+    'ちゃ':[{j:'おちゃ',r:'ocha',e:'té verde',m:'🍵'}],'ちゅ':[{j:'ちゅうごく',r:'chuugoku',e:'China',m:'🇨🇳'}],
+    'ちょ':[{j:'ちょっと',r:'chotto',e:'un poco',m:'🤏'}],'にゃ':[{j:'にゃんこ',r:'nyanko',e:'gatito',m:'🐱'}],
+    'にゅ':[{j:'にゅうがく',r:'nyuugaku',e:'ingreso escolar',m:'🏫'}],'にょ':[{j:'にょうぼう',r:'nyoubou',e:'esposa',m:'👩'}],
+    'ひゃ':[{j:'ひゃく',r:'hyaku',e:'cien',m:'💯'}],'ひゅ':[{j:'ひゅう',r:'hyuu',e:'silbido',m:'💨'}],
+    'ひょ':[{j:'ひょう',r:'hyou',e:'leopardo',m:'🐆'}],'みゃ':[{j:'みゃく',r:'myaku',e:'pulso',m:'💓'}],
+    'みゅ':[{j:'みゅーじっく',r:'myuujikku',e:'música',m:'🎵'}],'みょ':[{j:'みょうじ',r:'myouji',e:'apellido',m:'📛'}],
+    'りゃ':[{j:'りゃく',r:'ryaku',e:'abreviación',m:'📝'}],'りゅ':[{j:'りゅう',r:'ryuu',e:'dragón',m:'🐉'}],
+    'りょ':[{j:'りょこう',r:'ryokou',e:'viaje',m:'✈️'}],'ぎゃ':[{j:'ぎゃく',r:'gyaku',e:'contrario',m:'🔄'}],
+    'ぎゅ':[{j:'ぎゅうにゅう',r:'gyuunyuu',e:'leche',m:'🥛'}],'ぎょ':[{j:'きんぎょ',r:'kingyo',e:'pez dorado',m:'🐠'}],
+    'じゃ':[{j:'じゃま',r:'jama',e:'molestia',m:'🚫'}],'じゅ':[{j:'じゅうどう',r:'juudou',e:'judo',m:'🥋'}],
+    'じょ':[{j:'じょうず',r:'jouzu',e:'hábil',m:'👍'}],'びゃ':[{j:'さんびゃく',r:'sanbyaku',e:'trescientos',m:'3️⃣'}],
+    'びゅ':[{j:'びゅう',r:'byuu',e:'silbido',m:'💨'}],'びょ':[{j:'びょうき',r:'byouki',e:'enfermedad',m:'🤒'}],
+    'ぴゃ':[{j:'ろっぴゃく',r:'roppyaku',e:'seiscientos',m:'6️⃣'}],'ぴゅ':[{j:'ぴゅーれ',r:'pyuure',e:'puré',m:'🥔'}],
+    'ぴょ':[{j:'ぴょん',r:'pyon',e:'salto',m:'🐰'}],'っ':[{j:'がっこう',r:'gakkou',e:'escuela',m:'🏫'}],
+    'ア':[{j:'アメリカ',r:'amerika',e:'EE.UU.',m:'🇺🇸'}],'イ':[{j:'イタリア',r:'itaria',e:'Italia',m:'🇮🇹'}],
+    'ウ':[{j:'ウイスキー',r:'uisukii',e:'whisky',m:'🥃'}],'エ':[{j:'エレベーター',r:'erebeetaa',e:'ascensor',m:'🛗'}],
+    'オ':[{j:'オレンジ',r:'orenji',e:'naranja',m:'🍊'}],'カ':[{j:'カメラ',r:'kamera',e:'cámara',m:'📷'}],
+    'キ':[{j:'キロ',r:'kiro',e:'kilómetro',m:'📏'}],'ク':[{j:'クラス',r:'kurasu',e:'clase',m:'🏫'}],
+    'ケ':[{j:'ケーキ',r:'keeki',e:'pastel',m:'🎂'}],'コ':[{j:'コーヒー',r:'koohii',e:'café',m:'☕'}],
+    'サ':[{j:'サラダ',r:'sarada',e:'ensalada',m:'🥗'}],'シ':[{j:'シャツ',r:'shatsu',e:'camisa',m:'👔'}],
+    'ス':[{j:'スーパー',r:'suupaa',e:'supermercado',m:'🛒'}],'セ':[{j:'セーター',r:'seetaa',e:'suéter',m:'🧥'}],
+    'ソ':[{j:'ソファ',r:'sofa',e:'sofá',m:'🛋️'}],'タ':[{j:'タクシー',r:'takushii',e:'taxi',m:'🚕'}],
+    'チ':[{j:'チーズ',r:'chiizu',e:'queso',m:'🧀'}],'ツ':[{j:'ツアー',r:'tsuaa',e:'tour',m:'🗺️'}],
+    'テ':[{j:'テレビ',r:'terebi',e:'televisión',m:'📺'}],'ト':[{j:'トマト',r:'tomato',e:'tomate',m:'🍅'}],
+    'ナ':[{j:'ナイフ',r:'naifu',e:'cuchillo',m:'🔪'}],'ニ':[{j:'ニュース',r:'nyuusu',e:'noticias',m:'📰'}],
+    'ヌ':[{j:'カヌー',r:'kanuu',e:'canoa',m:'🛶'}],'ネ':[{j:'ネクタイ',r:'nekutai',e:'corbata',m:'👔'}],
+    'ノ':[{j:'ノート',r:'nooto',e:'cuaderno',m:'📓'}],'ハ':[{j:'ハンバーガー',r:'hanbaagaa',e:'hamburguesa',m:'🍔'}],
+    'ヒ':[{j:'ヒーター',r:'hiitaa',e:'calentador',m:'🔥'}],'フ':[{j:'フランス',r:'furansu',e:'Francia',m:'🇫🇷'}],
+    'ヘ':[{j:'ヘリコプター',r:'herikoputaa',e:'helicóptero',m:'🚁'}],'ホ':[{j:'ホテル',r:'hoteru',e:'hotel',m:'🏨'}],
+    'マ':[{j:'マンゴー',r:'mangoo',e:'mango',m:'🥭'}],'ミ':[{j:'ミルク',r:'miruku',e:'leche',m:'🥛'}],
+    'ム':[{j:'ムービー',r:'muubii',e:'película',m:'🎬'}],'メ':[{j:'メール',r:'meeru',e:'correo',m:'📧'}],
+    'モ':[{j:'モデル',r:'moderu',e:'modelo',m:'👗'}],'ヤ':[{j:'タイヤ',r:'taiya',e:'llanta',m:'🛞'}],
+    'ユ':[{j:'ユーロ',r:'yuuro',e:'euro',m:'💶'}],'ヨ':[{j:'ヨーグルト',r:'yooguruto',e:'yogurt',m:'🥛'}],
+    'ラ':[{j:'ラーメン',r:'raamen',e:'ramen',m:'🍜'}],'リ':[{j:'リモコン',r:'rimokon',e:'control remoto',m:'📱'}],
+    'ル':[{j:'ルール',r:'ruuru',e:'regla',m:'📏'}],'レ':[{j:'レストラン',r:'resutoran',e:'restaurante',m:'🍽️'}],
+    'ロ':[{j:'ロボット',r:'robotto',e:'robot',m:'🤖'}],'ワ':[{j:'ワイン',r:'wain',e:'vino',m:'🍷'}],
+    'ヲ':[{j:'ヲタク',r:'otaku',e:'otaku',m:'🎮'}],'ン':[{j:'パン',r:'pan',e:'pan',m:'🍞'}],
+    'ガ':[{j:'ガス',r:'gasu',e:'gas',m:'⛽'}],'ギ':[{j:'ギター',r:'gitaa',e:'guitarra',m:'🎸'}],
+    'グ':[{j:'グラス',r:'gurasu',e:'vaso',m:'🥛'}],'ゲ':[{j:'ゲーム',r:'geemu',e:'juego',m:'🎮'}],
+    'ゴ':[{j:'ゴルフ',r:'gorufu',e:'golf',m:'⛳'}],'ザ':[{j:'ピザ',r:'piza',e:'pizza',m:'🍕'}],
+    'ジ':[{j:'ジュース',r:'juusu',e:'jugo',m:'🧃'}],'ズ':[{j:'チーズ',r:'chiizu',e:'queso',m:'🧀'}],
+    'ゼ':[{j:'ゼロ',r:'zero',e:'cero',m:'0️⃣'}],'ゾ':[{j:'ゾーン',r:'zoon',e:'zona',m:'🔲'}],
+    'ダ':[{j:'ダンス',r:'dansu',e:'baile',m:'💃'}],'ヂ':[{j:'ヂ',r:'ji',e:'(raro)',m:'❓'}],
+    'ヅ':[{j:'ヅ',r:'zu',e:'(raro)',m:'❓'}],'デ':[{j:'デパート',r:'depaato',e:'tienda',m:'🏬'}],
+    'ド':[{j:'ドア',r:'doa',e:'puerta',m:'🚪'}],'バ':[{j:'バス',r:'basu',e:'autobús',m:'🚌'}],
+    'ビ':[{j:'ビール',r:'biiru',e:'cerveza',m:'🍺'}],'ブ':[{j:'ブログ',r:'burogu',e:'blog',m:'💻'}],
+    'ベ':[{j:'ベッド',r:'beddo',e:'cama',m:'🛏️'}],'ボ':[{j:'ボール',r:'booru',e:'pelota',m:'⚽'}],
+    'パ':[{j:'パン',r:'pan',e:'pan',m:'🍞'}],'ピ':[{j:'ピアノ',r:'piano',e:'piano',m:'🎹'}],
+    'プ':[{j:'プール',r:'puuru',e:'piscina',m:'🏊'}],'ペ':[{j:'ペン',r:'pen',e:'bolígrafo',m:'🖊️'}],
+    'ポ':[{j:'ポスト',r:'posuto',e:'buzón',m:'📮'}],
+    'キャ':[{j:'キャンプ',r:'kyanpu',e:'camping',m:'🏕️'}],'シャ':[{j:'シャワー',r:'shawaa',e:'ducha',m:'🚿'}],
+    'ショ':[{j:'ショッピング',r:'shoppingu',e:'compras',m:'🛍️'}],'チョ':[{j:'チョコレート',r:'chokoreeto',e:'chocolate',m:'🍫'}],
+    'ジュ':[{j:'ジュース',r:'juusu',e:'jugo',m:'🧃'}],'ジョ':[{j:'ジョギング',r:'jogingu',e:'jogging',m:'🏃'}],
+    'ギョ':[{j:'ギョウザ',r:'gyouza',e:'gyoza',m:'🥟'}],'リュ':[{j:'リュック',r:'ryukku',e:'mochila',m:'🎒'}],
+    'ピュ':[{j:'コンピューター',r:'konpyuutaa',e:'computadora',m:'💻'}],
+    'ッ':[{j:'サッカー',r:'sakkaa',e:'fútbol',m:'⚽'}],'ー':[{j:'コーヒー',r:'koohii',e:'café',m:'☕'}]
+};
+
+// Quiz vocabulary
+const quizVocab = {
+    hLevel2: [
+        {j:'いぬ',r:'inu',e:'perro',m:'🐕'},{j:'ねこ',r:'neko',e:'gato',m:'🐱'},{j:'うみ',r:'umi',e:'mar',m:'🌊'},
+        {j:'やま',r:'yama',e:'montaña',m:'⛰️'},{j:'はな',r:'hana',e:'flor',m:'🌷'},{j:'そら',r:'sora',e:'cielo',m:'🌤️'},
+        {j:'みず',r:'mizu',e:'agua',m:'💧'},{j:'ほし',r:'hoshi',e:'estrella',m:'⭐'},{j:'つき',r:'tsuki',e:'luna',m:'🌙'},
+        {j:'とり',r:'tori',e:'pájaro',m:'🐦'},{j:'すし',r:'sushi',e:'sushi',m:'🍣'},{j:'さけ',r:'sake',e:'sake',m:'🍶'},
+        {j:'くも',r:'kumo',e:'nube',m:'☁️'},{j:'かさ',r:'kasa',e:'paraguas',m:'☂️'},{j:'ほん',r:'hon',e:'libro',m:'📖'},
+        {j:'にく',r:'niku',e:'carne',m:'🥩'},{j:'へや',r:'heya',e:'habitación',m:'🛏️'},{j:'ゆめ',r:'yume',e:'sueño',m:'💭'},
+        {j:'なつ',r:'natsu',e:'verano',m:'☀️'},{j:'ふゆ',r:'fuyu',e:'invierno',m:'❄️'},{j:'はる',r:'haru',e:'primavera',m:'🌸'},
+        {j:'あき',r:'aki',e:'otoño',m:'🍂'},{j:'ちず',r:'chizu',e:'mapa',m:'🗺️'},{j:'たこ',r:'tako',e:'pulpo',m:'🐙'},
+        {j:'かお',r:'kao',e:'cara',m:'😊'},{j:'みみ',r:'mimi',e:'oreja',m:'👂'},{j:'あめ',r:'ame',e:'lluvia',m:'🌧️'},
+        {j:'ぞう',r:'zou',e:'elefante',m:'🐘'},{j:'くつ',r:'kutsu',e:'zapatos',m:'👟'},{j:'おちゃ',r:'ocha',e:'té',m:'🍵'}
+    ],
+    hLevel3: [
+        {j:'さくら',r:'sakura',e:'cerezo',m:'🌸'},{j:'がっこう',r:'gakkou',e:'escuela',m:'🏫'},
+        {j:'せんせい',r:'sensei',e:'profesor',m:'👨‍🏫'},{j:'ともだち',r:'tomodachi',e:'amigo',m:'🤝'},
+        {j:'たべもの',r:'tabemono',e:'comida',m:'🍱'},{j:'のみもの',r:'nomimono',e:'bebida',m:'🥤'},
+        {j:'おかあさん',r:'okaasan',e:'madre',m:'👩'},{j:'おとうさん',r:'otousan',e:'padre',m:'👨'},
+        {j:'ありがとう',r:'arigatou',e:'gracias',m:'🙏'},{j:'こんにちは',r:'konnichiwa',e:'hola',m:'👋'},
+        {j:'りょこう',r:'ryokou',e:'viaje',m:'✈️'},{j:'じてんしゃ',r:'jitensha',e:'bicicleta',m:'🚲'},
+        {j:'でんしゃ',r:'densha',e:'tren',m:'🚃'},{j:'びょういん',r:'byouin',e:'hospital',m:'🏥'},
+        {j:'だいがく',r:'daigaku',e:'universidad',m:'🎓'},{j:'しゃしん',r:'shashin',e:'foto',m:'📷'},
+        {j:'にほんご',r:'nihongo',e:'japonés',m:'🇯🇵'},{j:'どうぶつ',r:'doubutsu',e:'animal',m:'🦁'},
+        {j:'げんき',r:'genki',e:'saludable',m:'💪'},{j:'りんご',r:'ringo',e:'manzana',m:'🍎'}
+    ],
+    kLevel2: [
+        {j:'パン',r:'pan',e:'pan',m:'🍞'},{j:'ペン',r:'pen',e:'bolígrafo',m:'🖊️'},{j:'バス',r:'basu',e:'autobús',m:'🚌'},
+        {j:'ビール',r:'biiru',e:'cerveza',m:'🍺'},{j:'ピザ',r:'piza',e:'pizza',m:'🍕'},{j:'ドア',r:'doa',e:'puerta',m:'🚪'},
+        {j:'ゲーム',r:'geemu',e:'juego',m:'🎮'},{j:'メール',r:'meeru',e:'correo',m:'📧'},{j:'ガス',r:'gasu',e:'gas',m:'⛽'},
+        {j:'カメラ',r:'kamera',e:'cámara',m:'📷'},{j:'トマト',r:'tomato',e:'tomate',m:'🍅'},{j:'ノート',r:'nooto',e:'cuaderno',m:'📓'},
+        {j:'テレビ',r:'terebi',e:'televisión',m:'📺'},{j:'ホテル',r:'hoteru',e:'hotel',m:'🏨'},{j:'ギター',r:'gitaa',e:'guitarra',m:'🎸'},
+        {j:'ダンス',r:'dansu',e:'baile',m:'💃'},{j:'ゼロ',r:'zero',e:'cero',m:'0️⃣'},{j:'サラダ',r:'sarada',e:'ensalada',m:'🥗'},
+        {j:'チーズ',r:'chiizu',e:'queso',m:'🧀'},{j:'ワイン',r:'wain',e:'vino',m:'🍷'},{j:'カレー',r:'karee',e:'curry',m:'🍛'},
+        {j:'ベッド',r:'beddo',e:'cama',m:'🛏️'},{j:'ボール',r:'booru',e:'pelota',m:'⚽'},{j:'テニス',r:'tenisu',e:'tenis',m:'🎾'}
+    ],
+    kLevel3: [
+        {j:'コーヒー',r:'koohii',e:'café',m:'☕'},{j:'ケーキ',r:'keeki',e:'pastel',m:'🎂'},
+        {j:'サッカー',r:'sakkaa',e:'fútbol',m:'⚽'},{j:'レストラン',r:'resutoran',e:'restaurante',m:'🍽️'},
+        {j:'ハンバーガー',r:'hanbaagaa',e:'hamburguesa',m:'🍔'},{j:'チョコレート',r:'chokoreeto',e:'chocolate',m:'🍫'},
+        {j:'コンピューター',r:'konpyuutaa',e:'computadora',m:'💻'},{j:'スーパー',r:'suupaa',e:'supermercado',m:'🛒'},
+        {j:'タクシー',r:'takushii',e:'taxi',m:'🚕'},{j:'エレベーター',r:'erebeetaa',e:'ascensor',m:'🛗'},
+        {j:'ラーメン',r:'raamen',e:'ramen',m:'🍜'},{j:'アイスクリーム',r:'aisukuriimu',e:'helado',m:'🍦'},
+        {j:'ショッピング',r:'shoppingu',e:'compras',m:'🛍️'},{j:'パーティー',r:'paatii',e:'fiesta',m:'🎉'},
+        {j:'クリスマス',r:'kurisumasu',e:'Navidad',m:'🎄'},{j:'ジョギング',r:'jogingu',e:'jogging',m:'🏃'},
+        {j:'ギョウザ',r:'gyouza',e:'gyoza',m:'🥟'},{j:'リュック',r:'ryukku',e:'mochila',m:'🎒'}
+    ]
+};
+
+// State
+let learned = JSON.parse(localStorage.getItem('learnedChars')||'[]');
+let quizLevel = 1, questions = [], qIdx = 0, correct = 0;
+let fcType = 'hiragana', fcIdx = 0, fcList = [];
+
+// Grammar state
+let grammarMode = 'learn';
+let currentLesson = 'desu'; // 'desu' or 'masu'
+let reorderQuizIdx = 0;
+let reorderCorrect = 0;
+let reorderQuestions = [];
+let reorderErrors = [];
+let currentAnswer = [];
+let masuQuizIdx = 0;
+let masuCorrect = 0;
+let masuQuestions = [];
+let masuErrors = [];
+
+// ===== DESU LESSON =====
+const desuLesson = {
+    title: 'です',
+    subtitle: 'Forma cortés de afirmación',
+    desc: `<p><strong>「です」</strong> equivale a <strong>"es / soy / eres / somos / son"</strong> en español.</p>
+<p>Se coloca al final de la oración para hacerla cortés y formal.</p>
+<div class="grammar-point">
+<p>📌 <strong>Estructura básica:</strong></p>
+<p style="text-align:center;font-size:1.1rem;">[Tema] + は + [Sustantivo] + <strong>です</strong></p>
+</div>
+<p>⚠️ <strong>Nota:</strong> 「です」se usa en situaciones formales o con personas que no conoces bien.</p>`,
+    examples: [
+        ['<ruby>私<rt>わたし</rt></ruby>は<ruby>学生<rt>がくせい</rt></ruby>です','Watashi wa gakusei desu','Soy estudiante'],
+        ['これは<ruby>本<rt>ほん</rt></ruby>です','Kore wa hon desu','Esto es un libro'],
+        ['<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>先生<rt>せんせい</rt></ruby>です','Tanaka-san wa sensei desu','Tanaka es profesor'],
+        ['あれは<ruby>猫<rt>ねこ</rt></ruby>です','Are wa neko desu','Aquello es un gato']
+    ]
+};
+
+// ===== MASU LESSON =====
+const masuLesson = {
+    title: 'ます',
+    subtitle: 'Conjugación de verbos (forma cortés)',
+    desc: `<p><strong>「ます」</strong> es la terminación formal de los verbos en japonés.</p>
+<p>Expresa cortesía y respeto hacia el oyente.</p>
+
+<div class="grammar-point">
+<p>📌 <strong>Los 3 grupos de verbos:</strong></p>
+<p><strong>Grupo 1 (五段動詞):</strong> Verbos que terminan en う, く, す, つ, ぬ, ぶ, む, る</p>
+<p><strong>Grupo 2 (一段動詞):</strong> Verbos que terminan en いる o える</p>
+<p><strong>Grupo 3 (不規則動詞):</strong> する y 来る (irregulares)</p>
+</div>
+
+<div class="grammar-point">
+<p>📌 <strong>Cómo conjugar a ます:</strong></p>
+<p><strong>G1:</strong> Cambiar la última sílaba de う-dan a い-dan + ます</p>
+<p style="margin-left:1rem;">飲<strong>む</strong> → 飲<strong>み</strong>ます (む→み)</p>
+<p><strong>G2:</strong> Quitar る y agregar ます</p>
+<p style="margin-left:1rem;">食べ<strong>る</strong> → 食べ<strong>ます</strong></p>
+<p><strong>G3:</strong> Memorizar</p>
+<p style="margin-left:1rem;">する → します / 来る → 来ます</p>
+</div>
+
+<div class="grammar-point">
+<p>📌 <strong>4 formas de conjugación:</strong></p>
+<table style="width:100%;text-align:center;font-size:0.9rem;">
+<tr style="background:#f0f0f0;"><th></th><th>Afirmativo</th><th>Negativo</th></tr>
+<tr><td><strong>Presente/Futuro</strong></td><td>〜ます</td><td>〜ません</td></tr>
+<tr><td><strong>Pasado</strong></td><td>〜ました</td><td>〜ませんでした</td></tr>
+</table>
+</div>`,
+    groups: [
+        {
+            name: 'Grupo 1 (<ruby>五段動詞<rt>ごだんどうし</rt></ruby>)',
+            rule: 'Cambiar última sílaba (う<ruby>段<rt>だん</rt></ruby>→い<ruby>段<rt>だん</rt></ruby>) + ます',
+            verbs: [
+                ['<ruby>会<rt>あ</rt></ruby>う','<ruby>会<rt>あ</rt></ruby>います','<ruby>会<rt>あ</rt></ruby>いません','<ruby>会<rt>あ</rt></ruby>いました','<ruby>会<rt>あ</rt></ruby>いませんでした','encontrarse'],
+                ['<ruby>歩<rt>ある</rt></ruby>く','<ruby>歩<rt>ある</rt></ruby>きます','<ruby>歩<rt>ある</rt></ruby>きません','<ruby>歩<rt>ある</rt></ruby>きました','<ruby>歩<rt>ある</rt></ruby>きませんでした','caminar'],
+                ['<ruby>遊<rt>あそ</rt></ruby>ぶ','<ruby>遊<rt>あそ</rt></ruby>びます','<ruby>遊<rt>あそ</rt></ruby>びません','<ruby>遊<rt>あそ</rt></ruby>びました','<ruby>遊<rt>あそ</rt></ruby>びませんでした','jugar'],
+                ['<ruby>洗<rt>あら</rt></ruby>う','<ruby>洗<rt>あら</rt></ruby>います','<ruby>洗<rt>あら</rt></ruby>いません','<ruby>洗<rt>あら</rt></ruby>いました','<ruby>洗<rt>あら</rt></ruby>いませんでした','lavar'],
+                ['<ruby>言<rt>い</rt></ruby>う','<ruby>言<rt>い</rt></ruby>います','<ruby>言<rt>い</rt></ruby>いません','<ruby>言<rt>い</rt></ruby>いました','<ruby>言<rt>い</rt></ruby>いませんでした','decir'],
+                ['<ruby>行<rt>い</rt></ruby>く','<ruby>行<rt>い</rt></ruby>きます','<ruby>行<rt>い</rt></ruby>きません','<ruby>行<rt>い</rt></ruby>きました','<ruby>行<rt>い</rt></ruby>きませんでした','ir'],
+                ['<ruby>歌<rt>うた</rt></ruby>う','<ruby>歌<rt>うた</rt></ruby>います','<ruby>歌<rt>うた</rt></ruby>いません','<ruby>歌<rt>うた</rt></ruby>いました','<ruby>歌<rt>うた</rt></ruby>いませんでした','cantar'],
+                ['<ruby>売<rt>う</rt></ruby>る','<ruby>売<rt>う</rt></ruby>ります','<ruby>売<rt>う</rt></ruby>りません','<ruby>売<rt>う</rt></ruby>りました','<ruby>売<rt>う</rt></ruby>りませんでした','vender'],
+                ['<ruby>押<rt>お</rt></ruby>す','<ruby>押<rt>お</rt></ruby>します','<ruby>押<rt>お</rt></ruby>しません','<ruby>押<rt>お</rt></ruby>しました','<ruby>押<rt>お</rt></ruby>しませんでした','empujar'],
+                ['<ruby>泳<rt>およ</rt></ruby>ぐ','<ruby>泳<rt>およ</rt></ruby>ぎます','<ruby>泳<rt>およ</rt></ruby>ぎません','<ruby>泳<rt>およ</rt></ruby>ぎました','<ruby>泳<rt>およ</rt></ruby>ぎませんでした','nadar'],
+                ['<ruby>終<rt>お</rt></ruby>わる','<ruby>終<rt>お</rt></ruby>わります','<ruby>終<rt>お</rt></ruby>わりません','<ruby>終<rt>お</rt></ruby>わりました','<ruby>終<rt>お</rt></ruby>わりませんでした','terminar'],
+                ['<ruby>買<rt>か</rt></ruby>う','<ruby>買<rt>か</rt></ruby>います','<ruby>買<rt>か</rt></ruby>いません','<ruby>買<rt>か</rt></ruby>いました','<ruby>買<rt>か</rt></ruby>いませんでした','comprar'],
+                ['<ruby>帰<rt>かえ</rt></ruby>る','<ruby>帰<rt>かえ</rt></ruby>ります','<ruby>帰<rt>かえ</rt></ruby>りません','<ruby>帰<rt>かえ</rt></ruby>りました','<ruby>帰<rt>かえ</rt></ruby>りませんでした','volver'],
+                ['<ruby>書<rt>か</rt></ruby>く','<ruby>書<rt>か</rt></ruby>きます','<ruby>書<rt>か</rt></ruby>きません','<ruby>書<rt>か</rt></ruby>きました','<ruby>書<rt>か</rt></ruby>きませんでした','escribir'],
+                ['<ruby>貸<rt>か</rt></ruby>す','<ruby>貸<rt>か</rt></ruby>します','<ruby>貸<rt>か</rt></ruby>しません','<ruby>貸<rt>か</rt></ruby>しました','<ruby>貸<rt>か</rt></ruby>しませんでした','prestar'],
+                ['<ruby>聞<rt>き</rt></ruby>く','<ruby>聞<rt>き</rt></ruby>きます','<ruby>聞<rt>き</rt></ruby>きません','<ruby>聞<rt>き</rt></ruby>きました','<ruby>聞<rt>き</rt></ruby>きませんでした','escuchar'],
+                ['<ruby>切<rt>き</rt></ruby>る','<ruby>切<rt>き</rt></ruby>ります','<ruby>切<rt>き</rt></ruby>りません','<ruby>切<rt>き</rt></ruby>りました','<ruby>切<rt>き</rt></ruby>りませんでした','cortar'],
+                ['<ruby>消<rt>け</rt></ruby>す','<ruby>消<rt>け</rt></ruby>します','<ruby>消<rt>け</rt></ruby>しません','<ruby>消<rt>け</rt></ruby>しました','<ruby>消<rt>け</rt></ruby>しませんでした','apagar'],
+                ['<ruby>作<rt>つく</rt></ruby>る','<ruby>作<rt>つく</rt></ruby>ります','<ruby>作<rt>つく</rt></ruby>りません','<ruby>作<rt>つく</rt></ruby>りました','<ruby>作<rt>つく</rt></ruby>りませんでした','hacer/crear'],
+                ['<ruby>立<rt>た</rt></ruby>つ','<ruby>立<rt>た</rt></ruby>ちます','<ruby>立<rt>た</rt></ruby>ちません','<ruby>立<rt>た</rt></ruby>ちました','<ruby>立<rt>た</rt></ruby>ちませんでした','estar de pie'],
+                ['<ruby>使<rt>つか</rt></ruby>う','<ruby>使<rt>つか</rt></ruby>います','<ruby>使<rt>つか</rt></ruby>いません','<ruby>使<rt>つか</rt></ruby>いました','<ruby>使<rt>つか</rt></ruby>いませんでした','usar'],
+                ['<ruby>着<rt>つ</rt></ruby>く','<ruby>着<rt>つ</rt></ruby>きます','<ruby>着<rt>つ</rt></ruby>きません','<ruby>着<rt>つ</rt></ruby>きました','<ruby>着<rt>つ</rt></ruby>きませんでした','llegar'],
+                ['<ruby>撮<rt>と</rt></ruby>る','<ruby>撮<rt>と</rt></ruby>ります','<ruby>撮<rt>と</rt></ruby>りません','<ruby>撮<rt>と</rt></ruby>りました','<ruby>撮<rt>と</rt></ruby>りませんでした','tomar foto'],
+                ['<ruby>取<rt>と</rt></ruby>る','<ruby>取<rt>と</rt></ruby>ります','<ruby>取<rt>と</rt></ruby>りません','<ruby>取<rt>と</rt></ruby>りました','<ruby>取<rt>と</rt></ruby>りませんでした','tomar'],
+                ['<ruby>習<rt>なら</rt></ruby>う','<ruby>習<rt>なら</rt></ruby>います','<ruby>習<rt>なら</rt></ruby>いません','<ruby>習<rt>なら</rt></ruby>いました','<ruby>習<rt>なら</rt></ruby>いませんでした','aprender'],
+                ['<ruby>登<rt>のぼ</rt></ruby>る','<ruby>登<rt>のぼ</rt></ruby>ります','<ruby>登<rt>のぼ</rt></ruby>りません','<ruby>登<rt>のぼ</rt></ruby>りました','<ruby>登<rt>のぼ</rt></ruby>りませんでした','subir'],
+                ['<ruby>飲<rt>の</rt></ruby>む','<ruby>飲<rt>の</rt></ruby>みます','<ruby>飲<rt>の</rt></ruby>みません','<ruby>飲<rt>の</rt></ruby>みました','<ruby>飲<rt>の</rt></ruby>みませんでした','beber'],
+                ['<ruby>乗<rt>の</rt></ruby>る','<ruby>乗<rt>の</rt></ruby>ります','<ruby>乗<rt>の</rt></ruby>りません','<ruby>乗<rt>の</rt></ruby>りました','<ruby>乗<rt>の</rt></ruby>りませんでした','subirse'],
+                ['<ruby>入<rt>はい</rt></ruby>る','<ruby>入<rt>はい</rt></ruby>ります','<ruby>入<rt>はい</rt></ruby>りません','<ruby>入<rt>はい</rt></ruby>りました','<ruby>入<rt>はい</rt></ruby>りませんでした','entrar'],
+                ['<ruby>始<rt>はじ</rt></ruby>まる','<ruby>始<rt>はじ</rt></ruby>まります','<ruby>始<rt>はじ</rt></ruby>まりません','<ruby>始<rt>はじ</rt></ruby>まりました','<ruby>始<rt>はじ</rt></ruby>まりませんでした','comenzar'],
+                ['<ruby>走<rt>はし</rt></ruby>る','<ruby>走<rt>はし</rt></ruby>ります','<ruby>走<rt>はし</rt></ruby>りません','<ruby>走<rt>はし</rt></ruby>りました','<ruby>走<rt>はし</rt></ruby>りませんでした','correr'],
+                ['<ruby>話<rt>はな</rt></ruby>す','<ruby>話<rt>はな</rt></ruby>します','<ruby>話<rt>はな</rt></ruby>しません','<ruby>話<rt>はな</rt></ruby>しました','<ruby>話<rt>はな</rt></ruby>しませんでした','hablar'],
+                ['<ruby>払<rt>はら</rt></ruby>う','<ruby>払<rt>はら</rt></ruby>います','<ruby>払<rt>はら</rt></ruby>いません','<ruby>払<rt>はら</rt></ruby>いました','<ruby>払<rt>はら</rt></ruby>いませんでした','pagar'],
+                ['<ruby>弾<rt>ひ</rt></ruby>く','<ruby>弾<rt>ひ</rt></ruby>きます','<ruby>弾<rt>ひ</rt></ruby>きません','<ruby>弾<rt>ひ</rt></ruby>きました','<ruby>弾<rt>ひ</rt></ruby>きませんでした','tocar instrumento'],
+                ['<ruby>引<rt>ひ</rt></ruby>く','<ruby>引<rt>ひ</rt></ruby>きます','<ruby>引<rt>ひ</rt></ruby>きません','<ruby>引<rt>ひ</rt></ruby>きました','<ruby>引<rt>ひ</rt></ruby>きませんでした','tirar'],
+                ['<ruby>吹<rt>ふ</rt></ruby>く','<ruby>吹<rt>ふ</rt></ruby>きます','<ruby>吹<rt>ふ</rt></ruby>きません','<ruby>吹<rt>ふ</rt></ruby>きました','<ruby>吹<rt>ふ</rt></ruby>きませんでした','soplar'],
+                ['<ruby>降<rt>ふ</rt></ruby>る','<ruby>降<rt>ふ</rt></ruby>ります','<ruby>降<rt>ふ</rt></ruby>りません','<ruby>降<rt>ふ</rt></ruby>りました','<ruby>降<rt>ふ</rt></ruby>りませんでした','caer (lluvia)'],
+                ['<ruby>曲<rt>ま</rt></ruby>がる','<ruby>曲<rt>ま</rt></ruby>がります','<ruby>曲<rt>ま</rt></ruby>がりません','<ruby>曲<rt>ま</rt></ruby>がりました','<ruby>曲<rt>ま</rt></ruby>がりませんでした','girar'],
+                ['<ruby>待<rt>ま</rt></ruby>つ','<ruby>待<rt>ま</rt></ruby>ちます','<ruby>待<rt>ま</rt></ruby>ちません','<ruby>待<rt>ま</rt></ruby>ちました','<ruby>待<rt>ま</rt></ruby>ちませんでした','esperar'],
+                ['<ruby>持<rt>も</rt></ruby>つ','<ruby>持<rt>も</rt></ruby>ちます','<ruby>持<rt>も</rt></ruby>ちません','<ruby>持<rt>も</rt></ruby>ちました','<ruby>持<rt>も</rt></ruby>ちませんでした','tener/llevar'],
+                ['<ruby>休<rt>やす</rt></ruby>む','<ruby>休<rt>やす</rt></ruby>みます','<ruby>休<rt>やす</rt></ruby>みません','<ruby>休<rt>やす</rt></ruby>みました','<ruby>休<rt>やす</rt></ruby>みませんでした','descansar'],
+                ['<ruby>呼<rt>よ</rt></ruby>ぶ','<ruby>呼<rt>よ</rt></ruby>びます','<ruby>呼<rt>よ</rt></ruby>びません','<ruby>呼<rt>よ</rt></ruby>びました','<ruby>呼<rt>よ</rt></ruby>びませんでした','llamar'],
+                ['<ruby>読<rt>よ</rt></ruby>む','<ruby>読<rt>よ</rt></ruby>みます','<ruby>読<rt>よ</rt></ruby>みません','<ruby>読<rt>よ</rt></ruby>みました','<ruby>読<rt>よ</rt></ruby>みませんでした','leer'],
+                ['<ruby>分<rt>わ</rt></ruby>かる','<ruby>分<rt>わ</rt></ruby>かります','<ruby>分<rt>わ</rt></ruby>かりません','<ruby>分<rt>わ</rt></ruby>かりました','<ruby>分<rt>わ</rt></ruby>かりませんでした','entender'],
+                ['<ruby>渡<rt>わた</rt></ruby>る','<ruby>渡<rt>わた</rt></ruby>ります','<ruby>渡<rt>わた</rt></ruby>りません','<ruby>渡<rt>わた</rt></ruby>りました','<ruby>渡<rt>わた</rt></ruby>りませんでした','cruzar']
+            ]
+        },
+        {
+            name: 'Grupo 2 (<ruby>一段動詞<rt>いちだんどうし</rt></ruby>)',
+            rule: 'Quitar る y agregar ます',
+            verbs: [
+                ['あげる','あげます','あげません','あげました','あげませんでした','dar'],
+                ['<ruby>開<rt>あ</rt></ruby>ける','<ruby>開<rt>あ</rt></ruby>けます','<ruby>開<rt>あ</rt></ruby>けません','<ruby>開<rt>あ</rt></ruby>けました','<ruby>開<rt>あ</rt></ruby>けませんでした','abrir'],
+                ['<ruby>浴<rt>あ</rt></ruby>びる','<ruby>浴<rt>あ</rt></ruby>びます','<ruby>浴<rt>あ</rt></ruby>びません','<ruby>浴<rt>あ</rt></ruby>びました','<ruby>浴<rt>あ</rt></ruby>びませんでした','ducharse'],
+                ['いる','います','いません','いました','いませんでした','estar/haber'],
+                ['<ruby>入<rt>い</rt></ruby>れる','<ruby>入<rt>い</rt></ruby>れます','<ruby>入<rt>い</rt></ruby>れません','<ruby>入<rt>い</rt></ruby>れました','<ruby>入<rt>い</rt></ruby>れませんでした','meter'],
+                ['<ruby>生<rt>う</rt></ruby>まれる','<ruby>生<rt>う</rt></ruby>まれます','<ruby>生<rt>う</rt></ruby>まれません','<ruby>生<rt>う</rt></ruby>まれました','<ruby>生<rt>う</rt></ruby>まれませんでした','nacer'],
+                ['<ruby>教<rt>おし</rt></ruby>える','<ruby>教<rt>おし</rt></ruby>えます','<ruby>教<rt>おし</rt></ruby>えません','<ruby>教<rt>おし</rt></ruby>えました','<ruby>教<rt>おし</rt></ruby>えませんでした','enseñar'],
+                ['<ruby>起<rt>お</rt></ruby>きる','<ruby>起<rt>お</rt></ruby>きます','<ruby>起<rt>お</rt></ruby>きません','<ruby>起<rt>お</rt></ruby>きました','<ruby>起<rt>お</rt></ruby>きませんでした','levantarse'],
+                ['<ruby>降<rt>お</rt></ruby>りる','<ruby>降<rt>お</rt></ruby>ります','<ruby>降<rt>お</rt></ruby>りません','<ruby>降<rt>お</rt></ruby>りました','<ruby>降<rt>お</rt></ruby>りませんでした','bajarse'],
+                ['<ruby>覚<rt>おぼ</rt></ruby>える','<ruby>覚<rt>おぼ</rt></ruby>えます','<ruby>覚<rt>おぼ</rt></ruby>えません','<ruby>覚<rt>おぼ</rt></ruby>えました','<ruby>覚<rt>おぼ</rt></ruby>えませんでした','memorizar'],
+                ['<ruby>借<rt>か</rt></ruby>りる','<ruby>借<rt>か</rt></ruby>ります','<ruby>借<rt>か</rt></ruby>りません','<ruby>借<rt>か</rt></ruby>りました','<ruby>借<rt>か</rt></ruby>りませんでした','pedir prestado'],
+                ['<ruby>消<rt>き</rt></ruby>える','<ruby>消<rt>き</rt></ruby>えます','<ruby>消<rt>き</rt></ruby>えません','<ruby>消<rt>き</rt></ruby>えました','<ruby>消<rt>き</rt></ruby>えませんでした','desaparecer'],
+                ['<ruby>着<rt>き</rt></ruby>る','<ruby>着<rt>き</rt></ruby>ます','<ruby>着<rt>き</rt></ruby>ません','<ruby>着<rt>き</rt></ruby>ました','<ruby>着<rt>き</rt></ruby>ませんでした','vestirse'],
+                ['<ruby>答<rt>こた</rt></ruby>える','<ruby>答<rt>こた</rt></ruby>えます','<ruby>答<rt>こた</rt></ruby>えません','<ruby>答<rt>こた</rt></ruby>えました','<ruby>答<rt>こた</rt></ruby>えませんでした','responder'],
+                ['<ruby>閉<rt>し</rt></ruby>める','<ruby>閉<rt>し</rt></ruby>めます','<ruby>閉<rt>し</rt></ruby>めません','<ruby>閉<rt>し</rt></ruby>めました','<ruby>閉<rt>し</rt></ruby>めませんでした','cerrar'],
+                ['<ruby>食<rt>た</rt></ruby>べる','<ruby>食<rt>た</rt></ruby>べます','<ruby>食<rt>た</rt></ruby>べません','<ruby>食<rt>た</rt></ruby>べました','<ruby>食<rt>た</rt></ruby>べませんでした','comer'],
+                ['<ruby>疲<rt>つか</rt></ruby>れる','<ruby>疲<rt>つか</rt></ruby>れます','<ruby>疲<rt>つか</rt></ruby>れません','<ruby>疲<rt>つか</rt></ruby>れました','<ruby>疲<rt>つか</rt></ruby>れませんでした','cansarse'],
+                ['つける','つけます','つけません','つけました','つけませんでした','encender'],
+                ['<ruby>出<rt>で</rt></ruby>かける','<ruby>出<rt>で</rt></ruby>かけます','<ruby>出<rt>で</rt></ruby>かけません','<ruby>出<rt>で</rt></ruby>かけました','<ruby>出<rt>で</rt></ruby>かけませんでした','salir'],
+                ['できる','できます','できません','できました','できませんでした','poder'],
+                ['<ruby>出<rt>で</rt></ruby>る','<ruby>出<rt>で</rt></ruby>ます','<ruby>出<rt>で</rt></ruby>ません','<ruby>出<rt>で</rt></ruby>ました','<ruby>出<rt>で</rt></ruby>ませんでした','salir'],
+                ['<ruby>止<rt>と</rt></ruby>める','<ruby>止<rt>と</rt></ruby>めます','<ruby>止<rt>と</rt></ruby>めません','<ruby>止<rt>と</rt></ruby>めました','<ruby>止<rt>と</rt></ruby>めませんでした','detener'],
+                ['<ruby>寝<rt>ね</rt></ruby>る','<ruby>寝<rt>ね</rt></ruby>ます','<ruby>寝<rt>ね</rt></ruby>ません','<ruby>寝<rt>ね</rt></ruby>ました','<ruby>寝<rt>ね</rt></ruby>ませんでした','dormir'],
+                ['<ruby>見<rt>み</rt></ruby>せる','<ruby>見<rt>み</rt></ruby>せます','<ruby>見<rt>み</rt></ruby>せません','<ruby>見<rt>み</rt></ruby>せました','<ruby>見<rt>み</rt></ruby>せませんでした','mostrar'],
+                ['<ruby>見<rt>み</rt></ruby>る','<ruby>見<rt>み</rt></ruby>ます','<ruby>見<rt>み</rt></ruby>ません','<ruby>見<rt>み</rt></ruby>ました','<ruby>見<rt>み</rt></ruby>ませんでした','ver'],
+                ['<ruby>忘<rt>わす</rt></ruby>れる','<ruby>忘<rt>わす</rt></ruby>れます','<ruby>忘<rt>わす</rt></ruby>れません','<ruby>忘<rt>わす</rt></ruby>れました','<ruby>忘<rt>わす</rt></ruby>れませんでした','olvidar']
+            ]
+        },
+        {
+            name: 'Grupo 3 (<ruby>不規則動詞<rt>ふきそくどうし</rt></ruby>)',
+            rule: 'Memorizar (irregulares)',
+            verbs: [
+                ['する','します','しません','しました','しませんでした','hacer'],
+                ['<ruby>来<rt>く</rt></ruby>る','<ruby>来<rt>き</rt></ruby>ます','<ruby>来<rt>き</rt></ruby>ません','<ruby>来<rt>き</rt></ruby>ました','<ruby>来<rt>き</rt></ruby>ませんでした','venir'],
+                ['<ruby>勉強<rt>べんきょう</rt></ruby>する','<ruby>勉強<rt>べんきょう</rt></ruby>します','<ruby>勉強<rt>べんきょう</rt></ruby>しません','<ruby>勉強<rt>べんきょう</rt></ruby>しました','<ruby>勉強<rt>べんきょう</rt></ruby>しませんでした','estudiar'],
+                ['<ruby>散歩<rt>さんぽ</rt></ruby>する','<ruby>散歩<rt>さんぽ</rt></ruby>します','<ruby>散歩<rt>さんぽ</rt></ruby>しません','<ruby>散歩<rt>さんぽ</rt></ruby>しました','<ruby>散歩<rt>さんぽ</rt></ruby>しませんでした','pasear'],
+                ['<ruby>買<rt>か</rt></ruby>い<ruby>物<rt>もの</rt></ruby>する','<ruby>買<rt>か</rt></ruby>い<ruby>物<rt>もの</rt></ruby>します','<ruby>買<rt>か</rt></ruby>い<ruby>物<rt>もの</rt></ruby>しません','<ruby>買<rt>か</rt></ruby>い<ruby>物<rt>もの</rt></ruby>しました','<ruby>買<rt>か</rt></ruby>い<ruby>物<rt>もの</rt></ruby>しませんでした','hacer compras'],
+                ['<ruby>料理<rt>りょうり</rt></ruby>する','<ruby>料理<rt>りょうり</rt></ruby>します','<ruby>料理<rt>りょうり</rt></ruby>しません','<ruby>料理<rt>りょうり</rt></ruby>しました','<ruby>料理<rt>りょうり</rt></ruby>しませんでした','cocinar'],
+                ['<ruby>運動<rt>うんどう</rt></ruby>する','<ruby>運動<rt>うんどう</rt></ruby>します','<ruby>運動<rt>うんどう</rt></ruby>しません','<ruby>運動<rt>うんどう</rt></ruby>しました','<ruby>運動<rt>うんどう</rt></ruby>しませんでした','hacer ejercicio'],
+                ['<ruby>掃除<rt>そうじ</rt></ruby>する','<ruby>掃除<rt>そうじ</rt></ruby>します','<ruby>掃除<rt>そうじ</rt></ruby>しません','<ruby>掃除<rt>そうじ</rt></ruby>しました','<ruby>掃除<rt>そうじ</rt></ruby>しませんでした','limpiar'],
+                ['<ruby>洗濯<rt>せんたく</rt></ruby>する','<ruby>洗濯<rt>せんたく</rt></ruby>します','<ruby>洗濯<rt>せんたく</rt></ruby>しません','<ruby>洗濯<rt>せんたく</rt></ruby>しました','<ruby>洗濯<rt>せんたく</rt></ruby>しませんでした','lavar ropa'],
+                ['<ruby>電話<rt>でんわ</rt></ruby>する','<ruby>電話<rt>でんわ</rt></ruby>します','<ruby>電話<rt>でんわ</rt></ruby>しません','<ruby>電話<rt>でんわ</rt></ruby>しました','<ruby>電話<rt>でんわ</rt></ruby>しませんでした','llamar por teléfono'],
+                ['<ruby>持<rt>も</rt></ruby>ってくる','<ruby>持<rt>も</rt></ruby>ってきます','<ruby>持<rt>も</rt></ruby>ってきません','<ruby>持<rt>も</rt></ruby>ってきました','<ruby>持<rt>も</rt></ruby>ってきませんでした','traer'],
+                ['<ruby>連<rt>つ</rt></ruby>れてくる','<ruby>連<rt>つ</rt></ruby>れてきます','<ruby>連<rt>つ</rt></ruby>れてきません','<ruby>連<rt>つ</rt></ruby>れてきました','<ruby>連<rt>つ</rt></ruby>れてきませんでした','traer (persona)']
+            ]
+        }
+    ]
+};
+
+// Generate masu quiz pool from all verbs
+function generateMasuQuizPool(){
+    const pool = [];
+    const forms = [
+        {key:1,name:'Presente afirmativo',suffix:'ます'},
+        {key:2,name:'Presente negativo',suffix:'ません'},
+        {key:3,name:'Pasado afirmativo',suffix:'ました'},
+        {key:4,name:'Pasado negativo',suffix:'ませんでした'}
+    ];
+    masuLesson.groups.forEach((g,gi)=>{
+        g.verbs.forEach(v=>{
+            forms.forEach(f=>{
+                pool.push({
+                    dict: v[0],
+                    form: f.name,
+                    formKey: f.key,
+                    answer: v[f.key],
+                    meaning: v[5],
+                    group: gi+1,
+                    groupName: g.name,
+                    rule: g.rule,
+                    allForms: {pres:v[1],neg:v[2],past:v[3],pastneg:v[4]}
+                });
+            });
+        });
+    });
+    return pool;
+}
+const masuQuizPool = generateMasuQuizPool();
+
+// 50 Questions Pool for です (Reorder)
+const desuQuizPool = [
+    {words:['<ruby>私<rt>わたし</rt></ruby>','は','<ruby>学生<rt>がくせい</rt></ruby>','です'],answer:'<ruby>私<rt>わたし</rt></ruby>は<ruby>学生<rt>がくせい</rt></ruby>です',hint:'Soy estudiante',explain:'「<ruby>私<rt>わたし</rt></ruby>」(yo) es el tema, seguido de 「は」. 「<ruby>学生<rt>がくせい</rt></ruby>」(estudiante) va antes de 「です」.'},
+    {words:['これ','は','<ruby>本<rt>ほん</rt></ruby>','です'],answer:'これは<ruby>本<rt>ほん</rt></ruby>です',hint:'Esto es un libro',explain:'「これ」(esto) es el tema. 「<ruby>本<rt>ほん</rt></ruby>」(libro) es el sustantivo principal.'},
+    {words:['<ruby>田中<rt>たなか</rt></ruby>さん','は','<ruby>先生<rt>せんせい</rt></ruby>','です'],answer:'<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>先生<rt>せんせい</rt></ruby>です',hint:'Tanaka es profesor',explain:'「<ruby>田中<rt>たなか</rt></ruby>さん」es el tema. 「<ruby>先生<rt>せんせい</rt></ruby>」(profesor) describe a Tanaka.'},
+    {words:['あれ','は','<ruby>猫<rt>ねこ</rt></ruby>','です'],answer:'あれは<ruby>猫<rt>ねこ</rt></ruby>です',hint:'Aquello es un gato',explain:'「あれ」(aquello) indica algo lejano. Estructura: demostrativo + は + sustantivo + です.'},
+    {words:['<ruby>私<rt>わたし</rt></ruby>','は','<ruby>日本人<rt>にほんじん</rt></ruby>','です'],answer:'<ruby>私<rt>わたし</rt></ruby>は<ruby>日本人<rt>にほんじん</rt></ruby>です',hint:'Soy japonés',explain:'「<ruby>日本人<rt>にほんじん</rt></ruby>」(japonés) indica nacionalidad.'},
+    {words:['それ','は','ペン','です'],answer:'それはペンです',hint:'Eso es un bolígrafo',explain:'「それ」(eso) señala algo cerca del oyente.'},
+    {words:['<ruby>山田<rt>やまだ</rt></ruby>さん','は','<ruby>医者<rt>いしゃ</rt></ruby>','です'],answer:'<ruby>山田<rt>やまだ</rt></ruby>さんは<ruby>医者<rt>いしゃ</rt></ruby>です',hint:'Yamada es médico',explain:'「<ruby>医者<rt>いしゃ</rt></ruby>」(médico) es la profesión.'},
+    {words:['<ruby>彼<rt>かれ</rt></ruby>','は','<ruby>友達<rt>ともだち</rt></ruby>','です'],answer:'<ruby>彼<rt>かれ</rt></ruby>は<ruby>友達<rt>ともだち</rt></ruby>です',hint:'Él es mi amigo',explain:'「<ruby>彼<rt>かれ</rt></ruby>」(él) es el tema. 「<ruby>友達<rt>ともだち</rt></ruby>」(amigo) describe la relación.'},
+    {words:['あれ','は','<ruby>車<rt>くるま</rt></ruby>','です'],answer:'あれは<ruby>車<rt>くるま</rt></ruby>です',hint:'Aquello es un coche',explain:'「<ruby>車<rt>くるま</rt></ruby>」(coche) es el sustantivo.'},
+    {words:['<ruby>私<rt>わたし</rt></ruby>','は','<ruby>会社員<rt>かいしゃいん</rt></ruby>','です'],answer:'<ruby>私<rt>わたし</rt></ruby>は<ruby>会社員<rt>かいしゃいん</rt></ruby>です',hint:'Soy empleado',explain:'「<ruby>会社員<rt>かいしゃいん</rt></ruby>」(empleado de empresa) es la profesión.'},
+    {words:['これ','は','<ruby>水<rt>みず</rt></ruby>','です'],answer:'これは<ruby>水<rt>みず</rt></ruby>です',hint:'Esto es agua',explain:'「<ruby>水<rt>みず</rt></ruby>」(agua) es el sustantivo.'},
+    {words:['<ruby>佐藤<rt>さとう</rt></ruby>さん','は','<ruby>学生<rt>がくせい</rt></ruby>','です'],answer:'<ruby>佐藤<rt>さとう</rt></ruby>さんは<ruby>学生<rt>がくせい</rt></ruby>です',hint:'Sato es estudiante',explain:'El nombre propio es el tema de la oración.'},
+    {words:['それ','は','<ruby>傘<rt>かさ</rt></ruby>','です'],answer:'それは<ruby>傘<rt>かさ</rt></ruby>です',hint:'Eso es un paraguas',explain:'「<ruby>傘<rt>かさ</rt></ruby>」(paraguas) es el objeto.'},
+    {words:['<ruby>彼女<rt>かのじょ</rt></ruby>','は','<ruby>看護師<rt>かんごし</rt></ruby>','です'],answer:'<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>看護師<rt>かんごし</rt></ruby>です',hint:'Ella es enfermera',explain:'「<ruby>彼女<rt>かのじょ</rt></ruby>」(ella) es el tema.'},
+    {words:['あれ','は','<ruby>山<rt>やま</rt></ruby>','です'],answer:'あれは<ruby>山<rt>やま</rt></ruby>です',hint:'Aquello es una montaña',explain:'「<ruby>山<rt>やま</rt></ruby>」(montaña) es el sustantivo.'},
+    {words:['<ruby>私<rt>わたし</rt></ruby>','は','マリア','です'],answer:'<ruby>私<rt>わたし</rt></ruby>はマリアです',hint:'Soy María',explain:'Para presentarse: 私 + は + nombre + です.'},
+    {words:['これ','は','りんご','です'],answer:'これはりんごです',hint:'Esto es una manzana',explain:'「りんご」(manzana) es el sustantivo.'},
+    {words:['<ruby>鈴木<rt>すずき</rt></ruby>さん','は','<ruby>警察官<rt>けいさつかん</rt></ruby>','です'],answer:'<ruby>鈴木<rt>すずき</rt></ruby>さんは<ruby>警察官<rt>けいさつかん</rt></ruby>です',hint:'Suzuki es policía',explain:'「<ruby>警察官<rt>けいさつかん</rt></ruby>」(policía) es la profesión.'},
+    {words:['それ','は','<ruby>雑誌<rt>ざっし</rt></ruby>','です'],answer:'それは<ruby>雑誌<rt>ざっし</rt></ruby>です',hint:'Eso es una revista',explain:'「<ruby>雑誌<rt>ざっし</rt></ruby>」(revista) es el objeto.'},
+    {words:['<ruby>私<rt>わたし</rt></ruby>','は','<ruby>教師<rt>きょうし</rt></ruby>','です'],answer:'<ruby>私<rt>わたし</rt></ruby>は<ruby>教師<rt>きょうし</rt></ruby>です',hint:'Soy profesor',explain:'「<ruby>教師<rt>きょうし</rt></ruby>」(profesor) indica la profesión.'},
+    {words:['あれ','は','<ruby>海<rt>うみ</rt></ruby>','です'],answer:'あれは<ruby>海<rt>うみ</rt></ruby>です',hint:'Aquello es el mar',explain:'「<ruby>海<rt>うみ</rt></ruby>」(mar) es el sustantivo.'},
+    {words:['<ruby>木村<rt>きむら</rt></ruby>さん','は','<ruby>料理人<rt>りょうりにん</rt></ruby>','です'],answer:'<ruby>木村<rt>きむら</rt></ruby>さんは<ruby>料理人<rt>りょうりにん</rt></ruby>です',hint:'Kimura es cocinero',explain:'「<ruby>料理人<rt>りょうりにん</rt></ruby>」(cocinero) es la profesión.'},
+    {words:['これ','は','<ruby>鍵<rt>かぎ</rt></ruby>','です'],answer:'これは<ruby>鍵<rt>かぎ</rt></ruby>です',hint:'Esto es una llave',explain:'「<ruby>鍵<rt>かぎ</rt></ruby>」(llave) es el objeto.'},
+    {words:['<ruby>私<rt>わたし</rt></ruby>','は','<ruby>中国人<rt>ちゅうごくじん</rt></ruby>','です'],answer:'<ruby>私<rt>わたし</rt></ruby>は<ruby>中国人<rt>ちゅうごくじん</rt></ruby>です',hint:'Soy chino',explain:'「<ruby>中国人<rt>ちゅうごくじん</rt></ruby>」(chino) indica nacionalidad.'},
+    {words:['それ','は','<ruby>財布<rt>さいふ</rt></ruby>','です'],answer:'それは<ruby>財布<rt>さいふ</rt></ruby>です',hint:'Eso es una cartera',explain:'「<ruby>財布<rt>さいふ</rt></ruby>」(cartera) es el objeto.'},
+    {words:['<ruby>高橋<rt>たかはし</rt></ruby>さん','は','<ruby>歌手<rt>かしゅ</rt></ruby>','です'],answer:'<ruby>高橋<rt>たかはし</rt></ruby>さんは<ruby>歌手<rt>かしゅ</rt></ruby>です',hint:'Takahashi es cantante',explain:'「<ruby>歌手<rt>かしゅ</rt></ruby>」(cantante) es la profesión.'},
+    {words:['あれ','は','<ruby>病院<rt>びょういん</rt></ruby>','です'],answer:'あれは<ruby>病院<rt>びょういん</rt></ruby>です',hint:'Aquello es un hospital',explain:'「<ruby>病院<rt>びょういん</rt></ruby>」(hospital) es el edificio.'},
+    {words:['<ruby>私<rt>わたし</rt></ruby>','は','<ruby>韓国人<rt>かんこくじん</rt></ruby>','です'],answer:'<ruby>私<rt>わたし</rt></ruby>は<ruby>韓国人<rt>かんこくじん</rt></ruby>です',hint:'Soy coreano',explain:'「<ruby>韓国人<rt>かんこくじん</rt></ruby>」(coreano) indica nacionalidad.'},
+    {words:['これ','は','<ruby>時計<rt>とけい</rt></ruby>','です'],answer:'これは<ruby>時計<rt>とけい</rt></ruby>です',hint:'Esto es un reloj',explain:'「<ruby>時計<rt>とけい</rt></ruby>」(reloj) es el objeto.'},
+    {words:['<ruby>伊藤<rt>いとう</rt></ruby>さん','は','<ruby>弁護士<rt>べんごし</rt></ruby>','です'],answer:'<ruby>伊藤<rt>いとう</rt></ruby>さんは<ruby>弁護士<rt>べんごし</rt></ruby>です',hint:'Ito es abogado',explain:'「<ruby>弁護士<rt>べんごし</rt></ruby>」(abogado) es la profesión.'},
+    {words:['それ','は','<ruby>辞書<rt>じしょ</rt></ruby>','です'],answer:'それは<ruby>辞書<rt>じしょ</rt></ruby>です',hint:'Eso es un diccionario',explain:'「<ruby>辞書<rt>じしょ</rt></ruby>」(diccionario) es el objeto.'},
+    {words:['<ruby>彼<rt>かれ</rt></ruby>','は','<ruby>学生<rt>がくせい</rt></ruby>','です'],answer:'<ruby>彼<rt>かれ</rt></ruby>は<ruby>学生<rt>がくせい</rt></ruby>です',hint:'Él es estudiante',explain:'「<ruby>彼<rt>かれ</rt></ruby>」(él) es el tema.'},
+    {words:['あれ','は','<ruby>学校<rt>がっこう</rt></ruby>','です'],answer:'あれは<ruby>学校<rt>がっこう</rt></ruby>です',hint:'Aquello es una escuela',explain:'「<ruby>学校<rt>がっこう</rt></ruby>」(escuela) es el edificio.'},
+    {words:['<ruby>私<rt>わたし</rt></ruby>','は','<ruby>アメリカ人<rt>あめりかじん</rt></ruby>','です'],answer:'<ruby>私<rt>わたし</rt></ruby>は<ruby>アメリカ人<rt>あめりかじん</rt></ruby>です',hint:'Soy estadounidense',explain:'「<ruby>アメリカ人<rt>あめりかじん</rt></ruby>」indica nacionalidad.'},
+    {words:['これ','は','<ruby>写真<rt>しゃしん</rt></ruby>','です'],answer:'これは<ruby>写真<rt>しゃしん</rt></ruby>です',hint:'Esto es una foto',explain:'「<ruby>写真<rt>しゃしん</rt></ruby>」(foto) es el sustantivo.'},
+    {words:['<ruby>渡辺<rt>わたなべ</rt></ruby>さん','は','<ruby>銀行員<rt>ぎんこういん</rt></ruby>','です'],answer:'<ruby>渡辺<rt>わたなべ</rt></ruby>さんは<ruby>銀行員<rt>ぎんこういん</rt></ruby>です',hint:'Watanabe es banquero',explain:'「<ruby>銀行員<rt>ぎんこういん</rt></ruby>」(empleado de banco) es la profesión.'},
+    {words:['それ','は','<ruby>携帯<rt>けいたい</rt></ruby>','です'],answer:'それは<ruby>携帯<rt>けいたい</rt></ruby>です',hint:'Eso es un celular',explain:'「<ruby>携帯<rt>けいたい</rt></ruby>」(celular) es el objeto.'},
+    {words:['<ruby>彼女<rt>かのじょ</rt></ruby>','は','<ruby>先生<rt>せんせい</rt></ruby>','です'],answer:'<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>先生<rt>せんせい</rt></ruby>です',hint:'Ella es profesora',explain:'「<ruby>彼女<rt>かのじょ</rt></ruby>」(ella) es el tema.'},
+    {words:['あれ','は','<ruby>駅<rt>えき</rt></ruby>','です'],answer:'あれは<ruby>駅<rt>えき</rt></ruby>です',hint:'Aquello es una estación',explain:'「<ruby>駅<rt>えき</rt></ruby>」(estación) es el lugar.'},
+    {words:['<ruby>私<rt>わたし</rt></ruby>','は','<ruby>メキシコ人<rt>めきしこじん</rt></ruby>','です'],answer:'<ruby>私<rt>わたし</rt></ruby>は<ruby>メキシコ人<rt>めきしこじん</rt></ruby>です',hint:'Soy mexicano',explain:'「<ruby>メキシコ人<rt>めきしこじん</rt></ruby>」indica nacionalidad.'},
+    {words:['これ','は','<ruby>新聞<rt>しんぶん</rt></ruby>','です'],answer:'これは<ruby>新聞<rt>しんぶん</rt></ruby>です',hint:'Esto es un periódico',explain:'「<ruby>新聞<rt>しんぶん</rt></ruby>」(periódico) es el objeto.'},
+    {words:['<ruby>中村<rt>なかむら</rt></ruby>さん','は','エンジニア','です'],answer:'<ruby>中村<rt>なかむら</rt></ruby>さんはエンジニアです',hint:'Nakamura es ingeniero',explain:'「エンジニア」(ingeniero) es palabra del inglés.'},
+    {words:['それ','は','<ruby>地図<rt>ちず</rt></ruby>','です'],answer:'それは<ruby>地図<rt>ちず</rt></ruby>です',hint:'Eso es un mapa',explain:'「<ruby>地図<rt>ちず</rt></ruby>」(mapa) es el objeto.'},
+    {words:['<ruby>彼<rt>かれ</rt></ruby>','は','<ruby>医者<rt>いしゃ</rt></ruby>','です'],answer:'<ruby>彼<rt>かれ</rt></ruby>は<ruby>医者<rt>いしゃ</rt></ruby>です',hint:'Él es médico',explain:'「<ruby>医者<rt>いしゃ</rt></ruby>」(médico) es la profesión.'},
+    {words:['あれ','は','<ruby>公園<rt>こうえん</rt></ruby>','です'],answer:'あれは<ruby>公園<rt>こうえん</rt></ruby>です',hint:'Aquello es un parque',explain:'「<ruby>公園<rt>こうえん</rt></ruby>」(parque) es el lugar.'},
+    {words:['<ruby>私<rt>わたし</rt></ruby>','は','<ruby>ボリビア人<rt>ぼりびあじん</rt></ruby>','です'],answer:'<ruby>私<rt>わたし</rt></ruby>は<ruby>ボリビア人<rt>ぼりびあじん</rt></ruby>です',hint:'Soy boliviano',explain:'「<ruby>ボリビア人<rt>ぼりびあじん</rt></ruby>」indica nacionalidad.'},
+    {words:['これ','は','<ruby>手紙<rt>てがみ</rt></ruby>','です'],answer:'これは<ruby>手紙<rt>てがみ</rt></ruby>です',hint:'Esto es una carta',explain:'「<ruby>手紙<rt>てがみ</rt></ruby>」(carta) es el objeto.'},
+    {words:['<ruby>小林<rt>こばやし</rt></ruby>さん','は','<ruby>作家<rt>さっか</rt></ruby>','です'],answer:'<ruby>小林<rt>こばやし</rt></ruby>さんは<ruby>作家<rt>さっか</rt></ruby>です',hint:'Kobayashi es escritor',explain:'「<ruby>作家<rt>さっか</rt></ruby>」(escritor) es la profesión.'},
+    {words:['それ','は','<ruby>薬<rt>くすり</rt></ruby>','です'],answer:'それは<ruby>薬<rt>くすり</rt></ruby>です',hint:'Eso es medicina',explain:'「<ruby>薬<rt>くすり</rt></ruby>」(medicina) es el objeto.'},
+    {words:['<ruby>彼女<rt>かのじょ</rt></ruby>','は','<ruby>友達<rt>ともだち</rt></ruby>','です'],answer:'<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>友達<rt>ともだち</rt></ruby>です',hint:'Ella es mi amiga',explain:'「<ruby>友達<rt>ともだち</rt></ruby>」(amiga) describe la relación.'}
+];
+
+function renderGrammar(){
+    document.getElementById('grammar-list').innerHTML = `
+        <div class="grammar-lesson-tabs">
+            <button class="lesson-tab ${currentLesson==='desu'?'active':''}" onclick="setCurrentLesson('desu')">です</button>
+            <button class="lesson-tab ${currentLesson==='masu'?'active':''}" onclick="setCurrentLesson('masu')">ます</button>
+        </div>
+        <div class="grammar-mode-tabs">
+            <button class="mode-tab ${grammarMode==='learn'?'active':''}" onclick="setGrammarMode('learn')">📖 Aprender</button>
+            <button class="mode-tab ${grammarMode==='practice'?'active':''}" onclick="setGrammarMode('practice')">🎯 Practicar</button>
+        </div>
+        <div id="grammar-content"></div>
+    `;
+    if(currentLesson==='desu'){
+        if(grammarMode==='learn') renderDesuLearn();
+        else renderDesuPractice();
+    } else {
+        if(grammarMode==='learn') renderMasuLearn();
+        else renderMasuPractice();
+    }
+}
+
+function setCurrentLesson(lesson){
+    currentLesson = lesson;
+    grammarMode = 'learn';
+    renderGrammar();
+}
+
+function setGrammarMode(mode){
+    grammarMode = mode;
+    renderGrammar();
+}
+
+// ===== DESU FUNCTIONS =====
+function renderDesuLearn(){
+    const L = desuLesson;
+    document.getElementById('grammar-content').innerHTML = `
+        <div class="grammar-card">
+            <div class="grammar-title">${L.title}</div>
+            <div class="grammar-subtitle">${L.subtitle}</div>
+            <div class="grammar-desc">${L.desc}</div>
+            <div class="grammar-examples">
+                <h4>📝 Ejemplos</h4>
+                ${L.examples.map(ex=>`<div class="grammar-ex"><div class="ex-jp">${ex[0]}</div><div class="ex-ro">${ex[1]}</div><div class="ex-es">${ex[2]}</div></div>`).join('')}
+            </div>
+            <button class="btn-practice" onclick="setGrammarMode('practice')">🎯 Practicar</button>
+        </div>
+    `;
+}
+
+function renderDesuPractice(){
+    document.getElementById('grammar-content').innerHTML = `
+        <div class="grammar-card" style="text-align:center;">
+            <h3>🎯 Práctica: です</h3>
+            <p style="color:var(--text-light);margin:0.5rem 0;">Ordena las palabras para formar oraciones correctas.</p>
+            <p style="color:var(--text-light);font-size:0.9rem;">5 preguntas aleatorias</p>
+            <button class="btn-practice" onclick="startDesuQuiz()">Comenzar</button>
+        </div>
+        <div id="reorder-area"></div>
+    `;
+}
+
+function startDesuQuiz(){
+    reorderQuizIdx = 0;
+    reorderCorrect = 0;
+    reorderErrors = [];
+    reorderQuestions = [...desuQuizPool].sort(()=>Math.random()-0.5).slice(0,5);
+    document.querySelector('.grammar-card').style.display = 'none';
+    showReorderQuestion();
+}
+
+function showReorderQuestion(){
+    currentAnswer = [];
+    const q = reorderQuestions[reorderQuizIdx];
+    const shuffled = [...q.words].sort(()=>Math.random()-0.5);
+    document.getElementById('reorder-area').innerHTML = `
+        <div class="reorder-box">
+            <div class="reorder-progress">${reorderQuizIdx+1} / 5</div>
+            <div class="reorder-hint">${q.hint}</div>
+            <div class="reorder-words" id="word-pool">
+                ${shuffled.map((w,i)=>`<button class="word-btn" onclick="selectWord(${i})" id="wb-${i}">${w}</button>`).join('')}
+            </div>
+            <div class="reorder-answer" id="answer-area">
+                <span class="reorder-placeholder">Toca las palabras en orden</span>
+            </div>
+            <button class="btn-check" id="check-btn" onclick="checkReorderAnswer()" disabled>Verificar</button>
+            <div id="reorder-feedback"></div>
+        </div>
+    `;
+    window.wordPool = shuffled;
+}
+
+function selectWord(idx){
+    const btn = document.getElementById('wb-'+idx);
+    if(btn.classList.contains('selected')) return;
+    btn.classList.add('selected');
+    currentAnswer.push({idx:idx, word:window.wordPool[idx]});
+    renderAnswerArea();
+}
+
+function removeWord(ansIdx){
+    const removed = currentAnswer.splice(ansIdx,1)[0];
+    document.getElementById('wb-'+removed.idx).classList.remove('selected');
+    renderAnswerArea();
+}
+
+function renderAnswerArea(){
+    const area = document.getElementById('answer-area');
+    if(currentAnswer.length === 0){
+        area.innerHTML = '<span class="reorder-placeholder">Toca las palabras en orden</span>';
+    } else {
+        area.innerHTML = currentAnswer.map((a,i)=>`<button class="answer-btn" onclick="removeWord(${i})">${a.word}</button>`).join('');
+    }
+    document.getElementById('check-btn').disabled = currentAnswer.length !== window.wordPool.length;
+}
+
+function stripRuby(html){
+    return html.replace(/<ruby>([^<]+)<rt>[^<]+<\/rt><\/ruby>/g,'$1').replace(/<[^>]+>/g,'');
+}
+
+function checkReorderAnswer(){
+    const q = reorderQuestions[reorderQuizIdx];
+    const userAnswer = currentAnswer.map(a=>a.word).join('');
+    const correctAnswer = q.answer;
+    const userStripped = stripRuby(userAnswer);
+    const correctStripped = stripRuby(correctAnswer);
+    const isCorrect = userStripped === correctStripped;
+    
+    const feedback = document.getElementById('reorder-feedback');
+    if(isCorrect){
+        reorderCorrect++;
+        feedback.innerHTML = `<div class="reorder-feedback correct">⭕ ¡Correcto!</div>`;
+    } else {
+        reorderErrors.push({hint:q.hint,userAnswer:userAnswer,correctAnswer:q.answer,explain:q.explain});
+        feedback.innerHTML = `<div class="reorder-feedback wrong">❌ Incorrecto<br>Respuesta: ${q.answer}</div>`;
+    }
+    document.getElementById('check-btn').disabled = true;
+    document.querySelectorAll('.word-btn, .answer-btn').forEach(b=>b.style.pointerEvents='none');
+    setTimeout(()=>{
+        reorderQuizIdx++;
+        if(reorderQuizIdx < 5) showReorderQuestion();
+        else showDesuResult();
+    }, 1500);
+}
+
+function showDesuResult(){
+    const pct = Math.round((reorderCorrect/5)*100);
+    const msg = pct===100?'🎉 ¡Perfecto!':pct>=80?'🌟 ¡Excelente!':pct>=60?'👍 ¡Muy bien!':'📚 ¡Sigue practicando!';
+    let errorsHtml = '';
+    if(reorderErrors.length > 0){
+        errorsHtml = `<div class="error-review"><h4>❌ Errores (${reorderErrors.length})</h4>${reorderErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${e.hint}</div><div class="error-your">Tu respuesta: ${e.userAnswer}</div><div class="error-correct">✅ Correcta: ${e.correctAnswer}</div><div class="error-explain">📖 ${e.explain}</div></div>`).join('')}</div>`;
+    }
+    document.getElementById('reorder-area').innerHTML = `
+        <div class="grammar-result">
+            <div class="gr-score">${pct}%</div>
+            <div class="gr-msg">${msg}</div>
+            <div class="gr-detail">${reorderCorrect} / 5 correctas</div>
+            <button class="btn-practice" onclick="startDesuQuiz()">🔄 Intentar de nuevo</button>
+            <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
+            ${errorsHtml}
+        </div>
+    `;
+}
+
+// ===== MASU FUNCTIONS =====
+function renderMasuLearn(){
+    const L = masuLesson;
+    let groupsHtml = L.groups.map(g=>`
+        <div class="verb-group">
+            <h4>${g.name}</h4>
+            <p class="group-rule">📌 ${g.rule}</p>
+            <div class="verb-table-scroll">
+                <table class="verb-table">
+                    <tr><th>Diccionario</th><th>ます</th><th>ません</th><th>ました</th><th>ませんでした</th><th>Español</th></tr>
+                    ${g.verbs.map(v=>`<tr><td>${v[0]}</td><td>${v[1]}</td><td>${v[2]}</td><td>${v[3]}</td><td>${v[4]}</td><td>${v[5]}</td></tr>`).join('')}
+                </table>
+            </div>
+        </div>
+    `).join('');
+    
+    document.getElementById('grammar-content').innerHTML = `
+        <div class="grammar-card">
+            <div class="grammar-title">${L.title}</div>
+            <div class="grammar-subtitle">${L.subtitle}</div>
+            <div class="grammar-desc">${L.desc}</div>
+            ${groupsHtml}
+            <button class="btn-practice" onclick="setGrammarMode('practice')">🎯 Practicar</button>
+        </div>
+    `;
+}
+
+function renderMasuPractice(){
+    document.getElementById('grammar-content').innerHTML = `
+        <div class="grammar-card" style="text-align:center;">
+            <h3>🎯 Práctica: ます conjugación</h3>
+            <p style="color:var(--text-light);margin:0.5rem 0;">Selecciona la conjugación correcta del verbo.</p>
+            <p style="color:var(--text-light);font-size:0.9rem;">5 preguntas aleatorias</p>
+            <button class="btn-practice" onclick="startMasuQuiz()">Comenzar</button>
+        </div>
+        <div id="masu-quiz-area"></div>
+    `;
+}
+
+function startMasuQuiz(){
+    masuQuizIdx = 0;
+    masuCorrect = 0;
+    masuErrors = [];
+    masuQuestions = [...masuQuizPool].sort(()=>Math.random()-0.5).slice(0,5);
+    document.querySelector('.grammar-card').style.display = 'none';
+    showMasuQuestion();
+}
+
+function showMasuQuestion(){
+    const q = masuQuestions[masuQuizIdx];
+    const options = generateMasuOptions(q);
+    const formNames = {
+        'Presente afirmativo': '<ruby>現在形<rt>げんざいけい</rt></ruby>・<ruby>肯定<rt>こうてい</rt></ruby>',
+        'Presente negativo': '<ruby>現在形<rt>げんざいけい</rt></ruby>・<ruby>否定<rt>ひてい</rt></ruby>',
+        'Pasado afirmativo': '<ruby>過去形<rt>かこけい</rt></ruby>・<ruby>肯定<rt>こうてい</rt></ruby>',
+        'Pasado negativo': '<ruby>過去形<rt>かこけい</rt></ruby>・<ruby>否定<rt>ひてい</rt></ruby>'
+    };
+    const formJp = formNames[q.form] || '';
+    document.getElementById('masu-quiz-area').innerHTML = `
+        <div class="reorder-box">
+            <div class="reorder-progress">${masuQuizIdx+1} / 5</div>
+            <div class="masu-q-verb">${q.dict}</div>
+            <div class="masu-q-form">→ ${q.form}</div>
+            <div class="masu-q-form-jp">${formJp}</div>
+            <div class="masu-q-meaning">(${q.meaning})</div>
+            <div class="masu-options">
+                ${options.map((o,i)=>`<button class="masu-opt" onclick="checkMasuAnswer(${i},'${o.replace(/'/g,"\\'")}')"><span>${o}</span></button>`).join('')}
+            </div>
+            <div id="masu-feedback"></div>
+        </div>
+    `;
+    window.currentMasuAnswer = q.answer;
+    window.currentMasuOptions = options;
+}
+
+function generateMasuOptions(q){
+    const correct = q.answer;
+    const all = [q.allForms.pres, q.allForms.neg, q.allForms.past, q.allForms.pastneg];
+    let opts = [correct];
+    const others = all.filter(x=>stripRuby(x)!==stripRuby(correct));
+    while(opts.length < 4 && others.length > 0){
+        const idx = Math.floor(Math.random()*others.length);
+        if(!opts.some(o=>stripRuby(o)===stripRuby(others[idx]))){
+            opts.push(others[idx]);
+        }
+        others.splice(idx,1);
+    }
+    return opts.sort(()=>Math.random()-0.5);
+}
+
+function checkMasuAnswer(idx, selected){
+    const q = masuQuestions[masuQuizIdx];
+    const isCorrect = stripRuby(selected) === stripRuby(q.answer);
+    const feedback = document.getElementById('masu-feedback');
+    const btns = document.querySelectorAll('.masu-opt');
+    
+    btns.forEach(b=>{
+        b.disabled = true;
+        const btnText = stripRuby(b.querySelector('span').innerHTML);
+        if(btnText === stripRuby(q.answer)) b.classList.add('correct');
+        if(btnText === stripRuby(selected) && !isCorrect) b.classList.add('wrong');
+    });
+    
+    if(isCorrect){
+        masuCorrect++;
+        feedback.innerHTML = `<div class="reorder-feedback correct">⭕ ¡Correcto!</div>`;
+    } else {
+        const formNames = {
+            'Presente afirmativo': '<ruby>現在形<rt>げんざいけい</rt></ruby>・<ruby>肯定<rt>こうてい</rt></ruby>',
+            'Presente negativo': '<ruby>現在形<rt>げんざいけい</rt></ruby>・<ruby>否定<rt>ひてい</rt></ruby>',
+            'Pasado afirmativo': '<ruby>過去形<rt>かこけい</rt></ruby>・<ruby>肯定<rt>こうてい</rt></ruby>',
+            'Pasado negativo': '<ruby>過去形<rt>かこけい</rt></ruby>・<ruby>否定<rt>ひてい</rt></ruby>'
+        };
+        const formJp = formNames[q.form] || q.form;
+        const explain = `Este verbo es del ${q.groupName}. ${q.rule}. La forma correcta de "${q.form}" (${formJp}) es 「${q.answer}」.`;
+        masuErrors.push({dict:q.dict, form:q.form, formJp:formJp, meaning:q.meaning, userAnswer:selected, correctAnswer:q.answer, explain:explain});
+        feedback.innerHTML = `<div class="reorder-feedback wrong">❌ Respuesta: ${q.answer}</div>`;
+    }
+    
+    setTimeout(()=>{
+        masuQuizIdx++;
+        if(masuQuizIdx < 5) showMasuQuestion();
+        else showMasuResult();
+    }, 1500);
+}
+
+function showMasuResult(){
+    const pct = Math.round((masuCorrect/5)*100);
+    const msg = pct===100?'🎉 ¡Perfecto!':pct>=80?'🌟 ¡Excelente!':pct>=60?'👍 ¡Muy bien!':'📚 ¡Sigue practicando!';
+    let errorsHtml = '';
+    if(masuErrors.length > 0){
+        errorsHtml = `<div class="error-review"><h4>❌ Errores (${masuErrors.length})</h4>${masuErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${e.dict} → ${e.form} (${e.meaning})</div><div class="error-your">Tu respuesta: ${e.userAnswer}</div><div class="error-correct">✅ Correcta: ${e.correctAnswer}</div><div class="error-explain">📖 ${e.explain}</div></div>`).join('')}</div>`;
+    }
+    document.getElementById('masu-quiz-area').innerHTML = `
+        <div class="grammar-result">
+            <div class="gr-score">${pct}%</div>
+            <div class="gr-msg">${msg}</div>
+            <div class="gr-detail">${masuCorrect} / 5 correctas</div>
+            <button class="btn-practice" onclick="startMasuQuiz()">🔄 Intentar de nuevo</button>
+            <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
+            ${errorsHtml}
+        </div>
+    `;
+}
+
+function init() {
+    renderChars();
+    updateStats();
+    initFc();
+    genQuiz();
+    renderGrammar();
+}
+
+function renderChars() {
+    const rows = ['vowels','k','s','t','n','h','m','y','r','w','dakuon','handakuon','youon','sokuon'];
+    rows.forEach(row => {
+        const hEl = document.getElementById('h-'+row);
+        const kEl = document.getElementById('k-'+row);
+        if(hEl && hiragana[row]) hEl.innerHTML = hiragana[row].map(x => charCard(x.c, x.r)).join('');
+        if(kEl && katakana[row]) kEl.innerHTML = katakana[row].map(x => charCard(x.c, x.r)).join('');
+    });
+}
+
+function charCard(c, r) {
+    const l = learned.includes(c) ? 'learned' : '';
+    return `<div class="char-card ${l}" onclick="openModal('${c}','${r}')">
+        <div class="char-main">${c}</div>
+        <div class="char-romaji">${r}</div>
+    </div>`;
+}
+
+function openModal(c, r) {
+    document.getElementById('m-char').textContent = c;
+    document.getElementById('m-romaji').textContent = r;
+    const vDiv = document.getElementById('m-vocab');
+    const v = vocab[c];
+    if(v && v.length) {
+        vDiv.innerHTML = '<h4>📖 Vocabulario</h4>' + v.map(x => 
+            `<div class="vocab-item">
+                <span class="vocab-emoji">${x.m}</span>
+                <div class="vocab-text">
+                    <span class="vocab-jp">${x.j}</span>
+                    <span class="vocab-romaji">(${x.r})</span><br>
+                    <span class="vocab-es">${x.e}</span>
+                </div>
+            </div>`
+        ).join('');
+    } else {
+        vDiv.innerHTML = '<h4>📖 Vocabulario</h4><p style="color:#888;font-size:0.8rem;">Próximamente...</p>';
+    }
+    const btn = document.getElementById('btn-learn');
+    btn.dataset.char = c;
+    btn.textContent = learned.includes(c) ? '✓ Aprendido' : '✓ Marcar como aprendido';
+    btn.classList.toggle('learned', learned.includes(c));
+    document.getElementById('modal').classList.add('active');
+}
+
+function closeModal() { document.getElementById('modal').classList.remove('active'); }
+
+function toggleLearned() {
+    const btn = document.getElementById('btn-learn');
+    const c = btn.dataset.char;
+    if(learned.includes(c)) learned = learned.filter(x => x !== c);
+    else learned.push(c);
+    localStorage.setItem('learnedChars', JSON.stringify(learned));
+    btn.textContent = learned.includes(c) ? '✓ Aprendido' : '✓ Marcar como aprendido';
+    btn.classList.toggle('learned', learned.includes(c));
+    renderChars();
+    updateStats();
+}
+
+function showSection(id, btn) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+}
+
+function showMojiTab(tab, btn) {
+    document.querySelectorAll('.moji-content').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.moji-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('moji-' + tab).classList.add('active');
+    btn.classList.add('active');
+}
+
+function updateStats() { document.getElementById('learned-count').textContent = learned.length; }
+
+// Flashcard
+function initFc() { setFcType('hiragana'); }
+
+function setFcType(type, btn) {
+    fcType = type;
+    fcIdx = 0;
+    document.querySelectorAll('.fc-type-btn').forEach(b => b.classList.remove('active'));
+    if(btn) btn.classList.add('active');
+    else document.querySelector('.fc-type-btn').classList.add('active');
+    
+    if(type === 'vocab') {
+        fcList = [...quizVocab.hLevel2, ...quizVocab.kLevel2, ...quizVocab.hLevel3.slice(0,5), ...quizVocab.kLevel3.slice(0,5)];
+    } else {
+        const data = type === 'hiragana' ? hiragana : katakana;
+        fcList = [];
+        Object.values(data).forEach(arr => { if(Array.isArray(arr)) fcList = fcList.concat(arr); });
+    }
+    shuffle(fcList);
+    updateFc();
+}
+
+function updateFc() {
+    const item = fcList[fcIdx];
+    const charEl = document.getElementById('fc-char');
+    const ansEl = document.getElementById('fc-answer');
+    const subEl = document.getElementById('fc-sub');
+    const emojiEl = document.getElementById('fc-emoji');
+    
+    if(item.j) {
+        charEl.textContent = item.j;
+        ansEl.textContent = item.r;
+        subEl.textContent = item.e;
+        emojiEl.textContent = item.m || '';
+    } else {
+        charEl.textContent = item.c;
+        ansEl.textContent = item.r;
+        subEl.textContent = '';
+        emojiEl.textContent = '';
+    }
+    document.querySelector('.flashcard').classList.remove('flipped');
+}
+
+function flipCard() { document.querySelector('.flashcard').classList.toggle('flipped'); }
+function nextCard() { fcIdx = (fcIdx + 1) % fcList.length; updateFc(); }
+function prevCard() { fcIdx = (fcIdx - 1 + fcList.length) % fcList.length; updateFc(); }
+
+// Quiz
+function setQuizLevel(level, btn) {
+    quizLevel = level;
+    document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+    if(btn) btn.classList.add('active');
+    const desc = {
+        1: '📝 Nivel 1: Caracteres (ひらがな + カタカナ)',
+        2: '📝 Nivel 2: Palabras 2-4 letras',
+        3: '📝 Nivel 3: Palabras 3-6 letras'
+    };
+    document.getElementById('level-info').textContent = desc[level];
+    genQuiz();
+}
+
+function genQuiz() {
+    questions = [];
+    qIdx = 0;
+    correct = 0;
+    
+    if(quizLevel === 1) {
+        let chars = [];
+        Object.values(hiragana).forEach(arr => { if(Array.isArray(arr)) chars = chars.concat(arr); });
+        Object.values(katakana).forEach(arr => { if(Array.isArray(arr)) chars = chars.concat(arr); });
+        shuffle(chars);
+        chars = chars.slice(0, 10);
+        chars.forEach(item => {
+            const opts = [item.r];
+            while(opts.length < 4) {
+                const rnd = chars[Math.floor(Math.random() * chars.length)].r;
+                if(!opts.includes(rnd)) opts.push(rnd);
+            }
+            shuffle(opts);
+            questions.push({ display: item.c, ans: item.r, opts: opts, hint: '¿Cómo se lee?' });
+        });
+    } else {
+        let words = quizLevel === 2 
+            ? [...quizVocab.hLevel2, ...quizVocab.kLevel2]
+            : [...quizVocab.hLevel3, ...quizVocab.kLevel3];
+        shuffle(words);
+        words = words.slice(0, 10);
+        words.forEach(item => {
+            const opts = [item.e];
+            while(opts.length < 4) {
+                const rnd = words[Math.floor(Math.random() * words.length)].e;
+                if(!opts.includes(rnd)) opts.push(rnd);
+            }
+            shuffle(opts);
+            questions.push({ display: item.j, ans: item.e, opts: opts, hint: '¿Qué significa?' });
+        });
+    }
+    
+    document.getElementById('quiz-box').style.display = 'block';
+    document.getElementById('quiz-result').style.display = 'none';
+    showQ();
+}
+
+function showQ() {
+    const q = questions[qIdx];
+    document.getElementById('q-char').textContent = q.display;
+    document.getElementById('q-hint').textContent = q.hint;
+    document.getElementById('q-curr').textContent = qIdx + 1;
+    document.getElementById('q-total').textContent = questions.length;
+    document.getElementById('q-bar').style.width = ((qIdx + 1) / questions.length * 100) + '%';
+    
+    document.getElementById('q-opts').innerHTML = q.opts.map(opt => 
+        `<button class="quiz-opt" onclick="checkAns(this,'${opt.replace(/'/g, "\\'")}')">${opt}</button>`
+    ).join('');
+}
+
+function checkAns(btn, ans) {
+    const q = questions[qIdx];
+    document.querySelectorAll('.quiz-opt').forEach(b => {
+        b.disabled = true;
+        if(b.textContent === q.ans) b.classList.add('correct');
+    });
+    if(ans === q.ans) {
+        correct++;
+        btn.classList.add('correct');
+    } else {
+        btn.classList.add('wrong');
+    }
+    setTimeout(() => {
+        qIdx++;
+        if(qIdx < questions.length) showQ();
+        else showResult();
+    }, 700);
+}
+
+function showResult() {
+    const pct = Math.round((correct / questions.length) * 100);
+    document.getElementById('quiz-box').style.display = 'none';
+    document.getElementById('quiz-result').style.display = 'block';
+    document.getElementById('final-score').textContent = pct + '%';
+    let msg = pct === 100 ? '🎉 ¡Perfecto!' : pct >= 80 ? '🌟 ¡Excelente!' : pct >= 60 ? '👍 ¡Muy bien!' : '📚 ¡Sigue practicando!';
+    document.getElementById('result-msg').textContent = msg;
+    document.getElementById('quiz-score-display').textContent = pct + '%';
+}
+
+function restartQuiz() { genQuiz(); }
+
+function shuffle(arr) {
+    for(let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+}
+
+// Check auth on load
+checkAuth();
+</script>
+</body>
+</html>
