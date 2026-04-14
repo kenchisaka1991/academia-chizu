@@ -862,6 +862,79 @@
         .app-container.show {
             display: block;
         }
+
+        /* Grammar - New Styles */
+        .grammar-card{background:var(--white);border-radius:var(--radius-md);padding:1.2rem;margin-bottom:1rem;box-shadow:var(--shadow-sm)}
+        .grammar-title{font-family:'Noto Sans JP';font-size:1.8rem;color:var(--primary);font-weight:700;margin-bottom:0.3rem}
+        .grammar-subtitle{color:var(--text-light);font-size:0.95rem;font-style:italic;margin-bottom:1rem}
+        .grammar-desc{font-size:0.95rem;color:var(--text);line-height:1.7;margin-bottom:1rem}
+        .grammar-desc p{margin-bottom:0.6rem}
+        .grammar-desc strong{color:var(--primary)}
+        .grammar-point{background:linear-gradient(135deg,#FFF5F5,#FFF);padding:0.8rem;border-radius:var(--radius-sm);border-left:3px solid var(--primary);margin:0.8rem 0}
+        .grammar-examples{margin-top:1rem}
+        .grammar-examples h4{font-size:0.9rem;color:var(--text);margin-bottom:0.6rem}
+        .grammar-ex{background:var(--cream);padding:0.7rem;border-radius:var(--radius-sm);margin-bottom:0.5rem}
+        .ex-jp{display:block;font-family:'Noto Sans JP';font-size:1.05rem;margin-bottom:0.2rem}
+        .ex-jp ruby rt{font-size:0.6rem}
+        .ex-ro{display:block;color:var(--text-light);font-size:0.8rem}
+        .ex-es{display:block;color:var(--ocean);font-weight:600;font-size:0.85rem;margin-top:0.2rem}
+        .grammar-mode-tabs{display:flex;gap:0.5rem;margin-bottom:1rem}
+        .mode-tab{flex:1;padding:0.8rem;border:2px solid var(--primary);border-radius:var(--radius-md);background:transparent;color:var(--primary);font-size:0.95rem;font-weight:600;cursor:pointer;transition:all 0.3s}
+        .mode-tab.active{background:var(--primary);color:white}
+        .btn-practice{width:100%;padding:0.9rem;border:none;border-radius:var(--radius-md);background:linear-gradient(135deg,var(--ocean),var(--ocean-light));color:white;font-weight:600;font-size:1rem;cursor:pointer;margin-top:1rem;transition:all 0.3s}
+        .btn-practice:hover{transform:scale(1.02);box-shadow:var(--shadow-md)}
+        /* Reorder Quiz Styles */
+        .reorder-box{background:var(--white);border-radius:var(--radius-md);padding:1.2rem;margin-top:1rem;box-shadow:var(--shadow-md)}
+        .reorder-progress{font-size:0.85rem;color:var(--text-light);margin-bottom:0.8rem;text-align:center}
+        .reorder-hint{color:var(--ocean);font-size:0.95rem;margin-bottom:1rem;text-align:center;font-weight:500}
+        .reorder-words{display:flex;flex-wrap:wrap;gap:0.5rem;justify-content:center;margin-bottom:1rem;min-height:50px}
+        .word-btn{padding:0.6rem 1rem;border:2px solid var(--night);border-radius:var(--radius-sm);background:var(--white);font-family:'Noto Sans JP';font-size:1.1rem;cursor:pointer;transition:all 0.2s}
+        .word-btn:hover{background:var(--cream);transform:scale(1.05)}
+        .word-btn.selected{opacity:0.3;cursor:default}
+        .reorder-answer{min-height:60px;border:2px dashed #DDD;border-radius:var(--radius-sm);padding:0.8rem;display:flex;flex-wrap:wrap;gap:0.5rem;justify-content:center;align-items:center;margin-bottom:1rem;background:#FAFAFA}
+        .answer-btn{padding:0.6rem 1rem;border:none;border-radius:var(--radius-sm);background:var(--primary);color:white;font-family:'Noto Sans JP';font-size:1.1rem;cursor:pointer;transition:all 0.2s}
+        .answer-btn:hover{opacity:0.8}
+        .reorder-placeholder{color:#BBB;font-size:0.9rem}
+        .btn-check{padding:0.7rem 1.5rem;border:none;border-radius:var(--radius-md);background:var(--night);color:white;font-weight:600;cursor:pointer;font-size:1rem}
+        .btn-check:disabled{background:#CCC;cursor:not-allowed}
+        .reorder-feedback{margin-top:1rem;padding:1rem;border-radius:var(--radius-sm);text-align:center}
+        .reorder-feedback.correct{background:#D5F5E3;color:var(--ocean)}
+        .reorder-feedback.wrong{background:#FADBD8;color:var(--primary)}
+        /* Results Styles */
+        .grammar-result{text-align:center;padding:1.5rem;background:var(--white);border-radius:var(--radius-md);margin-top:1rem;box-shadow:var(--shadow-md)}
+        .gr-score{font-family:'Outfit';font-size:3.5rem;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--ocean));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .gr-msg{font-size:1.3rem;font-weight:700;margin:0.5rem 0}
+        .gr-detail{color:var(--text-light);font-size:0.95rem;margin-bottom:1rem}
+        .error-review{text-align:left;margin-top:1.5rem;padding-top:1rem;border-top:1px solid #EEE}
+        .error-review h4{color:var(--primary);margin-bottom:1rem}
+        .error-item{background:#FFF5F5;padding:1rem;border-radius:var(--radius-sm);margin-bottom:1rem;border-left:3px solid var(--primary)}
+        .error-q{font-weight:600;margin-bottom:0.5rem}
+        .error-your{color:var(--primary);font-size:0.9rem}
+        .error-correct{color:var(--ocean);font-size:0.9rem;margin-bottom:0.5rem}
+        .error-explain{background:white;padding:0.8rem;border-radius:var(--radius-sm);font-size:0.85rem;line-height:1.5}
+        /* Lesson tabs */
+        .grammar-lesson-tabs{display:flex;gap:0.5rem;margin-bottom:0.5rem}
+        .lesson-tab{flex:1;padding:0.7rem;border:2px solid var(--ocean);border-radius:var(--radius-md);background:transparent;color:var(--ocean);font-size:1.1rem;font-weight:700;cursor:pointer;transition:all 0.3s;font-family:'Noto Sans JP'}
+        .lesson-tab.active{background:var(--ocean);color:white}
+        /* Verb table styles */
+        .verb-group{margin:1.5rem 0;padding:1rem;background:#FAFAFA;border-radius:var(--radius-sm)}
+        .verb-group h4{color:var(--primary);margin-bottom:0.3rem;font-size:1rem}
+        .group-rule{color:var(--text-light);font-size:0.85rem;margin-bottom:0.8rem}
+        .verb-table-scroll{overflow-x:auto;margin:0 -0.5rem;padding:0 0.5rem}
+        .verb-table{width:100%;border-collapse:collapse;font-size:0.8rem;min-width:600px}
+        .verb-table th,.verb-table td{padding:0.5rem 0.4rem;text-align:center;border-bottom:1px solid #E8E8E8}
+        .verb-table th{background:var(--night);color:white;font-weight:600;font-size:0.75rem}
+        .verb-table td{font-family:'Noto Sans JP';background:white}
+        .verb-table tr:hover td{background:#F5F5F5}
+        /* Masu quiz styles */
+        .masu-q-verb{font-family:'Noto Sans JP';font-size:2rem;color:var(--primary);font-weight:700;text-align:center;margin-bottom:0.3rem}
+        .masu-q-form{font-size:1.1rem;color:var(--night);text-align:center;margin-bottom:0.3rem;font-weight:600}
+        .masu-q-meaning{color:var(--text-light);text-align:center;margin-bottom:1rem;font-size:0.9rem}
+        .masu-options{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:1rem}
+        .masu-opt{padding:0.8rem;border:2px solid #E8E8E8;border-radius:var(--radius-sm);background:white;font-family:'Noto Sans JP';font-size:1rem;cursor:pointer;transition:all 0.2s}
+        .masu-opt:hover{border-color:var(--primary);background:#FFF5F5}
+        .masu-opt.correct{background:#D5F5E3;border-color:var(--ocean)}
+        .masu-opt.wrong{background:#FADBD8;border-color:var(--primary)}
     </style>
 </head>
 <body>
@@ -911,6 +984,7 @@
         <button class="nav-btn" onclick="showSection('katakana',this)">カタカナ</button>
         <button class="nav-btn" onclick="showSection('flashcard',this)">📚 Tarjetas</button>
         <button class="nav-btn" onclick="showSection('quiz',this)">🎯 Quiz</button>
+        <button class="nav-btn" onclick="showSection('grammar',this)">📖 文法</button>
     </nav>
 
     <main class="main">
@@ -1034,6 +1108,15 @@
                 <div class="result-msg" id="result-msg">¡Muy bien!</div>
                 <button class="btn-restart" onclick="restartQuiz()">🔄 Intentar de nuevo</button>
             </div>
+        </section>
+
+        <!-- Grammar -->
+        <section id="grammar" class="section">
+            <div class="section-header">
+                <h2><span class="jp"><ruby>文法<rt>ぶんぽう</rt></ruby></span> Gramática N5</h2>
+                <p>Estructuras básicas del japonés</p>
+            </div>
+            <div id="grammar-list"></div>
         </section>
     </main>
 
@@ -1294,12 +1377,558 @@ let learned = JSON.parse(localStorage.getItem('learnedChars')||'[]');
 let quizLevel = 1, questions = [], qIdx = 0, correct = 0;
 let fcType = 'hiragana', fcIdx = 0, fcList = [];
 
-// Init
+// Grammar state
+let grammarMode = 'learn';
+let currentLesson = 'desu'; // 'desu' or 'masu'
+let reorderQuizIdx = 0;
+let reorderCorrect = 0;
+let reorderQuestions = [];
+let reorderErrors = [];
+let currentAnswer = [];
+let masuQuizIdx = 0;
+let masuCorrect = 0;
+let masuQuestions = [];
+let masuErrors = [];
+
+// ===== DESU LESSON =====
+const desuLesson = {
+    title: 'です',
+    subtitle: 'Forma cortés de afirmación',
+    desc: `<p><strong>「です」</strong> equivale a <strong>"es / soy / eres / somos / son"</strong> en español.</p>
+<p>Se coloca al final de la oración para hacerla cortés y formal.</p>
+<div class="grammar-point">
+<p>📌 <strong>Estructura básica:</strong></p>
+<p style="text-align:center;font-size:1.1rem;">[Tema] + は + [Sustantivo] + <strong>です</strong></p>
+</div>
+<p>⚠️ <strong>Nota:</strong> 「です」se usa en situaciones formales o con personas que no conoces bien.</p>`,
+    examples: [
+        ['<ruby>私<rt>わたし</rt></ruby>は<ruby>学生<rt>がくせい</rt></ruby>です','Watashi wa gakusei desu','Soy estudiante'],
+        ['これは<ruby>本<rt>ほん</rt></ruby>です','Kore wa hon desu','Esto es un libro'],
+        ['<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>先生<rt>せんせい</rt></ruby>です','Tanaka-san wa sensei desu','Tanaka es profesor'],
+        ['あれは<ruby>猫<rt>ねこ</rt></ruby>です','Are wa neko desu','Aquello es un gato']
+    ]
+};
+
+// ===== MASU LESSON =====
+const masuLesson = {
+    title: 'ます',
+    subtitle: 'Conjugación de verbos (forma cortés)',
+    desc: `<p><strong>「ます」</strong> es la terminación formal de los verbos en japonés.</p>
+<p>Expresa cortesía y respeto hacia el oyente.</p>
+
+<div class="grammar-point">
+<p>📌 <strong>Los 3 grupos de verbos:</strong></p>
+<p><strong>Grupo 1 (五段動詞):</strong> Verbos que terminan en う, く, す, つ, ぬ, ぶ, む, る</p>
+<p><strong>Grupo 2 (一段動詞):</strong> Verbos que terminan en いる o える</p>
+<p><strong>Grupo 3 (不規則動詞):</strong> する y 来る (irregulares)</p>
+</div>
+
+<div class="grammar-point">
+<p>📌 <strong>Cómo conjugar a ます:</strong></p>
+<p><strong>G1:</strong> Cambiar la última sílaba de う-dan a い-dan + ます</p>
+<p style="margin-left:1rem;">飲<strong>む</strong> → 飲<strong>み</strong>ます (む→み)</p>
+<p><strong>G2:</strong> Quitar る y agregar ます</p>
+<p style="margin-left:1rem;">食べ<strong>る</strong> → 食べ<strong>ます</strong></p>
+<p><strong>G3:</strong> Memorizar</p>
+<p style="margin-left:1rem;">する → します / 来る → 来ます</p>
+</div>
+
+<div class="grammar-point">
+<p>📌 <strong>4 formas de conjugación:</strong></p>
+<table style="width:100%;text-align:center;font-size:0.9rem;">
+<tr style="background:#f0f0f0;"><th></th><th>Afirmativo</th><th>Negativo</th></tr>
+<tr><td><strong>Presente/Futuro</strong></td><td>〜ます</td><td>〜ません</td></tr>
+<tr><td><strong>Pasado</strong></td><td>〜ました</td><td>〜ませんでした</td></tr>
+</table>
+</div>`,
+    groups: [
+        {
+            name: 'Grupo 1 (五段動詞)',
+            rule: 'Cambiar última sílaba (う段→い段) + ます',
+            verbs: [
+                ['<ruby>会<rt>あ</rt></ruby>う','会います','会いません','会いました','会いませんでした','encontrarse'],
+                ['<ruby>歩<rt>ある</rt></ruby>く','歩きます','歩きません','歩きました','歩きませんでした','caminar'],
+                ['<ruby>遊<rt>あそ</rt></ruby>ぶ','遊びます','遊びません','遊びました','遊びませんでした','jugar'],
+                ['<ruby>洗<rt>あら</rt></ruby>う','洗います','洗いません','洗いました','洗いませんでした','lavar'],
+                ['<ruby>言<rt>い</rt></ruby>う','言います','言いません','言いました','言いませんでした','decir'],
+                ['<ruby>行<rt>い</rt></ruby>く','行きます','行きません','行きました','行きませんでした','ir'],
+                ['<ruby>歌<rt>うた</rt></ruby>う','歌います','歌いません','歌いました','歌いませんでした','cantar'],
+                ['<ruby>売<rt>う</rt></ruby>る','売ります','売りません','売りました','売りませんでした','vender'],
+                ['<ruby>押<rt>お</rt></ruby>す','押します','押しません','押しました','押しませんでした','empujar'],
+                ['<ruby>泳<rt>およ</rt></ruby>ぐ','泳ぎます','泳ぎません','泳ぎました','泳ぎませんでした','nadar'],
+                ['<ruby>終<rt>お</rt></ruby>わる','終わります','終わりません','終わりました','終わりませんでした','terminar'],
+                ['<ruby>買<rt>か</rt></ruby>う','買います','買いません','買いました','買いませんでした','comprar'],
+                ['<ruby>帰<rt>かえ</rt></ruby>る','帰ります','帰りません','帰りました','帰りませんでした','volver'],
+                ['<ruby>書<rt>か</rt></ruby>く','書きます','書きません','書きました','書きませんでした','escribir'],
+                ['<ruby>貸<rt>か</rt></ruby>す','貸します','貸しません','貸しました','貸しませんでした','prestar'],
+                ['<ruby>聞<rt>き</rt></ruby>く','聞きます','聞きません','聞きました','聞きませんでした','escuchar'],
+                ['<ruby>切<rt>き</rt></ruby>る','切ります','切りません','切りました','切りませんでした','cortar'],
+                ['<ruby>消<rt>け</rt></ruby>す','消します','消しません','消しました','消しませんでした','apagar'],
+                ['<ruby>作<rt>つく</rt></ruby>る','作ります','作りません','作りました','作りませんでした','hacer/crear'],
+                ['<ruby>立<rt>た</rt></ruby>つ','立ちます','立ちません','立ちました','立ちませんでした','estar de pie'],
+                ['<ruby>使<rt>つか</rt></ruby>う','使います','使いません','使いました','使いませんでした','usar'],
+                ['<ruby>着<rt>つ</rt></ruby>く','着きます','着きません','着きました','着きませんでした','llegar'],
+                ['<ruby>撮<rt>と</rt></ruby>る','撮ります','撮りません','撮りました','撮りませんでした','tomar foto'],
+                ['<ruby>取<rt>と</rt></ruby>る','取ります','取りません','取りました','取りませんでした','tomar'],
+                ['<ruby>習<rt>なら</rt></ruby>う','習います','習いません','習いました','習いませんでした','aprender'],
+                ['<ruby>登<rt>のぼ</rt></ruby>る','登ります','登りません','登りました','登りませんでした','subir'],
+                ['<ruby>飲<rt>の</rt></ruby>む','飲みます','飲みません','飲みました','飲みませんでした','beber'],
+                ['<ruby>乗<rt>の</rt></ruby>る','乗ります','乗りません','乗りました','乗りませんでした','subirse'],
+                ['<ruby>入<rt>はい</rt></ruby>る','入ります','入りません','入りました','入りませんでした','entrar'],
+                ['<ruby>始<rt>はじ</rt></ruby>まる','始まります','始まりません','始まりました','始まりませんでした','comenzar'],
+                ['<ruby>走<rt>はし</rt></ruby>る','走ります','走りません','走りました','走りませんでした','correr'],
+                ['<ruby>話<rt>はな</rt></ruby>す','話します','話しません','話しました','話しませんでした','hablar'],
+                ['<ruby>払<rt>はら</rt></ruby>う','払います','払いません','払いました','払いませんでした','pagar'],
+                ['<ruby>弾<rt>ひ</rt></ruby>く','弾きます','弾きません','弾きました','弾きませんでした','tocar instrumento'],
+                ['<ruby>引<rt>ひ</rt></ruby>く','引きます','引きません','引きました','引きませんでした','tirar'],
+                ['<ruby>吹<rt>ふ</rt></ruby>く','吹きます','吹きません','吹きました','吹きませんでした','soplar'],
+                ['<ruby>降<rt>ふ</rt></ruby>る','降ります','降りません','降りました','降りませんでした','caer (lluvia)'],
+                ['<ruby>曲<rt>ま</rt></ruby>がる','曲がります','曲がりません','曲がりました','曲がりませんでした','girar'],
+                ['<ruby>待<rt>ま</rt></ruby>つ','待ちます','待ちません','待ちました','待ちませんでした','esperar'],
+                ['<ruby>持<rt>も</rt></ruby>つ','持ちます','持ちません','持ちました','持ちませんでした','tener/llevar'],
+                ['<ruby>休<rt>やす</rt></ruby>む','休みます','休みません','休みました','休みませんでした','descansar'],
+                ['<ruby>呼<rt>よ</rt></ruby>ぶ','呼びます','呼びません','呼びました','呼びませんでした','llamar'],
+                ['<ruby>読<rt>よ</rt></ruby>む','読みます','読みません','読みました','読みませんでした','leer'],
+                ['<ruby>分<rt>わ</rt></ruby>かる','分かります','分かりません','分かりました','分かりませんでした','entender'],
+                ['<ruby>渡<rt>わた</rt></ruby>る','渡ります','渡りません','渡りました','渡りませんでした','cruzar']
+            ]
+        },
+        {
+            name: 'Grupo 2 (一段動詞)',
+            rule: 'Quitar る y agregar ます',
+            verbs: [
+                ['あげる','あげます','あげません','あげました','あげませんでした','dar'],
+                ['<ruby>開<rt>あ</rt></ruby>ける','開けます','開けません','開けました','開けませんでした','abrir'],
+                ['<ruby>浴<rt>あ</rt></ruby>びる','浴びます','浴びません','浴びました','浴びませんでした','ducharse'],
+                ['いる','います','いません','いました','いませんでした','estar/haber'],
+                ['<ruby>入<rt>い</rt></ruby>れる','入れます','入れません','入れました','入れませんでした','meter'],
+                ['<ruby>生<rt>う</rt></ruby>まれる','生まれます','生まれません','生まれました','生まれませんでした','nacer'],
+                ['<ruby>教<rt>おし</rt></ruby>える','教えます','教えません','教えました','教えませんでした','enseñar'],
+                ['<ruby>起<rt>お</rt></ruby>きる','起きます','起きません','起きました','起きませんでした','levantarse'],
+                ['<ruby>降<rt>お</rt></ruby>りる','降ります','降りません','降りました','降りませんでした','bajarse'],
+                ['<ruby>覚<rt>おぼ</rt></ruby>える','覚えます','覚えません','覚えました','覚えませんでした','memorizar'],
+                ['<ruby>借<rt>か</rt></ruby>りる','借ります','借りません','借りました','借りませんでした','pedir prestado'],
+                ['<ruby>消<rt>き</rt></ruby>える','消えます','消えません','消えました','消えませんでした','desaparecer'],
+                ['<ruby>着<rt>き</rt></ruby>る','着ます','着ません','着ました','着ませんでした','vestirse'],
+                ['<ruby>答<rt>こた</rt></ruby>える','答えます','答えません','答えました','答えませんでした','responder'],
+                ['<ruby>閉<rt>し</rt></ruby>める','閉めます','閉めません','閉めました','閉めませんでした','cerrar'],
+                ['<ruby>食<rt>た</rt></ruby>べる','食べます','食べません','食べました','食べませんでした','comer'],
+                ['<ruby>疲<rt>つか</rt></ruby>れる','疲れます','疲れません','疲れました','疲れませんでした','cansarse'],
+                ['つける','つけます','つけません','つけました','つけませんでした','encender'],
+                ['<ruby>出<rt>で</rt></ruby>かける','出かけます','出かけません','出かけました','出かけませんでした','salir'],
+                ['できる','できます','できません','できました','できませんでした','poder'],
+                ['<ruby>出<rt>で</rt></ruby>る','出ます','出ません','出ました','出ませんでした','salir'],
+                ['<ruby>止<rt>と</rt></ruby>める','止めます','止めません','止めました','止めませんでした','detener'],
+                ['<ruby>寝<rt>ね</rt></ruby>る','寝ます','寝ません','寝ました','寝ませんでした','dormir'],
+                ['<ruby>見<rt>み</rt></ruby>せる','見せます','見せません','見せました','見せませんでした','mostrar'],
+                ['<ruby>見<rt>み</rt></ruby>る','見ます','見ません','見ました','見ませんでした','ver'],
+                ['<ruby>忘<rt>わす</rt></ruby>れる','忘れます','忘れません','忘れました','忘れませんでした','olvidar']
+            ]
+        },
+        {
+            name: 'Grupo 3 (不規則動詞)',
+            rule: 'Memorizar (irregulares)',
+            verbs: [
+                ['する','します','しません','しました','しませんでした','hacer'],
+                ['<ruby>来<rt>く</rt></ruby>る','<ruby>来<rt>き</rt></ruby>ます','<ruby>来<rt>き</rt></ruby>ません','<ruby>来<rt>き</rt></ruby>ました','<ruby>来<rt>き</rt></ruby>ませんでした','venir'],
+                ['<ruby>勉強<rt>べんきょう</rt></ruby>する','勉強します','勉強しません','勉強しました','勉強しませんでした','estudiar'],
+                ['<ruby>散歩<rt>さんぽ</rt></ruby>する','散歩します','散歩しません','散歩しました','散歩しませんでした','pasear'],
+                ['<ruby>買<rt>か</rt></ruby>い<ruby>物<rt>もの</rt></ruby>する','買い物します','買い物しません','買い物しました','買い物しませんでした','hacer compras'],
+                ['<ruby>料理<rt>りょうり</rt></ruby>する','料理します','料理しません','料理しました','料理しませんでした','cocinar'],
+                ['<ruby>運動<rt>うんどう</rt></ruby>する','運動します','運動しません','運動しました','運動しませんでした','hacer ejercicio'],
+                ['<ruby>掃除<rt>そうじ</rt></ruby>する','掃除します','掃除しません','掃除しました','掃除しませんでした','limpiar'],
+                ['<ruby>洗濯<rt>せんたく</rt></ruby>する','洗濯します','洗濯しません','洗濯しました','洗濯しませんでした','lavar ropa'],
+                ['<ruby>電話<rt>でんわ</rt></ruby>する','電話します','電話しません','電話しました','電話しませんでした','llamar por teléfono'],
+                ['<ruby>持<rt>も</rt></ruby>ってくる','持ってきます','持ってきません','持ってきました','持ってきませんでした','traer'],
+                ['<ruby>連<rt>つ</rt></ruby>れてくる','連れてきます','連れてきません','連れてきました','連れてきませんでした','traer (persona)']
+            ]
+        }
+    ]
+};
+
+// Generate masu quiz pool from all verbs
+function generateMasuQuizPool(){
+    const pool = [];
+    const forms = [
+        {key:1,name:'Presente afirmativo',suffix:'ます'},
+        {key:2,name:'Presente negativo',suffix:'ません'},
+        {key:3,name:'Pasado afirmativo',suffix:'ました'},
+        {key:4,name:'Pasado negativo',suffix:'ませんでした'}
+    ];
+    masuLesson.groups.forEach((g,gi)=>{
+        g.verbs.forEach(v=>{
+            forms.forEach(f=>{
+                pool.push({
+                    dict: v[0],
+                    form: f.name,
+                    formKey: f.key,
+                    answer: v[f.key],
+                    meaning: v[5],
+                    group: gi+1,
+                    groupName: g.name,
+                    rule: g.rule,
+                    allForms: {pres:v[1],neg:v[2],past:v[3],pastneg:v[4]}
+                });
+            });
+        });
+    });
+    return pool;
+}
+const masuQuizPool = generateMasuQuizPool();
+
+// 50 Questions Pool for です (Reorder)
+const desuQuizPool = [
+    {words:['<ruby>私<rt>わたし</rt></ruby>','は','<ruby>学生<rt>がくせい</rt></ruby>','です'],answer:'<ruby>私<rt>わたし</rt></ruby>は<ruby>学生<rt>がくせい</rt></ruby>です',hint:'Soy estudiante',explain:'「<ruby>私<rt>わたし</rt></ruby>」(yo) es el tema, seguido de 「は」. 「<ruby>学生<rt>がくせい</rt></ruby>」(estudiante) va antes de 「です」.'},
+    {words:['これ','は','<ruby>本<rt>ほん</rt></ruby>','です'],answer:'これは<ruby>本<rt>ほん</rt></ruby>です',hint:'Esto es un libro',explain:'「これ」(esto) es el tema. 「<ruby>本<rt>ほん</rt></ruby>」(libro) es el sustantivo principal.'},
+    {words:['<ruby>田中<rt>たなか</rt></ruby>さん','は','<ruby>先生<rt>せんせい</rt></ruby>','です'],answer:'<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>先生<rt>せんせい</rt></ruby>です',hint:'Tanaka es profesor',explain:'「<ruby>田中<rt>たなか</rt></ruby>さん」es el tema. 「<ruby>先生<rt>せんせい</rt></ruby>」(profesor) describe a Tanaka.'},
+    {words:['あれ','は','<ruby>猫<rt>ねこ</rt></ruby>','です'],answer:'あれは<ruby>猫<rt>ねこ</rt></ruby>です',hint:'Aquello es un gato',explain:'「あれ」(aquello) indica algo lejano. Estructura: demostrativo + は + sustantivo + です.'},
+    {words:['<ruby>私<rt>わたし</rt></ruby>','は','<ruby>日本人<rt>にほんじん</rt></ruby>','です'],answer:'<ruby>私<rt>わたし</rt></ruby>は<ruby>日本人<rt>にほんじん</rt></ruby>です',hint:'Soy japonés',explain:'「<ruby>日本人<rt>にほんじん</rt></ruby>」(japonés) indica nacionalidad.'},
+    {words:['それ','は','ペン','です'],answer:'それはペンです',hint:'Eso es un bolígrafo',explain:'「それ」(eso) señala algo cerca del oyente.'},
+    {words:['<ruby>山田<rt>やまだ</rt></ruby>さん','は','<ruby>医者<rt>いしゃ</rt></ruby>','です'],answer:'<ruby>山田<rt>やまだ</rt></ruby>さんは<ruby>医者<rt>いしゃ</rt></ruby>です',hint:'Yamada es médico',explain:'「<ruby>医者<rt>いしゃ</rt></ruby>」(médico) es la profesión.'},
+    {words:['<ruby>彼<rt>かれ</rt></ruby>','は','<ruby>友達<rt>ともだち</rt></ruby>','です'],answer:'<ruby>彼<rt>かれ</rt></ruby>は<ruby>友達<rt>ともだち</rt></ruby>です',hint:'Él es mi amigo',explain:'「<ruby>彼<rt>かれ</rt></ruby>」(él) es el tema. 「<ruby>友達<rt>ともだち</rt></ruby>」(amigo) describe la relación.'},
+    {words:['あれ','は','<ruby>車<rt>くるま</rt></ruby>','です'],answer:'あれは<ruby>車<rt>くるま</rt></ruby>です',hint:'Aquello es un coche',explain:'「<ruby>車<rt>くるま</rt></ruby>」(coche) es el sustantivo.'},
+    {words:['<ruby>私<rt>わたし</rt></ruby>','は','<ruby>会社員<rt>かいしゃいん</rt></ruby>','です'],answer:'<ruby>私<rt>わたし</rt></ruby>は<ruby>会社員<rt>かいしゃいん</rt></ruby>です',hint:'Soy empleado',explain:'「<ruby>会社員<rt>かいしゃいん</rt></ruby>」(empleado de empresa) es la profesión.'},
+    {words:['これ','は','<ruby>水<rt>みず</rt></ruby>','です'],answer:'これは<ruby>水<rt>みず</rt></ruby>です',hint:'Esto es agua',explain:'「<ruby>水<rt>みず</rt></ruby>」(agua) es el sustantivo.'},
+    {words:['<ruby>佐藤<rt>さとう</rt></ruby>さん','は','<ruby>学生<rt>がくせい</rt></ruby>','です'],answer:'<ruby>佐藤<rt>さとう</rt></ruby>さんは<ruby>学生<rt>がくせい</rt></ruby>です',hint:'Sato es estudiante',explain:'El nombre propio es el tema de la oración.'},
+    {words:['それ','は','<ruby>傘<rt>かさ</rt></ruby>','です'],answer:'それは<ruby>傘<rt>かさ</rt></ruby>です',hint:'Eso es un paraguas',explain:'「<ruby>傘<rt>かさ</rt></ruby>」(paraguas) es el objeto.'},
+    {words:['<ruby>彼女<rt>かのじょ</rt></ruby>','は','<ruby>看護師<rt>かんごし</rt></ruby>','です'],answer:'<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>看護師<rt>かんごし</rt></ruby>です',hint:'Ella es enfermera',explain:'「<ruby>彼女<rt>かのじょ</rt></ruby>」(ella) es el tema.'},
+    {words:['あれ','は','<ruby>山<rt>やま</rt></ruby>','です'],answer:'あれは<ruby>山<rt>やま</rt></ruby>です',hint:'Aquello es una montaña',explain:'「<ruby>山<rt>やま</rt></ruby>」(montaña) es el sustantivo.'},
+    {words:['<ruby>私<rt>わたし</rt></ruby>','は','マリア','です'],answer:'<ruby>私<rt>わたし</rt></ruby>はマリアです',hint:'Soy María',explain:'Para presentarse: 私 + は + nombre + です.'},
+    {words:['これ','は','りんご','です'],answer:'これはりんごです',hint:'Esto es una manzana',explain:'「りんご」(manzana) es el sustantivo.'},
+    {words:['<ruby>鈴木<rt>すずき</rt></ruby>さん','は','<ruby>警察官<rt>けいさつかん</rt></ruby>','です'],answer:'<ruby>鈴木<rt>すずき</rt></ruby>さんは<ruby>警察官<rt>けいさつかん</rt></ruby>です',hint:'Suzuki es policía',explain:'「<ruby>警察官<rt>けいさつかん</rt></ruby>」(policía) es la profesión.'},
+    {words:['それ','は','<ruby>雑誌<rt>ざっし</rt></ruby>','です'],answer:'それは<ruby>雑誌<rt>ざっし</rt></ruby>です',hint:'Eso es una revista',explain:'「<ruby>雑誌<rt>ざっし</rt></ruby>」(revista) es el objeto.'},
+    {words:['<ruby>私<rt>わたし</rt></ruby>','は','<ruby>教師<rt>きょうし</rt></ruby>','です'],answer:'<ruby>私<rt>わたし</rt></ruby>は<ruby>教師<rt>きょうし</rt></ruby>です',hint:'Soy profesor',explain:'「<ruby>教師<rt>きょうし</rt></ruby>」(profesor) indica la profesión.'},
+    {words:['あれ','は','<ruby>海<rt>うみ</rt></ruby>','です'],answer:'あれは<ruby>海<rt>うみ</rt></ruby>です',hint:'Aquello es el mar',explain:'「<ruby>海<rt>うみ</rt></ruby>」(mar) es el sustantivo.'},
+    {words:['<ruby>木村<rt>きむら</rt></ruby>さん','は','<ruby>料理人<rt>りょうりにん</rt></ruby>','です'],answer:'<ruby>木村<rt>きむら</rt></ruby>さんは<ruby>料理人<rt>りょうりにん</rt></ruby>です',hint:'Kimura es cocinero',explain:'「<ruby>料理人<rt>りょうりにん</rt></ruby>」(cocinero) es la profesión.'},
+    {words:['これ','は','<ruby>鍵<rt>かぎ</rt></ruby>','です'],answer:'これは<ruby>鍵<rt>かぎ</rt></ruby>です',hint:'Esto es una llave',explain:'「<ruby>鍵<rt>かぎ</rt></ruby>」(llave) es el objeto.'},
+    {words:['<ruby>私<rt>わたし</rt></ruby>','は','<ruby>中国人<rt>ちゅうごくじん</rt></ruby>','です'],answer:'<ruby>私<rt>わたし</rt></ruby>は<ruby>中国人<rt>ちゅうごくじん</rt></ruby>です',hint:'Soy chino',explain:'「<ruby>中国人<rt>ちゅうごくじん</rt></ruby>」(chino) indica nacionalidad.'},
+    {words:['それ','は','<ruby>財布<rt>さいふ</rt></ruby>','です'],answer:'それは<ruby>財布<rt>さいふ</rt></ruby>です',hint:'Eso es una cartera',explain:'「<ruby>財布<rt>さいふ</rt></ruby>」(cartera) es el objeto.'},
+    {words:['<ruby>高橋<rt>たかはし</rt></ruby>さん','は','<ruby>歌手<rt>かしゅ</rt></ruby>','です'],answer:'<ruby>高橋<rt>たかはし</rt></ruby>さんは<ruby>歌手<rt>かしゅ</rt></ruby>です',hint:'Takahashi es cantante',explain:'「<ruby>歌手<rt>かしゅ</rt></ruby>」(cantante) es la profesión.'},
+    {words:['あれ','は','<ruby>病院<rt>びょういん</rt></ruby>','です'],answer:'あれは<ruby>病院<rt>びょういん</rt></ruby>です',hint:'Aquello es un hospital',explain:'「<ruby>病院<rt>びょういん</rt></ruby>」(hospital) es el edificio.'},
+    {words:['<ruby>私<rt>わたし</rt></ruby>','は','<ruby>韓国人<rt>かんこくじん</rt></ruby>','です'],answer:'<ruby>私<rt>わたし</rt></ruby>は<ruby>韓国人<rt>かんこくじん</rt></ruby>です',hint:'Soy coreano',explain:'「<ruby>韓国人<rt>かんこくじん</rt></ruby>」(coreano) indica nacionalidad.'},
+    {words:['これ','は','<ruby>時計<rt>とけい</rt></ruby>','です'],answer:'これは<ruby>時計<rt>とけい</rt></ruby>です',hint:'Esto es un reloj',explain:'「<ruby>時計<rt>とけい</rt></ruby>」(reloj) es el objeto.'},
+    {words:['<ruby>伊藤<rt>いとう</rt></ruby>さん','は','<ruby>弁護士<rt>べんごし</rt></ruby>','です'],answer:'<ruby>伊藤<rt>いとう</rt></ruby>さんは<ruby>弁護士<rt>べんごし</rt></ruby>です',hint:'Ito es abogado',explain:'「<ruby>弁護士<rt>べんごし</rt></ruby>」(abogado) es la profesión.'},
+    {words:['それ','は','<ruby>辞書<rt>じしょ</rt></ruby>','です'],answer:'それは<ruby>辞書<rt>じしょ</rt></ruby>です',hint:'Eso es un diccionario',explain:'「<ruby>辞書<rt>じしょ</rt></ruby>」(diccionario) es el objeto.'},
+    {words:['<ruby>彼<rt>かれ</rt></ruby>','は','<ruby>学生<rt>がくせい</rt></ruby>','です'],answer:'<ruby>彼<rt>かれ</rt></ruby>は<ruby>学生<rt>がくせい</rt></ruby>です',hint:'Él es estudiante',explain:'「<ruby>彼<rt>かれ</rt></ruby>」(él) es el tema.'},
+    {words:['あれ','は','<ruby>学校<rt>がっこう</rt></ruby>','です'],answer:'あれは<ruby>学校<rt>がっこう</rt></ruby>です',hint:'Aquello es una escuela',explain:'「<ruby>学校<rt>がっこう</rt></ruby>」(escuela) es el edificio.'},
+    {words:['<ruby>私<rt>わたし</rt></ruby>','は','<ruby>アメリカ人<rt>あめりかじん</rt></ruby>','です'],answer:'<ruby>私<rt>わたし</rt></ruby>は<ruby>アメリカ人<rt>あめりかじん</rt></ruby>です',hint:'Soy estadounidense',explain:'「<ruby>アメリカ人<rt>あめりかじん</rt></ruby>」indica nacionalidad.'},
+    {words:['これ','は','<ruby>写真<rt>しゃしん</rt></ruby>','です'],answer:'これは<ruby>写真<rt>しゃしん</rt></ruby>です',hint:'Esto es una foto',explain:'「<ruby>写真<rt>しゃしん</rt></ruby>」(foto) es el sustantivo.'},
+    {words:['<ruby>渡辺<rt>わたなべ</rt></ruby>さん','は','<ruby>銀行員<rt>ぎんこういん</rt></ruby>','です'],answer:'<ruby>渡辺<rt>わたなべ</rt></ruby>さんは<ruby>銀行員<rt>ぎんこういん</rt></ruby>です',hint:'Watanabe es banquero',explain:'「<ruby>銀行員<rt>ぎんこういん</rt></ruby>」(empleado de banco) es la profesión.'},
+    {words:['それ','は','<ruby>携帯<rt>けいたい</rt></ruby>','です'],answer:'それは<ruby>携帯<rt>けいたい</rt></ruby>です',hint:'Eso es un celular',explain:'「<ruby>携帯<rt>けいたい</rt></ruby>」(celular) es el objeto.'},
+    {words:['<ruby>彼女<rt>かのじょ</rt></ruby>','は','<ruby>先生<rt>せんせい</rt></ruby>','です'],answer:'<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>先生<rt>せんせい</rt></ruby>です',hint:'Ella es profesora',explain:'「<ruby>彼女<rt>かのじょ</rt></ruby>」(ella) es el tema.'},
+    {words:['あれ','は','<ruby>駅<rt>えき</rt></ruby>','です'],answer:'あれは<ruby>駅<rt>えき</rt></ruby>です',hint:'Aquello es una estación',explain:'「<ruby>駅<rt>えき</rt></ruby>」(estación) es el lugar.'},
+    {words:['<ruby>私<rt>わたし</rt></ruby>','は','<ruby>メキシコ人<rt>めきしこじん</rt></ruby>','です'],answer:'<ruby>私<rt>わたし</rt></ruby>は<ruby>メキシコ人<rt>めきしこじん</rt></ruby>です',hint:'Soy mexicano',explain:'「<ruby>メキシコ人<rt>めきしこじん</rt></ruby>」indica nacionalidad.'},
+    {words:['これ','は','<ruby>新聞<rt>しんぶん</rt></ruby>','です'],answer:'これは<ruby>新聞<rt>しんぶん</rt></ruby>です',hint:'Esto es un periódico',explain:'「<ruby>新聞<rt>しんぶん</rt></ruby>」(periódico) es el objeto.'},
+    {words:['<ruby>中村<rt>なかむら</rt></ruby>さん','は','エンジニア','です'],answer:'<ruby>中村<rt>なかむら</rt></ruby>さんはエンジニアです',hint:'Nakamura es ingeniero',explain:'「エンジニア」(ingeniero) es palabra del inglés.'},
+    {words:['それ','は','<ruby>地図<rt>ちず</rt></ruby>','です'],answer:'それは<ruby>地図<rt>ちず</rt></ruby>です',hint:'Eso es un mapa',explain:'「<ruby>地図<rt>ちず</rt></ruby>」(mapa) es el objeto.'},
+    {words:['<ruby>彼<rt>かれ</rt></ruby>','は','<ruby>医者<rt>いしゃ</rt></ruby>','です'],answer:'<ruby>彼<rt>かれ</rt></ruby>は<ruby>医者<rt>いしゃ</rt></ruby>です',hint:'Él es médico',explain:'「<ruby>医者<rt>いしゃ</rt></ruby>」(médico) es la profesión.'},
+    {words:['あれ','は','<ruby>公園<rt>こうえん</rt></ruby>','です'],answer:'あれは<ruby>公園<rt>こうえん</rt></ruby>です',hint:'Aquello es un parque',explain:'「<ruby>公園<rt>こうえん</rt></ruby>」(parque) es el lugar.'},
+    {words:['<ruby>私<rt>わたし</rt></ruby>','は','<ruby>ボリビア人<rt>ぼりびあじん</rt></ruby>','です'],answer:'<ruby>私<rt>わたし</rt></ruby>は<ruby>ボリビア人<rt>ぼりびあじん</rt></ruby>です',hint:'Soy boliviano',explain:'「<ruby>ボリビア人<rt>ぼりびあじん</rt></ruby>」indica nacionalidad.'},
+    {words:['これ','は','<ruby>手紙<rt>てがみ</rt></ruby>','です'],answer:'これは<ruby>手紙<rt>てがみ</rt></ruby>です',hint:'Esto es una carta',explain:'「<ruby>手紙<rt>てがみ</rt></ruby>」(carta) es el objeto.'},
+    {words:['<ruby>小林<rt>こばやし</rt></ruby>さん','は','<ruby>作家<rt>さっか</rt></ruby>','です'],answer:'<ruby>小林<rt>こばやし</rt></ruby>さんは<ruby>作家<rt>さっか</rt></ruby>です',hint:'Kobayashi es escritor',explain:'「<ruby>作家<rt>さっか</rt></ruby>」(escritor) es la profesión.'},
+    {words:['それ','は','<ruby>薬<rt>くすり</rt></ruby>','です'],answer:'それは<ruby>薬<rt>くすり</rt></ruby>です',hint:'Eso es medicina',explain:'「<ruby>薬<rt>くすり</rt></ruby>」(medicina) es el objeto.'},
+    {words:['<ruby>彼女<rt>かのじょ</rt></ruby>','は','<ruby>友達<rt>ともだち</rt></ruby>','です'],answer:'<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>友達<rt>ともだち</rt></ruby>です',hint:'Ella es mi amiga',explain:'「<ruby>友達<rt>ともだち</rt></ruby>」(amiga) describe la relación.'}
+];
+
+function renderGrammar(){
+    document.getElementById('grammar-list').innerHTML = `
+        <div class="grammar-lesson-tabs">
+            <button class="lesson-tab ${currentLesson==='desu'?'active':''}" onclick="setCurrentLesson('desu')">です</button>
+            <button class="lesson-tab ${currentLesson==='masu'?'active':''}" onclick="setCurrentLesson('masu')">ます</button>
+        </div>
+        <div class="grammar-mode-tabs">
+            <button class="mode-tab ${grammarMode==='learn'?'active':''}" onclick="setGrammarMode('learn')">📖 Aprender</button>
+            <button class="mode-tab ${grammarMode==='practice'?'active':''}" onclick="setGrammarMode('practice')">🎯 Practicar</button>
+        </div>
+        <div id="grammar-content"></div>
+    `;
+    if(currentLesson==='desu'){
+        if(grammarMode==='learn') renderDesuLearn();
+        else renderDesuPractice();
+    } else {
+        if(grammarMode==='learn') renderMasuLearn();
+        else renderMasuPractice();
+    }
+}
+
+function setCurrentLesson(lesson){
+    currentLesson = lesson;
+    grammarMode = 'learn';
+    renderGrammar();
+}
+
+function setGrammarMode(mode){
+    grammarMode = mode;
+    renderGrammar();
+}
+
+// ===== DESU FUNCTIONS =====
+function renderDesuLearn(){
+    const L = desuLesson;
+    document.getElementById('grammar-content').innerHTML = `
+        <div class="grammar-card">
+            <div class="grammar-title">${L.title}</div>
+            <div class="grammar-subtitle">${L.subtitle}</div>
+            <div class="grammar-desc">${L.desc}</div>
+            <div class="grammar-examples">
+                <h4>📝 Ejemplos</h4>
+                ${L.examples.map(ex=>`<div class="grammar-ex"><div class="ex-jp">${ex[0]}</div><div class="ex-ro">${ex[1]}</div><div class="ex-es">${ex[2]}</div></div>`).join('')}
+            </div>
+            <button class="btn-practice" onclick="setGrammarMode('practice')">🎯 Practicar</button>
+        </div>
+    `;
+}
+
+function renderDesuPractice(){
+    document.getElementById('grammar-content').innerHTML = `
+        <div class="grammar-card" style="text-align:center;">
+            <h3>🎯 Práctica: です</h3>
+            <p style="color:var(--text-light);margin:0.5rem 0;">Ordena las palabras para formar oraciones correctas.</p>
+            <p style="color:var(--text-light);font-size:0.9rem;">5 preguntas aleatorias</p>
+            <button class="btn-practice" onclick="startDesuQuiz()">Comenzar</button>
+        </div>
+        <div id="reorder-area"></div>
+    `;
+}
+
+function startDesuQuiz(){
+    reorderQuizIdx = 0;
+    reorderCorrect = 0;
+    reorderErrors = [];
+    reorderQuestions = [...desuQuizPool].sort(()=>Math.random()-0.5).slice(0,5);
+    document.querySelector('.grammar-card').style.display = 'none';
+    showReorderQuestion();
+}
+
+function showReorderQuestion(){
+    currentAnswer = [];
+    const q = reorderQuestions[reorderQuizIdx];
+    const shuffled = [...q.words].sort(()=>Math.random()-0.5);
+    document.getElementById('reorder-area').innerHTML = `
+        <div class="reorder-box">
+            <div class="reorder-progress">${reorderQuizIdx+1} / 5</div>
+            <div class="reorder-hint">${q.hint}</div>
+            <div class="reorder-words" id="word-pool">
+                ${shuffled.map((w,i)=>`<button class="word-btn" onclick="selectWord(${i})" id="wb-${i}">${w}</button>`).join('')}
+            </div>
+            <div class="reorder-answer" id="answer-area">
+                <span class="reorder-placeholder">Toca las palabras en orden</span>
+            </div>
+            <button class="btn-check" id="check-btn" onclick="checkReorderAnswer()" disabled>Verificar</button>
+            <div id="reorder-feedback"></div>
+        </div>
+    `;
+    window.wordPool = shuffled;
+}
+
+function selectWord(idx){
+    const btn = document.getElementById('wb-'+idx);
+    if(btn.classList.contains('selected')) return;
+    btn.classList.add('selected');
+    currentAnswer.push({idx:idx, word:window.wordPool[idx]});
+    renderAnswerArea();
+}
+
+function removeWord(ansIdx){
+    const removed = currentAnswer.splice(ansIdx,1)[0];
+    document.getElementById('wb-'+removed.idx).classList.remove('selected');
+    renderAnswerArea();
+}
+
+function renderAnswerArea(){
+    const area = document.getElementById('answer-area');
+    if(currentAnswer.length === 0){
+        area.innerHTML = '<span class="reorder-placeholder">Toca las palabras en orden</span>';
+    } else {
+        area.innerHTML = currentAnswer.map((a,i)=>`<button class="answer-btn" onclick="removeWord(${i})">${a.word}</button>`).join('');
+    }
+    document.getElementById('check-btn').disabled = currentAnswer.length !== window.wordPool.length;
+}
+
+function stripRuby(html){
+    return html.replace(/<ruby>([^<]+)<rt>[^<]+<\/rt><\/ruby>/g,'$1').replace(/<[^>]+>/g,'');
+}
+
+function checkReorderAnswer(){
+    const q = reorderQuestions[reorderQuizIdx];
+    const userAnswer = currentAnswer.map(a=>a.word).join('');
+    const correctAnswer = q.answer;
+    const userStripped = stripRuby(userAnswer);
+    const correctStripped = stripRuby(correctAnswer);
+    const isCorrect = userStripped === correctStripped;
+    
+    const feedback = document.getElementById('reorder-feedback');
+    if(isCorrect){
+        reorderCorrect++;
+        feedback.innerHTML = `<div class="reorder-feedback correct">⭕ ¡Correcto!</div>`;
+    } else {
+        reorderErrors.push({hint:q.hint,userAnswer:userAnswer,correctAnswer:q.answer,explain:q.explain});
+        feedback.innerHTML = `<div class="reorder-feedback wrong">❌ Incorrecto<br>Respuesta: ${q.answer}</div>`;
+    }
+    document.getElementById('check-btn').disabled = true;
+    document.querySelectorAll('.word-btn, .answer-btn').forEach(b=>b.style.pointerEvents='none');
+    setTimeout(()=>{
+        reorderQuizIdx++;
+        if(reorderQuizIdx < 5) showReorderQuestion();
+        else showDesuResult();
+    }, 1500);
+}
+
+function showDesuResult(){
+    const pct = Math.round((reorderCorrect/5)*100);
+    const msg = pct===100?'🎉 ¡Perfecto!':pct>=80?'🌟 ¡Excelente!':pct>=60?'👍 ¡Muy bien!':'📚 ¡Sigue practicando!';
+    let errorsHtml = '';
+    if(reorderErrors.length > 0){
+        errorsHtml = `<div class="error-review"><h4>❌ Errores (${reorderErrors.length})</h4>${reorderErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${e.hint}</div><div class="error-your">Tu respuesta: ${e.userAnswer}</div><div class="error-correct">✅ Correcta: ${e.correctAnswer}</div><div class="error-explain">📖 ${e.explain}</div></div>`).join('')}</div>`;
+    }
+    document.getElementById('reorder-area').innerHTML = `
+        <div class="grammar-result">
+            <div class="gr-score">${pct}%</div>
+            <div class="gr-msg">${msg}</div>
+            <div class="gr-detail">${reorderCorrect} / 5 correctas</div>
+            <button class="btn-practice" onclick="startDesuQuiz()">🔄 Intentar de nuevo</button>
+            <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
+            ${errorsHtml}
+        </div>
+    `;
+}
+
+// ===== MASU FUNCTIONS =====
+function renderMasuLearn(){
+    const L = masuLesson;
+    let groupsHtml = L.groups.map(g=>`
+        <div class="verb-group">
+            <h4>${g.name}</h4>
+            <p class="group-rule">📌 ${g.rule}</p>
+            <div class="verb-table-scroll">
+                <table class="verb-table">
+                    <tr><th>Diccionario</th><th>ます</th><th>ません</th><th>ました</th><th>ませんでした</th><th>Español</th></tr>
+                    ${g.verbs.map(v=>`<tr><td>${v[0]}</td><td>${v[1]}</td><td>${v[2]}</td><td>${v[3]}</td><td>${v[4]}</td><td>${v[5]}</td></tr>`).join('')}
+                </table>
+            </div>
+        </div>
+    `).join('');
+    
+    document.getElementById('grammar-content').innerHTML = `
+        <div class="grammar-card">
+            <div class="grammar-title">${L.title}</div>
+            <div class="grammar-subtitle">${L.subtitle}</div>
+            <div class="grammar-desc">${L.desc}</div>
+            ${groupsHtml}
+            <button class="btn-practice" onclick="setGrammarMode('practice')">🎯 Practicar</button>
+        </div>
+    `;
+}
+
+function renderMasuPractice(){
+    document.getElementById('grammar-content').innerHTML = `
+        <div class="grammar-card" style="text-align:center;">
+            <h3>🎯 Práctica: ます conjugación</h3>
+            <p style="color:var(--text-light);margin:0.5rem 0;">Selecciona la conjugación correcta del verbo.</p>
+            <p style="color:var(--text-light);font-size:0.9rem;">5 preguntas aleatorias</p>
+            <button class="btn-practice" onclick="startMasuQuiz()">Comenzar</button>
+        </div>
+        <div id="masu-quiz-area"></div>
+    `;
+}
+
+function startMasuQuiz(){
+    masuQuizIdx = 0;
+    masuCorrect = 0;
+    masuErrors = [];
+    masuQuestions = [...masuQuizPool].sort(()=>Math.random()-0.5).slice(0,5);
+    document.querySelector('.grammar-card').style.display = 'none';
+    showMasuQuestion();
+}
+
+function showMasuQuestion(){
+    const q = masuQuestions[masuQuizIdx];
+    const options = generateMasuOptions(q);
+    document.getElementById('masu-quiz-area').innerHTML = `
+        <div class="reorder-box">
+            <div class="reorder-progress">${masuQuizIdx+1} / 5</div>
+            <div class="masu-q-verb">${q.dict}</div>
+            <div class="masu-q-form">→ ${q.form}</div>
+            <div class="masu-q-meaning">(${q.meaning})</div>
+            <div class="masu-options">
+                ${options.map((o,i)=>`<button class="masu-opt" onclick="checkMasuAnswer(${i},'${o.replace(/'/g,"\\'")}')"><span>${o}</span></button>`).join('')}
+            </div>
+            <div id="masu-feedback"></div>
+        </div>
+    `;
+    window.currentMasuAnswer = q.answer;
+    window.currentMasuOptions = options;
+}
+
+function generateMasuOptions(q){
+    const correct = q.answer;
+    const all = [q.allForms.pres, q.allForms.neg, q.allForms.past, q.allForms.pastneg];
+    let opts = [correct];
+    const others = all.filter(x=>stripRuby(x)!==stripRuby(correct));
+    while(opts.length < 4 && others.length > 0){
+        const idx = Math.floor(Math.random()*others.length);
+        if(!opts.some(o=>stripRuby(o)===stripRuby(others[idx]))){
+            opts.push(others[idx]);
+        }
+        others.splice(idx,1);
+    }
+    return opts.sort(()=>Math.random()-0.5);
+}
+
+function checkMasuAnswer(idx, selected){
+    const q = masuQuestions[masuQuizIdx];
+    const isCorrect = stripRuby(selected) === stripRuby(q.answer);
+    const feedback = document.getElementById('masu-feedback');
+    const btns = document.querySelectorAll('.masu-opt');
+    
+    btns.forEach(b=>{
+        b.disabled = true;
+        const btnText = stripRuby(b.querySelector('span').innerHTML);
+        if(btnText === stripRuby(q.answer)) b.classList.add('correct');
+        if(btnText === stripRuby(selected) && !isCorrect) b.classList.add('wrong');
+    });
+    
+    if(isCorrect){
+        masuCorrect++;
+        feedback.innerHTML = `<div class="reorder-feedback correct">⭕ ¡Correcto!</div>`;
+    } else {
+        const explain = `Este verbo es del ${q.groupName}. ${q.rule}. La forma correcta de "${q.form}" es 「${q.answer}」.`;
+        masuErrors.push({dict:q.dict, form:q.form, meaning:q.meaning, userAnswer:selected, correctAnswer:q.answer, explain:explain});
+        feedback.innerHTML = `<div class="reorder-feedback wrong">❌ Respuesta: ${q.answer}</div>`;
+    }
+    
+    setTimeout(()=>{
+        masuQuizIdx++;
+        if(masuQuizIdx < 5) showMasuQuestion();
+        else showMasuResult();
+    }, 1500);
+}
+
+function showMasuResult(){
+    const pct = Math.round((masuCorrect/5)*100);
+    const msg = pct===100?'🎉 ¡Perfecto!':pct>=80?'🌟 ¡Excelente!':pct>=60?'👍 ¡Muy bien!':'📚 ¡Sigue practicando!';
+    let errorsHtml = '';
+    if(masuErrors.length > 0){
+        errorsHtml = `<div class="error-review"><h4>❌ Errores (${masuErrors.length})</h4>${masuErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${e.dict} → ${e.form} (${e.meaning})</div><div class="error-your">Tu respuesta: ${e.userAnswer}</div><div class="error-correct">✅ Correcta: ${e.correctAnswer}</div><div class="error-explain">📖 ${e.explain}</div></div>`).join('')}</div>`;
+    }
+    document.getElementById('masu-quiz-area').innerHTML = `
+        <div class="grammar-result">
+            <div class="gr-score">${pct}%</div>
+            <div class="gr-msg">${msg}</div>
+            <div class="gr-detail">${masuCorrect} / 5 correctas</div>
+            <button class="btn-practice" onclick="startMasuQuiz()">🔄 Intentar de nuevo</button>
+            <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
+            ${errorsHtml}
+        </div>
+    `;
+}
+
 function init() {
     renderChars();
     updateStats();
     initFc();
     genQuiz();
+    renderGrammar();
 }
 
 function renderChars() {
