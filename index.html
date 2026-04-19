@@ -5615,14 +5615,13 @@ function showKanaResult() {
 }
 
 // Trazar (なぞり書き)
-let trazarAnimId = null;
-
 function renderKanaTrazer(script) {
     trazarScript = script;
+    trazarMode = 'guide';
+    trazarIdx = 0;
     const data = script === 'hiragana' ? hiragana : katakana;
     trazarList = [];
     Object.values(data).forEach(arr => { if(Array.isArray(arr)) trazarList = trazarList.concat(arr); });
-    trazarIdx = 0;
     showTrazarChar();
 }
 
@@ -5894,7 +5893,6 @@ function bindTrazarEvents(canvas) {
         e.preventDefault(); drawing = true;
         const el = document.getElementById('trazar-result');
         if(el) el.textContent = '';
-        trazarUserPoints = [];
         const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y);
     }
     function move(e) {
