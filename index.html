@@ -1116,6 +1116,13 @@
         .vocab-cat-tab.matome.active{background:var(--accent);color:white}
         .vocab-list{display:flex;flex-direction:column;gap:0.4rem}
         .vocab-item{display:flex;align-items:center;gap:0.8rem;padding:0.6rem 0.8rem;background:white;border-radius:var(--radius-sm);box-shadow:0 1px 3px rgba(0,0,0,0.08)}
+        .vocab-group-header{font-weight:700;color:white;background:var(--ocean);padding:0.35rem 0.8rem;border-radius:var(--radius-sm);margin:0.6rem 0 0.3rem;font-size:0.85rem;letter-spacing:0.05em}
+        .verb-group-section{margin-bottom:1rem}
+        .verb-chips{display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.4rem}
+        .verb-chip{background:white;border:1.5px solid var(--ocean);border-radius:20px;padding:0.25rem 0.7rem;font-family:'Noto Sans JP';font-size:0.95rem;font-weight:600;color:var(--night);cursor:pointer;transition:all 0.2s;position:relative;min-width:6rem;text-align:center;box-sizing:border-box}
+        .verb-chip.revealed{background:var(--ocean);color:white;border-color:var(--ocean)}
+        .verb-chip-meaning{font-size:0.72rem;font-weight:400;display:block;max-height:0;overflow:hidden;transition:max-height 0.2s}
+        .verb-chip.revealed .verb-chip-meaning{max-height:2rem}
         .vocab-jp{font-family:'Noto Sans JP';font-size:1.1rem;font-weight:600;color:var(--night);min-width:80px}
         .vocab-reading{display:none;font-size:0.85rem;color:var(--ocean);min-width:70px;font-style:italic}
         .pista-active .vocab-reading{display:inline}
@@ -1833,7 +1840,13 @@ let maeniQuizIdx = 0;
 let maeniCorrect = 0;
 let maeniQuestions = [];
 let maeniErrors = [];
+let masuPracMode = 'quiz';
+let masuReorderIdx=0;let masuReorderCorrect=0;let masuReorderQuestions=[];let masuReorderErrors=[];let masuCurrentAnswer=[];
 let niikuPracMode = 'conj';
+let tePracMode = 'conj'; // 'conj' | 'reorder'
+let teCardIdx = 0;
+let teQuizIdx = 0; let teCorrect = 0; let teQuestions = []; let teErrors = [];
+let teReorderIdx = 0; let teReorderCorrect = 0; let teReorderQuestions = []; let teReorderErrors = []; let teCurrentAnswer = [];
 let niikuQuizIdx = 0;
 let niikuCorrect = 0;
 let niikuQuestions = [];
@@ -2033,6 +2046,21 @@ function generateMasuQuizPool(){
     return pool;
 }
 const masuQuizPool = generateMasuQuizPool();
+
+const masuReorderPool = [
+    {words:['<ruby>私<rt>わたし</rt></ruby>は','<ruby>毎日<rt>まいにち</rt></ruby>','<ruby>日本語<rt>にほんご</rt></ruby>を','<ruby>勉強<rt>べんきょう</rt></ruby>します'],answer:'<ruby>私<rt>わたし</rt></ruby>は<ruby>毎日<rt>まいにち</rt></ruby><ruby>日本語<rt>にほんご</rt></ruby>を<ruby>勉強<rt>べんきょう</rt></ruby>します',hint:'Estudio japonés todos los días',explain:'「勉強する」はG3: する→します'},
+    {words:['<ruby>図書館<rt>としょかん</rt></ruby>で','<ruby>本<rt>ほん</rt></ruby>を','<ruby>読<rt>よ</rt></ruby>みます'],answer:'<ruby>図書館<rt>としょかん</rt></ruby>で<ruby>本<rt>ほん</rt></ruby>を<ruby>読<rt>よ</rt></ruby>みます',hint:'Leo libros en la biblioteca',explain:'「読む」はG1: む→みます'},
+    {words:['<ruby>毎朝<rt>まいあさ</rt></ruby>','シャワーを','<ruby>浴<rt>あ</rt></ruby>びます'],answer:'<ruby>毎朝<rt>まいあさ</rt></ruby>シャワーを<ruby>浴<rt>あ</rt></ruby>びます',hint:'Me ducho todas las mañanas',explain:'「浴びる」はG2: る→浴びます'},
+    {words:['<ruby>友達<rt>ともだち</rt></ruby>と','<ruby>公園<rt>こうえん</rt></ruby>で','<ruby>遊<rt>あそ</rt></ruby>びます'],answer:'<ruby>友達<rt>ともだち</rt></ruby>と<ruby>公園<rt>こうえん</rt></ruby>で<ruby>遊<rt>あそ</rt></ruby>びます',hint:'Juego en el parque con amigos',explain:'「遊ぶ」はG1: ぶ→びます'},
+    {words:['<ruby>電車<rt>でんしゃ</rt></ruby>に','<ruby>乗<rt>の</rt></ruby>って','<ruby>学校<rt>がっこう</rt></ruby>へ','<ruby>行<rt>い</rt></ruby>きます'],answer:'<ruby>電車<rt>でんしゃ</rt></ruby>に<ruby>乗<rt>の</rt></ruby>って<ruby>学校<rt>がっこう</rt></ruby>へ<ruby>行<rt>い</rt></ruby>きます',hint:'Voy a la escuela en tren',explain:'「乗る」G1: る→ります。「行く」G1: く→きます'},
+    {words:['<ruby>家<rt>いえ</rt></ruby>で','<ruby>料理<rt>りょうり</rt></ruby>を','<ruby>作<rt>つく</rt></ruby>ります'],answer:'<ruby>家<rt>いえ</rt></ruby>で<ruby>料理<rt>りょうり</rt></ruby>を<ruby>作<rt>つく</rt></ruby>ります',hint:'Cocino en casa',explain:'「作る」はG1: る→ります'},
+    {words:['バスを','<ruby>待<rt>ま</rt></ruby>ちます'],answer:'バスを<ruby>待<rt>ま</rt></ruby>ちます',hint:'Espero el autobús',explain:'「待つ」はG1: つ→ちます'},
+    {words:['<ruby>先生<rt>せんせい</rt></ruby>に','<ruby>質問<rt>しつもん</rt></ruby>を','<ruby>聞<rt>き</rt></ruby>きます'],answer:'<ruby>先生<rt>せんせい</rt></ruby>に<ruby>質問<rt>しつもん</rt></ruby>を<ruby>聞<rt>き</rt></ruby>きます',hint:'Le pregunto al profesor',explain:'「聞く」はG1: く→きます'},
+    {words:['<ruby>週末<rt>しゅうまつ</rt></ruby>に','<ruby>友達<rt>ともだち</rt></ruby>と','<ruby>映画<rt>えいが</rt></ruby>を','<ruby>見<rt>み</rt></ruby>ます'],answer:'<ruby>週末<rt>しゅうまつ</rt></ruby>に<ruby>友達<rt>ともだち</rt></ruby>と<ruby>映画<rt>えいが</rt></ruby>を<ruby>見<rt>み</rt></ruby>ます',hint:'Veo una película con amigos el fin de semana',explain:'「見る」はG2: る→見ます'},
+    {words:['<ruby>音楽<rt>おんがく</rt></ruby>を','<ruby>聴<rt>き</rt></ruby>きながら','<ruby>勉強<rt>べんきょう</rt></ruby>します'],answer:'<ruby>音楽<rt>おんがく</rt></ruby>を<ruby>聴<rt>き</rt></ruby>きながら<ruby>勉強<rt>べんきょう</rt></ruby>します',hint:'Estudio mientras escucho música',explain:'「〜ながら」は同時動作を表す'},
+    {words:['<ruby>日曜日<rt>にちようび</rt></ruby>に','<ruby>部屋<rt>へや</rt></ruby>を','<ruby>掃除<rt>そうじ</rt></ruby>します'],answer:'<ruby>日曜日<rt>にちようび</rt></ruby>に<ruby>部屋<rt>へや</rt></ruby>を<ruby>掃除<rt>そうじ</rt></ruby>します',hint:'Limpio mi habitación el domingo',explain:'「掃除する」はG3: する→します'},
+    {words:['<ruby>毎晩<rt>まいばん</rt></ruby>','<ruby>日記<rt>にっき</rt></ruby>を','<ruby>書<rt>か</rt></ruby>きます'],answer:'<ruby>毎晩<rt>まいばん</rt></ruby><ruby>日記<rt>にっき</rt></ruby>を<ruby>書<rt>か</rt></ruby>きます',hint:'Escribo un diario todas las noches',explain:'「書く」はG1: く→きます'},
+];
 
 // ===== です活用 LESSON (現在・過去 / 肯定・否定) =====
 const katsuLesson = {
@@ -2553,6 +2581,7 @@ function renderGrammar(){
             <button class="lesson-tab ${currentLesson==='maeni'?'active':''}" onclick="setCurrentLesson('maeni')">⏰ Antes/Después<span class="lesson-tab-jp">〜前に・後で</span></button>
             <button class="lesson-tab ${currentLesson==='niiku'?'active':''}" onclick="setCurrentLesson('niiku')">🚶 Ir a hacer<span class="lesson-tab-jp">〜に行く</span></button>
             <button class="lesson-tab ${currentLesson==='joshi'?'active':''}" onclick="setCurrentLesson('joshi')">🔗 Partículas<span class="lesson-tab-jp">助詞</span></button>
+            <button class="lesson-tab ${currentLesson==='te'?'active':''}" onclick="setCurrentLesson('te')">➡️ Forma て<span class="lesson-tab-jp">て形</span></button>
         </div>
         <div id="grammar-content"></div>
     `;
@@ -2585,6 +2614,9 @@ function renderGrammar(){
     } else if(currentLesson==='niiku'){
         if(grammarMode==='learn') renderNiikuLearn();
         else renderNiikuPractice();
+    } else if(currentLesson==='te'){
+        if(grammarMode==='learn') renderTeLearn();
+        else renderTePractice();
     } else {
         if(grammarMode==='learn') renderJoshiLearn();
         else renderJoshiPractice();
@@ -2794,13 +2826,112 @@ function renderMasuLearn(){
 
 function renderMasuPractice(){
     document.getElementById('grammar-content').innerHTML = `
+        <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:1rem;">
+            <button class="kanji-quiz-type ${masuPracMode==='quiz'?'active':''}" onclick="setMasuPracMode('quiz')">Conjugación</button>
+            <button class="kanji-quiz-type ${masuPracMode==='reorder'?'active':''}" onclick="setMasuPracMode('reorder')">Ordenar</button>
+        </div>
+        ${masuPracMode==='quiz'?`
         <div class="grammar-card" style="text-align:center;">
-            <h3>🎯 Práctica: ます conjugación</h3>
+            <h3>🎯 Conjugación ます</h3>
             <p style="color:var(--text-light);margin:0.5rem 0;">Selecciona la conjugación correcta del verbo.</p>
             <p style="color:var(--text-light);font-size:0.9rem;">5 preguntas aleatorias</p>
             <button class="btn-practice" onclick="startMasuQuiz()">Comenzar</button>
         </div>
         <div id="masu-quiz-area"></div>
+        `:`
+        <div class="grammar-card" style="text-align:center;">
+            <h3>🎯 Orden de palabras: ます</h3>
+            <p style="color:var(--text-light);margin:0.5rem 0;">Ordena las palabras para formar la oración correcta.</p>
+            <p style="color:var(--text-light);font-size:0.9rem;">5 preguntas aleatorias</p>
+            <button class="btn-practice" onclick="startMasuReorder()">Comenzar</button>
+        </div>
+        <div id="masu-reorder-area"></div>
+        `}
+    `;
+}
+function setMasuPracMode(m){masuPracMode=m;renderMasuPractice();}
+
+function startMasuReorder(){
+    masuReorderIdx=0;masuReorderCorrect=0;masuReorderErrors=[];masuCurrentAnswer=[];
+    masuReorderQuestions=[...masuReorderPool].sort(()=>Math.random()-0.5).slice(0,5);
+    document.getElementById('grammar-content').querySelector('.grammar-card').style.display='none';
+    showMasuReorderQuestion();
+}
+function showMasuReorderQuestion(){
+    masuCurrentAnswer=[];
+    const q=masuReorderQuestions[masuReorderIdx];
+    const shuffled=[...q.words].sort(()=>Math.random()-0.5);
+    window.masuWordPool=shuffled;
+    document.getElementById('masu-reorder-area').innerHTML=`
+        <div class="reorder-box">
+            <div class="reorder-progress">${masuReorderIdx+1} / 5</div>
+            <div class="reorder-hint">${q.hint}</div>
+            <button class="hint-btn" id="masu-ro-hint-btn" onclick="toggleMasuReorderHint()">💡 Pista (romaji)</button>
+            <div class="reorder-words" id="masu-word-pool">
+                ${shuffled.map((w,i)=>`<div class="word-btn-wrap"><button class="word-btn" onclick="selectMasuWord(${i})" id="mrwb-${i}">${w}</button><span class="word-romaji">${kanaToRomaji(rubyToHiragana(w))}</span></div>`).join('')}
+            </div>
+            <div class="reorder-answer" id="masu-answer-area"><span class="reorder-placeholder">Toca las palabras en orden</span></div>
+            <button class="btn-check" id="masu-check-btn" onclick="checkMasuReorderAnswer()" disabled>Verificar</button>
+            <div id="masu-reorder-feedback"></div>
+        </div>
+    `;
+}
+function toggleMasuReorderHint(){
+    const active=document.getElementById('masu-word-pool').classList.toggle('pista-active');
+    document.getElementById('masu-ro-hint-btn').textContent=active?'🙈 Ocultar pista':'💡 Pista (romaji)';
+}
+function selectMasuWord(idx){
+    const btn=document.getElementById('mrwb-'+idx);
+    if(btn.classList.contains('selected'))return;
+    btn.classList.add('selected');
+    masuCurrentAnswer.push({idx,word:window.masuWordPool[idx]});
+    renderMasuAnswerArea();
+}
+function removeMasuWord(ansIdx){
+    const removed=masuCurrentAnswer.splice(ansIdx,1)[0];
+    document.getElementById('mrwb-'+removed.idx).classList.remove('selected');
+    renderMasuAnswerArea();
+}
+function renderMasuAnswerArea(){
+    const area=document.getElementById('masu-answer-area');
+    area.innerHTML=masuCurrentAnswer.length===0
+        ?'<span class="reorder-placeholder">Toca las palabras en orden</span>'
+        :masuCurrentAnswer.map((a,i)=>`<button class="answer-btn" onclick="removeMasuWord(${i})">${a.word}</button>`).join('');
+    document.getElementById('masu-check-btn').disabled=masuCurrentAnswer.length!==window.masuWordPool.length;
+}
+function checkMasuReorderAnswer(){
+    const q=masuReorderQuestions[masuReorderIdx];
+    const userAnswer=masuCurrentAnswer.map(a=>a.word).join('');
+    const isCorrect=stripRuby(userAnswer)===stripRuby(q.answer);
+    const fb=document.getElementById('masu-reorder-feedback');
+    if(isCorrect){
+        masuReorderCorrect++;
+        fb.innerHTML='<div class="reorder-feedback correct">⭕ ¡Correcto!</div>';
+    }else{
+        masuReorderErrors.push({hint:q.hint,userAnswer,correctAnswer:q.answer,explain:q.explain});
+        fb.innerHTML=`<div class="reorder-feedback wrong">❌ Incorrecto<br>Respuesta: ${q.answer}</div>`;
+    }
+    document.getElementById('masu-check-btn').disabled=true;
+    document.querySelectorAll('#masu-word-pool .word-btn,#masu-answer-area .answer-btn').forEach(b=>b.style.pointerEvents='none');
+    setTimeout(()=>{masuReorderIdx++;if(masuReorderIdx<5)showMasuReorderQuestion();else showMasuReorderResult();},1500);
+}
+function showMasuReorderResult(){
+    const pct=Math.round((masuReorderCorrect/5)*100);
+    saveScore('masu',pct);
+    const msg=pct===100?'🎉 ¡Perfecto!':pct>=80?'🌟 ¡Excelente!':pct>=60?'👍 ¡Muy bien!':'📚 ¡Sigue practicando!';
+    let errorsHtml='';
+    if(masuReorderErrors.length>0){
+        errorsHtml=`<div class="error-review"><h4>❌ Errores (${masuReorderErrors.length})</h4>${masuReorderErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${e.hint}</div><div class="error-your">Tu respuesta: ${e.userAnswer}</div><div class="error-correct">✅ Correcta: ${e.correctAnswer}</div><div class="error-explain">📖 ${e.explain}</div></div>`).join('')}</div>`;
+    }
+    document.getElementById('masu-reorder-area').innerHTML=`
+        <div class="grammar-result">
+            <div class="gr-score">${pct}%</div>
+            <div class="gr-msg">${msg}</div>
+            <div class="gr-detail">${masuReorderCorrect} / 5 correctas</div>
+            <button class="btn-practice" onclick="startMasuReorder()">🔄 Intentar de nuevo</button>
+            <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
+            ${errorsHtml}
+        </div>
     `;
 }
 
@@ -4132,6 +4263,60 @@ function showKeiyoMeishiResult(){
     `;
 }
 
+// ===== て形 FUNCTIONS =====
+function teRubyHtml(word, reading){
+    // 末尾のひらがなを特定し、漢字部分にのみrubyを付ける
+    let i = word.length - 1;
+    while(i >= 0 && /[\u3041-\u3096]/.test(word[i])) i--;
+    const kanjiPart = word.slice(0, i + 1);
+    const hiraPart = word.slice(i + 1);
+    if(!kanjiPart) return word;
+    const kanjiReading = reading.slice(0, reading.length - hiraPart.length);
+    return `<ruby>${kanjiPart}<rt>${kanjiReading}</rt></ruby>${hiraPart}`;
+}
+function renderTeLearn(){
+    const v = teVerbPool[teCardIdx];
+    const subColor = {'G1':'var(--primary)','G2':'var(--ocean)','G3':'#7B2FBE','例外':'#E07A00'};
+    document.getElementById('grammar-content').innerHTML = `
+        <div class="grammar-card">
+            <div style="font-size:1.1rem;font-weight:700;color:var(--night);margin-bottom:0.8rem;">📋 Reglas de conjugación</div>
+            <table style="width:100%;border-collapse:collapse;font-family:'Noto Sans JP';font-size:0.85rem;">
+                <tr style="background:var(--cream);">
+                    <th style="padding:0.3rem 0.5rem;text-align:left;color:var(--text-light);">Grupo</th>
+                    <th style="padding:0.3rem 0.5rem;text-align:left;color:var(--text-light);">Terminación</th>
+                    <th style="padding:0.3rem 0.5rem;text-align:left;color:var(--ocean);">て形</th>
+                    <th style="padding:0.3rem 0.5rem;text-align:left;color:var(--text-light);">Ejemplo</th>
+                </tr>
+                <tr><td style="padding:0.25rem 0.5rem;">G1</td><td>く</td><td style="color:var(--ocean);font-weight:700;">いて</td><td><ruby>書<rt>か</rt></ruby>く→<ruby>書<rt>か</rt></ruby>いて</td></tr>
+                <tr style="background:var(--cream);"><td style="padding:0.25rem 0.5rem;">G1</td><td>ぐ</td><td style="color:var(--ocean);font-weight:700;">いで</td><td><ruby>泳<rt>およ</rt></ruby>ぐ→<ruby>泳<rt>およ</rt></ruby>いで</td></tr>
+                <tr><td style="padding:0.25rem 0.5rem;">G1</td><td>す</td><td style="color:var(--ocean);font-weight:700;">して</td><td><ruby>話<rt>はな</rt></ruby>す→<ruby>話<rt>はな</rt></ruby>して</td></tr>
+                <tr style="background:var(--cream);"><td style="padding:0.25rem 0.5rem;">G1</td><td>む/ぶ/ぬ</td><td style="color:var(--ocean);font-weight:700;">んで</td><td><ruby>読<rt>よ</rt></ruby>む→<ruby>読<rt>よ</rt></ruby>んで</td></tr>
+                <tr><td style="padding:0.25rem 0.5rem;">G1</td><td>る/う/つ</td><td style="color:var(--ocean);font-weight:700;">って</td><td><ruby>買<rt>か</rt></ruby>う→<ruby>買<rt>か</rt></ruby>って</td></tr>
+                <tr style="background:var(--cream);"><td style="padding:0.25rem 0.5rem;">G2</td><td>る</td><td style="color:var(--ocean);font-weight:700;">て</td><td><ruby>食<rt>た</rt></ruby>べる→<ruby>食<rt>た</rt></ruby>べて</td></tr>
+                <tr><td style="padding:0.25rem 0.5rem;">G3</td><td>する</td><td style="color:var(--ocean);font-weight:700;">して</td><td><ruby>勉強<rt>べんきょう</rt></ruby>する→<ruby>勉強<rt>べんきょう</rt></ruby>して</td></tr>
+                <tr style="background:var(--cream);"><td style="padding:0.25rem 0.5rem;">G3</td><td>くる</td><td style="color:var(--ocean);font-weight:700;">きて</td><td><ruby>来<rt>く</rt></ruby>る→<ruby>来<rt>き</rt></ruby>て</td></tr>
+                <tr><td style="padding:0.25rem 0.5rem;color:#E07A00;font-weight:700;">⚠️例外</td><td><ruby>行<rt>い</rt></ruby>く</td><td style="color:var(--ocean);font-weight:700;"><ruby>行<rt>い</rt></ruby>って</td><td>—</td></tr>
+            </table>
+        </div>
+        <div class="grammar-card" style="text-align:center;">
+            <div style="font-size:0.8rem;color:var(--text-light);margin-bottom:0.4rem;">${teCardIdx+1} / ${teVerbPool.length}</div>
+            <div style="display:inline-block;background:${subColor[v.group]||'var(--primary)'};color:white;border-radius:20px;padding:0.15rem 0.7rem;font-size:0.75rem;font-weight:700;margin-bottom:0.6rem;">${v.group} &nbsp;·&nbsp; ${v.sub}</div>
+            <div style="font-family:'Noto Sans JP';font-size:2.2rem;font-weight:700;color:var(--night);">${teRubyHtml(v.dict,v.dr)}</div>
+            <div style="font-size:1.5rem;color:var(--text-light);margin:0.3rem 0;">↓</div>
+            <div style="font-family:'Noto Sans JP';font-size:2.4rem;font-weight:700;color:var(--ocean);">${teRubyHtml(v.te,v.tr)}</div>
+            <div style="color:var(--text-light);font-size:0.9rem;margin-top:0.4rem;">${v.es}</div>
+            <div style="display:flex;justify-content:center;gap:1rem;margin-top:1rem;">
+                <button onclick="teCardIdx=Math.max(0,teCardIdx-1);renderTeLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid var(--ocean);border-radius:var(--radius-sm);background:white;color:var(--ocean);font-weight:700;cursor:pointer;">◀ Anterior</button>
+                <button onclick="teCardIdx=Math.min(teVerbPool.length-1,teCardIdx+1);renderTeLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid var(--ocean);border-radius:var(--radius-sm);background:white;color:var(--ocean);font-weight:700;cursor:pointer;">Siguiente ▶</button>
+            </div>
+        </div>
+        <button class="btn-practice" onclick="setGrammarMode('practice')">🎯 Practicar</button>
+    `;
+}
+function renderTePractice(){
+    document.getElementById('grammar-content').innerHTML = `<p style="text-align:center;color:var(--ocean);padding:2rem;">🚧 Practicar — próximamente</p>`;
+}
+
 // ===== JOSHI (助詞) DATA & FUNCTIONS =====
 let joshiGroup = 0;
 let joshiQuizIdx = 0;
@@ -4978,6 +5163,96 @@ function showKanjiResult(){
     `;
 }
 
+// ===== て形 DATA =====
+const teVerbPool = [
+    // G1 く→いて
+    {dict:'書く',dr:'かく',te:'書いて',tr:'かいて',masu:'書きます',group:'G1',sub:'く→いて',es:'escribir'},
+    {dict:'聞く',dr:'きく',te:'聞いて',tr:'きいて',masu:'聞きます',group:'G1',sub:'く→いて',es:'escuchar'},
+    {dict:'働く',dr:'はたらく',te:'働いて',tr:'はたらいて',masu:'働きます',group:'G1',sub:'く→いて',es:'trabajar'},
+    {dict:'歩く',dr:'あるく',te:'歩いて',tr:'あるいて',masu:'歩きます',group:'G1',sub:'く→いて',es:'caminar'},
+    // G1 ぐ→いで
+    {dict:'泳ぐ',dr:'およぐ',te:'泳いで',tr:'およいで',masu:'泳ぎます',group:'G1',sub:'ぐ→いで',es:'nadar'},
+    {dict:'急ぐ',dr:'いそぐ',te:'急いで',tr:'いそいで',masu:'急ぎます',group:'G1',sub:'ぐ→いで',es:'apurarse'},
+    // G1 す→して
+    {dict:'話す',dr:'はなす',te:'話して',tr:'はなして',masu:'話します',group:'G1',sub:'す→して',es:'hablar'},
+    {dict:'貸す',dr:'かす',te:'貸して',tr:'かして',masu:'貸します',group:'G1',sub:'す→して',es:'prestar'},
+    {dict:'押す',dr:'おす',te:'押して',tr:'おして',masu:'押します',group:'G1',sub:'す→して',es:'empujar'},
+    // G1 む/ぶ→んで
+    {dict:'読む',dr:'よむ',te:'読んで',tr:'よんで',masu:'読みます',group:'G1',sub:'む/ぶ/ぬ→んで',es:'leer'},
+    {dict:'飲む',dr:'のむ',te:'飲んで',tr:'のんで',masu:'飲みます',group:'G1',sub:'む/ぶ/ぬ→んで',es:'beber'},
+    {dict:'遊ぶ',dr:'あそぶ',te:'遊んで',tr:'あそんで',masu:'遊びます',group:'G1',sub:'む/ぶ/ぬ→んで',es:'jugar'},
+    // G1 つ/う/る→って
+    {dict:'待つ',dr:'まつ',te:'待って',tr:'まって',masu:'待ちます',group:'G1',sub:'る/う/つ→って',es:'esperar'},
+    {dict:'買う',dr:'かう',te:'買って',tr:'かって',masu:'買います',group:'G1',sub:'る/う/つ→って',es:'comprar'},
+    {dict:'洗う',dr:'あらう',te:'洗って',tr:'あらって',masu:'洗います',group:'G1',sub:'る/う/つ→って',es:'lavar'},
+    {dict:'撮る',dr:'とる',te:'撮って',tr:'とって',masu:'撮ります',group:'G1',sub:'る/う/つ→って',es:'fotografiar'},
+    {dict:'帰る',dr:'かえる',te:'帰って',tr:'かえって',masu:'帰ります',group:'G1',sub:'る/う/つ→って',es:'regresar'},
+    {dict:'乗る',dr:'のる',te:'乗って',tr:'のって',masu:'乗ります',group:'G1',sub:'る/う/つ→って',es:'subir'},
+    {dict:'作る',dr:'つくる',te:'作って',tr:'つくって',masu:'作ります',group:'G1',sub:'る/う/つ→って',es:'hacer'},
+    {dict:'座る',dr:'すわる',te:'座って',tr:'すわって',masu:'座ります',group:'G1',sub:'る/う/つ→って',es:'sentarse'},
+    {dict:'走る',dr:'はしる',te:'走って',tr:'はしって',masu:'走ります',group:'G1',sub:'る/う/つ→って',es:'correr'},
+    // G2 る→て
+    {dict:'食べる',dr:'たべる',te:'食べて',tr:'たべて',masu:'食べます',group:'G2',sub:'る→て',es:'comer'},
+    {dict:'見る',dr:'みる',te:'見て',tr:'みて',masu:'見ます',group:'G2',sub:'る→て',es:'ver'},
+    {dict:'起きる',dr:'おきる',te:'起きて',tr:'おきて',masu:'起きます',group:'G2',sub:'る→て',es:'levantarse'},
+    {dict:'寝る',dr:'ねる',te:'寝て',tr:'ねて',masu:'寝ます',group:'G2',sub:'る→て',es:'dormir'},
+    {dict:'開ける',dr:'あける',te:'開けて',tr:'あけて',masu:'開けます',group:'G2',sub:'る→て',es:'abrir'},
+    {dict:'浴びる',dr:'あびる',te:'浴びて',tr:'あびて',masu:'浴びます',group:'G2',sub:'る→て',es:'ducharse'},
+    {dict:'教える',dr:'おしえる',te:'教えて',tr:'おしえて',masu:'教えます',group:'G2',sub:'る→て',es:'enseñar'},
+    {dict:'着る',dr:'きる',te:'着て',tr:'きて',masu:'着ます',group:'G2',sub:'る→て',es:'ponerse ropa'},
+    {dict:'借りる',dr:'かりる',te:'借りて',tr:'かりて',masu:'借ります',group:'G2',sub:'る→て',es:'pedir prestado'},
+    // G3 する→して
+    {dict:'勉強する',dr:'べんきょうする',te:'勉強して',tr:'べんきょうして',masu:'勉強します',group:'G3',sub:'する→して',es:'estudiar'},
+    {dict:'電話する',dr:'でんわする',te:'電話して',tr:'でんわして',masu:'電話します',group:'G3',sub:'する→して',es:'llamar por tel.'},
+    {dict:'運動する',dr:'うんどうする',te:'運動して',tr:'うんどうして',masu:'運動します',group:'G3',sub:'する→して',es:'hacer ejercicio'},
+    {dict:'料理する',dr:'りょうりする',te:'料理して',tr:'りょうりして',masu:'料理します',group:'G3',sub:'する→して',es:'cocinar'},
+    {dict:'散歩する',dr:'さんぽする',te:'散歩して',tr:'さんぽして',masu:'散歩します',group:'G3',sub:'する→して',es:'pasear'},
+    {dict:'準備する',dr:'じゅんびする',te:'準備して',tr:'じゅんびして',masu:'準備します',group:'G3',sub:'する→して',es:'preparar'},
+    // G3 くる→きて
+    {dict:'来る',dr:'くる',te:'来て',tr:'きて',masu:'来ます',group:'G3',sub:'くる→きて',es:'venir'},
+    // 例外
+    {dict:'行く',dr:'いく',te:'行って',tr:'いって',masu:'行きます',group:'例外',sub:'例外',es:'ir'},
+];
+
+const teReorderPool = [
+    // てください (10)
+    {words:['もう少し','ゆっくり','話して','ください'],hint:'Por favor habla más despacio',use:'request'},
+    {words:['ここに','名前を','書いて','ください'],hint:'Por favor escribe tu nombre aquí',use:'request'},
+    {words:['この漢字を','読んで','ください'],hint:'Por favor lee este kanji',use:'request'},
+    {words:['窓を','開けて','ください'],hint:'Por favor abre la ventana',use:'request'},
+    {words:['少し','待って','ください'],hint:'Por favor espera un momento',use:'request'},
+    {words:['もう一度','来て','ください'],hint:'Por favor ven otra vez',use:'request'},
+    {words:['先生の','話を','聞いて','ください'],hint:'Por favor escucha al profesor',use:'request'},
+    {words:['少し','急いで','ください'],hint:'Por favor apúrate un poco',use:'request'},
+    {words:['このボタンを','押して','ください'],hint:'Por favor presiona este botón',use:'request'},
+    {words:['漢字を','教えて','ください'],hint:'Por favor enséñame los kanji',use:'request'},
+    // てから (6)
+    {words:['手を','洗って','から','食べて','ください'],hint:'Por favor lávate las manos antes de comer',use:'kara'},
+    {words:['宿題を','して','から','遊んで','ください'],hint:'Por favor haz la tarea antes de jugar',use:'kara'},
+    {words:['シャワーを','浴びて','から','寝ます'],hint:'Me ducho antes de dormir',use:'kara'},
+    {words:['起きて','から','朝ごはんを','食べます'],hint:'Como el desayuno después de levantarme',use:'kara'},
+    {words:['パンを','買って','から','帰ります'],hint:'Regreso a casa después de comprar pan',use:'kara'},
+    {words:['準備して','から','出かけます'],hint:'Salgo después de prepararme',use:'kara'},
+    // ています (5)
+    {words:['今','音楽を','聴いて','います'],hint:'Ahora estoy escuchando música',use:'iru'},
+    {words:['友達を','待って','います'],hint:'Estoy esperando a un amigo',use:'iru'},
+    {words:['日本語を','勉強して','います'],hint:'Estoy estudiando japonés',use:'iru'},
+    {words:['テレビを','見て','います'],hint:'Estoy viendo televisión',use:'iru'},
+    {words:['毎朝','運動して','います'],hint:'Hago ejercicio todas las mañanas',use:'iru'},
+    // てもいいですか (4)
+    {words:['写真を','撮って','もいいですか'],hint:'¿Puedo tomar fotos?',use:'moi'},
+    {words:['ここに','座って','もいいですか'],hint:'¿Puedo sentarme aquí?',use:'moi'},
+    {words:['本を','借りて','もいいですか'],hint:'¿Puedo tomar prestado el libro?',use:'moi'},
+    {words:['あとで','電話して','もいいですか'],hint:'¿Puedo llamarte después?',use:'moi'},
+    // てはいけません (2)
+    {words:['ここで','泳いで','はいけません'],hint:'No se puede nadar aquí',use:'wa'},
+    {words:['廊下を','走って','はいけません'],hint:'No se puede correr en el pasillo',use:'wa'},
+    // 行く・その他 (3)
+    {words:['バスに','乗って','行きます'],hint:'Voy en autobús',use:'iku'},
+    {words:['急いで','行って','ください'],hint:'Por favor ve rápido',use:'iku'},
+    {words:['コートを','着て','から','出かけます'],hint:'Salgo después de ponerme el abrigo',use:'kara'},
+];
+
 // ===== VOCAB DATA & FUNCTIONS =====
 let vocabMode = 'learn';
 let vocabPista = false;
@@ -5327,45 +5602,112 @@ const vocabData = [
     {
         name: '動詞', es: 'Verbos',
         words: [
-            {w:'<ruby>食<rt>た</rt></ruby>べる',r:'taberu',m:'comer'},{w:'<ruby>飲<rt>の</rt></ruby>む',r:'nomu',m:'beber'},
-            {w:'<ruby>行<rt>い</rt></ruby>く',r:'iku',m:'ir'},{w:'<ruby>来<rt>く</rt></ruby>る',r:'kuru',m:'venir'},
-            {w:'<ruby>帰<rt>かえ</rt></ruby>る',r:'kaeru',m:'volver'},{w:'<ruby>見<rt>み</rt></ruby>る',r:'miru',m:'ver'},
-            {w:'<ruby>聞<rt>き</rt></ruby>く',r:'kiku',m:'escuchar'},{w:'<ruby>読<rt>よ</rt></ruby>む',r:'yomu',m:'leer'},
-            {w:'<ruby>書<rt>か</rt></ruby>く',r:'kaku',m:'escribir'},{w:'<ruby>話<rt>はな</rt></ruby>す',r:'hanasu',m:'hablar'},
-            {w:'<ruby>買<rt>か</rt></ruby>う',r:'kau',m:'comprar'},{w:'<ruby>会<rt>あ</rt></ruby>う',r:'au',m:'encontrarse'},
-            {w:'する',r:'suru',m:'hacer'},{w:'<ruby>勉強<rt>べんきょう</rt></ruby>する',r:'benkyou suru',m:'estudiar'},
-            {w:'<ruby>仕事<rt>しごと</rt></ruby>する',r:'shigoto suru',m:'trabajar'},{w:'<ruby>起<rt>お</rt></ruby>きる',r:'okiru',m:'levantarse'},
-            {w:'<ruby>寝<rt>ね</rt></ruby>る',r:'neru',m:'dormir'},{w:'<ruby>入<rt>はい</rt></ruby>る',r:'hairu',m:'entrar'},
-            {w:'<ruby>出<rt>で</rt></ruby>る',r:'deru',m:'salir'},{w:'<ruby>待<rt>ま</rt></ruby>つ',r:'matsu',m:'esperar'},
-            {w:'<ruby>分<rt>わ</rt></ruby>かる',r:'wakaru',m:'entender'},{w:'ある',r:'aru',m:'haber/estar (objetos)'},
-            {w:'いる',r:'iru',m:'haber/estar (seres vivos)'},
-            {w:'<ruby>取<rt>と</rt></ruby>る',r:'toru',m:'tomar (foto)'},
-            {w:'<ruby>切<rt>き</rt></ruby>る',r:'kiru',m:'cortar'},
-            {w:'<ruby>終<rt>お</rt></ruby>わる',r:'owaru',m:'terminar'},
-            {w:'<ruby>習<rt>なら</rt></ruby>う',r:'narau',m:'aprender (de alguien)'},
-            {w:'<ruby>貸<rt>か</rt></ruby>す',r:'kasu',m:'prestar'},
-            {w:'<ruby>借<rt>か</rt></ruby>りる',r:'kariru',m:'tomar prestado'},
-            {w:'もらう',r:'morau',m:'recibir'},
-            {w:'あげる',r:'ageru',m:'dar'},
-            {w:'<ruby>見<rt>み</rt></ruby>せる',r:'miseru',m:'mostrar'},
-            {w:'<ruby>歌<rt>うた</rt></ruby>う',r:'utau',m:'cantar'},
-            {w:'<ruby>踊<rt>おど</rt></ruby>る',r:'odoru',m:'bailar'},
+            {w:'◆ Grupo 1 (う動詞)',type:'header'},
+            {w:'<ruby>会<rt>あ</rt></ruby>う',r:'au',m:'encontrarse'},
+            {w:'<ruby>開<rt>あ</rt></ruby>く',r:'aku',m:'abrirse'},
+            {w:'<ruby>洗<rt>あら</rt></ruby>う',r:'arau',m:'lavar'},
+            {w:'ある',r:'aru',m:'haber/estar (objetos)'},
+            {w:'<ruby>歩<rt>ある</rt></ruby>く',r:'aruku',m:'caminar'},
             {w:'<ruby>言<rt>い</rt></ruby>う',r:'iu',m:'decir'},
-            {w:'<ruby>立<rt>た</rt></ruby>つ',r:'tatsu',m:'levantarse / estar de pie'},
-            {w:'<ruby>座<rt>すわ</rt></ruby>る',r:'suwaru',m:'sentarse'},
-            {w:'<ruby>作<rt>つく</rt></ruby>る',r:'tsukuru',m:'hacer / crear'},
-            {w:'<ruby>使<rt>つか</rt></ruby>う',r:'tsukau',m:'usar'},
-            {w:'<ruby>遊<rt>あそ</rt></ruby>ぶ',r:'asobu',m:'jugar'},
+            {w:'<ruby>行<rt>い</rt></ruby>く',r:'iku',m:'ir'},
             {w:'<ruby>急<rt>いそ</rt></ruby>ぐ',r:'isogu',m:'apresurarse'},
-            {w:'<ruby>教<rt>おし</rt></ruby>える',r:'oshieru',m:'enseñar'},
-            {w:'<ruby>開<rt>あ</rt></ruby>ける',r:'akeru',m:'abrir'},
-            {w:'<ruby>閉<rt>し</rt></ruby>める',r:'shimeru',m:'cerrar'},
-            {w:'つける',r:'tsukeru',m:'encender'},
+            {w:'<ruby>歌<rt>うた</rt></ruby>う',r:'utau',m:'cantar'},
+            {w:'<ruby>売<rt>う</rt></ruby>る',r:'uru',m:'vender'},
+            {w:'<ruby>置<rt>お</rt></ruby>く',r:'oku',m:'colocar'},
+            {w:'<ruby>送<rt>おく</rt></ruby>る',r:'okuru',m:'enviar'},
+            {w:'<ruby>押<rt>お</rt></ruby>す',r:'osu',m:'empujar'},
+            {w:'<ruby>泳<rt>およ</rt></ruby>ぐ',r:'oyogu',m:'nadar'},
+            {w:'<ruby>終<rt>お</rt></ruby>わる',r:'owaru',m:'terminar'},
+            {w:'<ruby>買<rt>か</rt></ruby>う',r:'kau',m:'comprar'},
+            {w:'<ruby>返<rt>かえ</rt></ruby>す',r:'kaesu',m:'devolver'},
+            {w:'<ruby>帰<rt>かえ</rt></ruby>る',r:'kaeru',m:'volver a casa'},
+            {w:'かかる',r:'kakaru',m:'costar / tardar'},
+            {w:'<ruby>書<rt>か</rt></ruby>く',r:'kaku',m:'escribir'},
+            {w:'<ruby>貸<rt>か</rt></ruby>す',r:'kasu',m:'prestar'},
+            {w:'かぶる',r:'kaburu',m:'ponerse (sombrero)'},
+            {w:'<ruby>聞<rt>き</rt></ruby>く',r:'kiku',m:'escuchar / preguntar'},
+            {w:'<ruby>切<rt>き</rt></ruby>る',r:'kiru',m:'cortar'},
             {w:'<ruby>消<rt>け</rt></ruby>す',r:'kesu',m:'apagar / borrar'},
-            {w:'でかける',r:'dekakeru',m:'salir (de casa)'},
-            {w:'<ruby>休<rt>やす</rt></ruby>む',r:'yasumu',m:'descansar'},
+            {w:'<ruby>触<rt>さわ</rt></ruby>る',r:'sawaru',m:'tocar'},
+            {w:'<ruby>知<rt>し</rt></ruby>る',r:'shiru',m:'saber / conocer'},
+            {w:'<ruby>吸<rt>す</rt></ruby>う',r:'suu',m:'fumar / inhalar'},
+            {w:'<ruby>住<rt>す</rt></ruby>む',r:'sumu',m:'vivir / residir'},
+            {w:'<ruby>座<rt>すわ</rt></ruby>る',r:'suwaru',m:'sentarse'},
+            {w:'<ruby>出<rt>だ</rt></ruby>す',r:'dasu',m:'sacar / enviar'},
+            {w:'<ruby>立<rt>た</rt></ruby>つ',r:'tatsu',m:'ponerse de pie'},
+            {w:'<ruby>頼<rt>たの</rt></ruby>む',r:'tanomu',m:'pedir / encargar'},
+            {w:'<ruby>踊<rt>おど</rt></ruby>る',r:'odoru',m:'bailar'},
+            {w:'<ruby>違<rt>ちが</rt></ruby>う',r:'chigau',m:'ser diferente / equivocado'},
+            {w:'<ruby>使<rt>つか</rt></ruby>う',r:'tsukau',m:'usar'},
+            {w:'<ruby>着<rt>つ</rt></ruby>く',r:'tsuku',m:'llegar'},
+            {w:'<ruby>作<rt>つく</rt></ruby>る',r:'tsukuru',m:'hacer / crear'},
+            {w:'<ruby>手伝<rt>てつだ</rt></ruby>う',r:'tetsudau',m:'ayudar'},
+            {w:'<ruby>止<rt>と</rt></ruby>まる',r:'tomaru',m:'detenerse'},
+            {w:'<ruby>取<rt>と</rt></ruby>る',r:'toru',m:'tomar / coger'},
+            {w:'<ruby>鳴<rt>な</rt></ruby>く',r:'naku',m:'cantar (animal) / ladrar'},
+            {w:'なくす',r:'nakusu',m:'perder (objeto)'},
+            {w:'<ruby>習<rt>なら</rt></ruby>う',r:'narau',m:'aprender (de alguien)'},
+            {w:'なる',r:'naru',m:'convertirse en'},
+            {w:'<ruby>脱<rt>ぬ</rt></ruby>ぐ',r:'nugu',m:'quitarse ropa'},
+            {w:'<ruby>飲<rt>の</rt></ruby>む',r:'nomu',m:'beber'},
+            {w:'<ruby>乗<rt>の</rt></ruby>る',r:'noru',m:'subir / tomar transporte'},
+            {w:'<ruby>入<rt>はい</rt></ruby>る',r:'hairu',m:'entrar'},
+            {w:'<ruby>履<rt>は</rt></ruby>く',r:'haku',m:'ponerse (calzado)'},
             {w:'<ruby>働<rt>はたら</rt></ruby>く',r:'hataraku',m:'trabajar'},
-            {w:'<ruby>住<rt>す</rt></ruby>む',r:'sumu',m:'vivir / residir'}
+            {w:'<ruby>話<rt>はな</rt></ruby>す',r:'hanasu',m:'hablar'},
+            {w:'<ruby>張<rt>は</rt></ruby>る',r:'haru',m:'pegar / tender'},
+            {w:'<ruby>払<rt>はら</rt></ruby>う',r:'harau',m:'pagar'},
+            {w:'<ruby>引<rt>ひ</rt></ruby>く',r:'hiku',m:'jalar / tirar'},
+            {w:'<ruby>弾<rt>ひ</rt></ruby>く',r:'hiku',m:'tocar instrumento'},
+            {w:'<ruby>降<rt>ふ</rt></ruby>る',r:'furu',m:'llover / nevar'},
+            {w:'<ruby>待<rt>ま</rt></ruby>つ',r:'matsu',m:'esperar'},
+            {w:'<ruby>曲<rt>ま</rt></ruby>がる',r:'magaru',m:'doblar / girar'},
+            {w:'<ruby>持<rt>も</rt></ruby>つ',r:'motsu',m:'llevar / tener'},
+            {w:'もらう',r:'morau',m:'recibir'},
+            {w:'<ruby>休<rt>やす</rt></ruby>む',r:'yasumu',m:'descansar'},
+            {w:'<ruby>読<rt>よ</rt></ruby>む',r:'yomu',m:'leer'},
+            {w:'<ruby>呼<rt>よ</rt></ruby>ぶ',r:'yobu',m:'llamar'},
+            {w:'<ruby>分<rt>わ</rt></ruby>かる',r:'wakaru',m:'entender'},
+            {w:'<ruby>渡<rt>わた</rt></ruby>る',r:'wataru',m:'cruzar'},
+            {w:'◆ Grupo 2 (る動詞)',type:'header'},
+            {w:'<ruby>開<rt>あ</rt></ruby>ける',r:'akeru',m:'abrir'},
+            {w:'あげる',r:'ageru',m:'dar'},
+            {w:'<ruby>浴<rt>あ</rt></ruby>びる',r:'abiru',m:'ducharse'},
+            {w:'いる',r:'iru',m:'haber/estar (seres vivos)'},
+            {w:'<ruby>入<rt>い</rt></ruby>れる',r:'ireru',m:'meter / poner dentro'},
+            {w:'<ruby>生<rt>う</rt></ruby>まれる',r:'umareru',m:'nacer'},
+            {w:'<ruby>起<rt>お</rt></ruby>きる',r:'okiru',m:'levantarse'},
+            {w:'<ruby>教<rt>おし</rt></ruby>える',r:'oshieru',m:'enseñar'},
+            {w:'<ruby>覚<rt>おぼ</rt></ruby>える',r:'oboeru',m:'memorizar'},
+            {w:'<ruby>降<rt>お</rt></ruby>りる',r:'oriru',m:'bajar / apearse'},
+            {w:'かける',r:'kakeru',m:'llamar por tel. / colgar'},
+            {w:'<ruby>借<rt>か</rt></ruby>りる',r:'kariru',m:'tomar prestado'},
+            {w:'<ruby>消<rt>き</rt></ruby>える',r:'kieru',m:'apagarse / desaparecer'},
+            {w:'<ruby>着<rt>き</rt></ruby>る',r:'kiru',m:'ponerse ropa'},
+            {w:'<ruby>答<rt>こた</rt></ruby>える',r:'kotaeru',m:'responder'},
+            {w:'<ruby>閉<rt>し</rt></ruby>める',r:'shimeru',m:'cerrar'},
+            {w:'<ruby>食<rt>た</rt></ruby>べる',r:'taberu',m:'comer'},
+            {w:'<ruby>疲<rt>つか</rt></ruby>れる',r:'tsukareru',m:'cansarse'},
+            {w:'つける',r:'tsukeru',m:'encender'},
+            {w:'<ruby>勤<rt>つと</rt></ruby>める',r:'tsutomeru',m:'trabajar en empresa'},
+            {w:'でかける',r:'dekakeru',m:'salir (de casa)'},
+            {w:'<ruby>出来<rt>でき</rt></ruby>る',r:'dekiru',m:'poder / ser posible'},
+            {w:'<ruby>出<rt>で</rt></ruby>る',r:'deru',m:'salir'},
+            {w:'<ruby>止<rt>と</rt></ruby>める',r:'tomeru',m:'detener / parar'},
+            {w:'<ruby>並<rt>なら</rt></ruby>べる',r:'naraberu',m:'ordenar / alinear'},
+            {w:'<ruby>寝<rt>ね</rt></ruby>る',r:'neru',m:'dormir'},
+            {w:'<ruby>晴<rt>は</rt></ruby>れる',r:'hareru',m:'despejarse'},
+            {w:'<ruby>見<rt>み</rt></ruby>る',r:'miru',m:'ver'},
+            {w:'<ruby>見<rt>み</rt></ruby>せる',r:'miseru',m:'mostrar'},
+            {w:'<ruby>忘<rt>わす</rt></ruby>れる',r:'wasureru',m:'olvidar'},
+            {w:'◆ Grupo 3 (不規則)',type:'header'},
+            {w:'<ruby>来<rt>く</rt></ruby>る',r:'kuru',m:'venir'},
+            {w:'する',r:'suru',m:'hacer'},
+            {w:'<ruby>勉強<rt>べんきょう</rt></ruby>する',r:'benkyou suru',m:'estudiar'},
+            {w:'<ruby>仕事<rt>しごと</rt></ruby>する',r:'shigoto suru',m:'trabajar'},
+            {w:'<ruby>買<rt>か</rt></ruby>い<ruby>物<rt>もの</rt></ruby>する',r:'kaimono suru',m:'ir de compras'},
+            {w:'<ruby>洗濯<rt>せんたく</rt></ruby>する',r:'sentaku suru',m:'lavar ropa'},
+            {w:'<ruby>掃除<rt>そうじ</rt></ruby>する',r:'souji suru',m:'limpiar'},
         ]
     },
     {
@@ -5465,15 +5807,29 @@ function renderVocabLearn(){
             ${vocabData.map((c,i)=>`<button class="vocab-cat-tab ${i===vocabCategory?'active':''}" onclick="setVocabCategory(${i})">${c.es}</button>`).join('')}
             <button class="vocab-cat-tab matome ${isMatome?'active':''}" onclick="setVocabCategory(${REPASO})">⭐ Repaso</button>
         </div>
-        ${isMatome?renderVocabMatome():`
+        ${isMatome?renderVocabMatome():cat.name==='動詞'?renderVerbosGrouped(cat):`
         <div style="text-align:right;margin-bottom:0.5rem">
             <button class="hint-btn" id="vocab-pista-btn" onclick="toggleVocabPista()">${vocabPista?'🙈 Ocultar romaji':'💡 Pista (romaji)'}</button>
         </div>
-        <div class="vocab-list ${vocabPista?'pista-active':''}" id="vocab-list">${cat.words.map(w=>`<div class="vocab-item"><span class="vocab-jp">${w.w}</span><span class="vocab-reading">${w.r}</span><span class="vocab-meaning">${w.m}</span></div>`).join('')}</div>
+        <div class="vocab-list ${vocabPista?'pista-active':''}" id="vocab-list">${cat.words.map(w=>w.type==='header'?`<div class="vocab-group-header">${w.w}</div>`:`<div class="vocab-item"><span class="vocab-jp">${w.w}</span><span class="vocab-reading">${w.r}</span><span class="vocab-meaning">${w.m}</span></div>`).join('')}</div>
         `}
     `;
 }
 
+function renderVerbosGrouped(cat){
+    let html='<div style="font-size:0.8rem;color:var(--text-light);margin-bottom:0.5rem;">💡 Toca un verbo para ver el significado</div>';
+    let currentGroup=null;
+    let chipsHtml='';
+    const flush=()=>{
+        if(currentGroup){html+=`<div class="verb-group-section"><div class="vocab-group-header">${currentGroup}</div><div class="verb-chips">${chipsHtml}</div></div>`;chipsHtml='';}
+    };
+    cat.words.forEach((w,i)=>{
+        if(w.type==='header'){flush();currentGroup=w.w;}
+        else{chipsHtml+=`<div class="verb-chip" onclick="this.classList.toggle('revealed')">${w.w}<span class="verb-chip-meaning">${w.m}</span></div>`;}
+    });
+    flush();
+    return html;
+}
 function renderVocabMatome(){
     return `
         <div class="grammar-card" style="text-align:center;">
@@ -5520,7 +5876,8 @@ function toggleVocabPista(){
 function startVocabQuiz(){
     vocabQuizIdx=0;vocabCorrect=0;vocabErrors=[];
     const cat=vocabData[vocabCategory];
-    vocabQuestions=[...cat.words].sort(()=>Math.random()-0.5).slice(0,5);
+    const words=cat.words.filter(w=>!w.type);
+    vocabQuestions=[...words].sort(()=>Math.random()-0.5).slice(0,5);
     const _vc=document.getElementById('vocab-content').querySelector('.grammar-card');if(_vc)_vc.style.display='none';
     showVocabQuestion();
 }
@@ -5528,7 +5885,7 @@ function startVocabQuiz(){
 function startVocabMatome(){
     vocabQuizIdx=0;vocabCorrect=0;vocabErrors=[];
     let allWords=[];
-    vocabData.forEach(c=>allWords=allWords.concat(c.words));
+    vocabData.forEach(c=>allWords=allWords.concat(c.words.filter(w=>!w.type)));
     vocabQuestions=[...allWords].sort(()=>Math.random()-0.5).slice(0,10);
     const _vc2=document.getElementById('vocab-content').querySelector('.grammar-card');if(_vc2)_vc2.style.display='none';
     showVocabMatomeQ();
@@ -5537,13 +5894,14 @@ function startVocabMatome(){
 function showVocabQuestion(){
     const q=vocabQuestions[vocabQuizIdx];
     const cat=vocabData[vocabCategory];
+    const catWords=cat.words.filter(w=>!w.type);
     let qText,opts,correctAns;
     if(vocabQuizType==='meaning'){
         qText=q.w;
         correctAns=q.m;
         opts=[correctAns];
         while(opts.length<4){
-            const r=cat.words[Math.floor(Math.random()*cat.words.length)];
+            const r=catWords[Math.floor(Math.random()*catWords.length)];
             if(!opts.includes(r.m))opts.push(r.m);
         }
     }else{
@@ -5552,7 +5910,7 @@ function showVocabQuestion(){
         opts=[correctAns];
         const optsReadings={[correctAns]:rubyToHiragana(q.w)};
         while(opts.length<4){
-            const r=cat.words[Math.floor(Math.random()*cat.words.length)];
+            const r=catWords[Math.floor(Math.random()*catWords.length)];
             const rw=stripRuby(r.w);
             if(!opts.includes(rw)){opts.push(rw);optsReadings[rw]=rubyToHiragana(r.w);}
         }
