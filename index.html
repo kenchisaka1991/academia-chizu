@@ -155,7 +155,9 @@
         }
         .nav-btn { display: inline-flex; flex-direction: column; align-items: center; line-height: 1.2; }
         .btn-es { display: block; font-size: 0.62rem; font-weight: 500; opacity: 0.75; font-family: 'DM Sans', sans-serif; margin-top: 0.1rem; }
-        .moji-tab, .lesson-tab { display: inline-flex; flex-direction: column; align-items: center; line-height: 1.2; }
+        .moji-tab { display: inline-flex; flex-direction: column; align-items: center; line-height: 1.2; }
+        .lesson-tab { display: inline-flex; flex-direction: column; align-items: center; gap: 0.1rem; white-space: nowrap; }
+        .lesson-tab-jp { font-size: 0.6rem; opacity: 0.65; font-family: 'Noto Sans JP', sans-serif; font-weight: 500; letter-spacing: 0.02em; }
 
         /* Main Content */
         .main {
@@ -961,9 +963,16 @@
         /* Reorder Quiz Styles */
         .reorder-box{background:var(--white);border-radius:var(--radius-md);padding:1.2rem;margin-top:1rem;box-shadow:var(--shadow-md)}
         .reorder-progress{font-size:0.85rem;color:var(--text-light);margin-bottom:0.8rem;text-align:center}
-        .reorder-hint{color:var(--ocean);font-size:0.95rem;margin-bottom:1rem;text-align:center;font-weight:500}
+        .reorder-hint{color:var(--ocean);font-size:0.95rem;margin-bottom:0.5rem;text-align:center;font-weight:500}
+        .hint-btn{background:none;border:1.5px solid var(--ocean);color:var(--ocean);border-radius:var(--radius-sm);padding:0.25rem 0.8rem;font-size:0.82rem;cursor:pointer;margin:0.3rem auto 0.5rem;display:block;transition:all 0.2s}
+        .hint-btn:hover{background:var(--ocean);color:#fff}
+        .romaji-hint{background:#e8f7f5;color:#1a7a6e;border-radius:var(--radius-sm);padding:0.35rem 0.8rem;font-size:0.9rem;margin:0 0 0.6rem;text-align:center;font-style:italic;letter-spacing:0.04em}
+        .word-romaji{display:none;font-size:0.65rem;color:var(--ocean);margin-top:2px;font-style:italic;letter-spacing:0.03em}
+        .word-btn-wrap{display:inline-flex;flex-direction:column;align-items:center;gap:2px}
+        .word-btn.selected ~ .word-romaji{opacity:0.3}
+        .pista-active .word-romaji{display:block!important}
         .reorder-words{display:flex;flex-wrap:wrap;gap:0.5rem;justify-content:center;margin-bottom:1rem;min-height:50px}
-        .word-btn{padding:0.6rem 1rem;border:2px solid var(--night);border-radius:var(--radius-sm);background:var(--white);font-family:'Noto Sans JP';font-size:1.1rem;cursor:pointer;transition:all 0.2s}
+        .word-btn{padding:0.6rem 1rem;border:2px solid var(--night);border-radius:var(--radius-sm);background:var(--white);font-family:'Noto Sans JP';font-size:1.1rem;cursor:pointer;transition:all 0.2s;color:var(--night)!important}
         .word-btn:hover{background:var(--cream);transform:scale(1.05)}
         .word-btn.selected{opacity:0.3;cursor:default}
         .reorder-answer{min-height:60px;border:2px dashed #DDD;border-radius:var(--radius-sm);padding:0.8rem;display:flex;flex-wrap:wrap;gap:0.5rem;justify-content:center;align-items:center;margin-bottom:1rem;background:#FAFAFA}
@@ -988,8 +997,9 @@
         .error-correct{color:var(--ocean);font-size:0.9rem;margin-bottom:0.5rem}
         .error-explain{background:white;padding:0.8rem;border-radius:var(--radius-sm);font-size:0.85rem;line-height:1.5}
         /* Lesson tabs */
-        .grammar-lesson-tabs{display:flex;gap:0.5rem;margin-bottom:0.5rem}
-        .lesson-tab{flex:1;padding:0.7rem;border:2px solid var(--ocean);border-radius:var(--radius-md);background:transparent;color:var(--ocean);font-size:1.1rem;font-weight:700;cursor:pointer;transition:all 0.3s;font-family:'Noto Sans JP'}
+        .grammar-lesson-tabs{display:flex;gap:0.5rem;margin-bottom:0.5rem;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:0.2rem}
+        .grammar-lesson-tabs::-webkit-scrollbar{display:none}
+        .lesson-tab{flex-shrink:0;padding:0.4rem 0.65rem;border:1.5px solid var(--ocean);border-radius:var(--radius-sm);background:transparent;color:var(--ocean);font-size:0.9rem;font-weight:700;cursor:pointer;transition:all 0.3s;font-family:'Noto Sans JP'}
         .lesson-tab.active{background:var(--ocean);color:white}
         /* Verb table styles */
         .verb-group{margin:1.5rem 0;padding:1rem;background:#FAFAFA;border-radius:var(--radius-sm)}
@@ -1107,7 +1117,8 @@
         .vocab-list{display:flex;flex-direction:column;gap:0.4rem}
         .vocab-item{display:flex;align-items:center;gap:0.8rem;padding:0.6rem 0.8rem;background:white;border-radius:var(--radius-sm);box-shadow:0 1px 3px rgba(0,0,0,0.08)}
         .vocab-jp{font-family:'Noto Sans JP';font-size:1.1rem;font-weight:600;color:var(--night);min-width:80px}
-        .vocab-reading{font-size:0.85rem;color:var(--ocean);min-width:70px}
+        .vocab-reading{display:none;font-size:0.85rem;color:var(--ocean);min-width:70px;font-style:italic}
+        .pista-active .vocab-reading{display:inline}
         .vocab-meaning{font-size:0.85rem;color:var(--text);flex:1}
         .vocab-q-word{font-family:'Noto Sans JP';font-size:2rem;font-weight:700;color:var(--primary);text-align:center;margin-bottom:0.5rem}
     </style>
@@ -1793,6 +1804,12 @@ let katsuQuizIdx = 0;
 let katsuCorrect = 0;
 let katsuQuestions = [];
 let katsuErrors = [];
+let katsuPracMode = 'quiz';
+let katsuReorderIdx = 0;
+let katsuReorderCorrect = 0;
+let katsuReorderQuestions = [];
+let katsuReorderErrors = [];
+let katsuCurrentAnswer = [];
 let keiyoType = 'i'; // 'i' | 'na'
 let keiyoPracMode = 'katsu'; // 'katsu' | 'meishi'
 let keiyoQuizIdx = 0;
@@ -1816,10 +1833,12 @@ let maeniQuizIdx = 0;
 let maeniCorrect = 0;
 let maeniQuestions = [];
 let maeniErrors = [];
+let niikuPracMode = 'conj';
 let niikuQuizIdx = 0;
 let niikuCorrect = 0;
 let niikuQuestions = [];
 let niikuErrors = [];
+let niikuCurrentAnswer = [];
 
 // ===== DESU LESSON =====
 const desuLesson = {
@@ -2075,6 +2094,21 @@ function generateKatsuQuizPool(){
 }
 const katsuQuizPool = generateKatsuQuizPool();
 
+const katsuReorderPool = [
+    {words:['<ruby>私<rt>わたし</rt></ruby>','は','<ruby>学生<rt>がくせい</rt></ruby>','じゃないです'],answer:'<ruby>私<rt>わたし</rt></ruby>は<ruby>学生<rt>がくせい</rt></ruby>じゃないです',hint:'No soy estudiante',explain:'「じゃないです」は現在否定形。「じゃ」は「では」の縮約形。'},
+    {words:['<ruby>私<rt>わたし</rt></ruby>','は','<ruby>先生<rt>せんせい</rt></ruby>','でした'],answer:'<ruby>私<rt>わたし</rt></ruby>は<ruby>先生<rt>せんせい</rt></ruby>でした',hint:'Era profesor',explain:'「でした」は「です」の過去肯定形。'},
+    {words:['<ruby>私<rt>わたし</rt></ruby>','は','<ruby>会社員<rt>かいしゃいん</rt></ruby>','じゃなかったです'],answer:'<ruby>私<rt>わたし</rt></ruby>は<ruby>会社員<rt>かいしゃいん</rt></ruby>じゃなかったです',hint:'No era empleado',explain:'「じゃなかったです」は過去否定形。'},
+    {words:['<ruby>彼<rt>かれ</rt></ruby>','は','<ruby>医者<rt>いしゃ</rt></ruby>','じゃないです'],answer:'<ruby>彼<rt>かれ</rt></ruby>は<ruby>医者<rt>いしゃ</rt></ruby>じゃないです',hint:'Él no es médico',explain:'「じゃないです」で現在否定を表す。'},
+    {words:['<ruby>彼女<rt>かのじょ</rt></ruby>','は','<ruby>友達<rt>ともだち</rt></ruby>','でした'],answer:'<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>友達<rt>ともだち</rt></ruby>でした',hint:'Ella era mi amiga',explain:'「でした」で過去の状態を表す。'},
+    {words:['<ruby>私<rt>わたし</rt></ruby>','は','<ruby>日本人<rt>にほんじん</rt></ruby>','じゃないです'],answer:'<ruby>私<rt>わたし</rt></ruby>は<ruby>日本人<rt>にほんじん</rt></ruby>じゃないです',hint:'No soy japonés',explain:'「じゃないです」で国籍の現在否定を表す。'},
+    {words:['<ruby>私<rt>わたし</rt></ruby>','は','<ruby>子供<rt>こども</rt></ruby>','でした'],answer:'<ruby>私<rt>わたし</rt></ruby>は<ruby>子供<rt>こども</rt></ruby>でした',hint:'Era un niño',explain:'「でした」で過去の状態を表す。'},
+    {words:['<ruby>彼<rt>かれ</rt></ruby>','は','<ruby>大学生<rt>だいがくせい</rt></ruby>','じゃなかったです'],answer:'<ruby>彼<rt>かれ</rt></ruby>は<ruby>大学生<rt>だいがくせい</rt></ruby>じゃなかったです',hint:'Él no era universitario',explain:'「じゃなかったです」で過去否定を表す。'},
+    {words:['<ruby>彼女<rt>かのじょ</rt></ruby>','は','<ruby>学生<rt>がくせい</rt></ruby>','でした'],answer:'<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>学生<rt>がくせい</rt></ruby>でした',hint:'Ella era estudiante',explain:'「でした」で過去肯定を表す。主語は「彼女」(ella)。'},
+    {words:['<ruby>私<rt>わたし</rt></ruby>','は','<ruby>先生<rt>せんせい</rt></ruby>','じゃなかったです'],answer:'<ruby>私<rt>わたし</rt></ruby>は<ruby>先生<rt>せんせい</rt></ruby>じゃなかったです',hint:'No era profesor',explain:'「じゃなかったです」は過去否定形。'},
+    {words:['<ruby>彼<rt>かれ</rt></ruby>','は','<ruby>会社員<rt>かいしゃいん</rt></ruby>','でした'],answer:'<ruby>彼<rt>かれ</rt></ruby>は<ruby>会社員<rt>かいしゃいん</rt></ruby>でした',hint:'Él era empleado',explain:'「でした」で過去の職業を表す。'},
+    {words:['<ruby>私<rt>わたし</rt></ruby>','は','<ruby>医者<rt>いしゃ</rt></ruby>','じゃないです'],answer:'<ruby>私<rt>わたし</rt></ruby>は<ruby>医者<rt>いしゃ</rt></ruby>じゃないです',hint:'No soy médico',explain:'「じゃないです」で現在否定を表す。'},
+];
+
 // ===== ましょう・ませんか LESSON =====
 const mashouLesson = {
     title: 'ましょう・ませんか',
@@ -2278,6 +2312,21 @@ const niikuQuizPool = [
     {words:['コーヒーを','<ruby>飲<rt>の</rt></ruby>みに','カフェへ','<ruby>行<rt>い</rt></ruby>きませんか'],answer:'コーヒーを<ruby>飲<rt>の</rt></ruby>みにカフェへ<ruby>行<rt>い</rt></ruby>きませんか',hint:'¿No vas al café a tomar un café?',explain:'「<ruby>飲<rt>の</rt></ruby>む」→ ます語幹「<ruby>飲<rt>の</rt></ruby>み」+ に行く。ませんか=invitación cortés。'},
     {words:['<ruby>友達<rt>ともだち</rt></ruby>と','<ruby>遊<rt>あそ</rt></ruby>びに','<ruby>公園<rt>こうえん</rt></ruby>へ','<ruby>行<rt>い</rt></ruby>きました'],answer:'<ruby>友達<rt>ともだち</rt></ruby>と<ruby>遊<rt>あそ</rt></ruby>びに<ruby>公園<rt>こうえん</rt></ruby>へ<ruby>行<rt>い</rt></ruby>きました',hint:'Fui al parque a jugar con mis amigos',explain:'「<ruby>遊<rt>あそ</rt></ruby>ぶ」→ ます語幹「<ruby>遊<rt>あそ</rt></ruby>び」+ に行く。'},
     {words:['<ruby>京都<rt>きょうと</rt></ruby>へ','<ruby>友達<rt>ともだち</rt></ruby>に','<ruby>会<rt>あ</rt></ruby>いに','<ruby>行<rt>い</rt></ruby>きます'],answer:'<ruby>京都<rt>きょうと</rt></ruby>へ<ruby>友達<rt>ともだち</rt></ruby>に<ruby>会<rt>あ</rt></ruby>いに<ruby>行<rt>い</rt></ruby>きます',hint:'Voy a Kioto a encontrarme con mi amigo',explain:'Patrón: 〇(lugar)へ + 〇に + 〇に行く. 「<ruby>会<rt>あ</rt></ruby>う」→ raíz「<ruby>会<rt>あ</rt></ruby>い」+ に行く.'}
+];
+
+const niikuConjPool = [
+    {dict:'<ruby>食<rt>た</rt></ruby>べる',verb:'に<ruby>行<rt>い</rt></ruby>きましょう',correct:'<ruby>食<rt>た</rt></ruby>べに<ruby>行<rt>い</rt></ruby>きましょう',wrong:['<ruby>食<rt>た</rt></ruby>べるに<ruby>行<rt>い</rt></ruby>きましょう','<ruby>食<rt>た</rt></ruby>べますに<ruby>行<rt>い</rt></ruby>きましょう','<ruby>食<rt>た</rt></ruby>べてに<ruby>行<rt>い</rt></ruby>きましょう'],es:'vamos a comer'},
+    {dict:'<ruby>飲<rt>の</rt></ruby>む',verb:'に<ruby>行<rt>い</rt></ruby>きませんか',correct:'<ruby>飲<rt>の</rt></ruby>みに<ruby>行<rt>い</rt></ruby>きませんか',wrong:['<ruby>飲<rt>の</rt></ruby>むに<ruby>行<rt>い</rt></ruby>きませんか','<ruby>飲<rt>の</rt></ruby>みますに<ruby>行<rt>い</rt></ruby>きませんか','<ruby>飲<rt>の</rt></ruby>んでに<ruby>行<rt>い</rt></ruby>きませんか'],es:'¿no vamos a beber?'},
+    {dict:'<ruby>見<rt>み</rt></ruby>る',verb:'に<ruby>行<rt>い</rt></ruby>きましょう',correct:'<ruby>見<rt>み</rt></ruby>に<ruby>行<rt>い</rt></ruby>きましょう',wrong:['<ruby>見<rt>み</rt></ruby>るに<ruby>行<rt>い</rt></ruby>きましょう','<ruby>見<rt>み</rt></ruby>ますに<ruby>行<rt>い</rt></ruby>きましょう','<ruby>見<rt>み</rt></ruby>てに<ruby>行<rt>い</rt></ruby>きましょう'],es:'vamos a ver'},
+    {dict:'<ruby>買<rt>か</rt></ruby>う',verb:'に<ruby>行<rt>い</rt></ruby>きませんか',correct:'<ruby>買<rt>か</rt></ruby>いに<ruby>行<rt>い</rt></ruby>きませんか',wrong:['<ruby>買<rt>か</rt></ruby>うに<ruby>行<rt>い</rt></ruby>きませんか','<ruby>買<rt>か</rt></ruby>いますに<ruby>行<rt>い</rt></ruby>きませんか','<ruby>買<rt>か</rt></ruby>ってに<ruby>行<rt>い</rt></ruby>きませんか'],es:'¿no vamos a comprar?'},
+    {dict:'<ruby>遊<rt>あそ</rt></ruby>ぶ',verb:'に<ruby>来<rt>き</rt></ruby>ませんか',correct:'<ruby>遊<rt>あそ</rt></ruby>びに<ruby>来<rt>き</rt></ruby>ませんか',wrong:['<ruby>遊<rt>あそ</rt></ruby>ぶに<ruby>来<rt>き</rt></ruby>ませんか','<ruby>遊<rt>あそ</rt></ruby>びますに<ruby>来<rt>き</rt></ruby>ませんか','<ruby>遊<rt>あそ</rt></ruby>んでに<ruby>来<rt>き</rt></ruby>ませんか'],es:'¿no vienes a jugar?'},
+    {dict:'<ruby>勉強<rt>べんきょう</rt></ruby>する',verb:'に<ruby>来<rt>き</rt></ruby>ましょう',correct:'<ruby>勉強<rt>べんきょう</rt></ruby>しに<ruby>来<rt>き</rt></ruby>ましょう',wrong:['<ruby>勉強<rt>べんきょう</rt></ruby>するに<ruby>来<rt>き</rt></ruby>ましょう','<ruby>勉強<rt>べんきょう</rt></ruby>しますに<ruby>来<rt>き</rt></ruby>ましょう','<ruby>勉強<rt>べんきょう</rt></ruby>してに<ruby>来<rt>き</rt></ruby>ましょう'],es:'vamos a estudiar'},
+    {dict:'<ruby>借<rt>か</rt></ruby>りる',verb:'に<ruby>行<rt>い</rt></ruby>きましょう',correct:'<ruby>借<rt>か</rt></ruby>りに<ruby>行<rt>い</rt></ruby>きましょう',wrong:['<ruby>借<rt>か</rt></ruby>りるに<ruby>行<rt>い</rt></ruby>きましょう','<ruby>借<rt>か</rt></ruby>りますに<ruby>行<rt>い</rt></ruby>きましょう','<ruby>借<rt>か</rt></ruby>りてに<ruby>行<rt>い</rt></ruby>きましょう'],es:'vamos a pedir prestado'},
+    {dict:'<ruby>会<rt>あ</rt></ruby>う',verb:'に<ruby>来<rt>き</rt></ruby>ませんか',correct:'<ruby>会<rt>あ</rt></ruby>いに<ruby>来<rt>き</rt></ruby>ませんか',wrong:['<ruby>会<rt>あ</rt></ruby>うに<ruby>来<rt>き</rt></ruby>ませんか','<ruby>会<rt>あ</rt></ruby>いますに<ruby>来<rt>き</rt></ruby>ませんか','<ruby>会<rt>あ</rt></ruby>ってに<ruby>来<rt>き</rt></ruby>ませんか'],es:'¿no vienes a encontrarte?'},
+    {dict:'<ruby>泳<rt>およ</rt></ruby>ぐ',verb:'に<ruby>行<rt>い</rt></ruby>きましょう',correct:'<ruby>泳<rt>およ</rt></ruby>ぎに<ruby>行<rt>い</rt></ruby>きましょう',wrong:['<ruby>泳<rt>およ</rt></ruby>ぐに<ruby>行<rt>い</rt></ruby>きましょう','<ruby>泳<rt>およ</rt></ruby>ぎますに<ruby>行<rt>い</rt></ruby>きましょう','<ruby>泳<rt>およ</rt></ruby>いでに<ruby>行<rt>い</rt></ruby>きましょう'],es:'vamos a nadar'},
+    {dict:'<ruby>読<rt>よ</rt></ruby>む',verb:'に<ruby>行<rt>い</rt></ruby>きませんか',correct:'<ruby>読<rt>よ</rt></ruby>みに<ruby>行<rt>い</rt></ruby>きませんか',wrong:['<ruby>読<rt>よ</rt></ruby>むに<ruby>行<rt>い</rt></ruby>きませんか','<ruby>読<rt>よ</rt></ruby>みますに<ruby>行<rt>い</rt></ruby>きませんか','<ruby>読<rt>よ</rt></ruby>んでに<ruby>行<rt>い</rt></ruby>きませんか'],es:'¿no vamos a leer?'},
+    {dict:'<ruby>話<rt>はな</rt></ruby>す',verb:'に<ruby>来<rt>き</rt></ruby>ましょう',correct:'<ruby>話<rt>はな</rt></ruby>しに<ruby>来<rt>き</rt></ruby>ましょう',wrong:['<ruby>話<rt>はな</rt></ruby>すに<ruby>来<rt>き</rt></ruby>ましょう','<ruby>話<rt>はな</rt></ruby>しますに<ruby>来<rt>き</rt></ruby>ましょう','<ruby>話<rt>はな</rt></ruby>してに<ruby>来<rt>き</rt></ruby>ましょう'],es:'vamos a hablar'},
+    {dict:'<ruby>寝<rt>ね</rt></ruby>る',verb:'に<ruby>帰<rt>かえ</rt></ruby>りましょう',correct:'<ruby>寝<rt>ね</rt></ruby>に<ruby>帰<rt>かえ</rt></ruby>りましょう',wrong:['<ruby>寝<rt>ね</rt></ruby>るに<ruby>帰<rt>かえ</rt></ruby>りましょう','<ruby>寝<rt>ね</rt></ruby>ますに<ruby>帰<rt>かえ</rt></ruby>りましょう','<ruby>寝<rt>ね</rt></ruby>てに<ruby>帰<rt>かえ</rt></ruby>りましょう'],es:'volvamos a casa a dormir'},
 ];
 
 // ===== 形容詞 DATA =====
@@ -2495,18 +2544,23 @@ const desuQuizPool = [
 function renderGrammar(){
     document.getElementById('grammar-list').innerHTML = `
         <div class="grammar-lesson-tabs">
-            <button class="lesson-tab ${currentLesson==='desu'?'active':''}" onclick="setCurrentLesson('desu')">です<span class="btn-es">Ser/Estar</span></button>
-            <button class="lesson-tab ${currentLesson==='katsu'?'active':''}" onclick="setCurrentLesson('katsu')">です活用<span class="btn-es">Conj. ser/estar</span></button>
-            <button class="lesson-tab ${currentLesson==='masu'?'active':''}" onclick="setCurrentLesson('masu')">ます<span class="btn-es">Verbos</span></button>
-            <button class="lesson-tab ${currentLesson==='keiyo'?'active':''}" onclick="setCurrentLesson('keiyo')"><ruby>形容詞<rt>けいようし</rt></ruby><span class="btn-es">Adjetivos</span></button>
-            <button class="lesson-tab ${currentLesson==='mashou'?'active':''}" onclick="setCurrentLesson('mashou')">ましょう<span class="btn-es">Invitaciones</span></button>
-            <button class="lesson-tab ${currentLesson==='tai'?'active':''}" onclick="setCurrentLesson('tai')">〜たい<span class="btn-es">Deseos</span></button>
-            <button class="lesson-tab ${currentLesson==='maeni'?'active':''}" onclick="setCurrentLesson('maeni')">〜<ruby>前<rt>まえ</rt></ruby>に・後で<span class="btn-es">Antes/Después</span></button>
-            <button class="lesson-tab ${currentLesson==='niiku'?'active':''}" onclick="setCurrentLesson('niiku')">〜に<ruby>行<rt>い</rt></ruby>く<span class="btn-es">Ir a hacer</span></button>
-            <button class="lesson-tab ${currentLesson==='joshi'?'active':''}" onclick="setCurrentLesson('joshi')"><ruby>助詞<rt>じょし</rt></ruby><span class="btn-es">Partículas</span></button>
+            <button class="lesson-tab ${currentLesson==='desu'?'active':''}" onclick="setCurrentLesson('desu')">📌 Ser/Estar<span class="lesson-tab-jp">です</span></button>
+            <button class="lesson-tab ${currentLesson==='katsu'?'active':''}" onclick="setCurrentLesson('katsu')">🔄 Conj.<span class="lesson-tab-jp">です活用</span></button>
+            <button class="lesson-tab ${currentLesson==='masu'?'active':''}" onclick="setCurrentLesson('masu')">✋ Verbos<span class="lesson-tab-jp">ます</span></button>
+            <button class="lesson-tab ${currentLesson==='keiyo'?'active':''}" onclick="setCurrentLesson('keiyo')">🌈 Adjetivos<span class="lesson-tab-jp">形容詞</span></button>
+            <button class="lesson-tab ${currentLesson==='mashou'?'active':''}" onclick="setCurrentLesson('mashou')">🤝 Invitaciones<span class="lesson-tab-jp">ましょう</span></button>
+            <button class="lesson-tab ${currentLesson==='tai'?'active':''}" onclick="setCurrentLesson('tai')">💭 Deseos<span class="lesson-tab-jp">〜たい</span></button>
+            <button class="lesson-tab ${currentLesson==='maeni'?'active':''}" onclick="setCurrentLesson('maeni')">⏰ Antes/Después<span class="lesson-tab-jp">〜前に・後で</span></button>
+            <button class="lesson-tab ${currentLesson==='niiku'?'active':''}" onclick="setCurrentLesson('niiku')">🚶 Ir a hacer<span class="lesson-tab-jp">〜に行く</span></button>
+            <button class="lesson-tab ${currentLesson==='joshi'?'active':''}" onclick="setCurrentLesson('joshi')">🔗 Partículas<span class="lesson-tab-jp">助詞</span></button>
         </div>
         <div id="grammar-content"></div>
     `;
+    requestAnimationFrame(()=>{
+        const tabs=document.querySelector('.grammar-lesson-tabs');
+        const active=tabs&&tabs.querySelector('.lesson-tab.active');
+        if(active)tabs.scrollTo({left:active.offsetLeft-tabs.offsetWidth/2+active.offsetWidth/2,behavior:'smooth'});
+    });
     if(currentLesson==='desu'){
         if(grammarMode==='learn') renderDesuLearn();
         else renderDesuPractice();
@@ -2594,8 +2648,10 @@ function showReorderQuestion(){
         <div class="reorder-box">
             <div class="reorder-progress">${reorderQuizIdx+1} / 5</div>
             <div class="reorder-hint">${q.hint}</div>
+            <button class="hint-btn" id="desu-hint-btn" onclick="toggleDesuHint()">💡 Pista (romaji)</button>
+            <div class="romaji-hint" id="desu-romaji-hint" style="display:none"></div>
             <div class="reorder-words" id="word-pool">
-                ${shuffled.map((w,i)=>`<button class="word-btn" onclick="selectWord(${i})" id="wb-${i}">${w}</button>`).join('')}
+                ${shuffled.map((w,i)=>`<div class="word-btn-wrap"><button class="word-btn" style="color:var(--night)" onclick="selectWord(${i})" id="wb-${i}">${w}</button><span class="word-romaji">${kanaToRomaji(rubyToHiragana(w))}</span></div>`).join('')}
             </div>
             <div class="reorder-answer" id="answer-area">
                 <span class="reorder-placeholder">Toca las palabras en orden</span>
@@ -2636,6 +2692,32 @@ function stripRuby(html){
 }
 function rubyToHiragana(html){
     return html.replace(/<ruby>[^<]+<rt>([^<]+)<\/rt><\/ruby>/g,'$1').replace(/<[^>]+>/g,'');
+}
+function hiraganaToRomaji(str){
+    const comp={'きゃ':'kya','きゅ':'kyu','きょ':'kyo','しゃ':'sha','しゅ':'shu','しょ':'sho','ちゃ':'cha','ちゅ':'chu','ちょ':'cho','にゃ':'nya','にゅ':'nyu','にょ':'nyo','ひゃ':'hya','ひゅ':'hyu','ひょ':'hyo','みゃ':'mya','みゅ':'myu','みょ':'myo','りゃ':'rya','りゅ':'ryu','りょ':'ryo','ぎゃ':'gya','ぎゅ':'gyu','ぎょ':'gyo','じゃ':'ja','じゅ':'ju','じょ':'jo','びゃ':'bya','びゅ':'byu','びょ':'byo','ぴゃ':'pya','ぴゅ':'pyu','ぴょ':'pyo'};
+    const single={'あ':'a','い':'i','う':'u','え':'e','お':'o','か':'ka','き':'ki','く':'ku','け':'ke','こ':'ko','さ':'sa','し':'shi','す':'su','せ':'se','そ':'so','た':'ta','ち':'chi','つ':'tsu','て':'te','と':'to','な':'na','に':'ni','ぬ':'nu','ね':'ne','の':'no','は':'wa','ひ':'hi','ふ':'fu','へ':'e','ほ':'ho','ま':'ma','み':'mi','む':'mu','め':'me','も':'mo','や':'ya','ゆ':'yu','よ':'yo','ら':'ra','り':'ri','る':'ru','れ':'re','ろ':'ro','わ':'wa','を':'wo','ん':'n','が':'ga','ぎ':'gi','ぐ':'gu','げ':'ge','ご':'go','ざ':'za','じ':'ji','ず':'zu','ぜ':'ze','ぞ':'zo','だ':'da','ぢ':'ji','づ':'zu','で':'de','ど':'do','ば':'ba','び':'bi','ぶ':'bu','べ':'be','ぼ':'bo','ぱ':'pa','ぴ':'pi','ぷ':'pu','ぺ':'pe','ぽ':'po'};
+    let r='', i=0;
+    while(i<str.length){
+        if(str[i]==='っ'){
+            const nxt=comp[str.slice(i+1,i+3)]||single[str[i+1]]||'';
+            r+=nxt?nxt[0]:'tt'; i++; continue;
+        }
+        const two=str.slice(i,i+2);
+        if(comp[two]){r+=comp[two];i+=2;}
+        else if(single[str[i]]){r+=single[str[i]];i++;}
+        else{r+=str[i];i++;}
+    }
+    return r;
+}
+
+function kanaToRomaji(str){
+    return hiraganaToRomaji(rubyToHiragana(str).replace(/[\u30A1-\u30F6]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x60))).replace(/[^\x00-\x7F]/g,'');
+}
+
+function toggleDesuHint(){
+    const btn = document.getElementById('desu-hint-btn');
+    const active = document.getElementById('word-pool').classList.toggle('pista-active');
+    btn.textContent=active?'🙈 Ocultar pista':'💡 Pista (romaji)';
 }
 
 function checkReorderAnswer(){
@@ -2857,6 +2939,11 @@ function renderKatsuLearn(){
 
 function renderKatsuPractice(){
     document.getElementById('grammar-content').innerHTML = `
+        <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:1rem;">
+            <button class="kanji-quiz-type ${katsuPracMode==='quiz'?'active':''}" onclick="setKatsuPracMode('quiz')">4 opciones</button>
+            <button class="kanji-quiz-type ${katsuPracMode==='reorder'?'active':''}" onclick="setKatsuPracMode('reorder')">Ordenar</button>
+        </div>
+        ${katsuPracMode==='quiz'?`
         <div class="grammar-card" style="text-align:center;">
             <h3>🎯 Práctica: です activación</h3>
             <p style="color:var(--text-light);margin:0.5rem 0;">Selecciona la forma correcta.</p>
@@ -2864,8 +2951,18 @@ function renderKatsuPractice(){
             <button class="btn-practice" onclick="startKatsuQuiz()">Comenzar</button>
         </div>
         <div id="katsu-quiz-area"></div>
+        `:`
+        <div class="grammar-card" style="text-align:center;">
+            <h3>🎯 Orden de palabras</h3>
+            <p style="color:var(--text-light);margin:0.5rem 0;">Ordena las palabras para formar la oración correcta.</p>
+            <p style="color:var(--text-light);font-size:0.9rem;">5 preguntas aleatorias</p>
+            <button class="btn-practice" onclick="startKatsuReorder()">Comenzar</button>
+        </div>
+        <div id="katsu-reorder-area"></div>
+        `}
     `;
 }
+function setKatsuPracMode(m){katsuPracMode=m;renderKatsuPractice();}
 
 function startKatsuQuiz(){
     katsuQuizIdx = 0; katsuCorrect = 0; katsuErrors = [];
@@ -2899,6 +2996,8 @@ function showKatsuQuestion(){
             <div class="masu-q-form">→ ${q.form}</div>
             <div class="masu-q-form-jp">${formNames[q.form]||''}</div>
             <div class="masu-q-meaning">(${q.meaning})</div>
+            <button class="hint-btn" id="katsu-hint-btn" onclick="toggleKatsuHint()">💡 Pista (romaji)</button>
+            <div class="romaji-hint" id="katsu-romaji-hint" style="display:none"></div>
             <div class="masu-options">
                 ${opts.map((o,i)=>`<button class="masu-opt" onclick="checkKatsuAnswer(${i},'${o.replace(/'/g,"\\'")}')"><span>${o}</span></button>`).join('')}
             </div>
@@ -2906,6 +3005,20 @@ function showKatsuQuestion(){
         </div>
     `;
     window._katsuAnswer = q.answer;
+}
+
+function toggleKatsuHint(){
+    const q = katsuQuestions[katsuQuizIdx];
+    const div = document.getElementById('katsu-romaji-hint');
+    const btn = document.getElementById('katsu-hint-btn');
+    if(div.style.display==='none'){
+        div.textContent = hiraganaToRomaji(rubyToHiragana(q.answer));
+        div.style.display='block';
+        btn.textContent='🙈 Ocultar pista';
+    } else {
+        div.style.display='none';
+        btn.textContent='💡 Pista (romaji)';
+    }
 }
 
 function checkKatsuAnswer(idx, selected){
@@ -2952,6 +3065,95 @@ function showKatsuResult(){
             <div class="gr-msg">${msg}</div>
             <div class="gr-detail">${katsuCorrect} / 5 correctas</div>
             <button class="btn-practice" onclick="startKatsuQuiz()">🔄 Intentar de nuevo</button>
+            <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
+            ${errorsHtml}
+        </div>
+    `;
+}
+
+// ===== です活用 REORDER =====
+function startKatsuReorder(){
+    katsuReorderIdx=0; katsuReorderCorrect=0; katsuReorderErrors=[]; katsuCurrentAnswer=[];
+    katsuReorderQuestions=[...katsuReorderPool].sort(()=>Math.random()-0.5).slice(0,5);
+    document.getElementById('grammar-content').querySelector('.grammar-card').style.display='none';
+    showKatsuReorderQuestion();
+}
+function showKatsuReorderQuestion(){
+    katsuCurrentAnswer=[];
+    const q=katsuReorderQuestions[katsuReorderIdx];
+    const shuffled=[...q.words].sort(()=>Math.random()-0.5);
+    window.katsuWordPool=shuffled;
+    document.getElementById('katsu-reorder-area').innerHTML=`
+        <div class="reorder-box">
+            <div class="reorder-progress">${katsuReorderIdx+1} / 5</div>
+            <div class="reorder-hint">${q.hint}</div>
+            <button class="hint-btn" id="katsu-ro-hint-btn" onclick="toggleKatsuReorderHint()">💡 Pista (romaji)</button>
+            <div class="reorder-words" id="katsu-word-pool">
+                ${shuffled.map((w,i)=>`<div class="word-btn-wrap"><button class="word-btn" onclick="selectKatsuWord(${i})" id="krwb-${i}">${w}</button><span class="word-romaji">${kanaToRomaji(rubyToHiragana(w))}</span></div>`).join('')}
+            </div>
+            <div class="reorder-answer" id="katsu-answer-area"><span class="reorder-placeholder">Toca las palabras en orden</span></div>
+            <button class="btn-check" id="katsu-check-btn" onclick="checkKatsuReorderAnswer()" disabled>Verificar</button>
+            <div id="katsu-reorder-feedback"></div>
+        </div>
+    `;
+}
+function toggleKatsuReorderHint(){
+    const active=document.getElementById('katsu-word-pool').classList.toggle('pista-active');
+    document.getElementById('katsu-ro-hint-btn').textContent=active?'🙈 Ocultar pista':'💡 Pista (romaji)';
+}
+function selectKatsuWord(idx){
+    const btn=document.getElementById('krwb-'+idx);
+    if(btn.classList.contains('selected')) return;
+    btn.classList.add('selected');
+    katsuCurrentAnswer.push({idx,word:window.katsuWordPool[idx]});
+    renderKatsuAnswerArea();
+}
+function removeKatsuWord(ansIdx){
+    const removed=katsuCurrentAnswer.splice(ansIdx,1)[0];
+    document.getElementById('krwb-'+removed.idx).classList.remove('selected');
+    renderKatsuAnswerArea();
+}
+function renderKatsuAnswerArea(){
+    const area=document.getElementById('katsu-answer-area');
+    area.innerHTML=katsuCurrentAnswer.length===0
+        ?'<span class="reorder-placeholder">Toca las palabras en orden</span>'
+        :katsuCurrentAnswer.map((a,i)=>`<button class="answer-btn" onclick="removeKatsuWord(${i})">${a.word}</button>`).join('');
+    document.getElementById('katsu-check-btn').disabled=katsuCurrentAnswer.length!==window.katsuWordPool.length;
+}
+function checkKatsuReorderAnswer(){
+    const q=katsuReorderQuestions[katsuReorderIdx];
+    const userAnswer=katsuCurrentAnswer.map(a=>a.word).join('');
+    const isCorrect=stripRuby(userAnswer)===stripRuby(q.answer);
+    const fb=document.getElementById('katsu-reorder-feedback');
+    if(isCorrect){
+        katsuReorderCorrect++;
+        fb.innerHTML=`<div class="reorder-feedback correct">⭕ ¡Correcto!</div>`;
+    } else {
+        katsuReorderErrors.push({hint:q.hint,userAnswer,correctAnswer:q.answer,explain:q.explain});
+        fb.innerHTML=`<div class="reorder-feedback wrong">❌ Incorrecto<br>Respuesta: ${q.answer}</div>`;
+    }
+    document.getElementById('katsu-check-btn').disabled=true;
+    document.querySelectorAll('#katsu-word-pool .word-btn, #katsu-answer-area .answer-btn').forEach(b=>b.style.pointerEvents='none');
+    setTimeout(()=>{
+        katsuReorderIdx++;
+        if(katsuReorderIdx<5) showKatsuReorderQuestion();
+        else showKatsuReorderResult();
+    },1500);
+}
+function showKatsuReorderResult(){
+    const pct=Math.round((katsuReorderCorrect/5)*100);
+    saveScore('katsu',pct);
+    const msg=pct===100?'🎉 ¡Perfecto!':pct>=80?'🌟 ¡Excelente!':pct>=60?'👍 ¡Muy bien!':'📚 ¡Sigue practicando!';
+    let errorsHtml='';
+    if(katsuReorderErrors.length>0){
+        errorsHtml=`<div class="error-review"><h4>❌ Errores (${katsuReorderErrors.length})</h4>${katsuReorderErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${e.hint}</div><div class="error-your">Tu respuesta: ${e.userAnswer}</div><div class="error-correct">✅ Correcta: ${e.correctAnswer}</div><div class="error-explain">📖 ${e.explain}</div></div>`).join('')}</div>`;
+    }
+    document.getElementById('katsu-reorder-area').innerHTML=`
+        <div class="grammar-result">
+            <div class="gr-score">${pct}%</div>
+            <div class="gr-msg">${msg}</div>
+            <div class="gr-detail">${katsuReorderCorrect} / 5 correctas</div>
+            <button class="btn-practice" onclick="startKatsuReorder()">🔄 Intentar de nuevo</button>
             <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
             ${errorsHtml}
         </div>
@@ -3045,8 +3247,14 @@ function renderMashouAnswerArea(){
 
 function checkMashouReorderAnswer(){
     const q = mashouQuestions[mashouQuizIdx];
+    const userWords = currentAnswer.map(a=>a.word);
+    const n = userWords.length;
+    const endingOk = stripRuby(userWords[n-1]) === stripRuby(q.words[q.words.length-1]);
+    const stemOk   = stripRuby(userWords[n-2]) === stripRuby(q.words[q.words.length-2]);
+    const userMid  = userWords.slice(0,-2).map(w=>stripRuby(w)).sort().join('|');
+    const corrMid  = q.words.slice(0,-2).map(w=>stripRuby(w)).sort().join('|');
+    const isCorrect = endingOk && stemOk && (userMid === corrMid);
     const userAnswer = currentAnswer.map(a=>a.word).join('');
-    const isCorrect = stripRuby(userAnswer) === stripRuby(q.answer);
     const fb = document.getElementById('mashou-feedback');
     if(isCorrect){
         mashouCorrect++;
@@ -3439,42 +3647,76 @@ function renderNiikuLearn(){
 
 function renderNiikuPractice(){
     document.getElementById('grammar-content').innerHTML = `
+        <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:1rem;">
+            <button class="kanji-quiz-type ${niikuPracMode==='conj'?'active':''}" onclick="setNiikuPracMode('conj')">Conjugación</button>
+            <button class="kanji-quiz-type ${niikuPracMode==='reorder'?'active':''}" onclick="setNiikuPracMode('reorder')">Ordenar</button>
+        </div>
+        ${niikuPracMode==='conj'?`
         <div class="grammar-card" style="text-align:center;">
-            <h3>🎯 Práctica: 〜に行く・〜に来る</h3>
-            <p style="color:var(--text-light);margin:0.5rem 0;">Ordena las palabras para formar la oración.</p>
+            <h3>🎯 Conjugación: 〜に行く・〜に来る・〜に帰る</h3>
+            <p style="color:var(--text-light);margin:0.5rem 0;">Elige la forma correcta: <strong>raíz de ます + に行きます／来ます／帰ります</strong></p>
             <p style="color:var(--text-light);font-size:0.9rem;">5 preguntas aleatorias</p>
             <button class="btn-practice" onclick="startNiikuQuiz()">Comenzar</button>
         </div>
         <div id="niiku-quiz-area"></div>
+        `:`
+        <div class="grammar-card" style="text-align:center;">
+            <h3>🎯 Orden de palabras: 〜に行く・〜に来る</h3>
+            <p style="color:var(--text-light);margin:0.5rem 0;">Ordena las palabras para formar la oración correcta.</p>
+            <p style="color:var(--text-light);font-size:0.9rem;">5 preguntas aleatorias</p>
+            <button class="btn-practice" onclick="startNiikuReorder()">Comenzar</button>
+        </div>
+        <div id="niiku-quiz-area"></div>
+        `}
     `;
 }
+function setNiikuPracMode(m){niikuPracMode=m;renderNiikuPractice();}
 
 function startNiikuQuiz(){
     niikuQuizIdx = 0; niikuCorrect = 0; niikuErrors = [];
-    niikuQuestions = [...niikuQuizPool].sort(()=>Math.random()-0.5).slice(0,5);
+    niikuQuestions = [...niikuConjPool].sort(()=>Math.random()-0.5).slice(0,5);
     document.getElementById('grammar-content').querySelector('.grammar-card').style.display = 'none';
     showNiikuQuestion();
 }
 
 function showNiikuQuestion(){
-    currentAnswer = [];
     const q = niikuQuestions[niikuQuizIdx];
-    const shuffled = [...q.words].sort(()=>Math.random()-0.5);
-    window._niikuPool = shuffled;
+    const opts = [q.correct, ...q.wrong].sort(()=>Math.random()-0.5);
     document.getElementById('niiku-quiz-area').innerHTML = `
         <div class="reorder-box">
             <div class="reorder-progress">${niikuQuizIdx+1} / 5</div>
-            <div class="reorder-hint">${q.hint}</div>
-            <div class="reorder-words" id="niiku-word-pool">
-                ${shuffled.map((w,i)=>`<button class="word-btn" onclick="selectNiikuWord(${i})" id="niwb-${i}">${w}</button>`).join('')}
+            <div class="masu-q-verb">${q.dict} → ${q.verb}</div>
+            <div class="masu-q-meaning">(${q.es})</div>
+            <div class="masu-options">
+                ${opts.map((o,i)=>`<button class="masu-opt" onclick="checkNiikuAnswer(${i},'${o.replace(/'/g,"\\'")}')"><span>${o}</span></button>`).join('')}
             </div>
-            <div class="reorder-answer" id="niiku-answer-area">
-                <span class="reorder-placeholder">Toca las palabras en orden</span>
-            </div>
-            <button class="btn-check" id="niiku-check-btn" onclick="checkNiikuReorderAnswer()" disabled>Verificar</button>
             <div id="niiku-feedback"></div>
         </div>
     `;
+}
+
+function checkNiikuAnswer(idx, selected){
+    const q = niikuQuestions[niikuQuizIdx];
+    const isCorrect = stripRuby(selected) === stripRuby(q.correct);
+    const fb = document.getElementById('niiku-feedback');
+    document.querySelectorAll('.masu-opt').forEach(b => {
+        b.disabled = true;
+        const t = stripRuby(b.querySelector('span').innerHTML);
+        if(t === stripRuby(q.correct)) b.classList.add('correct');
+        if(t === stripRuby(selected) && !isCorrect) b.classList.add('wrong');
+    });
+    if(isCorrect){
+        niikuCorrect++;
+        fb.innerHTML = `<div class="reorder-feedback correct">⭕ ¡Correcto!</div>`;
+    } else {
+        niikuErrors.push({dict:q.dict, verb:q.verb, es:q.es, selected, correct:q.correct});
+        fb.innerHTML = `<div class="reorder-feedback wrong">❌ Respuesta: ${q.correct}</div>`;
+    }
+    setTimeout(()=>{
+        niikuQuizIdx++;
+        if(niikuQuizIdx < 5) showNiikuQuestion();
+        else showNiikuResult();
+    }, 1500);
 }
 
 function selectNiikuWord(idx){
@@ -3528,7 +3770,7 @@ function showNiikuResult(){
     const msg = pct===100?'🎉 ¡Perfecto!':pct>=80?'🌟 ¡Excelente!':pct>=60?'👍 ¡Muy bien!':'📚 ¡Sigue practicando!';
     let errHtml = '';
     if(niikuErrors.length > 0){
-        errHtml = `<div class="error-review"><h4>❌ Errores (${niikuErrors.length})</h4>${niikuErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${e.hint}</div><div class="error-your">Tu respuesta: ${e.user}</div><div class="error-correct">✅ Correcta: ${e.correct}</div><div class="error-explain">📖 ${e.explain}</div></div>`).join('')}</div>`;
+        errHtml = `<div class="error-review"><h4>❌ Errores (${niikuErrors.length})</h4>${niikuErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${e.dict} → ${e.verb} (${e.es})</div><div class="error-your">Tu respuesta: ${e.selected}</div><div class="error-correct">✅ Correcta: ${e.correct}</div></div>`).join('')}</div>`;
     }
     document.getElementById('niiku-quiz-area').innerHTML = `
         <div class="grammar-result">
@@ -3536,6 +3778,89 @@ function showNiikuResult(){
             <div class="gr-msg">${msg}</div>
             <div class="gr-detail">${niikuCorrect} / 5 correctas</div>
             <button class="btn-practice" onclick="startNiikuQuiz()">🔄 Intentar de nuevo</button>
+            <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
+            ${errHtml}
+        </div>
+    `;
+}
+
+function startNiikuReorder(){
+    niikuQuizIdx=0; niikuCorrect=0; niikuErrors=[]; niikuCurrentAnswer=[];
+    niikuQuestions=[...niikuQuizPool].sort(()=>Math.random()-0.5).slice(0,5);
+    document.getElementById('grammar-content').querySelector('.grammar-card').style.display='none';
+    showNiikuReorderQuestion();
+}
+function showNiikuReorderQuestion(){
+    niikuCurrentAnswer=[];
+    const q=niikuQuestions[niikuQuizIdx];
+    const shuffled=[...q.words].sort(()=>Math.random()-0.5);
+    window._niikuPool=shuffled;
+    document.getElementById('niiku-quiz-area').innerHTML=`
+        <div class="reorder-box">
+            <div class="reorder-progress">${niikuQuizIdx+1} / 5</div>
+            <div class="reorder-hint">${q.hint}</div>
+            <div class="reorder-words" id="niiku-word-pool">
+                ${shuffled.map((w,i)=>`<button class="word-btn" onclick="selectNiikuReorderWord(${i})" id="nirwb-${i}">${w}</button>`).join('')}
+            </div>
+            <div class="reorder-answer" id="niiku-answer-area"><span class="reorder-placeholder">Toca las palabras en orden</span></div>
+            <button class="btn-check" id="niiku-check-btn" onclick="checkNiikuReorderAnswer()" disabled>Verificar</button>
+            <div id="niiku-feedback"></div>
+        </div>
+    `;
+}
+function selectNiikuReorderWord(idx){
+    const btn=document.getElementById('nirwb-'+idx);
+    if(btn.classList.contains('selected')) return;
+    btn.classList.add('selected');
+    niikuCurrentAnswer.push({idx,word:window._niikuPool[idx]});
+    renderNiikuReorderAnswerArea();
+}
+function removeNiikuReorderWord(ansIdx){
+    const removed=niikuCurrentAnswer.splice(ansIdx,1)[0];
+    document.getElementById('nirwb-'+removed.idx).classList.remove('selected');
+    renderNiikuReorderAnswerArea();
+}
+function renderNiikuReorderAnswerArea(){
+    const area=document.getElementById('niiku-answer-area');
+    area.innerHTML=niikuCurrentAnswer.length===0
+        ?'<span class="reorder-placeholder">Toca las palabras en orden</span>'
+        :niikuCurrentAnswer.map((a,i)=>`<button class="answer-btn" onclick="removeNiikuReorderWord(${i})">${a.word}</button>`).join('');
+    document.getElementById('niiku-check-btn').disabled=niikuCurrentAnswer.length!==window._niikuPool.length;
+}
+function checkNiikuReorderAnswer(){
+    const q=niikuQuestions[niikuQuizIdx];
+    const userAnswer=niikuCurrentAnswer.map(a=>a.word).join('');
+    const isCorrect=stripRuby(userAnswer)===stripRuby(q.answer);
+    const fb=document.getElementById('niiku-feedback');
+    if(isCorrect){
+        niikuCorrect++;
+        fb.innerHTML=`<div class="reorder-feedback correct">⭕ ¡Correcto!</div>`;
+    } else {
+        niikuErrors.push({hint:q.hint,user:userAnswer,correct:q.answer,explain:q.explain});
+        fb.innerHTML=`<div class="reorder-feedback wrong">❌ Incorrecto<br>Respuesta: ${q.answer}</div>`;
+    }
+    document.getElementById('niiku-check-btn').disabled=true;
+    document.querySelectorAll('#niiku-word-pool .word-btn, #niiku-answer-area .answer-btn').forEach(b=>b.style.pointerEvents='none');
+    setTimeout(()=>{
+        niikuQuizIdx++;
+        if(niikuQuizIdx<5) showNiikuReorderQuestion();
+        else showNiikuReorderResult();
+    },1500);
+}
+function showNiikuReorderResult(){
+    const pct=Math.round((niikuCorrect/5)*100);
+    saveScore('niiku',pct);
+    const msg=pct===100?'🎉 ¡Perfecto!':pct>=80?'🌟 ¡Excelente!':pct>=60?'👍 ¡Muy bien!':'📚 ¡Sigue practicando!';
+    let errHtml='';
+    if(niikuErrors.length>0){
+        errHtml=`<div class="error-review"><h4>❌ Errores (${niikuErrors.length})</h4>${niikuErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${e.hint}</div><div class="error-your">Tu respuesta: ${e.user}</div><div class="error-correct">✅ Correcta: ${e.correct}</div><div class="error-explain">📖 ${e.explain}</div></div>`).join('')}</div>`;
+    }
+    document.getElementById('niiku-quiz-area').innerHTML=`
+        <div class="grammar-result">
+            <div class="gr-score">${pct}%</div>
+            <div class="gr-msg">${msg}</div>
+            <div class="gr-detail">${niikuCorrect} / 5 correctas</div>
+            <button class="btn-practice" onclick="startNiikuReorder()">🔄 Intentar de nuevo</button>
             <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
             ${errHtml}
         </div>
@@ -3740,12 +4065,18 @@ function startKeiyoMeishiQuiz(){
 
 function showKeiyoMeishiQuestion(){
     const q = keiyoMeishiQuestions[keiyoMeishiIdx];
-    const opts = [q.correct, ...q.wrong].sort(()=>Math.random()-0.5);
+    const pool = keiyoType === 'i' ? keiyoIMeishiData : keiyoNaMeishiData;
+    const correctAdj = keiyoType === 'i' ? q.adj : q.adj + 'な';
+    window._keiyoCorrectAdj = correctAdj;
+    const others = pool.filter(item => stripRuby(item.adj) !== stripRuby(q.adj));
+    const wrongAdjs = [...others].sort(()=>Math.random()-0.5).slice(0,3)
+        .map(item => keiyoType === 'i' ? item.adj : item.adj + 'な');
+    const opts = [correctAdj, ...wrongAdjs].sort(()=>Math.random()-0.5);
     document.getElementById('keiyo-quiz-area').innerHTML = `
         <div class="reorder-box">
             <div class="reorder-progress">${keiyoMeishiIdx+1} / 5</div>
-            <p style="color:var(--text-light);font-size:0.85rem;margin-bottom:0.3rem;">Uso antes de sustantivos — Elige la opción correcta</p>
-            <div class="masu-q-verb" style="font-size:1rem;">${q.adj} ＋ ${q.noun}</div>
+            <p style="color:var(--text-light);font-size:0.85rem;margin-bottom:0.3rem;">Elige el adjetivo correcto para completar</p>
+            <div class="masu-q-verb" style="font-size:1.3rem;">（　　）${q.noun}</div>
             <div class="masu-q-meaning">(${q.es})</div>
             <div class="masu-options">
                 ${opts.map((o,i)=>`<button class="masu-opt" onclick="checkKeiyoMeishiAnswer(${i},'${o.replace(/'/g,"\\'")}')"><span>${o}</span></button>`).join('')}
@@ -3757,21 +4088,22 @@ function showKeiyoMeishiQuestion(){
 
 function checkKeiyoMeishiAnswer(idx, selected){
     const q = keiyoMeishiQuestions[keiyoMeishiIdx];
-    const isCorrect = stripRuby(selected) === stripRuby(q.correct);
+    const correctAdj = window._keiyoCorrectAdj;
+    const isCorrect = stripRuby(selected) === stripRuby(correctAdj);
     const feedback = document.getElementById('keiyo-meishi-feedback');
     document.querySelectorAll('.masu-opt').forEach(b => {
         b.disabled = true;
         const t = stripRuby(b.querySelector('span').innerHTML);
-        if(t === stripRuby(q.correct)) b.classList.add('correct');
+        if(t === stripRuby(correctAdj)) b.classList.add('correct');
         if(t === stripRuby(selected) && !isCorrect) b.classList.add('wrong');
     });
     if(isCorrect){
         keiyoMeishiCorrect++;
-        feedback.innerHTML = `<div class="reorder-feedback correct">⭕ ¡Correcto!</div>`;
+        feedback.innerHTML = `<div class="reorder-feedback correct">⭕ ¡Correcto! → ${correctAdj}${q.noun}</div>`;
     } else {
-        const rule = keiyoType === 'i' ? 'い形容詞 + 名詞（変化なし）' : 'な形容詞 + な + 名詞';
-        keiyoMeishiErrors.push({q, selected, rule});
-        feedback.innerHTML = `<div class="reorder-feedback wrong">❌ Respuesta: ${q.correct}</div>`;
+        const rule = keiyoType === 'i' ? 'い形容詞はそのまま名詞の前に置く' : 'な形容詞＋な＋名詞';
+        keiyoMeishiErrors.push({q, selected, correctAdj, rule});
+        feedback.innerHTML = `<div class="reorder-feedback wrong">❌ Respuesta: ${correctAdj}${q.noun}</div>`;
     }
     setTimeout(()=>{
         keiyoMeishiIdx++;
@@ -3786,7 +4118,7 @@ function showKeiyoMeishiResult(){
     const msg = pct===100?'🎉 ¡Perfecto!':pct>=80?'🌟 ¡Excelente!':pct>=60?'👍 ¡Muy bien!':'📚 ¡Sigue practicando!';
     let errorsHtml = '';
     if(keiyoMeishiErrors.length > 0){
-        errorsHtml = `<div class="error-review"><h4>❌ Errores (${keiyoMeishiErrors.length})</h4>${keiyoMeishiErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${e.q.adj} ＋ ${e.q.noun} (${e.q.es})</div><div class="error-explain">📖 ${e.rule}</div><div class="error-your">Tu respuesta: ${e.selected}</div><div class="error-correct">✅ Correcta: ${e.q.correct}</div></div>`).join('')}</div>`;
+        errorsHtml = `<div class="error-review"><h4>❌ Errores (${keiyoMeishiErrors.length})</h4>${keiyoMeishiErrors.map(e=>`<div class="error-item"><div class="error-q">📝 （　　）${e.q.noun} (${e.q.es})</div><div class="error-explain">📖 ${e.rule}</div><div class="error-your">Tu respuesta: ${e.selected}${e.q.noun}</div><div class="error-correct">✅ Correcta: ${e.correctAdj}${e.q.noun}</div></div>`).join('')}</div>`;
     }
     document.getElementById('keiyo-quiz-area').innerHTML = `
         <div class="grammar-result">
@@ -4219,7 +4551,9 @@ const kanjiData = [
             {k:'間',on:'カン・ケン',kun:'あいだ',m:'intervalo',s:12,ex:[['時間','じかん','tiempo'],['間','あいだ','entre']]},
             {k:'今',on:'コン・キン',kun:'いま',m:'ahora',s:4,ex:[['今日','きょう','hoy'],['今','いま','ahora']]},
             {k:'先',on:'セン',kun:'さき',m:'anterior',s:6,ex:[['先生','せんせい','profesor'],['先週','せんしゅう','semana pasada']]},
-            {k:'毎',on:'マイ',kun:'-',m:'cada',s:6,ex:[['毎日','まいにち','cada día'],['毎週','まいしゅう','cada semana']]}
+            {k:'毎',on:'マイ',kun:'-',m:'cada',s:6,ex:[['毎日','まいにち','cada día'],['毎週','まいしゅう','cada semana']]},
+            {k:'半',on:'ハン',kun:'-',m:'mitad',s:5,ex:[['半分','はんぶん','mitad'],['一時半','いちじはん','1:30']]},
+            {k:'方',on:'ホウ',kun:'かた',m:'dirección/forma',s:4,ex:[['方','かた','persona/forma'],['方向','ほうこう','dirección']]}
         ]
     },
     {
@@ -4249,6 +4583,18 @@ const kanjiData = [
         ]
     },
     {
+        name: 'Cuerpo',
+        kanji: [
+            {k:'口',on:'コウ・ク',kun:'くち',m:'boca',s:3,ex:[['口','くち','boca'],['出口','でぐち','salida']]},
+            {k:'目',on:'モク・ボク',kun:'め',m:'ojo',s:5,ex:[['目','め','ojo'],['目標','もくひょう','objetivo']]},
+            {k:'耳',on:'ジ',kun:'みみ',m:'oreja',s:6,ex:[['耳','みみ','oreja'],['耳鳴り','みみなり','tinnitus']]},
+            {k:'手',on:'シュ',kun:'て',m:'mano',s:4,ex:[['手','て','mano'],['手紙','てがみ','carta']]},
+            {k:'足',on:'ソク',kun:'あし',m:'pie/pierna',s:7,ex:[['足','あし','pie'],['足りる','たりる','ser suficiente']]},
+            {k:'体',on:'タイ・テイ',kun:'からだ',m:'cuerpo',s:7,ex:[['体','からだ','cuerpo'],['体育','たいいく','educación física']]},
+            {k:'力',on:'リョク・リキ',kun:'ちから',m:'fuerza',s:2,ex:[['力','ちから','fuerza'],['努力','どりょく','esfuerzo']]}
+        ]
+    },
+    {
         name: 'Naturaleza',
         kanji: [
             {k:'山',on:'サン',kun:'やま',m:'montaña',s:3,ex:[['山','やま','montaña'],['富士山','ふじさん','Monte Fuji']]},
@@ -4257,7 +4603,20 @@ const kanjiData = [
             {k:'気',on:'キ・ケ',kun:'-',m:'espíritu/aire',s:6,ex:[['天気','てんき','clima'],['元気','げんき','energía']]},
             {k:'雨',on:'ウ',kun:'あめ',m:'lluvia',s:8,ex:[['雨','あめ','lluvia'],['大雨','おおあめ','lluvia fuerte']]},
             {k:'空',on:'クウ',kun:'そら・から',m:'cielo/vacío',s:8,ex:[['空','そら','cielo'],['空港','くうこう','aeropuerto']]},
-            {k:'花',on:'カ',kun:'はな',m:'flor',s:7,ex:[['花','はな','flor'],['花見','はなみ','ver flores']]}
+            {k:'花',on:'カ',kun:'はな',m:'flor',s:7,ex:[['花','はな','flor'],['花見','はなみ','ver flores']]},
+            {k:'田',on:'デン',kun:'た',m:'campo de arroz',s:5,ex:[['田んぼ','たんぼ','arrozal'],['田中','たなか','Tanaka']]},
+            {k:'石',on:'セキ・シャク',kun:'いし',m:'piedra',s:5,ex:[['石','いし','piedra'],['石けん','せっけん','jabón']]},
+            {k:'夕',on:'セキ',kun:'ゆう',m:'atardecer',s:3,ex:[['夕方','ゆうがた','tarde'],['夕食','ゆうしょく','cena']]},
+            {k:'岩',on:'ガン',kun:'いわ',m:'roca',s:8,ex:[['岩','いわ','roca'],['岩山','いわやま','monte rocoso']]},
+            {k:'音',on:'オン・イン',kun:'おと',m:'sonido',s:9,ex:[['音楽','おんがく','música'],['音','おと','sonido']]},
+            {k:'林',on:'リン',kun:'はやし',m:'bosquecillo',s:8,ex:[['林','はやし','bosque pequeño'],['林道','りんどう','camino forestal']]},
+            {k:'森',on:'シン',kun:'もり',m:'bosque',s:12,ex:[['森','もり','bosque'],['森林','しんりん','bosque']]},
+            {k:'竹',on:'チク',kun:'たけ',m:'bambú',s:6,ex:[['竹','たけ','bambú'],['竹林','ちくりん','bambusal']]},
+            {k:'犬',on:'ケン',kun:'いぬ',m:'perro',s:4,ex:[['犬','いぬ','perro'],['子犬','こいぬ','cachorro']]},
+            {k:'貝',on:'バイ',kun:'かい',m:'concha',s:7,ex:[['貝','かい','concha'],['貝殻','かいがら','concha marina']]},
+            {k:'牛',on:'ギュウ',kun:'うし',m:'vaca',s:4,ex:[['牛','うし','vaca'],['牛肉','ぎゅうにく','carne de res']]},
+            {k:'魚',on:'ギョ',kun:'さかな',m:'pez',s:11,ex:[['魚','さかな','pez'],['金魚','きんぎょ','pez dorado']]},
+            {k:'鳥',on:'チョウ',kun:'とり',m:'pájaro',s:11,ex:[['鳥','とり','pájaro'],['小鳥','ことり','pajarito']]}
         ]
     },
     {
@@ -4275,7 +4634,9 @@ const kanjiData = [
             {k:'右',on:'ウ・ユウ',kun:'みぎ',m:'derecha',s:5,ex:[['右','みぎ','derecha']]},
             {k:'左',on:'サ',kun:'ひだり',m:'izquierda',s:5,ex:[['左','ひだり','izquierda']]},
             {k:'前',on:'ゼン',kun:'まえ',m:'delante',s:9,ex:[['前','まえ','delante'],['名前','なまえ','nombre']]},
-            {k:'後',on:'ゴ・コウ',kun:'うし(ろ)・あと',m:'detrás/después',s:9,ex:[['後ろ','うしろ','detrás'],['午後','ごご','tarde']]}
+            {k:'後',on:'ゴ・コウ',kun:'うし(ろ)・あと',m:'detrás/después',s:9,ex:[['後ろ','うしろ','detrás'],['午後','ごご','tarde']]},
+            {k:'町',on:'チョウ',kun:'まち',m:'ciudad/barrio',s:7,ex:[['町','まち','ciudad'],['下町','したまち','barrio tradicional']]},
+            {k:'寺',on:'ジ',kun:'てら',m:'templo',s:6,ex:[['寺','てら','templo'],['お寺','おてら','templo budista']]}
         ]
     },
     {
@@ -4292,7 +4653,11 @@ const kanjiData = [
             {k:'読',on:'ドク・トク',kun:'よ(む)',m:'leer',s:14,ex:[['読む','よむ','leer'],['読書','どくしょ','lectura']]},
             {k:'書',on:'ショ',kun:'か(く)',m:'escribir',s:10,ex:[['書く','かく','escribir'],['辞書','じしょ','diccionario']]},
             {k:'話',on:'ワ',kun:'はな(す)',m:'hablar',s:13,ex:[['話す','はなす','hablar'],['電話','でんわ','teléfono']]},
-            {k:'買',on:'バイ',kun:'か(う)',m:'comprar',s:12,ex:[['買う','かう','comprar'],['買い物','かいもの','compras']]}
+            {k:'買',on:'バイ',kun:'か(う)',m:'comprar',s:12,ex:[['買う','かう','comprar'],['買い物','かいもの','compras']]},
+            {k:'立',on:'リツ・リュウ',kun:'た(つ)',m:'estar de pie',s:5,ex:[['立つ','たつ','estar de pie'],['立派','りっぱ','magnífico']]},
+            {k:'休',on:'キュウ',kun:'やす(む)',m:'descansar',s:6,ex:[['休む','やすむ','descansar'],['休日','きゅうじつ','día libre']]},
+            {k:'言',on:'ゲン・ゴン',kun:'い(う)',m:'decir',s:7,ex:[['言う','いう','decir'],['言葉','ことば','palabra']]},
+            {k:'帰',on:'キ',kun:'かえ(る)',m:'regresar',s:10,ex:[['帰る','かえる','regresar'],['帰国','きこく','regresar al país']]}
         ]
     },
     {
@@ -4312,7 +4677,17 @@ const kanjiData = [
             {k:'電',on:'デン',kun:'-',m:'electricidad',s:13,ex:[['電話','でんわ','teléfono'],['電車','でんしゃ','tren']]},
             {k:'語',on:'ゴ',kun:'かた(る)',m:'idioma',s:14,ex:[['日本語','にほんご','japonés'],['英語','えいご','inglés']]},
             {k:'校',on:'コウ',kun:'-',m:'escuela',s:10,ex:[['学校','がっこう','escuela'],['高校','こうこう','preparatoria']]},
-            {k:'店',on:'テン',kun:'みせ',m:'tienda',s:8,ex:[['店','みせ','tienda'],['喫茶店','きっさてん','cafetería']]}
+            {k:'店',on:'テン',kun:'みせ',m:'tienda',s:8,ex:[['店','みせ','tienda'],['喫茶店','きっさてん','cafetería']]},
+            {k:'多',on:'タ',kun:'おお(い)',m:'mucho',s:6,ex:[['多い','おおい','muchos'],['多分','たぶん','quizás']]},
+            {k:'少',on:'ショウ',kun:'すく(ない)・すこ(し)',m:'poco',s:4,ex:[['少ない','すくない','pocos'],['少し','すこし','un poco']]},
+            {k:'明',on:'メイ・ミョウ',kun:'あか(るい)',m:'claro/mañana',s:8,ex:[['明るい','あかるい','brillante'],['明日','あした','mañana']]},
+            {k:'暗',on:'アン',kun:'くら(い)',m:'oscuro',s:13,ex:[['暗い','くらい','oscuro'],['暗記','あんき','memorización']]},
+            {k:'元',on:'ゲン・ガン',kun:'もと',m:'origen/base',s:4,ex:[['元気','げんき','energía'],['元','もと','origen']]},
+            {k:'米',on:'ベイ・マイ',kun:'こめ',m:'arroz/EE.UU.',s:6,ex:[['米','こめ','arroz'],['米国','べいこく','EE.UU.']]},
+            {k:'肉',on:'ニク',kun:'-',m:'carne',s:6,ex:[['肉','にく','carne'],['牛肉','ぎゅうにく','carne de res']]},
+            {k:'茶',on:'チャ・サ',kun:'-',m:'té',s:9,ex:[['お茶','おちゃ','té'],['茶色','ちゃいろ','marrón']]},
+            {k:'好',on:'コウ',kun:'す(き)',m:'gustar',s:6,ex:[['好き','すき','gustar'],['好物','こうぶつ','favorito']]},
+            {k:'物',on:'ブツ・モツ',kun:'もの',m:'cosa/objeto',s:8,ex:[['物','もの','cosa'],['食べ物','たべもの','comida']]}
         ]
     }
 ];
@@ -4324,7 +4699,7 @@ function setKanjiMode(mode){
 
 function setKanjiCategory(idx){
     kanjiCategory=idx;
-    if(idx===8) kanjiMode='learn';
+    if(idx===kanjiData.length) kanjiMode='learn';
     renderKanji();
 }
 
@@ -4443,9 +4818,9 @@ function renderKanjiLearn(){
     document.getElementById('kanji-content').innerHTML=`
         <div class="kanji-cat-tabs">
             ${kanjiData.map((c,i)=>`<button class="kanji-cat-tab ${i===kanjiCategory?'active':''}" onclick="setKanjiCategory(${i})">${c.name}</button>`).join('')}
-            <button class="kanji-cat-tab matome ${kanjiCategory===8?'active':''}" onclick="setKanjiCategory(8)">⭐ Repaso</button>
+            <button class="kanji-cat-tab matome ${kanjiCategory===kanjiData.length?'active':''}" onclick="setKanjiCategory(kanjiData.length)">⭐ Repaso</button>
         </div>
-        ${kanjiCategory===8?renderKanjiMatome():`
+        ${kanjiCategory===kanjiData.length?renderKanjiMatome():`
         <div class="kanji-grid">${cat.kanji.map((k,i)=>`<div class="kanji-card" onclick="openKanjiModal(${kanjiCategory},${i})"><div class="kanji">${k.k}</div></div>`).join('')}</div>
         `}
     `;
@@ -4605,6 +4980,7 @@ function showKanjiResult(){
 
 // ===== VOCAB DATA & FUNCTIONS =====
 let vocabMode = 'learn';
+let vocabPista = false;
 let vocabCategory = 0;
 let vocabQuizType = 'meaning';
 let vocabQuizIdx = 0;
@@ -5090,7 +5466,10 @@ function renderVocabLearn(){
             <button class="vocab-cat-tab matome ${isMatome?'active':''}" onclick="setVocabCategory(${REPASO})">⭐ Repaso</button>
         </div>
         ${isMatome?renderVocabMatome():`
-        <div class="vocab-list">${cat.words.map(w=>`<div class="vocab-item"><span class="vocab-jp">${w.w}</span><span class="vocab-reading">${w.r}</span><span class="vocab-meaning">${w.m}</span></div>`).join('')}</div>
+        <div style="text-align:right;margin-bottom:0.5rem">
+            <button class="hint-btn" id="vocab-pista-btn" onclick="toggleVocabPista()">${vocabPista?'🙈 Ocultar romaji':'💡 Pista (romaji)'}</button>
+        </div>
+        <div class="vocab-list ${vocabPista?'pista-active':''}" id="vocab-list">${cat.words.map(w=>`<div class="vocab-item"><span class="vocab-jp">${w.w}</span><span class="vocab-reading">${w.r}</span><span class="vocab-meaning">${w.m}</span></div>`).join('')}</div>
         `}
     `;
 }
@@ -5132,6 +5511,11 @@ function renderVocabPractice(){
 }
 
 function setVocabQuizType(t){vocabQuizType=t;renderVocabPractice();}
+function toggleVocabPista(){
+    vocabPista=!vocabPista;
+    document.getElementById('vocab-list').classList.toggle('pista-active',vocabPista);
+    document.getElementById('vocab-pista-btn').textContent=vocabPista?'🙈 Ocultar romaji':'💡 Pista (romaji)';
+}
 
 function startVocabQuiz(){
     vocabQuizIdx=0;vocabCorrect=0;vocabErrors=[];
