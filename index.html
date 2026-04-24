@@ -1844,9 +1844,19 @@ let masuPracMode = 'quiz';
 let masuReorderIdx=0;let masuReorderCorrect=0;let masuReorderQuestions=[];let masuReorderErrors=[];let masuCurrentAnswer=[];
 let niikuPracMode = 'conj';
 let tePracMode = 'conj'; // 'conj' | 'reorder'
+let teLearnSubTab = 'base'; // 'base' | 'ouyou'
 let teCardIdx = 0;
+let teOuyouCardIdx = 0;
 let teQuizIdx = 0; let teCorrect = 0; let teQuestions = []; let teErrors = [];
 let teReorderIdx = 0; let teReorderCorrect = 0; let teReorderQuestions = []; let teReorderErrors = []; let teCurrentAnswer = [];
+let taPracMode = 'conj'; // 'conj' | 'reorder'
+let taLearnSubTab = 'base'; // 'base' | 'ouyou'
+let taCardIdx = 0;
+let taOuyouCardIdx = 0;
+let taQuizIdx = 0; let taCorrect = 0; let taQuestions = []; let taErrors = [];
+let taReorderIdx = 0; let taReorderCorrect = 0; let taReorderQuestions = []; let taReorderErrors = []; let taCurrentAnswer = [];
+let taexpType = 'koto'; // 'koto' | 'hou'
+let taexpReorderIdx = 0; let taexpReorderCorrect = 0; let taexpReorderQuestions = []; let taexpReorderErrors = []; let taexpCurrentAnswer = [];
 let niikuQuizIdx = 0;
 let niikuCorrect = 0;
 let niikuQuestions = [];
@@ -2582,6 +2592,8 @@ function renderGrammar(){
             <button class="lesson-tab ${currentLesson==='niiku'?'active':''}" onclick="setCurrentLesson('niiku')">🚶 Ir a hacer<span class="lesson-tab-jp">〜に行く</span></button>
             <button class="lesson-tab ${currentLesson==='joshi'?'active':''}" onclick="setCurrentLesson('joshi')">🔗 Partículas<span class="lesson-tab-jp">助詞</span></button>
             <button class="lesson-tab ${currentLesson==='te'?'active':''}" onclick="setCurrentLesson('te')">➡️ Forma て<span class="lesson-tab-jp">て形</span></button>
+            <button class="lesson-tab ${currentLesson==='ta'?'active':''}" onclick="setCurrentLesson('ta')">📜 Forma た<span class="lesson-tab-jp">た形</span></button>
+            <button class="lesson-tab ${currentLesson==='taexp'?'active':''}" onclick="setCurrentLesson('taexp')">🎯 Experiencias<span class="lesson-tab-jp">たことがある</span></button>
         </div>
         <div id="grammar-content"></div>
     `;
@@ -2617,6 +2629,12 @@ function renderGrammar(){
     } else if(currentLesson==='te'){
         if(grammarMode==='learn') renderTeLearn();
         else renderTePractice();
+    } else if(currentLesson==='ta'){
+        if(grammarMode==='learn') renderTaLearn();
+        else renderTaPractice();
+    } else if(currentLesson==='taexp'){
+        if(grammarMode==='learn') renderTaexpLearn();
+        else renderTaexpPractice();
     } else {
         if(grammarMode==='learn') renderJoshiLearn();
         else renderJoshiPractice();
@@ -4275,9 +4293,14 @@ function teRubyHtml(word, reading){
     return `<ruby>${kanjiPart}<rt>${kanjiReading}</rt></ruby>${hiraPart}`;
 }
 function renderTeLearn(){
+    if(teLearnSubTab === 'ouyou'){ renderTeOuyouLearn(); return; }
     const v = teVerbPool[teCardIdx];
     const subColor = {'G1':'var(--primary)','G2':'var(--ocean)','G3':'#7B2FBE','例外':'#E07A00'};
     document.getElementById('grammar-content').innerHTML = `
+        <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:0.8rem;max-width:360px;margin-left:auto;margin-right:auto;">
+            <button class="mode-tab active" onclick="teLearnSubTab='base';renderTeLearn()">📖 Forma て</button>
+            <button class="mode-tab" onclick="teLearnSubTab='ouyou';renderTeLearn()">💬 Expresiones</button>
+        </div>
         <div class="grammar-card">
             <div style="font-size:1.1rem;font-weight:700;color:var(--night);margin-bottom:0.8rem;">📋 Reglas de conjugación</div>
             <table style="width:100%;border-collapse:collapse;font-family:'Noto Sans JP';font-size:0.85rem;">
@@ -4313,8 +4336,823 @@ function renderTeLearn(){
         <button class="btn-practice" onclick="setGrammarMode('practice')">🎯 Practicar</button>
     `;
 }
+function renderTeOuyouLearn(){
+    const cards = [
+        {
+            title:'Conexión secuencial',
+            expr:'〜て、〜',
+            formation:'Forma て ＋ 、＋ siguiente verbo',
+            desc:'Conecta dos acciones en orden: "hacer A y luego B".',
+            note: null,
+            exs:[
+                {jp:'<ruby>朝<rt>あさ</rt></ruby>ごはんを<ruby>食<rt>た</rt></ruby>べて、<ruby>学校<rt>がっこう</rt></ruby>に<ruby>行<rt>い</rt></ruby>きます。',es:'Como el desayuno y voy a la escuela.'},
+                {jp:'シャワーを<ruby>浴<rt>あ</rt></ruby>びて、<ruby>着替<rt>きが</rt></ruby>えます。',es:'Me ducho y me cambio de ropa.'},
+            ]
+        },
+        {
+            title:'Después de hacer A',
+            expr:'〜てから',
+            formation:'Forma て ＋ から ＋ siguiente verbo',
+            desc:'"Después de hacer A, hacer B." Más énfasis en la secuencia que て solo.',
+            note:'Diferencia con て: てから enfatiza que A está completamente terminado antes de hacer B.',
+            exs:[
+                {jp:'<ruby>宿題<rt>しゅくだい</rt></ruby>をしてから、<ruby>遊<rt>あそ</rt></ruby>びます。',es:'Después de hacer la tarea, juego.'},
+                {jp:'<ruby>手<rt>て</rt></ruby>を<ruby>洗<rt>あら</rt></ruby>ってから、<ruby>食<rt>た</rt></ruby>べます。',es:'Después de lavarme las manos, como.'},
+            ]
+        },
+        {
+            title:'Petición',
+            expr:'〜てください',
+            formation:'Forma て ＋ ください',
+            desc:'"Por favor, haz ~." Forma educada de pedir algo.',
+            note: null,
+            exs:[
+                {jp:'<ruby>少<rt>すこ</rt></ruby>し<ruby>待<rt>ま</rt></ruby>ってください。',es:'Por favor, espera un momento.'},
+                {jp:'ここに<ruby>名前<rt>なまえ</rt></ruby>を<ruby>書<rt>か</rt></ruby>いてください。',es:'Por favor, escribe tu nombre aquí.'},
+            ]
+        },
+        {
+            title:'Acción continua',
+            expr:'〜ています',
+            formation:'Forma て ＋ います',
+            desc:'Acción en progreso ahora, o hábito continuo.',
+            note: null,
+            exs:[
+                {jp:'<ruby>今<rt>いま</rt></ruby>、<ruby>音楽<rt>おんがく</rt></ruby>を<ruby>聴<rt>き</rt></ruby>いています。',es:'Ahora estoy escuchando música.'},
+                {jp:'<ruby>日本語<rt>にほんご</rt></ruby>を<ruby>勉強<rt>べんきょう</rt></ruby>しています。',es:'Estoy estudiando japonés.'},
+            ]
+        },
+        {
+            title:'Pedir permiso',
+            expr:'〜てもいいですか',
+            formation:'Forma て ＋ もいいですか',
+            desc:'"¿Puedo hacer ~?" Para pedir permiso educadamente.',
+            note: null,
+            exs:[
+                {jp:'ここに<ruby>座<rt>すわ</rt></ruby>ってもいいですか。',es:'¿Puedo sentarme aquí?'},
+                {jp:'<ruby>写真<rt>しゃしん</rt></ruby>を<ruby>撮<rt>と</rt></ruby>ってもいいですか。',es:'¿Puedo tomar una foto?'},
+            ]
+        },
+        {
+            title:'Prohibición',
+            expr:'〜てはいけません',
+            formation:'Forma て ＋ はいけません',
+            desc:'"No se puede hacer ~." Expresa prohibición.',
+            note: null,
+            exs:[
+                {jp:'<ruby>廊下<rt>ろうか</rt></ruby>を<ruby>走<rt>はし</rt></ruby>ってはいけません。',es:'No se puede correr en el pasillo.'},
+                {jp:'ここで<ruby>泳<rt>およ</rt></ruby>いではいけません。',es:'No se puede nadar aquí.'},
+            ]
+        },
+    ];
+    const c = cards[teOuyouCardIdx];
+    document.getElementById('grammar-content').innerHTML = `
+        <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:0.8rem;max-width:360px;margin-left:auto;margin-right:auto;">
+            <button class="mode-tab" onclick="teLearnSubTab='base';renderTeLearn()">📖 Forma て</button>
+            <button class="mode-tab active" onclick="teLearnSubTab='ouyou';renderTeLearn()">💬 Expresiones</button>
+        </div>
+        <div class="grammar-card" style="text-align:center;">
+            <div style="font-size:0.8rem;color:var(--text-light);margin-bottom:0.4rem;">${teOuyouCardIdx+1} / ${cards.length}</div>
+            <div style="display:inline-block;background:var(--ocean);color:white;border-radius:20px;padding:0.2rem 1rem;font-size:1rem;font-weight:700;font-family:'Noto Sans JP';margin-bottom:0.5rem;">${c.expr}</div>
+            <div style="font-size:1.15rem;font-weight:700;color:var(--night);margin-bottom:0.3rem;">${c.title}</div>
+            <div style="font-size:0.85rem;background:var(--cream);border-radius:var(--radius-sm);padding:0.4rem 0.8rem;margin-bottom:0.5rem;color:var(--ocean);font-family:'Noto Sans JP';">${c.formation}</div>
+            <div style="font-size:0.9rem;color:var(--text-light);margin-bottom:0.8rem;">${c.desc}</div>
+            ${c.note ? `<div style="font-size:0.8rem;background:#fff8e1;border-left:3px solid var(--accent);padding:0.4rem 0.7rem;border-radius:4px;text-align:left;margin-bottom:0.8rem;font-family:'Noto Sans JP';">⚠️ ${c.note}</div>` : ''}
+            <div style="display:flex;flex-direction:column;gap:0.6rem;text-align:left;">
+                ${c.exs.map(e=>`
+                <div style="background:white;border:1.5px solid var(--ocean);border-radius:var(--radius-sm);padding:0.5rem 0.8rem;">
+                    <div style="font-family:'Noto Sans JP';font-size:1rem;color:var(--night);">${e.jp}</div>
+                    <div style="font-size:0.85rem;color:var(--text-light);margin-top:0.2rem;">${e.es}</div>
+                </div>`).join('')}
+            </div>
+            <div style="display:flex;justify-content:center;gap:1rem;margin-top:1rem;">
+                <button onclick="teOuyouCardIdx=Math.max(0,teOuyouCardIdx-1);renderTeOuyouLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid var(--ocean);border-radius:var(--radius-sm);background:white;color:var(--ocean);font-weight:700;cursor:pointer;">◀ Anterior</button>
+                <button onclick="teOuyouCardIdx=Math.min(${cards.length-1},teOuyouCardIdx+1);renderTeOuyouLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid var(--ocean);border-radius:var(--radius-sm);background:white;color:var(--ocean);font-weight:700;cursor:pointer;">Siguiente ▶</button>
+            </div>
+        </div>
+        <button class="btn-practice" onclick="setGrammarMode('practice')">🎯 Practicar</button>
+    `;
+}
+
+function renderTaLearn(){
+    if(taLearnSubTab === 'ouyou'){ renderTaOuyouLearn(); return; }
+    const v = taVerbPool[taCardIdx];
+    const subColor = {'G1':'var(--primary)','G2':'var(--ocean)','G3':'#7B2FBE','例外':'#E07A00'};
+    document.getElementById('grammar-content').innerHTML = `
+        <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:0.8rem;max-width:360px;margin-left:auto;margin-right:auto;">
+            <button class="mode-tab active" onclick="taLearnSubTab='base';renderTaLearn()">📖 Forma た</button>
+            <button class="mode-tab" onclick="taLearnSubTab='ouyou';renderTaLearn()">💬 Expresiones</button>
+        </div>
+        <div class="grammar-card">
+            <div style="font-size:1.1rem;font-weight:700;color:var(--night);margin-bottom:0.8rem;">📋 Reglas de conjugación</div>
+            <table style="width:100%;border-collapse:collapse;font-family:'Noto Sans JP';font-size:0.85rem;">
+                <tr style="background:var(--cream);">
+                    <th style="padding:0.3rem 0.5rem;text-align:left;color:var(--text-light);">Grupo</th>
+                    <th style="padding:0.3rem 0.5rem;text-align:left;color:var(--text-light);">Terminación</th>
+                    <th style="padding:0.3rem 0.5rem;text-align:left;color:var(--primary);">た形</th>
+                    <th style="padding:0.3rem 0.5rem;text-align:left;color:var(--text-light);">Ejemplo</th>
+                </tr>
+                <tr><td style="padding:0.25rem 0.5rem;">G1</td><td>く</td><td style="color:var(--primary);font-weight:700;">いた</td><td><ruby>書<rt>か</rt></ruby>く→<ruby>書<rt>か</rt></ruby>いた</td></tr>
+                <tr style="background:var(--cream);"><td style="padding:0.25rem 0.5rem;">G1</td><td>ぐ</td><td style="color:var(--primary);font-weight:700;">いだ</td><td><ruby>泳<rt>およ</rt></ruby>ぐ→<ruby>泳<rt>およ</rt></ruby>いだ</td></tr>
+                <tr><td style="padding:0.25rem 0.5rem;">G1</td><td>す</td><td style="color:var(--primary);font-weight:700;">した</td><td><ruby>話<rt>はな</rt></ruby>す→<ruby>話<rt>はな</rt></ruby>した</td></tr>
+                <tr style="background:var(--cream);"><td style="padding:0.25rem 0.5rem;">G1</td><td>む/ぶ/ぬ</td><td style="color:var(--primary);font-weight:700;">んだ</td><td><ruby>読<rt>よ</rt></ruby>む→<ruby>読<rt>よ</rt></ruby>んだ</td></tr>
+                <tr><td style="padding:0.25rem 0.5rem;">G1</td><td>る/う/つ</td><td style="color:var(--primary);font-weight:700;">った</td><td><ruby>買<rt>か</rt></ruby>う→<ruby>買<rt>か</rt></ruby>った</td></tr>
+                <tr style="background:var(--cream);"><td style="padding:0.25rem 0.5rem;">G2</td><td>る</td><td style="color:var(--primary);font-weight:700;">た</td><td><ruby>食<rt>た</rt></ruby>べる→<ruby>食<rt>た</rt></ruby>べた</td></tr>
+                <tr><td style="padding:0.25rem 0.5rem;">G3</td><td>する</td><td style="color:var(--primary);font-weight:700;">した</td><td><ruby>勉強<rt>べんきょう</rt></ruby>する→<ruby>勉強<rt>べんきょう</rt></ruby>した</td></tr>
+                <tr style="background:var(--cream);"><td style="padding:0.25rem 0.5rem;">G3</td><td>くる</td><td style="color:var(--primary);font-weight:700;">きた</td><td><ruby>来<rt>く</rt></ruby>る→<ruby>来<rt>き</rt></ruby>た</td></tr>
+                <tr><td style="padding:0.25rem 0.5rem;color:#E07A00;font-weight:700;">⚠️例外</td><td><ruby>行<rt>い</rt></ruby>く</td><td style="color:var(--primary);font-weight:700;"><ruby>行<rt>い</rt></ruby>った</td><td>—</td></tr>
+            </table>
+        </div>
+        <div class="grammar-card" style="text-align:center;">
+            <div style="font-size:0.8rem;color:var(--text-light);margin-bottom:0.4rem;">${taCardIdx+1} / ${taVerbPool.length}</div>
+            <div style="display:inline-block;background:${subColor[v.group]||'var(--primary)'};color:white;border-radius:20px;padding:0.15rem 0.7rem;font-size:0.75rem;font-weight:700;margin-bottom:0.6rem;">${v.group} &nbsp;·&nbsp; ${v.sub}</div>
+            <div style="font-family:'Noto Sans JP';font-size:2.2rem;font-weight:700;color:var(--night);">${teRubyHtml(v.dict,v.dr)}</div>
+            <div style="font-size:1.5rem;color:var(--text-light);margin:0.3rem 0;">↓</div>
+            <div style="font-family:'Noto Sans JP';font-size:2.4rem;font-weight:700;color:var(--primary);">${teRubyHtml(v.ta,v.tar)}</div>
+            <div style="color:var(--text-light);font-size:0.9rem;margin-top:0.4rem;">${v.es}</div>
+            <div style="display:flex;justify-content:center;gap:1rem;margin-top:1rem;">
+                <button onclick="taCardIdx=Math.max(0,taCardIdx-1);renderTaLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid var(--primary);border-radius:var(--radius-sm);background:white;color:var(--primary);font-weight:700;cursor:pointer;">◀ Anterior</button>
+                <button onclick="taCardIdx=Math.min(taVerbPool.length-1,taCardIdx+1);renderTaLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid var(--primary);border-radius:var(--radius-sm);background:white;color:var(--primary);font-weight:700;cursor:pointer;">Siguiente ▶</button>
+            </div>
+        </div>
+        <button class="btn-practice" onclick="setGrammarMode('practice')">🎯 Practicar</button>
+    `;
+}
+function renderTaOuyouLearn(){
+    const cards = [
+        {
+            title:'Experiencia pasada',
+            expr:'〜たことがある',
+            formation:'Forma た ＋ ことがあります',
+            desc:'"He hecho ~ alguna vez." Expresa experiencias pasadas.',
+            note: null,
+            exs:[
+                {jp:'<ruby>日本<rt>にほん</rt></ruby>に<ruby>行<rt>い</rt></ruby>ったことがあります。',es:'He estado en Japón.'},
+                {jp:'<ruby>寿司<rt>すし</rt></ruby>を<ruby>食<rt>た</rt></ruby>べたことがあります。',es:'He comido sushi.'},
+            ]
+        },
+        {
+            title:'Consejo',
+            expr:'〜たほうがいい',
+            formation:'Forma た ＋ ほうがいいです',
+            desc:'"Es mejor hacer ~." Da un consejo o recomendación.',
+            note: null,
+            exs:[
+                {jp:'<ruby>早<rt>はや</rt></ruby>く<ruby>寝<rt>ね</rt></ruby>たほうがいいです。',es:'Es mejor dormir temprano.'},
+                {jp:'<ruby>薬<rt>くすり</rt></ruby>を<ruby>飲<rt>の</rt></ruby>んだほうがいいです。',es:'Es mejor tomar la medicina.'},
+            ]
+        },
+        {
+            title:'Después de hacer A',
+            expr:'〜たあとで',
+            formation:'Forma た ＋ あとで ＋ siguiente acción',
+            desc:'"Después de hacer A, hacer B." Indica que A ocurre antes que B.',
+            note:'Diferencia con てから: たあとで no implica que B sigue inmediatamente.',
+            exs:[
+                {jp:'<ruby>食<rt>た</rt></ruby>べたあとで、<ruby>散歩<rt>さんぽ</rt></ruby>しました。',es:'Paseé después de comer.'},
+                {jp:'<ruby>宿題<rt>しゅくだい</rt></ruby>をしたあとで、テレビを<ruby>見<rt>み</rt></ruby>ました。',es:'Vi televisión después de hacer la tarea.'},
+            ]
+        },
+        {
+            title:'Razón / Causa',
+            expr:'〜たから',
+            formation:'Forma た ＋ から ＋ resultado',
+            desc:'"Porque hice ~, ..." Explica la razón en tiempo pasado.',
+            note: null,
+            exs:[
+                {jp:'<ruby>疲<rt>つか</rt></ruby>れたから、<ruby>休<rt>やす</rt></ruby>みます。',es:'Descanso porque estoy cansado.'},
+                {jp:'<ruby>雨<rt>あめ</rt></ruby>が<ruby>降<rt>ふ</rt></ruby>ったから、<ruby>家<rt>いえ</rt></ruby>にいました。',es:'Me quedé en casa porque llovió.'},
+            ]
+        },
+        {
+            title:'Pasado casual (forma corta)',
+            expr:'普通体過去',
+            formation:'Forma た (sin です／ます)',
+            desc:'Pasado informal usado en conversación entre amigos o en monólogos.',
+            note:'En habla formal usa ました. た es la forma corta / casual.',
+            exs:[
+                {jp:'<ruby>昨日<rt>きのう</rt></ruby>、<ruby>映画<rt>えいが</rt></ruby>を<ruby>見<rt>み</rt></ruby>た。',es:'Ayer vi una película.'},
+                {jp:'もう<ruby>宿題<rt>しゅくだい</rt></ruby>をした。',es:'Ya hice la tarea.'},
+            ]
+        },
+    ];
+    const c = cards[taOuyouCardIdx];
+    document.getElementById('grammar-content').innerHTML = `
+        <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:0.8rem;max-width:360px;margin-left:auto;margin-right:auto;">
+            <button class="mode-tab" onclick="taLearnSubTab='base';renderTaLearn()">📖 Forma た</button>
+            <button class="mode-tab active" onclick="taLearnSubTab='ouyou';renderTaLearn()">💬 Expresiones</button>
+        </div>
+        <div class="grammar-card" style="text-align:center;">
+            <div style="font-size:0.8rem;color:var(--text-light);margin-bottom:0.4rem;">${taOuyouCardIdx+1} / ${cards.length}</div>
+            <div style="display:inline-block;background:var(--primary);color:white;border-radius:20px;padding:0.2rem 1rem;font-size:1rem;font-weight:700;font-family:'Noto Sans JP';margin-bottom:0.5rem;">${c.expr}</div>
+            <div style="font-size:1.15rem;font-weight:700;color:var(--night);margin-bottom:0.3rem;">${c.title}</div>
+            <div style="font-size:0.85rem;background:var(--cream);border-radius:var(--radius-sm);padding:0.4rem 0.8rem;margin-bottom:0.5rem;color:var(--primary);font-family:'Noto Sans JP';">${c.formation}</div>
+            <div style="font-size:0.9rem;color:var(--text-light);margin-bottom:0.8rem;">${c.desc}</div>
+            ${c.note ? `<div style="font-size:0.8rem;background:#fff8e1;border-left:3px solid var(--accent);padding:0.4rem 0.7rem;border-radius:4px;text-align:left;margin-bottom:0.8rem;font-family:'Noto Sans JP';">⚠️ ${c.note}</div>` : ''}
+            <div style="display:flex;flex-direction:column;gap:0.6rem;text-align:left;">
+                ${c.exs.map(e=>`
+                <div style="background:white;border:1.5px solid var(--primary);border-radius:var(--radius-sm);padding:0.5rem 0.8rem;">
+                    <div style="font-family:'Noto Sans JP';font-size:1rem;color:var(--night);">${e.jp}</div>
+                    <div style="font-size:0.85rem;color:var(--text-light);margin-top:0.2rem;">${e.es}</div>
+                </div>`).join('')}
+            </div>
+            <div style="display:flex;justify-content:center;gap:1rem;margin-top:1rem;">
+                <button onclick="taOuyouCardIdx=Math.max(0,taOuyouCardIdx-1);renderTaOuyouLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid var(--primary);border-radius:var(--radius-sm);background:white;color:var(--primary);font-weight:700;cursor:pointer;">◀ Anterior</button>
+                <button onclick="taOuyouCardIdx=Math.min(${cards.length-1},taOuyouCardIdx+1);renderTaOuyouLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid var(--primary);border-radius:var(--radius-sm);background:white;color:var(--primary);font-weight:700;cursor:pointer;">Siguiente ▶</button>
+            </div>
+        </div>
+        <button class="btn-practice" onclick="setGrammarMode('practice')">🎯 Practicar</button>
+    `;
+}
+
+function setTePracMode(mode){
+    tePracMode = mode;
+    renderTePractice();
+}
+
 function renderTePractice(){
-    document.getElementById('grammar-content').innerHTML = `<p style="text-align:center;color:var(--ocean);padding:2rem;">🚧 Practicar — próximamente</p>`;
+    const isConj = tePracMode === 'conj';
+    document.getElementById('grammar-content').innerHTML = `
+        <div class="grammar-card" style="text-align:center;">
+            <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:1rem;">
+                <button class="mode-tab ${isConj?'active':''}" onclick="setTePracMode('conj')">📊 Conjugación</button>
+                <button class="mode-tab ${!isConj?'active':''}" onclick="setTePracMode('reorder')">🔤 Orden de palabras</button>
+            </div>
+            <h3>🎯 Práctica: て形 — ${isConj?'Conjugación':'Orden de palabras'}</h3>
+            <p style="color:var(--text-light);margin:0.5rem 0;">${isConj?'Selecciona la forma て correcta del verbo.':'Ordena las palabras para formar la oración.'}</p>
+            <p style="color:var(--text-light);font-size:0.9rem;">5 preguntas aleatorias</p>
+            <button class="btn-practice" onclick="${isConj?'startTeConjQuiz()':'startTeReorderQuiz()'}">Comenzar</button>
+        </div>
+        <div id="te-quiz-area"></div>
+    `;
+}
+
+// ===== て形 STEP 4: Conjugación 4択 =====
+function startTeConjQuiz(){
+    teQuizIdx = 0; teCorrect = 0; teErrors = [];
+    teQuestions = [...teVerbPool].sort(()=>Math.random()-0.5).slice(0,5);
+    document.getElementById('grammar-content').querySelector('.grammar-card').style.display = 'none';
+    showTeConjQuestion();
+}
+
+function showTeConjQuestion(){
+    const q = teQuestions[teQuizIdx];
+    const others = teVerbPool.filter(v => stripRuby(v.te) !== stripRuby(q.te));
+    const shuffledOthers = [...others].sort(()=>Math.random()-0.5);
+    let opts = [q];
+    for(let i=0; i<shuffledOthers.length && opts.length<4; i++){
+        if(!opts.some(o=>stripRuby(o.te)===stripRuby(shuffledOthers[i].te))){
+            opts.push(shuffledOthers[i]);
+        }
+    }
+    opts = opts.sort(()=>Math.random()-0.5);
+    window._teOpts = opts;
+    const groupColor = {'G1':'var(--primary)','G2':'var(--ocean)','G3':'#7B2FBE','例外':'#E07A00'};
+    document.getElementById('te-quiz-area').innerHTML = `
+        <div class="reorder-box">
+            <div class="reorder-progress">${teQuizIdx+1} / 5</div>
+            <div style="display:inline-block;background:${groupColor[q.group]||'var(--primary)'};color:white;border-radius:20px;padding:0.15rem 0.7rem;font-size:0.75rem;font-weight:700;margin-bottom:0.6rem;">${q.group} · ${q.sub}</div>
+            <div class="masu-q-verb">${teRubyHtml(q.dict,q.dr)}</div>
+            <div class="masu-q-form">→ て形</div>
+            <div class="masu-q-meaning">(${q.es})</div>
+            <div class="masu-options">
+                ${opts.map((o,i)=>`<button class="masu-opt" onclick="checkTeConjAnswer(${i})"><span>${teRubyHtml(o.te,o.tr)}</span></button>`).join('')}
+            </div>
+            <div id="te-feedback"></div>
+        </div>
+    `;
+}
+
+function checkTeConjAnswer(idx){
+    const q = teQuestions[teQuizIdx];
+    const selected = window._teOpts[idx];
+    const isCorrect = stripRuby(selected.te) === stripRuby(q.te);
+    document.querySelectorAll('#te-quiz-area .masu-opt').forEach((b,i) => {
+        b.disabled = true;
+        if(stripRuby(window._teOpts[i].te) === stripRuby(q.te)) b.classList.add('correct');
+        if(i === idx && !isCorrect) b.classList.add('wrong');
+    });
+    const fb = document.getElementById('te-feedback');
+    if(isCorrect){
+        teCorrect++;
+        fb.innerHTML = `<div class="reorder-feedback correct">⭕ ¡Correcto!</div>`;
+    } else {
+        teErrors.push({dict:q.dict, dr:q.dr, te:q.te, tr:q.tr, es:q.es, group:q.group, sub:q.sub, userTe:selected.te, userTr:selected.tr});
+        fb.innerHTML = `<div class="reorder-feedback wrong">❌ Respuesta: ${teRubyHtml(q.te,q.tr)}</div>`;
+    }
+    setTimeout(()=>{
+        teQuizIdx++;
+        if(teQuizIdx < 5) showTeConjQuestion();
+        else showTeConjResult();
+    }, 1500);
+}
+
+function showTeConjResult(){
+    const pct = Math.round((teCorrect/5)*100);
+    saveScore('te', pct);
+    const msg = pct===100?'🎉 ¡Perfecto!':pct>=80?'🌟 ¡Excelente!':pct>=60?'👍 ¡Muy bien!':'📚 ¡Sigue practicando!';
+    let errHtml = '';
+    if(teErrors.length > 0){
+        errHtml = `<div class="error-review"><h4>❌ Errores (${teErrors.length})</h4>${teErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${teRubyHtml(e.dict,e.dr)} → て形 (${e.es}) [${e.group}·${e.sub}]</div><div class="error-your">Tu respuesta: ${teRubyHtml(e.userTe,e.userTr)}</div><div class="error-correct">✅ Correcta: ${teRubyHtml(e.te,e.tr)}</div></div>`).join('')}</div>`;
+    }
+    document.getElementById('te-quiz-area').innerHTML = `
+        <div class="grammar-result">
+            <div class="gr-score">${pct}%</div>
+            <div class="gr-msg">${msg}</div>
+            <div class="gr-detail">${teCorrect} / 5 correctas</div>
+            <button class="btn-practice" onclick="startTeConjQuiz()">🔄 Intentar de nuevo</button>
+            <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
+            ${errHtml}
+        </div>
+    `;
+}
+
+// ===== て形 STEP 5: Orden de palabras 並び替え =====
+function startTeReorderQuiz(){
+    teReorderIdx = 0; teReorderCorrect = 0; teReorderErrors = [];
+    teReorderQuestions = [...teReorderPool].sort(()=>Math.random()-0.5).slice(0,5);
+    teCurrentAnswer = [];
+    document.getElementById('grammar-content').querySelector('.grammar-card').style.display = 'none';
+    showTeReorderQuestion();
+}
+
+function toggleTeReorderHint(){
+    const active = document.getElementById('te-word-pool').classList.toggle('pista-active');
+    document.getElementById('te-pista-btn').textContent = active ? '🙈 Ocultar furigana' : '💡 Pista (furigana)';
+}
+
+function showTeReorderQuestion(){
+    teCurrentAnswer = [];
+    const q = teReorderQuestions[teReorderIdx];
+    const indices = q.words.map((_,i)=>i).sort(()=>Math.random()-0.5);
+    const shuffledWords = indices.map(i=>q.words[i]);
+    const shuffledR = q.r ? indices.map(i=>q.r[i]) : shuffledWords;
+    window._teReorderPool = shuffledWords;
+    document.getElementById('te-quiz-area').innerHTML = `
+        <div class="reorder-box">
+            <div class="reorder-progress">${teReorderIdx+1} / 5</div>
+            <div class="reorder-hint">${q.hint}</div>
+            <button class="hint-btn" id="te-pista-btn" onclick="toggleTeReorderHint()">💡 Pista (furigana)</button>
+            <div class="reorder-words" id="te-word-pool">
+                ${shuffledWords.map((w,i)=>`<div class="word-btn-wrap"><button class="word-btn" onclick="selectTeWord(${i})" id="tewb-${i}">${w}</button><span class="word-romaji">${shuffledR[i]}</span></div>`).join('')}
+            </div>
+            <div class="reorder-answer" id="te-answer-area">
+                <span class="reorder-placeholder">Toca las palabras en orden</span>
+            </div>
+            <button class="btn-check" id="te-check-btn" onclick="checkTeReorderAnswer()" disabled>Verificar</button>
+            <div id="te-feedback"></div>
+        </div>
+    `;
+}
+
+function selectTeWord(idx){
+    const btn = document.getElementById('tewb-'+idx);
+    if(btn.classList.contains('selected')) return;
+    btn.classList.add('selected');
+    teCurrentAnswer.push({idx:idx, word:window._teReorderPool[idx]});
+    renderTeAnswerArea();
+}
+
+function removeTeWord(ansIdx){
+    const removed = teCurrentAnswer.splice(ansIdx,1)[0];
+    document.getElementById('tewb-'+removed.idx).classList.remove('selected');
+    renderTeAnswerArea();
+}
+
+function renderTeAnswerArea(){
+    const area = document.getElementById('te-answer-area');
+    if(teCurrentAnswer.length === 0){
+        area.innerHTML = '<span class="reorder-placeholder">Toca las palabras en orden</span>';
+    } else {
+        area.innerHTML = teCurrentAnswer.map((a,i)=>`<button class="answer-btn" onclick="removeTeWord(${i})">${a.word}</button>`).join('');
+    }
+    document.getElementById('te-check-btn').disabled = teCurrentAnswer.length !== window._teReorderPool.length;
+}
+
+function checkTeReorderAnswer(){
+    const q = teReorderQuestions[teReorderIdx];
+    const userWords = teCurrentAnswer.map(a=>a.word);
+    const correctAnswer = q.words.join('');
+    const userAnswer = userWords.join('');
+    const isCorrect = stripRuby(userAnswer) === stripRuby(correctAnswer);
+    const fb = document.getElementById('te-feedback');
+    document.getElementById('te-check-btn').disabled = true;
+    document.querySelectorAll('#te-word-pool .word-btn, #te-answer-area .answer-btn').forEach(b=>b.style.pointerEvents='none');
+    if(isCorrect){
+        teReorderCorrect++;
+        fb.innerHTML = `<div class="reorder-feedback correct">⭕ ¡Correcto!</div>`;
+    } else {
+        teReorderErrors.push({hint:q.hint, user:userAnswer, correct:correctAnswer});
+        fb.innerHTML = `<div class="reorder-feedback wrong">❌ Incorrecto<br>Respuesta: ${correctAnswer}</div>`;
+    }
+    setTimeout(()=>{
+        teReorderIdx++;
+        if(teReorderIdx < 5) showTeReorderQuestion();
+        else showTeReorderResult();
+    }, 1500);
+}
+
+function showTeReorderResult(){
+    const pct = Math.round((teReorderCorrect/5)*100);
+    saveScore('te', pct);
+    const msg = pct===100?'🎉 ¡Perfecto!':pct>=80?'🌟 ¡Excelente!':pct>=60?'👍 ¡Muy bien!':'📚 ¡Sigue practicando!';
+    let errHtml = '';
+    if(teReorderErrors.length > 0){
+        errHtml = `<div class="error-review"><h4>❌ Errores (${teReorderErrors.length})</h4>${teReorderErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${e.hint}</div><div class="error-your">Tu respuesta: ${e.user}</div><div class="error-correct">✅ Correcta: ${e.correct}</div></div>`).join('')}</div>`;
+    }
+    document.getElementById('te-quiz-area').innerHTML = `
+        <div class="grammar-result">
+            <div class="gr-score">${pct}%</div>
+            <div class="gr-msg">${msg}</div>
+            <div class="gr-detail">${teReorderCorrect} / 5 correctas</div>
+            <button class="btn-practice" onclick="startTeReorderQuiz()">🔄 Intentar de nuevo</button>
+            <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
+            ${errHtml}
+        </div>
+    `;
+}
+
+// ===== た形 PRACTICAR =====
+function setTaPracMode(mode){
+    taPracMode = mode;
+    renderTaPractice();
+}
+
+function renderTaPractice(){
+    const isConj = taPracMode === 'conj';
+    document.getElementById('grammar-content').innerHTML = `
+        <div class="grammar-card" style="text-align:center;">
+            <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:1rem;">
+                <button class="mode-tab ${isConj?'active':''}" onclick="setTaPracMode('conj')">📊 Conjugación</button>
+                <button class="mode-tab ${!isConj?'active':''}" onclick="setTaPracMode('reorder')">🔤 Orden de palabras</button>
+            </div>
+            <h3>🎯 Práctica: た形 — ${isConj?'Conjugación':'Orden de palabras'}</h3>
+            <p style="color:var(--text-light);margin:0.5rem 0;">${isConj?'Selecciona la forma た correcta del verbo.':'Ordena las palabras para formar la oración.'}</p>
+            <p style="color:var(--text-light);font-size:0.9rem;">5 preguntas aleatorias</p>
+            <button class="btn-practice" onclick="${isConj?'startTaConjQuiz()':'startTaReorderQuiz()'}">Comenzar</button>
+        </div>
+        <div id="ta-quiz-area"></div>
+    `;
+}
+
+function startTaConjQuiz(){
+    taQuizIdx = 0; taCorrect = 0; taErrors = [];
+    taQuestions = [...taVerbPool].sort(()=>Math.random()-0.5).slice(0,5);
+    document.getElementById('grammar-content').querySelector('.grammar-card').style.display = 'none';
+    showTaConjQuestion();
+}
+
+function showTaConjQuestion(){
+    const q = taQuestions[taQuizIdx];
+    const others = taVerbPool.filter(v => stripRuby(v.ta) !== stripRuby(q.ta));
+    const shuffledOthers = [...others].sort(()=>Math.random()-0.5);
+    let opts = [q];
+    for(let i=0; i<shuffledOthers.length && opts.length<4; i++){
+        if(!opts.some(o=>stripRuby(o.ta)===stripRuby(shuffledOthers[i].ta))){
+            opts.push(shuffledOthers[i]);
+        }
+    }
+    opts = opts.sort(()=>Math.random()-0.5);
+    window._taOpts = opts;
+    const groupColor = {'G1':'var(--primary)','G2':'var(--ocean)','G3':'#7B2FBE','例外':'#E07A00'};
+    document.getElementById('ta-quiz-area').innerHTML = `
+        <div class="reorder-box">
+            <div class="reorder-progress">${taQuizIdx+1} / 5</div>
+            <div style="display:inline-block;background:${groupColor[q.group]||'var(--primary)'};color:white;border-radius:20px;padding:0.15rem 0.7rem;font-size:0.75rem;font-weight:700;margin-bottom:0.6rem;">${q.group} · ${q.sub}</div>
+            <div class="masu-q-verb">${teRubyHtml(q.dict,q.dr)}</div>
+            <div class="masu-q-form">→ た形</div>
+            <div class="masu-q-meaning">(${q.es})</div>
+            <div class="masu-options">
+                ${opts.map((o,i)=>`<button class="masu-opt" onclick="checkTaConjAnswer(${i})"><span>${teRubyHtml(o.ta,o.tar)}</span></button>`).join('')}
+            </div>
+            <div id="ta-feedback"></div>
+        </div>
+    `;
+}
+
+function checkTaConjAnswer(idx){
+    const q = taQuestions[taQuizIdx];
+    const selected = window._taOpts[idx];
+    const isCorrect = stripRuby(selected.ta) === stripRuby(q.ta);
+    document.querySelectorAll('#ta-quiz-area .masu-opt').forEach((b,i) => {
+        b.disabled = true;
+        if(stripRuby(window._taOpts[i].ta) === stripRuby(q.ta)) b.classList.add('correct');
+        if(i === idx && !isCorrect) b.classList.add('wrong');
+    });
+    const fb = document.getElementById('ta-feedback');
+    if(isCorrect){
+        taCorrect++;
+        fb.innerHTML = `<div class="reorder-feedback correct">⭕ ¡Correcto!</div>`;
+    } else {
+        taErrors.push({dict:q.dict, dr:q.dr, ta:q.ta, tar:q.tar, es:q.es, group:q.group, sub:q.sub, userTa:selected.ta, userTar:selected.tar});
+        fb.innerHTML = `<div class="reorder-feedback wrong">❌ Respuesta: ${teRubyHtml(q.ta,q.tar)}</div>`;
+    }
+    setTimeout(()=>{
+        taQuizIdx++;
+        if(taQuizIdx < 5) showTaConjQuestion();
+        else showTaConjResult();
+    }, 1500);
+}
+
+function showTaConjResult(){
+    const pct = Math.round((taCorrect/5)*100);
+    saveScore('ta', pct);
+    const msg = pct===100?'🎉 ¡Perfecto!':pct>=80?'🌟 ¡Excelente!':pct>=60?'👍 ¡Muy bien!':'📚 ¡Sigue practicando!';
+    let errHtml = '';
+    if(taErrors.length > 0){
+        errHtml = `<div class="error-review"><h4>❌ Errores (${taErrors.length})</h4>${taErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${teRubyHtml(e.dict,e.dr)} → た形 (${e.es}) [${e.group}·${e.sub}]</div><div class="error-your">Tu respuesta: ${teRubyHtml(e.userTa,e.userTar)}</div><div class="error-correct">✅ Correcta: ${teRubyHtml(e.ta,e.tar)}</div></div>`).join('')}</div>`;
+    }
+    document.getElementById('ta-quiz-area').innerHTML = `
+        <div class="grammar-result">
+            <div class="gr-score">${pct}%</div>
+            <div class="gr-msg">${msg}</div>
+            <div class="gr-detail">${taCorrect} / 5 correctas</div>
+            <button class="btn-practice" onclick="startTaConjQuiz()">🔄 Intentar de nuevo</button>
+            <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
+            ${errHtml}
+        </div>
+    `;
+}
+
+function startTaReorderQuiz(){
+    taReorderIdx = 0; taReorderCorrect = 0; taReorderErrors = [];
+    taReorderQuestions = [...taReorderPool].sort(()=>Math.random()-0.5).slice(0,5);
+    taCurrentAnswer = [];
+    document.getElementById('grammar-content').querySelector('.grammar-card').style.display = 'none';
+    showTaReorderQuestion();
+}
+
+function toggleTaReorderHint(){
+    const active = document.getElementById('ta-word-pool').classList.toggle('pista-active');
+    document.getElementById('ta-pista-btn').textContent = active ? '🙈 Ocultar furigana' : '💡 Pista (furigana)';
+}
+
+function showTaReorderQuestion(){
+    taCurrentAnswer = [];
+    const q = taReorderQuestions[taReorderIdx];
+    const indices = q.words.map((_,i)=>i).sort(()=>Math.random()-0.5);
+    const shuffledWords = indices.map(i=>q.words[i]);
+    const shuffledR = q.r ? indices.map(i=>q.r[i]) : shuffledWords;
+    window._taReorderPool = shuffledWords;
+    document.getElementById('ta-quiz-area').innerHTML = `
+        <div class="reorder-box">
+            <div class="reorder-progress">${taReorderIdx+1} / 5</div>
+            <div class="reorder-hint">${q.hint}</div>
+            <button class="hint-btn" id="ta-pista-btn" onclick="toggleTaReorderHint()">💡 Pista (furigana)</button>
+            <div class="reorder-words" id="ta-word-pool">
+                ${shuffledWords.map((w,i)=>`<div class="word-btn-wrap"><button class="word-btn" onclick="selectTaWord(${i})" id="tawb-${i}">${w}</button><span class="word-romaji">${shuffledR[i]}</span></div>`).join('')}
+            </div>
+            <div class="reorder-answer" id="ta-answer-area">
+                <span class="reorder-placeholder">Toca las palabras en orden</span>
+            </div>
+            <button class="btn-check" id="ta-check-btn" onclick="checkTaReorderAnswer()" disabled>Verificar</button>
+            <div id="ta-feedback"></div>
+        </div>
+    `;
+}
+
+function selectTaWord(idx){
+    const btn = document.getElementById('tawb-'+idx);
+    if(btn.classList.contains('selected')) return;
+    btn.classList.add('selected');
+    taCurrentAnswer.push({idx:idx, word:window._taReorderPool[idx]});
+    renderTaAnswerArea();
+}
+
+function removeTaWord(ansIdx){
+    const removed = taCurrentAnswer.splice(ansIdx,1)[0];
+    document.getElementById('tawb-'+removed.idx).classList.remove('selected');
+    renderTaAnswerArea();
+}
+
+function renderTaAnswerArea(){
+    const area = document.getElementById('ta-answer-area');
+    if(taCurrentAnswer.length === 0){
+        area.innerHTML = '<span class="reorder-placeholder">Toca las palabras en orden</span>';
+    } else {
+        area.innerHTML = taCurrentAnswer.map((a,i)=>`<button class="answer-btn" onclick="removeTaWord(${i})">${a.word}</button>`).join('');
+    }
+    document.getElementById('ta-check-btn').disabled = taCurrentAnswer.length !== window._taReorderPool.length;
+}
+
+function checkTaReorderAnswer(){
+    const q = taReorderQuestions[taReorderIdx];
+    const userWords = taCurrentAnswer.map(a=>a.word);
+    const correctAnswer = q.words.join('');
+    const userAnswer = userWords.join('');
+    const isCorrect = stripRuby(userAnswer) === stripRuby(correctAnswer);
+    const fb = document.getElementById('ta-feedback');
+    document.getElementById('ta-check-btn').disabled = true;
+    document.querySelectorAll('#ta-word-pool .word-btn, #ta-answer-area .answer-btn').forEach(b=>b.style.pointerEvents='none');
+    if(isCorrect){
+        taReorderCorrect++;
+        fb.innerHTML = `<div class="reorder-feedback correct">⭕ ¡Correcto!</div>`;
+    } else {
+        taReorderErrors.push({hint:q.hint, user:userAnswer, correct:correctAnswer});
+        fb.innerHTML = `<div class="reorder-feedback wrong">❌ Incorrecto<br>Respuesta: ${correctAnswer}</div>`;
+    }
+    setTimeout(()=>{
+        taReorderIdx++;
+        if(taReorderIdx < 5) showTaReorderQuestion();
+        else showTaReorderResult();
+    }, 1500);
+}
+
+function showTaReorderResult(){
+    const pct = Math.round((taReorderCorrect/5)*100);
+    saveScore('ta', pct);
+    const msg = pct===100?'🎉 ¡Perfecto!':pct>=80?'🌟 ¡Excelente!':pct>=60?'👍 ¡Muy bien!':'📚 ¡Sigue practicando!';
+    let errHtml = '';
+    if(taReorderErrors.length > 0){
+        errHtml = `<div class="error-review"><h4>❌ Errores (${taReorderErrors.length})</h4>${taReorderErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${e.hint}</div><div class="error-your">Tu respuesta: ${e.user}</div><div class="error-correct">✅ Correcta: ${e.correct}</div></div>`).join('')}</div>`;
+    }
+    document.getElementById('ta-quiz-area').innerHTML = `
+        <div class="grammar-result">
+            <div class="gr-score">${pct}%</div>
+            <div class="gr-msg">${msg}</div>
+            <div class="gr-detail">${taReorderCorrect} / 5 correctas</div>
+            <button class="btn-practice" onclick="startTaReorderQuiz()">🔄 Intentar de nuevo</button>
+            <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
+            ${errHtml}
+        </div>
+    `;
+}
+
+// ===== たことがある・たほうがいい =====
+const taexpData = {
+    koto: {
+        expr:'〜たことがある',
+        title:'Experiencia pasada',
+        formation:'Forma た ＋ ことがあります',
+        desc:'"He hecho ~ alguna vez." Expresa si alguien ha tenido una experiencia. La negación es たことがありません.',
+        note:'Para preguntar: たことがありますか？ Para negar: たことがありません。',
+        exs:[
+            {jp:'<ruby>日本<rt>にほん</rt></ruby>に<ruby>行<rt>い</rt></ruby>ったことがあります。',es:'He estado en Japón.'},
+            {jp:'<ruby>寿司<rt>すし</rt></ruby>を<ruby>食<rt>た</rt></ruby>べたことがあります。',es:'He comido sushi.'},
+            {jp:'<ruby>海<rt>うみ</rt></ruby>で<ruby>泳<rt>およ</rt></ruby>いだことがありません。',es:'Nunca he nadado en el mar.'},
+        ],
+        use:'koto'
+    },
+    hou: {
+        expr:'〜たほうがいい',
+        title:'Consejo / Recomendación',
+        formation:'Forma た ＋ ほうがいいです',
+        desc:'"Es mejor hacer ~." Se usa para dar consejos o recomendaciones. Más directo que てください.',
+        note:'También existe ないほうがいい para recomendar NO hacer algo.',
+        exs:[
+            {jp:'<ruby>早<rt>はや</rt></ruby>く<ruby>寝<rt>ね</rt></ruby>たほうがいいです。',es:'Es mejor dormir temprano.'},
+            {jp:'<ruby>薬<rt>くすり</rt></ruby>を<ruby>飲<rt>の</rt></ruby>んだほうがいいです。',es:'Es mejor tomar la medicina.'},
+            {jp:'もっと<ruby>勉強<rt>べんきょう</rt></ruby>したほうがいいです。',es:'Es mejor estudiar más.'},
+        ],
+        use:'hou'
+    }
+};
+
+function renderTaexpLearn(){
+    const d = taexpData[taexpType];
+    const isKoto = taexpType === 'koto';
+    document.getElementById('grammar-content').innerHTML = `
+        <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:0.8rem;max-width:400px;margin-left:auto;margin-right:auto;">
+            <button class="mode-tab ${isKoto?'active':''}" onclick="taexpType='koto';renderTaexpLearn()">📝 たことがある</button>
+            <button class="mode-tab ${!isKoto?'active':''}" onclick="taexpType='hou';renderTaexpLearn()">💡 たほうがいい</button>
+        </div>
+        <div class="grammar-card" style="text-align:center;">
+            <div style="display:inline-block;background:var(--primary);color:white;border-radius:20px;padding:0.2rem 1rem;font-size:1rem;font-weight:700;font-family:'Noto Sans JP';margin-bottom:0.5rem;">${d.expr}</div>
+            <div style="font-size:1.15rem;font-weight:700;color:var(--night);margin-bottom:0.3rem;">${d.title}</div>
+            <div style="font-size:0.85rem;background:var(--cream);border-radius:var(--radius-sm);padding:0.4rem 0.8rem;margin-bottom:0.5rem;color:var(--primary);font-family:'Noto Sans JP';">${d.formation}</div>
+            <div style="font-size:0.9rem;color:var(--text-light);margin-bottom:0.8rem;">${d.desc}</div>
+            <div style="font-size:0.8rem;background:#fff8e1;border-left:3px solid var(--accent);padding:0.4rem 0.7rem;border-radius:4px;text-align:left;margin-bottom:0.8rem;font-family:'Noto Sans JP';">⚠️ ${d.note}</div>
+            <div style="display:flex;flex-direction:column;gap:0.6rem;text-align:left;">
+                ${d.exs.map(e=>`
+                <div style="background:white;border:1.5px solid var(--primary);border-radius:var(--radius-sm);padding:0.5rem 0.8rem;">
+                    <div style="font-family:'Noto Sans JP';font-size:1rem;color:var(--night);">${e.jp}</div>
+                    <div style="font-size:0.85rem;color:var(--text-light);margin-top:0.2rem;">${e.es}</div>
+                </div>`).join('')}
+            </div>
+        </div>
+        <button class="btn-practice" onclick="setGrammarMode('practice')">🎯 Practicar</button>
+    `;
+}
+
+function renderTaexpPractice(){
+    const isKoto = taexpType === 'koto';
+    document.getElementById('grammar-content').innerHTML = `
+        <div class="grammar-card" style="text-align:center;">
+            <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:1rem;">
+                <button class="mode-tab ${isKoto?'active':''}" onclick="taexpType='koto';renderTaexpPractice()">📝 たことがある</button>
+                <button class="mode-tab ${!isKoto?'active':''}" onclick="taexpType='hou';renderTaexpPractice()">💡 たほうがいい</button>
+            </div>
+            <h3>🎯 Práctica: ${taexpData[taexpType].expr}</h3>
+            <p style="color:var(--text-light);margin:0.5rem 0;">Ordena las palabras para formar la oración.</p>
+            <p style="color:var(--text-light);font-size:0.9rem;">5 preguntas aleatorias</p>
+            <button class="btn-practice" onclick="startTaexpReorder()">Comenzar</button>
+        </div>
+        <div id="taexp-quiz-area"></div>
+    `;
+}
+
+function startTaexpReorder(){
+    taexpReorderIdx = 0; taexpReorderCorrect = 0; taexpReorderErrors = [];
+    const pool = taReorderPool.filter(q => q.use === taexpType);
+    taexpReorderQuestions = [...pool].sort(()=>Math.random()-0.5).slice(0,5);
+    taexpCurrentAnswer = [];
+    document.getElementById('grammar-content').querySelector('.grammar-card').style.display = 'none';
+    showTaexpReorderQuestion();
+}
+
+function toggleTaexpHint(){
+    const active = document.getElementById('taexp-word-pool').classList.toggle('pista-active');
+    document.getElementById('taexp-pista-btn').textContent = active ? '🙈 Ocultar furigana' : '💡 Pista (furigana)';
+}
+
+function showTaexpReorderQuestion(){
+    taexpCurrentAnswer = [];
+    const q = taexpReorderQuestions[taexpReorderIdx];
+    const indices = q.words.map((_,i)=>i).sort(()=>Math.random()-0.5);
+    const shuffledWords = indices.map(i=>q.words[i]);
+    const shuffledR = q.r ? indices.map(i=>q.r[i]) : shuffledWords;
+    window._taexpPool = shuffledWords;
+    document.getElementById('taexp-quiz-area').innerHTML = `
+        <div class="reorder-box">
+            <div class="reorder-progress">${taexpReorderIdx+1} / 5</div>
+            <div class="reorder-hint">${q.hint}</div>
+            <button class="hint-btn" id="taexp-pista-btn" onclick="toggleTaexpHint()">💡 Pista (furigana)</button>
+            <div class="reorder-words" id="taexp-word-pool">
+                ${shuffledWords.map((w,i)=>`<div class="word-btn-wrap"><button class="word-btn" onclick="selectTaexpWord(${i})" id="taexpwb-${i}">${w}</button><span class="word-romaji">${shuffledR[i]}</span></div>`).join('')}
+            </div>
+            <div class="reorder-answer" id="taexp-answer-area">
+                <span class="reorder-placeholder">Toca las palabras en orden</span>
+            </div>
+            <button class="btn-check" id="taexp-check-btn" onclick="checkTaexpReorder()" disabled>Verificar</button>
+            <div id="taexp-feedback"></div>
+        </div>
+    `;
+}
+
+function selectTaexpWord(idx){
+    const btn = document.getElementById('taexpwb-'+idx);
+    if(btn.classList.contains('selected')) return;
+    btn.classList.add('selected');
+    taexpCurrentAnswer.push({idx, word:window._taexpPool[idx]});
+    renderTaexpAnswerArea();
+}
+
+function removeTaexpWord(ansIdx){
+    const removed = taexpCurrentAnswer.splice(ansIdx,1)[0];
+    document.getElementById('taexpwb-'+removed.idx).classList.remove('selected');
+    renderTaexpAnswerArea();
+}
+
+function renderTaexpAnswerArea(){
+    const area = document.getElementById('taexp-answer-area');
+    if(taexpCurrentAnswer.length === 0){
+        area.innerHTML = '<span class="reorder-placeholder">Toca las palabras en orden</span>';
+    } else {
+        area.innerHTML = taexpCurrentAnswer.map((a,i)=>`<button class="answer-btn" onclick="removeTaexpWord(${i})">${a.word}</button>`).join('');
+    }
+    document.getElementById('taexp-check-btn').disabled = taexpCurrentAnswer.length !== window._taexpPool.length;
+}
+
+function checkTaexpReorder(){
+    const q = taexpReorderQuestions[taexpReorderIdx];
+    const correctAnswer = q.words.join('');
+    const userAnswer = taexpCurrentAnswer.map(a=>a.word).join('');
+    const isCorrect = stripRuby(userAnswer) === stripRuby(correctAnswer);
+    document.getElementById('taexp-check-btn').disabled = true;
+    document.querySelectorAll('#taexp-word-pool .word-btn, #taexp-answer-area .answer-btn').forEach(b=>b.style.pointerEvents='none');
+    const fb = document.getElementById('taexp-feedback');
+    if(isCorrect){
+        taexpReorderCorrect++;
+        fb.innerHTML = `<div class="reorder-feedback correct">⭕ ¡Correcto!</div>`;
+    } else {
+        taexpReorderErrors.push({hint:q.hint, user:userAnswer, correct:correctAnswer});
+        fb.innerHTML = `<div class="reorder-feedback wrong">❌ Incorrecto<br>Respuesta: ${correctAnswer}</div>`;
+    }
+    setTimeout(()=>{
+        taexpReorderIdx++;
+        if(taexpReorderIdx < 5) showTaexpReorderQuestion();
+        else showTaexpReorderResult();
+    }, 1500);
+}
+
+function showTaexpReorderResult(){
+    const pct = Math.round((taexpReorderCorrect/5)*100);
+    saveScore('taexp_'+taexpType, pct);
+    const msg = pct===100?'🎉 ¡Perfecto!':pct>=80?'🌟 ¡Excelente!':pct>=60?'👍 ¡Muy bien!':'📚 ¡Sigue practicando!';
+    let errHtml = '';
+    if(taexpReorderErrors.length > 0){
+        errHtml = `<div class="error-review"><h4>❌ Errores (${taexpReorderErrors.length})</h4>${taexpReorderErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${e.hint}</div><div class="error-your">Tu respuesta: ${e.user}</div><div class="error-correct">✅ Correcta: ${e.correct}</div></div>`).join('')}</div>`;
+    }
+    document.getElementById('taexp-quiz-area').innerHTML = `
+        <div class="grammar-result">
+            <div class="gr-score">${pct}%</div>
+            <div class="gr-msg">${msg}</div>
+            <div class="gr-detail">${taexpReorderCorrect} / 5 correctas</div>
+            <button class="btn-practice" onclick="startTaexpReorder()">🔄 Intentar de nuevo</button>
+            <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
+            ${errHtml}
+        </div>
+    `;
 }
 
 // ===== JOSHI (助詞) DATA & FUNCTIONS =====
@@ -5216,41 +6054,135 @@ const teVerbPool = [
 
 const teReorderPool = [
     // てください (10)
-    {words:['もう少し','ゆっくり','話して','ください'],hint:'Por favor habla más despacio',use:'request'},
-    {words:['ここに','名前を','書いて','ください'],hint:'Por favor escribe tu nombre aquí',use:'request'},
-    {words:['この漢字を','読んで','ください'],hint:'Por favor lee este kanji',use:'request'},
-    {words:['窓を','開けて','ください'],hint:'Por favor abre la ventana',use:'request'},
-    {words:['少し','待って','ください'],hint:'Por favor espera un momento',use:'request'},
-    {words:['もう一度','来て','ください'],hint:'Por favor ven otra vez',use:'request'},
-    {words:['先生の','話を','聞いて','ください'],hint:'Por favor escucha al profesor',use:'request'},
-    {words:['少し','急いで','ください'],hint:'Por favor apúrate un poco',use:'request'},
-    {words:['このボタンを','押して','ください'],hint:'Por favor presiona este botón',use:'request'},
-    {words:['漢字を','教えて','ください'],hint:'Por favor enséñame los kanji',use:'request'},
+    {words:['もう少し','ゆっくり','話して','ください'],r:['もうすこし','ゆっくり','はなして','ください'],hint:'Por favor habla más despacio',use:'request'},
+    {words:['ここに','名前を','書いて','ください'],r:['ここに','なまえを','かいて','ください'],hint:'Por favor escribe tu nombre aquí',use:'request'},
+    {words:['この漢字を','読んで','ください'],r:['このかんじを','よんで','ください'],hint:'Por favor lee este kanji',use:'request'},
+    {words:['窓を','開けて','ください'],r:['まどを','あけて','ください'],hint:'Por favor abre la ventana',use:'request'},
+    {words:['少し','待って','ください'],r:['すこし','まって','ください'],hint:'Por favor espera un momento',use:'request'},
+    {words:['もう一度','来て','ください'],r:['もういちど','きて','ください'],hint:'Por favor ven otra vez',use:'request'},
+    {words:['先生の','話を','聞いて','ください'],r:['せんせいの','はなしを','きいて','ください'],hint:'Por favor escucha al profesor',use:'request'},
+    {words:['少し','急いで','ください'],r:['すこし','いそいで','ください'],hint:'Por favor apúrate un poco',use:'request'},
+    {words:['このボタンを','押して','ください'],r:['このボタンを','おして','ください'],hint:'Por favor presiona este botón',use:'request'},
+    {words:['漢字を','教えて','ください'],r:['かんじを','おしえて','ください'],hint:'Por favor enséñame los kanji',use:'request'},
     // てから (6)
-    {words:['手を','洗って','から','食べて','ください'],hint:'Por favor lávate las manos antes de comer',use:'kara'},
-    {words:['宿題を','して','から','遊んで','ください'],hint:'Por favor haz la tarea antes de jugar',use:'kara'},
-    {words:['シャワーを','浴びて','から','寝ます'],hint:'Me ducho antes de dormir',use:'kara'},
-    {words:['起きて','から','朝ごはんを','食べます'],hint:'Como el desayuno después de levantarme',use:'kara'},
-    {words:['パンを','買って','から','帰ります'],hint:'Regreso a casa después de comprar pan',use:'kara'},
-    {words:['準備して','から','出かけます'],hint:'Salgo después de prepararme',use:'kara'},
+    {words:['手を','洗って','から','食べて','ください'],r:['てを','あらって','から','たべて','ください'],hint:'Por favor lávate las manos antes de comer',use:'kara'},
+    {words:['宿題を','して','から','遊んで','ください'],r:['しゅくだいを','して','から','あそんで','ください'],hint:'Por favor haz la tarea antes de jugar',use:'kara'},
+    {words:['シャワーを','浴びて','から','寝ます'],r:['シャワーを','あびて','から','ねます'],hint:'Me ducho antes de dormir',use:'kara'},
+    {words:['起きて','から','朝ごはんを','食べます'],r:['おきて','から','あさごはんを','たべます'],hint:'Como el desayuno después de levantarme',use:'kara'},
+    {words:['パンを','買って','から','帰ります'],r:['パンを','かって','から','かえります'],hint:'Regreso a casa después de comprar pan',use:'kara'},
+    {words:['準備して','から','出かけます'],r:['じゅんびして','から','でかけます'],hint:'Salgo después de prepararme',use:'kara'},
     // ています (5)
-    {words:['今','音楽を','聴いて','います'],hint:'Ahora estoy escuchando música',use:'iru'},
-    {words:['友達を','待って','います'],hint:'Estoy esperando a un amigo',use:'iru'},
-    {words:['日本語を','勉強して','います'],hint:'Estoy estudiando japonés',use:'iru'},
-    {words:['テレビを','見て','います'],hint:'Estoy viendo televisión',use:'iru'},
-    {words:['毎朝','運動して','います'],hint:'Hago ejercicio todas las mañanas',use:'iru'},
+    {words:['今','音楽を','聴いて','います'],r:['いま','おんがくを','きいて','います'],hint:'Ahora estoy escuchando música',use:'iru'},
+    {words:['友達を','待って','います'],r:['ともだちを','まって','います'],hint:'Estoy esperando a un amigo',use:'iru'},
+    {words:['日本語を','勉強して','います'],r:['にほんごを','べんきょうして','います'],hint:'Estoy estudiando japonés',use:'iru'},
+    {words:['テレビを','見て','います'],r:['テレビを','みて','います'],hint:'Estoy viendo televisión',use:'iru'},
+    {words:['毎朝','運動して','います'],r:['まいあさ','うんどうして','います'],hint:'Hago ejercicio todas las mañanas',use:'iru'},
     // てもいいですか (4)
-    {words:['写真を','撮って','もいいですか'],hint:'¿Puedo tomar fotos?',use:'moi'},
-    {words:['ここに','座って','もいいですか'],hint:'¿Puedo sentarme aquí?',use:'moi'},
-    {words:['本を','借りて','もいいですか'],hint:'¿Puedo tomar prestado el libro?',use:'moi'},
-    {words:['あとで','電話して','もいいですか'],hint:'¿Puedo llamarte después?',use:'moi'},
+    {words:['写真を','撮って','もいいですか'],r:['しゃしんを','とって','もいいですか'],hint:'¿Puedo tomar fotos?',use:'moi'},
+    {words:['ここに','座って','もいいですか'],r:['ここに','すわって','もいいですか'],hint:'¿Puedo sentarme aquí?',use:'moi'},
+    {words:['本を','借りて','もいいですか'],r:['ほんを','かりて','もいいですか'],hint:'¿Puedo tomar prestado el libro?',use:'moi'},
+    {words:['あとで','電話して','もいいですか'],r:['あとで','でんわして','もいいですか'],hint:'¿Puedo llamarte después?',use:'moi'},
     // てはいけません (2)
-    {words:['ここで','泳いで','はいけません'],hint:'No se puede nadar aquí',use:'wa'},
-    {words:['廊下を','走って','はいけません'],hint:'No se puede correr en el pasillo',use:'wa'},
+    {words:['ここで','泳いで','はいけません'],r:['ここで','およいで','はいけません'],hint:'No se puede nadar aquí',use:'wa'},
+    {words:['廊下を','走って','はいけません'],r:['ろうかを','はしって','はいけません'],hint:'No se puede correr en el pasillo',use:'wa'},
     // 行く・その他 (3)
-    {words:['バスに','乗って','行きます'],hint:'Voy en autobús',use:'iku'},
-    {words:['急いで','行って','ください'],hint:'Por favor ve rápido',use:'iku'},
-    {words:['コートを','着て','から','出かけます'],hint:'Salgo después de ponerme el abrigo',use:'kara'},
+    {words:['バスに','乗って','行きます'],r:['バスに','のって','いきます'],hint:'Voy en autobús',use:'iku'},
+    {words:['急いで','行って','ください'],r:['いそいで','いって','ください'],hint:'Por favor ve rápido',use:'iku'},
+    {words:['コートを','着て','から','出かけます'],r:['コートを','きて','から','でかけます'],hint:'Salgo después de ponerme el abrigo',use:'kara'},
+    // て接続 (6)
+    {words:['朝ごはんを','食べて','学校に','行きます'],r:['あさごはんを','たべて','がっこうに','いきます'],hint:'Como el desayuno y voy a la escuela',use:'seq'},
+    {words:['シャワーを','浴びて','着替えます'],r:['シャワーを','あびて','きがえます'],hint:'Me ducho y me cambio de ropa',use:'seq'},
+    {words:['本を','買って','読みます'],r:['ほんを','かって','よみます'],hint:'Compro un libro y lo leo',use:'seq'},
+    {words:['音楽を','聴いて','勉強します'],r:['おんがくを','きいて','べんきょうします'],hint:'Escucho música y estudio',use:'seq'},
+    {words:['コーヒーを','飲んで','仕事を','します'],r:['コーヒーを','のんで','しごとを','します'],hint:'Bebo café y trabajo',use:'seq'},
+    {words:['駅まで','歩いて','電車に','乗ります'],r:['えきまで','あるいて','でんしゃに','のります'],hint:'Camino hasta la estación y tomo el tren',use:'seq'},
+];
+
+const taVerbPool = [
+    // G1 く→いた
+    {dict:'書く',dr:'かく',ta:'書いた',tar:'かいた',masu:'書きます',group:'G1',sub:'く→いた',es:'escribir'},
+    {dict:'聞く',dr:'きく',ta:'聞いた',tar:'きいた',masu:'聞きます',group:'G1',sub:'く→いた',es:'escuchar'},
+    {dict:'働く',dr:'はたらく',ta:'働いた',tar:'はたらいた',masu:'働きます',group:'G1',sub:'く→いた',es:'trabajar'},
+    {dict:'歩く',dr:'あるく',ta:'歩いた',tar:'あるいた',masu:'歩きます',group:'G1',sub:'く→いた',es:'caminar'},
+    // G1 ぐ→いだ
+    {dict:'泳ぐ',dr:'およぐ',ta:'泳いだ',tar:'およいだ',masu:'泳ぎます',group:'G1',sub:'ぐ→いだ',es:'nadar'},
+    {dict:'急ぐ',dr:'いそぐ',ta:'急いだ',tar:'いそいだ',masu:'急ぎます',group:'G1',sub:'ぐ→いだ',es:'apurarse'},
+    // G1 す→した
+    {dict:'話す',dr:'はなす',ta:'話した',tar:'はなした',masu:'話します',group:'G1',sub:'す→した',es:'hablar'},
+    {dict:'貸す',dr:'かす',ta:'貸した',tar:'かした',masu:'貸します',group:'G1',sub:'す→した',es:'prestar'},
+    {dict:'押す',dr:'おす',ta:'押した',tar:'おした',masu:'押します',group:'G1',sub:'す→した',es:'empujar'},
+    // G1 む/ぶ→んだ
+    {dict:'読む',dr:'よむ',ta:'読んだ',tar:'よんだ',masu:'読みます',group:'G1',sub:'む/ぶ/ぬ→んだ',es:'leer'},
+    {dict:'飲む',dr:'のむ',ta:'飲んだ',tar:'のんだ',masu:'飲みます',group:'G1',sub:'む/ぶ/ぬ→んだ',es:'beber'},
+    {dict:'遊ぶ',dr:'あそぶ',ta:'遊んだ',tar:'あそんだ',masu:'遊びます',group:'G1',sub:'む/ぶ/ぬ→んだ',es:'jugar'},
+    // G1 る/う/つ→った
+    {dict:'待つ',dr:'まつ',ta:'待った',tar:'まった',masu:'待ちます',group:'G1',sub:'る/う/つ→った',es:'esperar'},
+    {dict:'買う',dr:'かう',ta:'買った',tar:'かった',masu:'買います',group:'G1',sub:'る/う/つ→った',es:'comprar'},
+    {dict:'洗う',dr:'あらう',ta:'洗った',tar:'あらった',masu:'洗います',group:'G1',sub:'る/う/つ→った',es:'lavar'},
+    {dict:'撮る',dr:'とる',ta:'撮った',tar:'とった',masu:'撮ります',group:'G1',sub:'る/う/つ→った',es:'fotografiar'},
+    {dict:'帰る',dr:'かえる',ta:'帰った',tar:'かえった',masu:'帰ります',group:'G1',sub:'る/う/つ→った',es:'regresar'},
+    {dict:'乗る',dr:'のる',ta:'乗った',tar:'のった',masu:'乗ります',group:'G1',sub:'る/う/つ→った',es:'subir'},
+    {dict:'作る',dr:'つくる',ta:'作った',tar:'つくった',masu:'作ります',group:'G1',sub:'る/う/つ→った',es:'hacer'},
+    {dict:'座る',dr:'すわる',ta:'座った',tar:'すわった',masu:'座ります',group:'G1',sub:'る/う/つ→った',es:'sentarse'},
+    {dict:'走る',dr:'はしる',ta:'走った',tar:'はしった',masu:'走ります',group:'G1',sub:'る/う/つ→った',es:'correr'},
+    // G2 る→た
+    {dict:'食べる',dr:'たべる',ta:'食べた',tar:'たべた',masu:'食べます',group:'G2',sub:'る→た',es:'comer'},
+    {dict:'見る',dr:'みる',ta:'見た',tar:'みた',masu:'見ます',group:'G2',sub:'る→た',es:'ver'},
+    {dict:'起きる',dr:'おきる',ta:'起きた',tar:'おきた',masu:'起きます',group:'G2',sub:'る→た',es:'levantarse'},
+    {dict:'寝る',dr:'ねる',ta:'寝た',tar:'ねた',masu:'寝ます',group:'G2',sub:'る→た',es:'dormir'},
+    {dict:'開ける',dr:'あける',ta:'開けた',tar:'あけた',masu:'開けます',group:'G2',sub:'る→た',es:'abrir'},
+    {dict:'浴びる',dr:'あびる',ta:'浴びた',tar:'あびた',masu:'浴びます',group:'G2',sub:'る→た',es:'ducharse'},
+    {dict:'教える',dr:'おしえる',ta:'教えた',tar:'おしえた',masu:'教えます',group:'G2',sub:'る→た',es:'enseñar'},
+    {dict:'着る',dr:'きる',ta:'着た',tar:'きた',masu:'着ます',group:'G2',sub:'る→た',es:'ponerse ropa'},
+    {dict:'借りる',dr:'かりる',ta:'借りた',tar:'かりた',masu:'借ります',group:'G2',sub:'る→た',es:'pedir prestado'},
+    // G3 する→した
+    {dict:'勉強する',dr:'べんきょうする',ta:'勉強した',tar:'べんきょうした',masu:'勉強します',group:'G3',sub:'する→した',es:'estudiar'},
+    {dict:'電話する',dr:'でんわする',ta:'電話した',tar:'でんわした',masu:'電話します',group:'G3',sub:'する→した',es:'llamar por tel.'},
+    {dict:'運動する',dr:'うんどうする',ta:'運動した',tar:'うんどうした',masu:'運動します',group:'G3',sub:'する→した',es:'hacer ejercicio'},
+    {dict:'料理する',dr:'りょうりする',ta:'料理した',tar:'りょうりした',masu:'料理します',group:'G3',sub:'する→した',es:'cocinar'},
+    {dict:'散歩する',dr:'さんぽする',ta:'散歩した',tar:'さんぽした',masu:'散歩します',group:'G3',sub:'する→した',es:'pasear'},
+    {dict:'準備する',dr:'じゅんびする',ta:'準備した',tar:'じゅんびした',masu:'準備します',group:'G3',sub:'する→した',es:'preparar'},
+    // G3 くる→きた
+    {dict:'来る',dr:'くる',ta:'来た',tar:'きた',masu:'来ます',group:'G3',sub:'くる→きた',es:'venir'},
+    // 例外
+    {dict:'行く',dr:'いく',ta:'行った',tar:'いった',masu:'行きます',group:'例外',sub:'例外',es:'ir'},
+];
+
+const taReorderPool = [
+    // たことがある (10)
+    {words:['日本に','行った','ことが','あります'],r:['にほんに','いった','ことが','あります'],hint:'He estado en Japón',use:'koto'},
+    {words:['寿司を','食べた','ことが','あります'],r:['すしを','たべた','ことが','あります'],hint:'He comido sushi',use:'koto'},
+    {words:['日本語を','勉強した','ことが','あります'],r:['にほんごを','べんきょうした','ことが','あります'],hint:'He estudiado japonés',use:'koto'},
+    {words:['映画を','見た','ことが','あります'],r:['えいがを','みた','ことが','あります'],hint:'He visto una película',use:'koto'},
+    {words:['自転車に','乗った','ことが','あります'],r:['じてんしゃに','のった','ことが','あります'],hint:'He montado en bicicleta',use:'koto'},
+    {words:['一人で','料理した','ことが','あります'],r:['ひとりで','りょうりした','ことが','あります'],hint:'He cocinado solo',use:'koto'},
+    {words:['海で','泳いだ','ことが','あります'],r:['うみで','およいだ','ことが','あります'],hint:'He nadado en el mar',use:'koto'},
+    {words:['写真を','撮った','ことが','あります'],r:['しゃしんを','とった','ことが','あります'],hint:'He tomado fotos',use:'koto'},
+    {words:['日本語の','本を','読んだ','ことが','あります'],r:['にほんごの','ほんを','よんだ','ことが','あります'],hint:'He leído un libro en japonés',use:'koto'},
+    {words:['先生に','電話した','ことが','あります'],r:['せんせいに','でんわした','ことが','あります'],hint:'He llamado al profesor',use:'koto'},
+    // たほうがいい (8)
+    {words:['早く','寝た','ほうが','いいです'],r:['はやく','ねた','ほうが','いいです'],hint:'Es mejor dormir temprano',use:'hou'},
+    {words:['薬を','飲んだ','ほうが','いいです'],r:['くすりを','のんだ','ほうが','いいです'],hint:'Es mejor tomar la medicina',use:'hou'},
+    {words:['もっと','勉強した','ほうが','いいです'],r:['もっと','べんきょうした','ほうが','いいです'],hint:'Es mejor estudiar más',use:'hou'},
+    {words:['先生に','聞いた','ほうが','いいです'],r:['せんせいに','きいた','ほうが','いいです'],hint:'Es mejor preguntarle al profesor',use:'hou'},
+    {words:['野菜を','食べた','ほうが','いいです'],r:['やさいを','たべた','ほうが','いいです'],hint:'Es mejor comer verduras',use:'hou'},
+    {words:['急いだ','ほうが','いいです'],r:['いそいだ','ほうが','いいです'],hint:'Es mejor apurarse',use:'hou'},
+    {words:['毎日','運動した','ほうが','いいです'],r:['まいにち','うんどうした','ほうが','いいです'],hint:'Es mejor hacer ejercicio todos los días',use:'hou'},
+    {words:['もっと','ゆっくり','話した','ほうが','いいです'],r:['もっと','ゆっくり','はなした','ほうが','いいです'],hint:'Es mejor hablar más despacio',use:'hou'},
+    // たあとで (6)
+    {words:['食べた','あとで','散歩しました'],r:['たべた','あとで','さんぽしました'],hint:'Paseé después de comer',use:'ato'},
+    {words:['宿題を','した','あとで','テレビを','見ました'],r:['しゅくだいを','した','あとで','テレビを','みました'],hint:'Vi televisión después de hacer la tarea',use:'ato'},
+    {words:['シャワーを','浴びた','あとで','寝ます'],r:['シャワーを','あびた','あとで','ねます'],hint:'Duermo después de ducharme',use:'ato'},
+    {words:['授業を','聞いた','あとで','帰りました'],r:['じゅぎょうを','きいた','あとで','かえりました'],hint:'Regresé después de escuchar la clase',use:'ato'},
+    {words:['本を','読んだ','あとで','レポートを','書きました'],r:['ほんを','よんだ','あとで','レポートを','かきました'],hint:'Escribí el informe después de leer el libro',use:'ato'},
+    {words:['準備した','あとで','出かけます'],r:['じゅんびした','あとで','でかけます'],hint:'Salgo después de prepararme',use:'ato'},
+    // 普通体過去 (6)
+    {words:['昨日','映画を','見た'],r:['きのう','えいがを','みた'],hint:'Ayer vi una película',use:'plain'},
+    {words:['朝','シャワーを','浴びた'],r:['あさ','シャワーを','あびた'],hint:'Por la mañana me duché',use:'plain'},
+    {words:['もう','宿題を','した'],r:['もう','しゅくだいを','した'],hint:'Ya hice la tarea',use:'plain'},
+    {words:['昨日','本を','買った'],r:['きのう','ほんを','かった'],hint:'Ayer compré un libro',use:'plain'},
+    {words:['先週','友達と','料理した'],r:['せんしゅう','ともだちと','りょうりした'],hint:'La semana pasada cociné con un amigo',use:'plain'},
+    {words:['さっき','電話した'],r:['さっき','でんわした'],hint:'Llamé hace un momento',use:'plain'},
 ];
 
 // ===== VOCAB DATA & FUNCTIONS =====
