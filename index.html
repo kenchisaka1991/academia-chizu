@@ -1855,8 +1855,6 @@ let taCardIdx = 0;
 let taOuyouCardIdx = 0;
 let taQuizIdx = 0; let taCorrect = 0; let taQuestions = []; let taErrors = [];
 let taReorderIdx = 0; let taReorderCorrect = 0; let taReorderQuestions = []; let taReorderErrors = []; let taCurrentAnswer = [];
-let taexpType = 'koto'; // 'koto' | 'hou'
-let taexpReorderIdx = 0; let taexpReorderCorrect = 0; let taexpReorderQuestions = []; let taexpReorderErrors = []; let taexpCurrentAnswer = [];
 let niikuQuizIdx = 0;
 let niikuCorrect = 0;
 let niikuQuestions = [];
@@ -2618,7 +2616,6 @@ function renderGrammar(){
             <button class="lesson-tab ${currentLesson==='joshi'?'active':''}" onclick="setCurrentLesson('joshi')">🔗 Partículas<span class="lesson-tab-jp">助詞</span></button>
             <button class="lesson-tab ${currentLesson==='te'?'active':''}" onclick="setCurrentLesson('te')">➡️ Forma て<span class="lesson-tab-jp">て形</span></button>
             <button class="lesson-tab ${currentLesson==='ta'?'active':''}" onclick="setCurrentLesson('ta')">📜 Forma た<span class="lesson-tab-jp">た形</span></button>
-            <button class="lesson-tab ${currentLesson==='taexp'?'active':''}" onclick="setCurrentLesson('taexp')">🎯 Experiencias<span class="lesson-tab-jp">たことがある</span></button>
         </div>
         <div id="grammar-content"></div>
     `;
@@ -2657,9 +2654,6 @@ function renderGrammar(){
     } else if(currentLesson==='ta'){
         if(grammarMode==='learn') renderTaLearn();
         else renderTaPractice();
-    } else if(currentLesson==='taexp'){
-        if(grammarMode==='learn') renderTaexpLearn();
-        else renderTaexpPractice();
     } else {
         if(grammarMode==='learn') renderJoshiLearn();
         else renderJoshiPractice();
@@ -5003,182 +4997,6 @@ function showTaReorderResult(){
     `;
 }
 
-// ===== たことがある・たほうがいい =====
-const taexpData = {
-    koto: {
-        expr:'〜たことがある',
-        title:'Experiencia pasada',
-        formation:'Forma た ＋ ことがあります',
-        desc:'"He hecho ~ alguna vez." Expresa si alguien ha tenido una experiencia. La negación es たことがありません.',
-        note:'Para preguntar: たことがありますか？ Para negar: たことがありません。',
-        exs:[
-            {jp:'<ruby>日本<rt>にほん</rt></ruby>に<ruby>行<rt>い</rt></ruby>ったことがあります。',es:'He estado en Japón.'},
-            {jp:'<ruby>寿司<rt>すし</rt></ruby>を<ruby>食<rt>た</rt></ruby>べたことがあります。',es:'He comido sushi.'},
-            {jp:'<ruby>海<rt>うみ</rt></ruby>で<ruby>泳<rt>およ</rt></ruby>いだことがありません。',es:'Nunca he nadado en el mar.'},
-        ],
-        use:'koto'
-    },
-    hou: {
-        expr:'〜たほうがいい',
-        title:'Consejo / Recomendación',
-        formation:'Forma た ＋ ほうがいいです',
-        desc:'"Es mejor hacer ~." Se usa para dar consejos o recomendaciones. Más directo que てください.',
-        note:'También existe ないほうがいい para recomendar NO hacer algo.',
-        exs:[
-            {jp:'<ruby>早<rt>はや</rt></ruby>く<ruby>寝<rt>ね</rt></ruby>たほうがいいです。',es:'Es mejor dormir temprano.'},
-            {jp:'<ruby>薬<rt>くすり</rt></ruby>を<ruby>飲<rt>の</rt></ruby>んだほうがいいです。',es:'Es mejor tomar la medicina.'},
-            {jp:'もっと<ruby>勉強<rt>べんきょう</rt></ruby>したほうがいいです。',es:'Es mejor estudiar más.'},
-        ],
-        use:'hou'
-    }
-};
-
-function renderTaexpLearn(){
-    const d = taexpData[taexpType];
-    const isKoto = taexpType === 'koto';
-    document.getElementById('grammar-content').innerHTML = `
-        <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:0.8rem;max-width:400px;margin-left:auto;margin-right:auto;">
-            <button class="mode-tab ${isKoto?'active':''}" onclick="taexpType='koto';renderTaexpLearn()">📝 たことがある</button>
-            <button class="mode-tab ${!isKoto?'active':''}" onclick="taexpType='hou';renderTaexpLearn()">💡 たほうがいい</button>
-        </div>
-        <div class="grammar-card" style="text-align:center;">
-            <div style="display:inline-block;background:var(--primary);color:white;border-radius:20px;padding:0.2rem 1rem;font-size:1rem;font-weight:700;font-family:'Noto Sans JP';margin-bottom:0.5rem;">${d.expr}</div>
-            <div style="font-size:1.15rem;font-weight:700;color:var(--night);margin-bottom:0.3rem;">${d.title}</div>
-            <div style="font-size:0.85rem;background:var(--cream);border-radius:var(--radius-sm);padding:0.4rem 0.8rem;margin-bottom:0.5rem;color:var(--primary);font-family:'Noto Sans JP';">${d.formation}</div>
-            <div style="font-size:0.9rem;color:var(--text-light);margin-bottom:0.8rem;">${d.desc}</div>
-            <div style="font-size:0.8rem;background:#fff8e1;border-left:3px solid var(--accent);padding:0.4rem 0.7rem;border-radius:4px;text-align:left;margin-bottom:0.8rem;font-family:'Noto Sans JP';">⚠️ ${d.note}</div>
-            <div style="display:flex;flex-direction:column;gap:0.6rem;text-align:left;">
-                ${d.exs.map(e=>`
-                <div style="background:white;border:1.5px solid var(--primary);border-radius:var(--radius-sm);padding:0.5rem 0.8rem;">
-                    <div style="font-family:'Noto Sans JP';font-size:1rem;color:var(--night);">${e.jp}</div>
-                    <div style="font-size:0.85rem;color:var(--text-light);margin-top:0.2rem;">${e.es}</div>
-                </div>`).join('')}
-            </div>
-        </div>
-        <button class="btn-practice" onclick="setGrammarMode('practice')">🎯 Practicar</button>
-    `;
-}
-
-function renderTaexpPractice(){
-    const isKoto = taexpType === 'koto';
-    document.getElementById('grammar-content').innerHTML = `
-        <div class="grammar-card" style="text-align:center;">
-            <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:1rem;">
-                <button class="mode-tab ${isKoto?'active':''}" onclick="taexpType='koto';renderTaexpPractice()">📝 たことがある</button>
-                <button class="mode-tab ${!isKoto?'active':''}" onclick="taexpType='hou';renderTaexpPractice()">💡 たほうがいい</button>
-            </div>
-            <h3>🎯 Práctica: ${taexpData[taexpType].expr}</h3>
-            <p style="color:var(--text-light);margin:0.5rem 0;">Ordena las palabras para formar la oración.</p>
-            <p style="color:var(--text-light);font-size:0.9rem;">5 preguntas aleatorias</p>
-            <button class="btn-practice" onclick="startTaexpReorder()">Comenzar</button>
-        </div>
-        <div id="taexp-quiz-area"></div>
-    `;
-}
-
-function startTaexpReorder(){
-    taexpReorderIdx = 0; taexpReorderCorrect = 0; taexpReorderErrors = [];
-    const pool = taReorderPool.filter(q => q.use === taexpType);
-    taexpReorderQuestions = [...pool].sort(()=>Math.random()-0.5).slice(0,5);
-    taexpCurrentAnswer = [];
-    document.getElementById('grammar-content').querySelector('.grammar-card').style.display = 'none';
-    showTaexpReorderQuestion();
-}
-
-function toggleTaexpHint(){
-    const active = document.getElementById('taexp-word-pool').classList.toggle('pista-active');
-    document.getElementById('taexp-pista-btn').textContent = active ? '🙈 Ocultar furigana' : '💡 Pista (furigana)';
-}
-
-function showTaexpReorderQuestion(){
-    taexpCurrentAnswer = [];
-    const q = taexpReorderQuestions[taexpReorderIdx];
-    const indices = q.words.map((_,i)=>i).sort(()=>Math.random()-0.5);
-    const shuffledWords = indices.map(i=>q.words[i]);
-    const shuffledR = q.r ? indices.map(i=>q.r[i]) : shuffledWords;
-    window._taexpPool = shuffledWords;
-    document.getElementById('taexp-quiz-area').innerHTML = `
-        <div class="reorder-box">
-            <div class="reorder-progress">${taexpReorderIdx+1} / 5</div>
-            <div class="reorder-hint">${q.hint}</div>
-            <button class="hint-btn" id="taexp-pista-btn" onclick="toggleTaexpHint()">💡 Pista (furigana)</button>
-            <div class="reorder-words" id="taexp-word-pool">
-                ${shuffledWords.map((w,i)=>`<div class="word-btn-wrap"><button class="word-btn" onclick="selectTaexpWord(${i})" id="taexpwb-${i}">${w}</button><span class="word-romaji">${shuffledR[i]}</span></div>`).join('')}
-            </div>
-            <div class="reorder-answer" id="taexp-answer-area">
-                <span class="reorder-placeholder">Toca las palabras en orden</span>
-            </div>
-            <button class="btn-check" id="taexp-check-btn" onclick="checkTaexpReorder()" disabled>Verificar</button>
-            <div id="taexp-feedback"></div>
-        </div>
-    `;
-}
-
-function selectTaexpWord(idx){
-    const btn = document.getElementById('taexpwb-'+idx);
-    if(btn.classList.contains('selected')) return;
-    btn.classList.add('selected');
-    taexpCurrentAnswer.push({idx, word:window._taexpPool[idx]});
-    renderTaexpAnswerArea();
-}
-
-function removeTaexpWord(ansIdx){
-    const removed = taexpCurrentAnswer.splice(ansIdx,1)[0];
-    document.getElementById('taexpwb-'+removed.idx).classList.remove('selected');
-    renderTaexpAnswerArea();
-}
-
-function renderTaexpAnswerArea(){
-    const area = document.getElementById('taexp-answer-area');
-    if(taexpCurrentAnswer.length === 0){
-        area.innerHTML = '<span class="reorder-placeholder">Toca las palabras en orden</span>';
-    } else {
-        area.innerHTML = taexpCurrentAnswer.map((a,i)=>`<button class="answer-btn" onclick="removeTaexpWord(${i})">${a.word}</button>`).join('');
-    }
-    document.getElementById('taexp-check-btn').disabled = taexpCurrentAnswer.length !== window._taexpPool.length;
-}
-
-function checkTaexpReorder(){
-    const q = taexpReorderQuestions[taexpReorderIdx];
-    const correctAnswer = q.words.join('');
-    const userAnswer = taexpCurrentAnswer.map(a=>a.word).join('');
-    const isCorrect = stripRuby(userAnswer) === stripRuby(correctAnswer);
-    document.getElementById('taexp-check-btn').disabled = true;
-    document.querySelectorAll('#taexp-word-pool .word-btn, #taexp-answer-area .answer-btn').forEach(b=>b.style.pointerEvents='none');
-    const fb = document.getElementById('taexp-feedback');
-    if(isCorrect){
-        taexpReorderCorrect++;
-        fb.innerHTML = `<div class="reorder-feedback correct">⭕ ¡Correcto!</div>`;
-    } else {
-        taexpReorderErrors.push({hint:q.hint, user:userAnswer, correct:correctAnswer});
-        fb.innerHTML = `<div class="reorder-feedback wrong">❌ Incorrecto<br>Respuesta: ${correctAnswer}</div>`;
-    }
-    setTimeout(()=>{
-        taexpReorderIdx++;
-        if(taexpReorderIdx < 5) showTaexpReorderQuestion();
-        else showTaexpReorderResult();
-    }, 1500);
-}
-
-function showTaexpReorderResult(){
-    const pct = Math.round((taexpReorderCorrect/5)*100);
-    saveScore('taexp_'+taexpType, pct);
-    const msg = pct===100?'🎉 ¡Perfecto!':pct>=80?'🌟 ¡Excelente!':pct>=60?'👍 ¡Muy bien!':'📚 ¡Sigue practicando!';
-    let errHtml = '';
-    if(taexpReorderErrors.length > 0){
-        errHtml = `<div class="error-review"><h4>❌ Errores (${taexpReorderErrors.length})</h4>${taexpReorderErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${e.hint}</div><div class="error-your">Tu respuesta: ${e.user}</div><div class="error-correct">✅ Correcta: ${e.correct}</div></div>`).join('')}</div>`;
-    }
-    document.getElementById('taexp-quiz-area').innerHTML = `
-        <div class="grammar-result">
-            <div class="gr-score">${pct}%</div>
-            <div class="gr-msg">${msg}</div>
-            <div class="gr-detail">${taexpReorderCorrect} / 5 correctas</div>
-            <button class="btn-practice" onclick="startTaexpReorder()">🔄 Intentar de nuevo</button>
-            <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
-            ${errHtml}
-        </div>
-    `;
-}
 
 // ===== JOSHI (助詞) DATA & FUNCTIONS =====
 let joshiGroup = 0;
@@ -6089,38 +5907,72 @@ const teReorderPool = [
     {words:['少し','急いで','ください'],r:['すこし','いそいで','ください'],hint:'Por favor apúrate un poco',use:'request'},
     {words:['このボタンを','押して','ください'],r:['このボタンを','おして','ください'],hint:'Por favor presiona este botón',use:'request'},
     {words:['漢字を','教えて','ください'],r:['かんじを','おしえて','ください'],hint:'Por favor enséñame los kanji',use:'request'},
-    // てから (6)
+    // てから (10)
     {words:['手を','洗って','から','食べて','ください'],r:['てを','あらって','から','たべて','ください'],hint:'Por favor lávate las manos antes de comer',use:'kara'},
     {words:['宿題を','して','から','遊んで','ください'],r:['しゅくだいを','して','から','あそんで','ください'],hint:'Por favor haz la tarea antes de jugar',use:'kara'},
     {words:['シャワーを','浴びて','から','寝ます'],r:['シャワーを','あびて','から','ねます'],hint:'Me ducho antes de dormir',use:'kara'},
     {words:['起きて','から','朝ごはんを','食べます'],r:['おきて','から','あさごはんを','たべます'],hint:'Como el desayuno después de levantarme',use:'kara'},
     {words:['パンを','買って','から','帰ります'],r:['パンを','かって','から','かえります'],hint:'Regreso a casa después de comprar pan',use:'kara'},
     {words:['準備して','から','出かけます'],r:['じゅんびして','から','でかけます'],hint:'Salgo después de prepararme',use:'kara'},
-    // ています (5)
+    {words:['本を','読んで','から','寝ます'],r:['ほんを','よんで','から','ねます'],hint:'Duermo después de leer un libro',use:'kara'},
+    {words:['運動して','から','シャワーを','浴びます'],r:['うんどうして','から','シャワーを','あびます'],hint:'Me ducho después de hacer ejercicio',use:'kara'},
+    {words:['友達に','電話して','から','出かけます'],r:['ともだちに','でんわして','から','でかけます'],hint:'Salgo después de llamar a mi amigo',use:'kara'},
+    {words:['服を','着て','から','学校に','行きます'],r:['ふくを','きて','から','がっこうに','いきます'],hint:'Voy a la escuela después de vestirme',use:'kara'},
+    // ています (10)
     {words:['今','音楽を','聴いて','います'],r:['いま','おんがくを','きいて','います'],hint:'Ahora estoy escuchando música',use:'iru'},
     {words:['友達を','待って','います'],r:['ともだちを','まって','います'],hint:'Estoy esperando a un amigo',use:'iru'},
     {words:['日本語を','勉強して','います'],r:['にほんごを','べんきょうして','います'],hint:'Estoy estudiando japonés',use:'iru'},
     {words:['テレビを','見て','います'],r:['テレビを','みて','います'],hint:'Estoy viendo televisión',use:'iru'},
     {words:['毎朝','運動して','います'],r:['まいあさ','うんどうして','います'],hint:'Hago ejercicio todas las mañanas',use:'iru'},
-    // てもいいですか (4)
+    {words:['妹が','本を','読んで','います'],r:['いもうとが','ほんを','よんで','います'],hint:'Mi hermana está leyendo un libro',use:'iru'},
+    {words:['父が','料理して','います'],r:['ちちが','りょうりして','います'],hint:'Mi padre está cocinando',use:'iru'},
+    {words:['バスを','待って','います'],r:['バスを','まって','います'],hint:'Estoy esperando el autobús',use:'iru'},
+    {words:['今','走って','います'],r:['いま','はしって','います'],hint:'Ahora estoy corriendo',use:'iru'},
+    {words:['弟が','散歩して','います'],r:['おとうとが','さんぽして','います'],hint:'Mi hermano está paseando',use:'iru'},
+    // てもいいですか (10)
     {words:['写真を','撮って','もいいですか'],r:['しゃしんを','とって','もいいですか'],hint:'¿Puedo tomar fotos?',use:'moi'},
     {words:['ここに','座って','もいいですか'],r:['ここに','すわって','もいいですか'],hint:'¿Puedo sentarme aquí?',use:'moi'},
     {words:['本を','借りて','もいいですか'],r:['ほんを','かりて','もいいですか'],hint:'¿Puedo tomar prestado el libro?',use:'moi'},
     {words:['あとで','電話して','もいいですか'],r:['あとで','でんわして','もいいですか'],hint:'¿Puedo llamarte después?',use:'moi'},
-    // てはいけません (2)
+    {words:['窓を','開けて','もいいですか'],r:['まどを','あけて','もいいですか'],hint:'¿Puedo abrir la ventana?',use:'moi'},
+    {words:['日本語で','話して','もいいですか'],r:['にほんごで','はなして','もいいですか'],hint:'¿Puedo hablar en japonés?',use:'moi'},
+    {words:['明日','来て','もいいですか'],r:['あした','きて','もいいですか'],hint:'¿Puedo venir mañana?',use:'moi'},
+    {words:['辞書を','借りて','もいいですか'],r:['じしょを','かりて','もいいですか'],hint:'¿Puedo tomar prestado el diccionario?',use:'moi'},
+    {words:['少し','待って','もいいですか'],r:['すこし','まって','もいいですか'],hint:'¿Puedo esperar un momento?',use:'moi'},
+    {words:['ここで','食べて','もいいですか'],r:['ここで','たべて','もいいですか'],hint:'¿Puedo comer aquí?',use:'moi'},
+    // てはいけません (10)
     {words:['ここで','泳いで','はいけません'],r:['ここで','およいで','はいけません'],hint:'No se puede nadar aquí',use:'wa'},
     {words:['廊下を','走って','はいけません'],r:['ろうかを','はしって','はいけません'],hint:'No se puede correr en el pasillo',use:'wa'},
-    // 行く・その他 (3)
+    {words:['授業中に','食べて','はいけません'],r:['じゅぎょうちゅうに','たべて','はいけません'],hint:'No se puede comer durante la clase',use:'wa'},
+    {words:['ここで','写真を','撮って','はいけません'],r:['ここで','しゃしんを','とって','はいけません'],hint:'No se puede tomar fotos aquí',use:'wa'},
+    {words:['電車の中で','電話して','はいけません'],r:['でんしゃのなかで','でんわして','はいけません'],hint:'No se puede hablar por teléfono en el tren',use:'wa'},
+    {words:['大きい声で','話して','はいけません'],r:['おおきいこえで','はなして','はいけません'],hint:'No se puede hablar en voz alta',use:'wa'},
+    {words:['授業中に','寝て','はいけません'],r:['じゅぎょうちゅうに','ねて','はいけません'],hint:'No se puede dormir durante la clase',use:'wa'},
+    {words:['ここに','座って','はいけません'],r:['ここに','すわって','はいけません'],hint:'No se puede sentarse aquí',use:'wa'},
+    {words:['この本を','借りて','はいけません'],r:['このほんを','かりて','はいけません'],hint:'No se puede tomar prestado este libro',use:'wa'},
+    {words:['教室で','遊んで','はいけません'],r:['きょうしつで','あそんで','はいけません'],hint:'No se puede jugar en el aula',use:'wa'},
+    // 行く・来る (9)
     {words:['バスに','乗って','行きます'],r:['バスに','のって','いきます'],hint:'Voy en autobús',use:'iku'},
     {words:['急いで','行って','ください'],r:['いそいで','いって','ください'],hint:'Por favor ve rápido',use:'iku'},
     {words:['コートを','着て','から','出かけます'],r:['コートを','きて','から','でかけます'],hint:'Salgo después de ponerme el abrigo',use:'kara'},
-    // て接続 (6)
+    {words:['歩いて','駅に','行きます'],r:['あるいて','えきに','いきます'],hint:'Voy caminando a la estación',use:'iku'},
+    {words:['走って','学校に','行きます'],r:['はしって','がっこうに','いきます'],hint:'Voy corriendo a la escuela',use:'iku'},
+    {words:['電車に','乗って','行きます'],r:['でんしゃに','のって','いきます'],hint:'Voy en tren',use:'iku'},
+    {words:['急いで','来て','ください'],r:['いそいで','きて','ください'],hint:'Por favor ven rápido',use:'iku'},
+    {words:['走って','来て','ください'],r:['はしって','きて','ください'],hint:'Por favor ven corriendo',use:'iku'},
+    {words:['バスに','乗って','来ます'],r:['バスに','のって','きます'],hint:'Vengo en autobús',use:'iku'},
+    {words:['早く','起きて','学校に','行きます'],r:['はやく','おきて','がっこうに','いきます'],hint:'Me levanto temprano y voy a la escuela',use:'iku'},
+    // て接続 (10)
     {words:['朝ごはんを','食べて','学校に','行きます'],r:['あさごはんを','たべて','がっこうに','いきます'],hint:'Como el desayuno y voy a la escuela',use:'seq'},
     {words:['シャワーを','浴びて','着替えます'],r:['シャワーを','あびて','きがえます'],hint:'Me ducho y me cambio de ropa',use:'seq'},
     {words:['本を','買って','読みます'],r:['ほんを','かって','よみます'],hint:'Compro un libro y lo leo',use:'seq'},
     {words:['音楽を','聴いて','勉強します'],r:['おんがくを','きいて','べんきょうします'],hint:'Escucho música y estudio',use:'seq'},
     {words:['コーヒーを','飲んで','仕事を','します'],r:['コーヒーを','のんで','しごとを','します'],hint:'Bebo café y trabajo',use:'seq'},
     {words:['駅まで','歩いて','電車に','乗ります'],r:['えきまで','あるいて','でんしゃに','のります'],hint:'Camino hasta la estación y tomo el tren',use:'seq'},
+    {words:['本を','読んで','寝ます'],r:['ほんを','よんで','ねます'],hint:'Leo un libro y duermo',use:'seq'},
+    {words:['友達に','電話して','話します'],r:['ともだちに','でんわして','はなします'],hint:'Llamo a mi amigo y hablo con él',use:'seq'},
+    {words:['ご飯を','作って','食べます'],r:['ごはんを','つくって','たべます'],hint:'Preparo la comida y la como',use:'seq'},
+    {words:['服を','着て','出かけます'],r:['ふくを','きて','でかけます'],hint:'Me visto y salgo',use:'seq'},
 ];
 
 const taVerbPool = [
@@ -6194,20 +6046,50 @@ const taReorderPool = [
     {words:['急いだ','ほうが','いいです'],r:['いそいだ','ほうが','いいです'],hint:'Es mejor apurarse',use:'hou'},
     {words:['毎日','運動した','ほうが','いいです'],r:['まいにち','うんどうした','ほうが','いいです'],hint:'Es mejor hacer ejercicio todos los días',use:'hou'},
     {words:['もっと','ゆっくり','話した','ほうが','いいです'],r:['もっと','ゆっくり','はなした','ほうが','いいです'],hint:'Es mejor hablar más despacio',use:'hou'},
-    // たあとで (6)
+    // たあとで (10)
     {words:['食べた','あとで','散歩しました'],r:['たべた','あとで','さんぽしました'],hint:'Paseé después de comer',use:'ato'},
     {words:['宿題を','した','あとで','テレビを','見ました'],r:['しゅくだいを','した','あとで','テレビを','みました'],hint:'Vi televisión después de hacer la tarea',use:'ato'},
     {words:['シャワーを','浴びた','あとで','寝ます'],r:['シャワーを','あびた','あとで','ねます'],hint:'Duermo después de ducharme',use:'ato'},
     {words:['授業を','聞いた','あとで','帰りました'],r:['じゅぎょうを','きいた','あとで','かえりました'],hint:'Regresé después de escuchar la clase',use:'ato'},
     {words:['本を','読んだ','あとで','レポートを','書きました'],r:['ほんを','よんだ','あとで','レポートを','かきました'],hint:'Escribí el informe después de leer el libro',use:'ato'},
     {words:['準備した','あとで','出かけます'],r:['じゅんびした','あとで','でかけます'],hint:'Salgo después de prepararme',use:'ato'},
-    // 普通体過去 (6)
+    {words:['手を','洗った','あとで','ご飯を','食べます'],r:['てを','あらった','あとで','ごはんを','たべます'],hint:'Como después de lavarme las manos',use:'ato'},
+    {words:['着替えた','あとで','出かけました'],r:['きがえた','あとで','でかけました'],hint:'Salí después de cambiarme de ropa',use:'ato'},
+    {words:['電話した','あとで','行きます'],r:['でんわした','あとで','いきます'],hint:'Voy después de llamar',use:'ato'},
+    {words:['勉強した','あとで','音楽を','聴きました'],r:['べんきょうした','あとで','おんがくを','ききました'],hint:'Escuché música después de estudiar',use:'ato'},
+    // たほうがいい (10)
+    {words:['早く','寝た','ほうが','いいです'],r:['はやく','ねた','ほうが','いいです'],hint:'Es mejor dormir temprano',use:'hou'},
+    {words:['薬を','飲んだ','ほうが','いいです'],r:['くすりを','のんだ','ほうが','いいです'],hint:'Es mejor tomar la medicina',use:'hou'},
+    {words:['もっと','勉強した','ほうが','いいです'],r:['もっと','べんきょうした','ほうが','いいです'],hint:'Es mejor estudiar más',use:'hou'},
+    {words:['先生に','聞いた','ほうが','いいです'],r:['せんせいに','きいた','ほうが','いいです'],hint:'Es mejor preguntarle al profesor',use:'hou'},
+    {words:['野菜を','食べた','ほうが','いいです'],r:['やさいを','たべた','ほうが','いいです'],hint:'Es mejor comer verduras',use:'hou'},
+    {words:['急いだ','ほうが','いいです'],r:['いそいだ','ほうが','いいです'],hint:'Es mejor apurarse',use:'hou'},
+    {words:['毎日','運動した','ほうが','いいです'],r:['まいにち','うんどうした','ほうが','いいです'],hint:'Es mejor hacer ejercicio todos los días',use:'hou'},
+    {words:['もっと','ゆっくり','話した','ほうが','いいです'],r:['もっと','ゆっくり','はなした','ほうが','いいです'],hint:'Es mejor hablar más despacio',use:'hou'},
+    {words:['早く','起きた','ほうが','いいです'],r:['はやく','おきた','ほうが','いいです'],hint:'Es mejor levantarse temprano',use:'hou'},
+    {words:['水を','飲んだ','ほうが','いいです'],r:['みずを','のんだ','ほうが','いいです'],hint:'Es mejor beber agua',use:'hou'},
+    // 普通体過去 (10)
     {words:['昨日','映画を','見た'],r:['きのう','えいがを','みた'],hint:'Ayer vi una película',use:'plain'},
     {words:['朝','シャワーを','浴びた'],r:['あさ','シャワーを','あびた'],hint:'Por la mañana me duché',use:'plain'},
     {words:['もう','宿題を','した'],r:['もう','しゅくだいを','した'],hint:'Ya hice la tarea',use:'plain'},
     {words:['昨日','本を','買った'],r:['きのう','ほんを','かった'],hint:'Ayer compré un libro',use:'plain'},
     {words:['先週','友達と','料理した'],r:['せんしゅう','ともだちと','りょうりした'],hint:'La semana pasada cociné con un amigo',use:'plain'},
     {words:['さっき','電話した'],r:['さっき','でんわした'],hint:'Llamé hace un momento',use:'plain'},
+    {words:['昨日','友達と','話した'],r:['きのう','ともだちと','はなした'],hint:'Ayer hablé con un amigo',use:'plain'},
+    {words:['朝ごはんを','食べた'],r:['あさごはんを','たべた'],hint:'Comí el desayuno',use:'plain'},
+    {words:['もう','シャワーを','浴びた'],r:['もう','シャワーを','あびた'],hint:'Ya me duché',use:'plain'},
+    {words:['先週','散歩した'],r:['せんしゅう','さんぽした'],hint:'La semana pasada paseé',use:'plain'},
+    // たから (10)
+    {words:['疲れた','から','休みます'],r:['つかれた','から','やすみます'],hint:'Descanso porque estoy cansado',use:'kara'},
+    {words:['雨が','降った','から','家に','いました'],r:['あめが','ふった','から','いえに','いました'],hint:'Me quedé en casa porque llovió',use:'kara'},
+    {words:['お腹が','すいた','から','ご飯を','食べました'],r:['おなかが','すいた','から','ごはんを','たべました'],hint:'Comí porque tenía hambre',use:'kara'},
+    {words:['友達が','来た','から','にぎやかです'],r:['ともだちが','きた','から','にぎやかです'],hint:'Está animado porque vino un amigo',use:'kara'},
+    {words:['宿題を','した','から','遊べます'],r:['しゅくだいを','した','から','あそべます'],hint:'Puedo jugar porque hice la tarea',use:'kara'},
+    {words:['本を','読んだ','から','眠いです'],r:['ほんを','よんだ','から','ねむいです'],hint:'Tengo sueño porque leí un libro',use:'kara'},
+    {words:['たくさん','食べた','から','お腹が','いっぱいです'],r:['たくさん','たべた','から','おなかが','いっぱいです'],hint:'Estoy lleno porque comí mucho',use:'kara'},
+    {words:['走った','から','疲れました'],r:['はしった','から','つかれました'],hint:'Me cansé porque corrí',use:'kara'},
+    {words:['早く','起きた','から','時間が','あります'],r:['はやく','おきた','から','じかんが','あります'],hint:'Tengo tiempo porque me levanté temprano',use:'kara'},
+    {words:['勉強した','から','テストが','できました'],r:['べんきょうした','から','テストが','できました'],hint:'Pude hacer el examen porque estudié',use:'kara'},
 ];
 
 // ===== VOCAB DATA & FUNCTIONS =====
