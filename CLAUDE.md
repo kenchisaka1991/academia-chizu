@@ -40,9 +40,9 @@ const firebaseConfig = {
 
 ## 文法モジュール（Grammar）
 
-### タブ構成（renderGrammar の if-else 9分岐）
+### タブ構成（renderGrammar の if-else 12分岐）
 ```
-desu → katsu → masu → keiyo → mashou → tai → maeni → niiku → joshi（else）
+desu → katsu → masu → keiyo → mashou → tai → maeni → niiku → te → ta → taexp → joshi（else）
 ```
 **新レッスン追加時は必ず3箇所に追記：**
 1. タブボタン HTML（renderGrammar内）
@@ -62,6 +62,9 @@ desu → katsu → masu → keiyo → mashou → tai → maeni → niiku → jos
 | `maeni` | 〜前に・後で | `maeniLesson`(8語), `maeniQuizPool`(10問) | 並び替え |
 | `niiku` | 〜に行く・来る | `niikuLesson`, `niikuQuizPool`(10問) | 並び替え |
 | `joshi` | 助詞 | `joshiData`(10グループ) | 並び替え / 穴埋め |
+| `te` | て形 | `teVerbPool`(38語), `teReorderPool`(30問) | Conjugación(4択) / Orden de palabras |
+| `ta` | た形 | `taVerbPool`(38語), `taReorderPool`(30問) | Conjugación(4択) / Orden de palabras |
+| `taexp` | たことがある・たほうがいい | `taexpData`, `taReorderPool`をフィルタ | Orden de palabras（サブタブ切替） |
 
 ### 形容詞モジュール（keiyoXxx）
 ```
@@ -159,7 +162,7 @@ State: `taiPracMode('katsu'|'reorder')`
 - Firebase Authentication（メール/パスワード登録・ログイン・ログアウト）
 - クイズスコアを `localStorage` に保存（`saveScore()` / `getAvgScore()`）
 - プラン選択モーダル（Gratis/Estudio Bs.30/Premium Bs.60）
-- **文法タブ9種**: です・です活用・ます・形容詞・ましょう・〜たい・〜前に/後で・〜に行く/来る・助詞
+- **文法タブ12種**: です・です活用・ます・形容詞・ましょう・〜たい・〜前に/後で・〜に行く/来る・助詞・て形・た形・たことがある/たほうがいい
 - **助詞10グループ**: は/が・を・に/で/へ・と/も/の・時間・よ/ね/か・もの包含・から/まで・から理由・が逆接
 - **語彙11カテゴリ**: Saludos・Personas・Comida・Lugares・Tiempo・Verbos・Adj.い・Adj.な・Otros・Transporte・Familia
 - 語彙タブはスペイン語表示（`es` プロパティ）
@@ -205,7 +208,7 @@ State: `taiPracMode('katsu'|'reorder')`
 ---
 
 ## 要注意箇所
-- `renderGrammar()` の分岐は **9つ**（desu/katsu/masu/keiyo/mashou/tai/maeni/niiku/joshi）。新レッスン追加時は3箇所に追記
+- `renderGrammar()` の分岐は **12つ**（desu/katsu/masu/keiyo/mashou/tai/maeni/niiku/te/ta/taexp/joshi）。新レッスン追加時は3箇所に追記
 - **助詞 Repaso は `joshiGroup === 10`** で判定（グループ追加時は要更新）
 - **語彙 Repaso は `vocabCategory === 11`** で判定（カテゴリ追加時は要更新）
 - 語彙タブ表示は `c.es`、クイズ説明文も `c.es` を使用
@@ -230,12 +233,12 @@ State: `taiPracMode('katsu'|'reorder')`
 ### 🔴 最優先（文法コンテンツ）
 | 優先 | 項目 | 規模 | 状態 |
 |---|---|---|---|
-| 1 | **て形**（8変化パターン） | 大 | ❌ 未実装 |
-| 2 | 〜てください / 〜ています / 〜てもいいですか / 〜てはいけません | 小×4 | ❌ 未実装（て形依存） |
+| 1 | **て形**（8変化パターン） | 大 | ✅ 完了（`te` タブ） |
+| 2 | 〜てください / 〜ています / 〜てもいいですか / 〜てはいけません | 小×4 | ✅ 完了（て形 Aprender 応用表現カード＋reorderプール） |
 | 3 | **ない形** | 中 | ❌ 未実装 |
-| 4 | **た形**（普通体過去形・8変化パターン） | 大 | ❌ 未実装 |
-| 5 | 〜たことがある（経験） | 中 | ❌ 未実装（た形依存） |
-| 6 | 〜たほうがいい（アドバイス） | 小 | ❌ 未実装（た形依存） |
+| 4 | **た形**（普通体過去形・8変化パターン） | 大 | ✅ 完了（`ta` タブ） |
+| 5 | 〜たことがある（経験） | 中 | ✅ 完了（`taexp` タブ） |
+| 6 | 〜たほうがいい（アドバイス） | 小 | ✅ 完了（`taexp` タブ） |
 
 **て形・た形 共通8変化パターン：**
 | グループ | 語尾 | て形 | た形 |
@@ -256,6 +259,13 @@ State: `taiPracMode('katsu'|'reorder')`
 | 7 | 〜くて / 〜で（形容詞接続） | 中 | ❌ 未実装 |
 | 8 | 〜より〜の方が | 小 | ❌ 未実装 |
 | 9 | 〜はどうですか / 〜と思います | 小 | ❌ 未実装 |
+
+### 🟡 中優先（UI・コンテンツ改善）
+| 優先 | 項目 | 規模 | 状態 |
+|---|---|---|---|
+| A | カタカナ Practicar をひらがなと同じ機能・見た目に統一 | 中 | ❌ 未実装 |
+| B | 漢字 Practicar をひらがなと同じ機能・見た目に統一。Quiz は N5 動詞・語彙を出題 | 中 | ❌ 未実装 |
+| C | 全文法の並び替え問題プールを増量し、同じ問題が出にくくなるよう改善 | 中 | ❌ 未実装 |
 
 ### 🟢 低優先（バックエンド）
 | 優先 | 項目 | 規模 | 状態 |
