@@ -42,7 +42,7 @@ const firebaseConfig = {
 
 ### タブ構成（renderGrammar の if-else 12分岐）
 ```
-desu → katsu → masu → keiyo → mashou → tai → maeni → niiku → te → ta → taexp → joshi（else）
+desu → katsu → keiyo → masu → mashou → tai → maeni → niiku → te → ta → nai → joshi（else）
 ```
 **新レッスン追加時は必ず3箇所に追記：**
 1. タブボタン HTML（renderGrammar内）
@@ -64,7 +64,7 @@ desu → katsu → masu → keiyo → mashou → tai → maeni → niiku → te 
 | `joshi` | 助詞 | `joshiData`(10グループ) | 並び替え / 穴埋め |
 | `te` | て形 | `teVerbPool`(38語), `teReorderPool`(30問) | Conjugación(4択) / Orden de palabras |
 | `ta` | た形 | `taVerbPool`(38語), `taReorderPool`(30問) | Conjugación(4択) / Orden de palabras |
-| `taexp` | たことがある・たほうがいい | `taexpData`, `taReorderPool`をフィルタ | Orden de palabras（サブタブ切替） |
+| `nai` | ない形 | `naiVerbPool`(38語), `naiReorderPool`(50問) | Conjugación(4択) / Orden de palabras |
 
 ### 形容詞モジュール（keiyoXxx）
 ```
@@ -208,7 +208,7 @@ State: `taiPracMode('katsu'|'reorder')`
 ---
 
 ## 要注意箇所
-- `renderGrammar()` の分岐は **12つ**（desu/katsu/masu/keiyo/mashou/tai/maeni/niiku/te/ta/taexp/joshi）。新レッスン追加時は3箇所に追記
+- `renderGrammar()` の分岐は **12つ**（desu/katsu/masu/keiyo/mashou/tai/maeni/niiku/te/ta/nai/joshi）。新レッスン追加時は3箇所に追記
 - **助詞 Repaso は `joshiGroup === 10`** で判定（グループ追加時は要更新）
 - **語彙 Repaso は `vocabCategory === 11`** で判定（カテゴリ追加時は要更新）
 - 語彙タブ表示は `c.es`、クイズ説明文も `c.es` を使用
@@ -235,7 +235,7 @@ State: `taiPracMode('katsu'|'reorder')`
 |---|---|---|---|
 | 1 | **て形**（8変化パターン） | 大 | ✅ 完了（`te` タブ） |
 | 2 | 〜てください / 〜ています / 〜てもいいですか / 〜てはいけません | 小×4 | ✅ 完了（て形 Aprender 応用表現カード＋reorderプール） |
-| 3 | **ない形** | 中 | ❌ 未実装 |
+| 3 | **ない形** | 中 | ✅ 完了（`nai` タブ） |
 | 4 | **た形**（普通体過去形・8変化パターン） | 大 | ✅ 完了（`ta` タブ） |
 | 5 | 〜たことがある（経験） | 中 | ✅ 完了（`taexp` タブ） |
 | 6 | 〜たほうがいい（アドバイス） | 小 | ✅ 完了（`taexp` タブ） |

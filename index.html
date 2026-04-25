@@ -1855,6 +1855,12 @@ let taCardIdx = 0;
 let taOuyouCardIdx = 0;
 let taQuizIdx = 0; let taCorrect = 0; let taQuestions = []; let taErrors = [];
 let taReorderIdx = 0; let taReorderCorrect = 0; let taReorderQuestions = []; let taReorderErrors = []; let taCurrentAnswer = [];
+let naiPracMode = 'conj'; // 'conj' | 'reorder'
+let naiLearnSubTab = 'base'; // 'base' | 'ouyou'
+let naiCardIdx = 0;
+let naiOuyouCardIdx = 0;
+let naiQuizIdx = 0; let naiCorrect = 0; let naiQuestions = []; let naiErrors = [];
+let naiReorderIdx = 0; let naiReorderCorrect = 0; let naiReorderQuestions = []; let naiReorderErrors = []; let naiCurrentAnswer = [];
 let niikuQuizIdx = 0;
 let niikuCorrect = 0;
 let niikuQuestions = [];
@@ -2616,6 +2622,7 @@ function renderGrammar(){
             <button class="lesson-tab ${currentLesson==='joshi'?'active':''}" onclick="setCurrentLesson('joshi')">🔗 Partículas<span class="lesson-tab-jp">助詞</span></button>
             <button class="lesson-tab ${currentLesson==='te'?'active':''}" onclick="setCurrentLesson('te')">➡️ Forma て<span class="lesson-tab-jp">て形</span></button>
             <button class="lesson-tab ${currentLesson==='ta'?'active':''}" onclick="setCurrentLesson('ta')">📜 Forma た<span class="lesson-tab-jp">た形</span></button>
+            <button class="lesson-tab ${currentLesson==='nai'?'active':''}" onclick="setCurrentLesson('nai')">🚫 Forma ない<span class="lesson-tab-jp">ない形</span></button>
         </div>
         <div id="grammar-content"></div>
     `;
@@ -2654,6 +2661,9 @@ function renderGrammar(){
     } else if(currentLesson==='ta'){
         if(grammarMode==='learn') renderTaLearn();
         else renderTaPractice();
+    } else if(currentLesson==='nai'){
+        if(grammarMode==='learn') renderNaiLearn();
+        else renderNaiPractice();
     } else {
         if(grammarMode==='learn') renderJoshiLearn();
         else renderJoshiPractice();
@@ -4998,6 +5008,340 @@ function showTaReorderResult(){
 }
 
 
+// ===== ない形 LEARN =====
+function renderNaiLearn(){
+    if(naiLearnSubTab === 'ouyou'){ renderNaiOuyouLearn(); return; }
+    const v = naiVerbPool[naiCardIdx];
+    const naiColor = '#7B2FBE';
+    const subColor = {'G1':naiColor,'G2':'var(--ocean)','G3':'#E07A00','例外':'var(--primary)'};
+    document.getElementById('grammar-content').innerHTML = `
+        <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:0.8rem;max-width:360px;margin-left:auto;margin-right:auto;">
+            <button class="mode-tab active" onclick="naiLearnSubTab='base';renderNaiLearn()">📖 Forma ない</button>
+            <button class="mode-tab" onclick="naiLearnSubTab='ouyou';renderNaiLearn()">💬 Expresiones</button>
+        </div>
+        <div class="grammar-card">
+            <div style="font-size:1.1rem;font-weight:700;color:var(--night);margin-bottom:0.8rem;">📋 Reglas de conjugación</div>
+            <table style="width:100%;border-collapse:collapse;font-family:'Noto Sans JP';font-size:0.85rem;">
+                <tr style="background:var(--cream);">
+                    <th style="padding:0.3rem 0.5rem;text-align:left;color:var(--text-light);">Grupo</th>
+                    <th style="padding:0.3rem 0.5rem;text-align:left;color:var(--text-light);">Terminación</th>
+                    <th style="padding:0.3rem 0.5rem;text-align:left;color:${naiColor};">ない形</th>
+                    <th style="padding:0.3rem 0.5rem;text-align:left;color:var(--text-light);">Ejemplo</th>
+                </tr>
+                <tr><td style="padding:0.25rem 0.5rem;">G1</td><td>く</td><td style="color:${naiColor};font-weight:700;">かない</td><td><ruby>書<rt>か</rt></ruby>く→<ruby>書<rt>か</rt></ruby>かない</td></tr>
+                <tr style="background:var(--cream);"><td style="padding:0.25rem 0.5rem;">G1</td><td>ぐ</td><td style="color:${naiColor};font-weight:700;">がない</td><td><ruby>泳<rt>およ</rt></ruby>ぐ→<ruby>泳<rt>およ</rt></ruby>がない</td></tr>
+                <tr><td style="padding:0.25rem 0.5rem;">G1</td><td>す</td><td style="color:${naiColor};font-weight:700;">さない</td><td><ruby>話<rt>はな</rt></ruby>す→<ruby>話<rt>はな</rt></ruby>さない</td></tr>
+                <tr style="background:var(--cream);"><td style="padding:0.25rem 0.5rem;">G1</td><td>む/ぶ</td><td style="color:${naiColor};font-weight:700;">まない/ばない</td><td><ruby>読<rt>よ</rt></ruby>む→<ruby>読<rt>よ</rt></ruby>まない</td></tr>
+                <tr><td style="padding:0.25rem 0.5rem;">G1</td><td>つ</td><td style="color:${naiColor};font-weight:700;">たない</td><td><ruby>待<rt>ま</rt></ruby>つ→<ruby>待<rt>ま</rt></ruby>たない</td></tr>
+                <tr style="background:#f3e8ff;"><td style="padding:0.25rem 0.5rem;font-weight:700;color:${naiColor};">G1 ⚠️</td><td style="font-weight:700;">う</td><td style="color:${naiColor};font-weight:700;">わない</td><td><ruby>買<rt>か</rt></ruby>う→<ruby>買<rt>か</rt></ruby>わない</td></tr>
+                <tr><td style="padding:0.25rem 0.5rem;">G1</td><td>る</td><td style="color:${naiColor};font-weight:700;">らない</td><td><ruby>帰<rt>かえ</rt></ruby>る→<ruby>帰<rt>かえ</rt></ruby>らない</td></tr>
+                <tr style="background:var(--cream);"><td style="padding:0.25rem 0.5rem;">G2</td><td>る</td><td style="color:${naiColor};font-weight:700;">ない</td><td><ruby>食<rt>た</rt></ruby>べる→<ruby>食<rt>た</rt></ruby>べない</td></tr>
+                <tr><td style="padding:0.25rem 0.5rem;">G3</td><td>する</td><td style="color:${naiColor};font-weight:700;">しない</td><td><ruby>勉強<rt>べんきょう</rt></ruby>する→しない</td></tr>
+                <tr style="background:var(--cream);"><td style="padding:0.25rem 0.5rem;">G3</td><td>くる</td><td style="color:${naiColor};font-weight:700;">こない</td><td><ruby>来<rt>く</rt></ruby>る→<ruby>来<rt>こ</rt></ruby>ない</td></tr>
+                <tr><td style="padding:0.25rem 0.5rem;color:#E07A00;font-weight:700;">⚠️例外</td><td>ある</td><td style="color:${naiColor};font-weight:700;">ない</td><td>—</td></tr>
+            </table>
+        </div>
+        <div class="grammar-card" style="text-align:center;">
+            <div style="font-size:0.8rem;color:var(--text-light);margin-bottom:0.4rem;">${naiCardIdx+1} / ${naiVerbPool.length}</div>
+            <div style="display:inline-block;background:${subColor[v.group]||naiColor};color:white;border-radius:20px;padding:0.15rem 0.7rem;font-size:0.75rem;font-weight:700;margin-bottom:0.6rem;">${v.group} &nbsp;·&nbsp; ${v.sub}</div>
+            <div style="font-family:'Noto Sans JP';font-size:2.2rem;font-weight:700;color:var(--night);">${teRubyHtml(v.dict,v.dr)}</div>
+            <div style="font-size:1.5rem;color:var(--text-light);margin:0.3rem 0;">↓</div>
+            <div style="font-family:'Noto Sans JP';font-size:2.4rem;font-weight:700;color:${naiColor};">${teRubyHtml(v.nai,v.nar)}</div>
+            <div style="color:var(--text-light);font-size:0.9rem;margin-top:0.4rem;">${v.es}</div>
+            <div style="display:flex;justify-content:center;gap:1rem;margin-top:1rem;">
+                <button onclick="naiCardIdx=Math.max(0,naiCardIdx-1);renderNaiLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid ${naiColor};border-radius:var(--radius-sm);background:white;color:${naiColor};font-weight:700;cursor:pointer;">◀ Anterior</button>
+                <button onclick="naiCardIdx=Math.min(naiVerbPool.length-1,naiCardIdx+1);renderNaiLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid ${naiColor};border-radius:var(--radius-sm);background:white;color:${naiColor};font-weight:700;cursor:pointer;">Siguiente ▶</button>
+            </div>
+        </div>
+        <button class="btn-practice" onclick="setGrammarMode('practice')">🎯 Practicar</button>
+    `;
+}
+
+function renderNaiOuyouLearn(){
+    const naiColor = '#7B2FBE';
+    const cards = [
+        {
+            title:'Petición negativa',
+            expr:'〜ないでください',
+            formation:'Forma ない ＋ でください',
+            desc:'"Por favor no hagas ~." Forma educada de pedir que no se realice una acción.',
+            note: null,
+            exs:[
+                {jp:'<ruby>廊下<rt>ろうか</rt></ruby>を<ruby>走<rt>はし</rt></ruby>らないでください。',es:'Por favor no corras en el pasillo.'},
+                {jp:'<ruby>授業中<rt>じゅぎょうちゅう</rt></ruby>に<ruby>食<rt>た</rt></ruby>べないでください。',es:'Por favor no comas durante la clase.'},
+            ]
+        },
+        {
+            title:'Permiso de no hacer',
+            expr:'〜なくてもいいです',
+            formation:'Forma ない → なくて ＋ もいいです',
+            desc:'"No tienes que hacer ~." Expresa que algo es opcional o no necesario.',
+            note:'Formación: ない → (quita い) → なくて → なくてもいいです',
+            exs:[
+                {jp:'<ruby>急<rt>いそ</rt></ruby>がなくてもいいです。',es:'No tienes que apurarte.'},
+                {jp:'<ruby>全部<rt>ぜんぶ</rt></ruby><ruby>食<rt>た</rt></ruby>べなくてもいいです。',es:'No tienes que comer todo.'},
+            ]
+        },
+        {
+            title:'Obligación',
+            expr:'〜なければなりません',
+            formation:'Forma ない → なければ ＋ なりません',
+            desc:'"Tienes que hacer ~." Doble negación que expresa obligación: si no lo haces, no está bien.',
+            note:'Lit: "si no hago ~, no va bien". Es la forma más formal de expresar obligación.',
+            exs:[
+                {jp:'<ruby>毎日<rt>まいにち</rt></ruby><ruby>勉強<rt>べんきょう</rt></ruby>しなければなりません。',es:'Tienes que estudiar todos los días.'},
+                {jp:'<ruby>薬<rt>くすり</rt></ruby>を<ruby>飲<rt>の</rt></ruby>まなければなりません。',es:'Tienes que tomar la medicina.'},
+            ]
+        },
+        {
+            title:'Consejo negativo',
+            expr:'〜ないほうがいい',
+            formation:'Forma ない ＋ ほうがいいです',
+            desc:'"Es mejor no hacer ~." Aconseja no realizar una acción.',
+            note: null,
+            exs:[
+                {jp:'たくさん<ruby>食<rt>た</rt></ruby>べないほうがいいです。',es:'Es mejor no comer demasiado.'},
+                {jp:'お<ruby>酒<rt>さけ</rt></ruby>を<ruby>飲<rt>の</rt></ruby>まないほうがいいです。',es:'Es mejor no beber alcohol.'},
+            ]
+        },
+    ];
+    const c = cards[naiOuyouCardIdx];
+    document.getElementById('grammar-content').innerHTML = `
+        <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:0.8rem;max-width:360px;margin-left:auto;margin-right:auto;">
+            <button class="mode-tab" onclick="naiLearnSubTab='base';renderNaiLearn()">📖 Forma ない</button>
+            <button class="mode-tab active" onclick="naiLearnSubTab='ouyou';renderNaiLearn()">💬 Expresiones</button>
+        </div>
+        <div class="grammar-card" style="text-align:center;">
+            <div style="font-size:0.8rem;color:var(--text-light);margin-bottom:0.4rem;">${naiOuyouCardIdx+1} / ${cards.length}</div>
+            <div style="display:inline-block;background:${naiColor};color:white;border-radius:20px;padding:0.2rem 1rem;font-size:1rem;font-weight:700;font-family:'Noto Sans JP';margin-bottom:0.5rem;">${c.expr}</div>
+            <div style="font-size:1.15rem;font-weight:700;color:var(--night);margin-bottom:0.3rem;">${c.title}</div>
+            <div style="font-size:0.85rem;background:var(--cream);border-radius:var(--radius-sm);padding:0.4rem 0.8rem;margin-bottom:0.5rem;color:${naiColor};font-family:'Noto Sans JP';">${c.formation}</div>
+            <div style="font-size:0.9rem;color:var(--text-light);margin-bottom:0.8rem;">${c.desc}</div>
+            ${c.note ? `<div style="font-size:0.8rem;background:#fff8e1;border-left:3px solid var(--accent);padding:0.4rem 0.7rem;border-radius:4px;text-align:left;margin-bottom:0.8rem;font-family:'Noto Sans JP';">⚠️ ${c.note}</div>` : ''}
+            <div style="display:flex;flex-direction:column;gap:0.6rem;text-align:left;">
+                ${c.exs.map(e=>`
+                <div style="background:white;border:1.5px solid ${naiColor};border-radius:var(--radius-sm);padding:0.5rem 0.8rem;">
+                    <div style="font-family:'Noto Sans JP';font-size:1rem;color:var(--night);">${e.jp}</div>
+                    <div style="font-size:0.85rem;color:var(--text-light);margin-top:0.2rem;">${e.es}</div>
+                </div>`).join('')}
+            </div>
+            <div style="display:flex;justify-content:center;gap:1rem;margin-top:1rem;">
+                <button onclick="naiOuyouCardIdx=Math.max(0,naiOuyouCardIdx-1);renderNaiOuyouLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid ${naiColor};border-radius:var(--radius-sm);background:white;color:${naiColor};font-weight:700;cursor:pointer;">◀ Anterior</button>
+                <button onclick="naiOuyouCardIdx=Math.min(${cards.length-1},naiOuyouCardIdx+1);renderNaiOuyouLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid ${naiColor};border-radius:var(--radius-sm);background:white;color:${naiColor};font-weight:700;cursor:pointer;">Siguiente ▶</button>
+            </div>
+        </div>
+        <button class="btn-practice" onclick="setGrammarMode('practice')">🎯 Practicar</button>
+    `;
+}
+
+// ===== ない形 PRACTICE =====
+function setNaiPracMode(mode){
+    naiPracMode = mode;
+    renderNaiPractice();
+}
+
+function renderNaiPractice(){
+    const isConj = naiPracMode === 'conj';
+    document.getElementById('grammar-content').innerHTML = `
+        <div class="grammar-card" style="text-align:center;">
+            <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:1rem;">
+                <button class="mode-tab ${isConj?'active':''}" onclick="setNaiPracMode('conj')">📊 Conjugación</button>
+                <button class="mode-tab ${!isConj?'active':''}" onclick="setNaiPracMode('reorder')">🔤 Orden de palabras</button>
+            </div>
+            <h3>🎯 Práctica: ない形 — ${isConj?'Conjugación':'Orden de palabras'}</h3>
+            <p style="color:var(--text-light);margin:0.5rem 0;">${isConj?'Selecciona la forma ない correcta del verbo.':'Ordena las palabras para formar la oración.'}</p>
+            <p style="color:var(--text-light);font-size:0.9rem;">5 preguntas aleatorias</p>
+            <button class="btn-practice" onclick="${isConj?'startNaiConjQuiz()':'startNaiReorderQuiz()'}">Comenzar</button>
+        </div>
+        <div id="nai-quiz-area"></div>
+    `;
+}
+
+function startNaiConjQuiz(){
+    naiQuizIdx = 0; naiCorrect = 0; naiErrors = [];
+    naiQuestions = [...naiVerbPool].sort(()=>Math.random()-0.5).slice(0,5);
+    document.getElementById('grammar-content').querySelector('.grammar-card').style.display = 'none';
+    showNaiConjQuestion();
+}
+
+function showNaiConjQuestion(){
+    const q = naiQuestions[naiQuizIdx];
+    const others = naiVerbPool.filter(v => stripRuby(v.nai) !== stripRuby(q.nai));
+    const shuffledOthers = [...others].sort(()=>Math.random()-0.5);
+    let opts = [q];
+    for(let i=0; i<shuffledOthers.length && opts.length<4; i++){
+        if(!opts.some(o=>stripRuby(o.nai)===stripRuby(shuffledOthers[i].nai))){
+            opts.push(shuffledOthers[i]);
+        }
+    }
+    opts = opts.sort(()=>Math.random()-0.5);
+    window._naiOpts = opts;
+    const naiColor = '#7B2FBE';
+    const groupColor = {'G1':naiColor,'G2':'var(--ocean)','G3':'#E07A00','例外':'var(--primary)'};
+    document.getElementById('nai-quiz-area').innerHTML = `
+        <div class="reorder-box">
+            <div class="reorder-progress">${naiQuizIdx+1} / 5</div>
+            <div style="display:inline-block;background:${groupColor[q.group]||naiColor};color:white;border-radius:20px;padding:0.15rem 0.7rem;font-size:0.75rem;font-weight:700;margin-bottom:0.6rem;">${q.group} · ${q.sub}</div>
+            <div class="masu-q-verb">${teRubyHtml(q.dict,q.dr)}</div>
+            <div class="masu-q-form">→ ない形</div>
+            <div class="masu-q-meaning">(${q.es})</div>
+            <div class="masu-options">
+                ${opts.map((o,i)=>`<button class="masu-opt" onclick="checkNaiConjAnswer(${i})"><span>${teRubyHtml(o.nai,o.nar)}</span></button>`).join('')}
+            </div>
+            <div id="nai-feedback"></div>
+        </div>
+    `;
+}
+
+function checkNaiConjAnswer(idx){
+    const q = naiQuestions[naiQuizIdx];
+    const selected = window._naiOpts[idx];
+    const isCorrect = stripRuby(selected.nai) === stripRuby(q.nai);
+    document.querySelectorAll('#nai-quiz-area .masu-opt').forEach((b,i) => {
+        b.disabled = true;
+        if(stripRuby(window._naiOpts[i].nai) === stripRuby(q.nai)) b.classList.add('correct');
+        if(i === idx && !isCorrect) b.classList.add('wrong');
+    });
+    const fb = document.getElementById('nai-feedback');
+    if(isCorrect){
+        naiCorrect++;
+        fb.innerHTML = `<div class="reorder-feedback correct">⭕ ¡Correcto!</div>`;
+    } else {
+        naiErrors.push({dict:q.dict, dr:q.dr, nai:q.nai, nar:q.nar, es:q.es, group:q.group, sub:q.sub, userNai:selected.nai, userNar:selected.nar});
+        fb.innerHTML = `<div class="reorder-feedback wrong">❌ Respuesta: ${teRubyHtml(q.nai,q.nar)}</div>`;
+    }
+    setTimeout(()=>{
+        naiQuizIdx++;
+        if(naiQuizIdx < 5) showNaiConjQuestion();
+        else showNaiConjResult();
+    }, 1500);
+}
+
+function showNaiConjResult(){
+    const pct = Math.round((naiCorrect/5)*100);
+    saveScore('nai', pct);
+    const msg = pct===100?'🎉 ¡Perfecto!':pct>=80?'🌟 ¡Excelente!':pct>=60?'👍 ¡Muy bien!':'📚 ¡Sigue practicando!';
+    let errHtml = '';
+    if(naiErrors.length > 0){
+        errHtml = `<div class="error-review"><h4>❌ Errores (${naiErrors.length})</h4>${naiErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${teRubyHtml(e.dict,e.dr)} → ない形 (${e.es}) [${e.group}·${e.sub}]</div><div class="error-your">Tu respuesta: ${teRubyHtml(e.userNai,e.userNar)}</div><div class="error-correct">✅ Correcta: ${teRubyHtml(e.nai,e.nar)}</div></div>`).join('')}</div>`;
+    }
+    document.getElementById('nai-quiz-area').innerHTML = `
+        <div class="grammar-result">
+            <div class="gr-score">${pct}%</div>
+            <div class="gr-msg">${msg}</div>
+            <div class="gr-detail">${naiCorrect} / 5 correctas</div>
+            <button class="btn-practice" onclick="startNaiConjQuiz()">🔄 Intentar de nuevo</button>
+            <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
+            ${errHtml}
+        </div>
+    `;
+}
+
+// ===== ない形 REORDER =====
+function startNaiReorderQuiz(){
+    naiReorderIdx = 0; naiReorderCorrect = 0; naiReorderErrors = [];
+    naiReorderQuestions = [...naiReorderPool].sort(()=>Math.random()-0.5).slice(0,5);
+    naiCurrentAnswer = [];
+    document.getElementById('grammar-content').querySelector('.grammar-card').style.display = 'none';
+    showNaiReorderQuestion();
+}
+
+function toggleNaiReorderHint(){
+    const active = document.getElementById('nai-word-pool').classList.toggle('pista-active');
+    document.getElementById('nai-pista-btn').textContent = active ? '🙈 Ocultar furigana' : '💡 Pista (furigana)';
+}
+
+function showNaiReorderQuestion(){
+    naiCurrentAnswer = [];
+    const q = naiReorderQuestions[naiReorderIdx];
+    const indices = q.words.map((_,i)=>i).sort(()=>Math.random()-0.5);
+    const shuffledWords = indices.map(i=>q.words[i]);
+    const shuffledR = q.r ? indices.map(i=>q.r[i]) : shuffledWords;
+    window._naiReorderPool = shuffledWords;
+    document.getElementById('nai-quiz-area').innerHTML = `
+        <div class="reorder-box">
+            <div class="reorder-progress">${naiReorderIdx+1} / 5</div>
+            <div class="reorder-hint">${q.hint}</div>
+            <button class="hint-btn" id="nai-pista-btn" onclick="toggleNaiReorderHint()">💡 Pista (furigana)</button>
+            <div class="reorder-words" id="nai-word-pool">
+                ${shuffledWords.map((w,i)=>`<div class="word-btn-wrap"><button class="word-btn" onclick="selectNaiWord(${i})" id="naiwb-${i}">${w}</button><span class="word-romaji">${shuffledR[i]}</span></div>`).join('')}
+            </div>
+            <div class="reorder-answer" id="nai-answer-area">
+                <span class="reorder-placeholder">Toca las palabras en orden</span>
+            </div>
+            <button class="btn-check" id="nai-check-btn" onclick="checkNaiReorderAnswer()" disabled>Verificar</button>
+            <div id="nai-feedback"></div>
+        </div>
+    `;
+}
+
+function selectNaiWord(idx){
+    const btn = document.getElementById('naiwb-'+idx);
+    if(btn.classList.contains('selected')) return;
+    btn.classList.add('selected');
+    naiCurrentAnswer.push({idx:idx, word:window._naiReorderPool[idx]});
+    renderNaiAnswerArea();
+}
+
+function removeNaiWord(ansIdx){
+    const removed = naiCurrentAnswer.splice(ansIdx,1)[0];
+    document.getElementById('naiwb-'+removed.idx).classList.remove('selected');
+    renderNaiAnswerArea();
+}
+
+function renderNaiAnswerArea(){
+    const area = document.getElementById('nai-answer-area');
+    if(naiCurrentAnswer.length === 0){
+        area.innerHTML = '<span class="reorder-placeholder">Toca las palabras en orden</span>';
+    } else {
+        area.innerHTML = naiCurrentAnswer.map((a,i)=>`<button class="answer-btn" onclick="removeNaiWord(${i})">${a.word}</button>`).join('');
+    }
+    document.getElementById('nai-check-btn').disabled = naiCurrentAnswer.length !== window._naiReorderPool.length;
+}
+
+function checkNaiReorderAnswer(){
+    const q = naiReorderQuestions[naiReorderIdx];
+    const userWords = naiCurrentAnswer.map(a=>a.word);
+    const correctAnswer = q.words.join('');
+    const userAnswer = userWords.join('');
+    const isCorrect = stripRuby(userAnswer) === stripRuby(correctAnswer);
+    const fb = document.getElementById('nai-feedback');
+    document.getElementById('nai-check-btn').disabled = true;
+    document.querySelectorAll('#nai-word-pool .word-btn, #nai-answer-area .answer-btn').forEach(b=>b.style.pointerEvents='none');
+    if(isCorrect){
+        naiReorderCorrect++;
+        fb.innerHTML = `<div class="reorder-feedback correct">⭕ ¡Correcto!</div>`;
+    } else {
+        naiReorderErrors.push({hint:q.hint, user:userAnswer, correct:correctAnswer});
+        fb.innerHTML = `<div class="reorder-feedback wrong">❌ Incorrecto<br>Respuesta: ${correctAnswer}</div>`;
+    }
+    setTimeout(()=>{
+        naiReorderIdx++;
+        if(naiReorderIdx < 5) showNaiReorderQuestion();
+        else showNaiReorderResult();
+    }, 1500);
+}
+
+function showNaiReorderResult(){
+    const pct = Math.round((naiReorderCorrect/5)*100);
+    saveScore('nai', pct);
+    const msg = pct===100?'🎉 ¡Perfecto!':pct>=80?'🌟 ¡Excelente!':pct>=60?'👍 ¡Muy bien!':'📚 ¡Sigue practicando!';
+    let errHtml = '';
+    if(naiReorderErrors.length > 0){
+        errHtml = `<div class="error-review"><h4>❌ Errores (${naiReorderErrors.length})</h4>${naiReorderErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${e.hint}</div><div class="error-your">Tu respuesta: ${e.user}</div><div class="error-correct">✅ Correcta: ${e.correct}</div></div>`).join('')}</div>`;
+    }
+    document.getElementById('nai-quiz-area').innerHTML = `
+        <div class="grammar-result">
+            <div class="gr-score">${pct}%</div>
+            <div class="gr-msg">${msg}</div>
+            <div class="gr-detail">${naiReorderCorrect} / 5 correctas</div>
+            <button class="btn-practice" onclick="startNaiReorderQuiz()">🔄 Intentar de nuevo</button>
+            <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
+            ${errHtml}
+        </div>
+    `;
+}
+
 // ===== JOSHI (助詞) DATA & FUNCTIONS =====
 let joshiGroup = 0;
 let joshiQuizIdx = 0;
@@ -6090,6 +6434,117 @@ const taReorderPool = [
     {words:['走った','から','疲れました'],r:['はしった','から','つかれました'],hint:'Me cansé porque corrí',use:'kara'},
     {words:['早く','起きた','から','時間が','あります'],r:['はやく','おきた','から','じかんが','あります'],hint:'Tengo tiempo porque me levanté temprano',use:'kara'},
     {words:['勉強した','から','テストが','できました'],r:['べんきょうした','から','テストが','できました'],hint:'Pude hacer el examen porque estudié',use:'kara'},
+];
+
+// ===== NAI VERB POOL =====
+const naiVerbPool = [
+    // G1 く→かない
+    {dict:'書く',dr:'かく',nai:'書かない',nar:'かかない',masu:'書きます',group:'G1',sub:'く→かない',es:'escribir'},
+    {dict:'聞く',dr:'きく',nai:'聞かない',nar:'きかない',masu:'聞きます',group:'G1',sub:'く→かない',es:'escuchar'},
+    {dict:'働く',dr:'はたらく',nai:'働かない',nar:'はたらかない',masu:'働きます',group:'G1',sub:'く→かない',es:'trabajar'},
+    {dict:'歩く',dr:'あるく',nai:'歩かない',nar:'あるかない',masu:'歩きます',group:'G1',sub:'く→かない',es:'caminar'},
+    // G1 ぐ→がない
+    {dict:'泳ぐ',dr:'およぐ',nai:'泳がない',nar:'およがない',masu:'泳ぎます',group:'G1',sub:'ぐ→がない',es:'nadar'},
+    {dict:'急ぐ',dr:'いそぐ',nai:'急がない',nar:'いそがない',masu:'急ぎます',group:'G1',sub:'ぐ→がない',es:'apurarse'},
+    // G1 す→さない
+    {dict:'話す',dr:'はなす',nai:'話さない',nar:'はなさない',masu:'話します',group:'G1',sub:'す→さない',es:'hablar'},
+    {dict:'貸す',dr:'かす',nai:'貸さない',nar:'かさない',masu:'貸します',group:'G1',sub:'す→さない',es:'prestar'},
+    {dict:'押す',dr:'おす',nai:'押さない',nar:'おさない',masu:'押します',group:'G1',sub:'す→さない',es:'empujar'},
+    // G1 む→まない
+    {dict:'読む',dr:'よむ',nai:'読まない',nar:'よまない',masu:'読みます',group:'G1',sub:'む→まない',es:'leer'},
+    {dict:'飲む',dr:'のむ',nai:'飲まない',nar:'のまない',masu:'飲みます',group:'G1',sub:'む→まない',es:'beber'},
+    // G1 ぶ→ばない
+    {dict:'遊ぶ',dr:'あそぶ',nai:'遊ばない',nar:'あそばない',masu:'遊びます',group:'G1',sub:'ぶ→ばない',es:'jugar'},
+    // G1 つ→たない
+    {dict:'待つ',dr:'まつ',nai:'待たない',nar:'またない',masu:'待ちます',group:'G1',sub:'つ→たない',es:'esperar'},
+    // G1 う→わない（特殊）
+    {dict:'買う',dr:'かう',nai:'買わない',nar:'かわない',masu:'買います',group:'G1',sub:'う→わない',es:'comprar'},
+    {dict:'洗う',dr:'あらう',nai:'洗わない',nar:'あらわない',masu:'洗います',group:'G1',sub:'う→わない',es:'lavar'},
+    // G1 る（G1）→らない
+    {dict:'撮る',dr:'とる',nai:'撮らない',nar:'とらない',masu:'撮ります',group:'G1',sub:'る→らない',es:'fotografiar'},
+    {dict:'帰る',dr:'かえる',nai:'帰らない',nar:'かえらない',masu:'帰ります',group:'G1',sub:'る→らない',es:'regresar'},
+    {dict:'乗る',dr:'のる',nai:'乗らない',nar:'のらない',masu:'乗ります',group:'G1',sub:'る→らない',es:'subir'},
+    {dict:'作る',dr:'つくる',nai:'作らない',nar:'つくらない',masu:'作ります',group:'G1',sub:'る→らない',es:'hacer'},
+    {dict:'座る',dr:'すわる',nai:'座らない',nar:'すわらない',masu:'座ります',group:'G1',sub:'る→らない',es:'sentarse'},
+    {dict:'走る',dr:'はしる',nai:'走らない',nar:'はしらない',masu:'走ります',group:'G1',sub:'る→らない',es:'correr'},
+    // G2 る→ない
+    {dict:'食べる',dr:'たべる',nai:'食べない',nar:'たべない',masu:'食べます',group:'G2',sub:'る→ない',es:'comer'},
+    {dict:'見る',dr:'みる',nai:'見ない',nar:'みない',masu:'見ます',group:'G2',sub:'る→ない',es:'ver'},
+    {dict:'起きる',dr:'おきる',nai:'起きない',nar:'おきない',masu:'起きます',group:'G2',sub:'る→ない',es:'levantarse'},
+    {dict:'寝る',dr:'ねる',nai:'寝ない',nar:'ねない',masu:'寝ます',group:'G2',sub:'る→ない',es:'dormir'},
+    {dict:'開ける',dr:'あける',nai:'開けない',nar:'あけない',masu:'開けます',group:'G2',sub:'る→ない',es:'abrir'},
+    {dict:'浴びる',dr:'あびる',nai:'浴びない',nar:'あびない',masu:'浴びます',group:'G2',sub:'る→ない',es:'ducharse'},
+    {dict:'教える',dr:'おしえる',nai:'教えない',nar:'おしえない',masu:'教えます',group:'G2',sub:'る→ない',es:'enseñar'},
+    {dict:'着る',dr:'きる',nai:'着ない',nar:'きない',masu:'着ます',group:'G2',sub:'る→ない',es:'ponerse ropa'},
+    {dict:'借りる',dr:'かりる',nai:'借りない',nar:'かりない',masu:'借ります',group:'G2',sub:'る→ない',es:'pedir prestado'},
+    // G3 する→しない
+    {dict:'勉強する',dr:'べんきょうする',nai:'勉強しない',nar:'べんきょうしない',masu:'勉強します',group:'G3',sub:'する→しない',es:'estudiar'},
+    {dict:'電話する',dr:'でんわする',nai:'電話しない',nar:'でんわしない',masu:'電話します',group:'G3',sub:'する→しない',es:'llamar por tel.'},
+    {dict:'運動する',dr:'うんどうする',nai:'運動しない',nar:'うんどうしない',masu:'運動します',group:'G3',sub:'する→しない',es:'hacer ejercicio'},
+    {dict:'料理する',dr:'りょうりする',nai:'料理しない',nar:'りょうりしない',masu:'料理します',group:'G3',sub:'する→しない',es:'cocinar'},
+    {dict:'散歩する',dr:'さんぽする',nai:'散歩しない',nar:'さんぽしない',masu:'散歩します',group:'G3',sub:'する→しない',es:'pasear'},
+    {dict:'準備する',dr:'じゅんびする',nai:'準備しない',nar:'じゅんびしない',masu:'準備します',group:'G3',sub:'する→しない',es:'preparar'},
+    // G3 くる→こない
+    {dict:'来る',dr:'くる',nai:'来ない',nar:'こない',masu:'来ます',group:'G3',sub:'くる→こない',es:'venir'},
+    // 例外（ない形はG1と同じだが明示）
+    {dict:'行く',dr:'いく',nai:'行かない',nar:'いかない',masu:'行きます',group:'例外',sub:'例外',es:'ir'},
+];
+
+const naiReorderPool = [
+    // ないでください (8)
+    {words:['ここで','写真を','撮らないで','ください'],r:['ここで','しゃしんを','とらないで','ください'],hint:'Por favor no tomes fotos aquí',use:'req'},
+    {words:['廊下を','走らないで','ください'],r:['ろうかを','はしらないで','ください'],hint:'Por favor no corras en el pasillo',use:'req'},
+    {words:['授業中に','食べないで','ください'],r:['じゅぎょうちゅうに','たべないで','ください'],hint:'Por favor no comas durante la clase',use:'req'},
+    {words:['ここに','座らないで','ください'],r:['ここに','すわらないで','ください'],hint:'Por favor no te sientes aquí',use:'req'},
+    {words:['教室で','話さないで','ください'],r:['きょうしつで','はなさないで','ください'],hint:'Por favor no hables en el aula',use:'req'},
+    {words:['この本を','読まないで','ください'],r:['このほんを','よまないで','ください'],hint:'Por favor no leas este libro',use:'req'},
+    {words:['電車の中で','電話しないで','ください'],r:['でんしゃのなかで','でんわしないで','ください'],hint:'Por favor no hables por teléfono en el tren',use:'req'},
+    {words:['窓を','開けないで','ください'],r:['まどを','あけないで','ください'],hint:'Por favor no abras la ventana',use:'req'},
+    {words:['ここで','泳がないで','ください'],r:['ここで','およがないで','ください'],hint:'Por favor no nades aquí',use:'req'},
+    {words:['授業中に','寝ないで','ください'],r:['じゅぎょうちゅうに','ねないで','ください'],hint:'Por favor no duermas durante la clase',use:'req'},
+    {words:['遅く','帰らないで','ください'],r:['おそく','かえらないで','ください'],hint:'Por favor no vuelvas tarde',use:'req'},
+    {words:['教室で','走らないで','ください'],r:['きょうしつで','はしらないで','ください'],hint:'Por favor no corras en el aula',use:'req'},
+    {words:['音楽を','聴かないで','ください'],r:['おんがくを','きかないで','ください'],hint:'Por favor no escuches música',use:'req'},
+    // なくてもいいです (8)
+    {words:['急がなくても','いいです'],r:['いそがなくても','いいです'],hint:'No tienes que apurarte',use:'naku'},
+    {words:['今日は','来なくても','いいです'],r:['きょうは','こなくても','いいです'],hint:'No tienes que venir hoy',use:'naku'},
+    {words:['全部','食べなくても','いいです'],r:['ぜんぶ','たべなくても','いいです'],hint:'No tienes que comer todo',use:'naku'},
+    {words:['明日は','勉強しなくても','いいです'],r:['あしたは','べんきょうしなくても','いいです'],hint:'No tienes que estudiar mañana',use:'naku'},
+    {words:['早く','起きなくても','いいです'],r:['はやく','おきなくても','いいです'],hint:'No tienes que levantarte temprano',use:'naku'},
+    {words:['ここで','待たなくても','いいです'],r:['ここで','またなくても','いいです'],hint:'No tienes que esperar aquí',use:'naku'},
+    {words:['漢字を','書かなくても','いいです'],r:['かんじを','かかなくても','いいです'],hint:'No tienes que escribir kanji',use:'naku'},
+    {words:['写真を','撮らなくても','いいです'],r:['しゃしんを','とらなくても','いいです'],hint:'No tienes que tomar fotos',use:'naku'},
+    {words:['今日は','料理しなくても','いいです'],r:['きょうは','りょうりしなくても','いいです'],hint:'No tienes que cocinar hoy',use:'naku'},
+    {words:['全部','読まなくても','いいです'],r:['ぜんぶ','よまなくても','いいです'],hint:'No tienes que leer todo',use:'naku'},
+    {words:['今日は','運動しなくても','いいです'],r:['きょうは','うんどうしなくても','いいです'],hint:'No tienes que hacer ejercicio hoy',use:'naku'},
+    {words:['早く','帰らなくても','いいです'],r:['はやく','かえらなくても','いいです'],hint:'No tienes que volver temprano',use:'naku'},
+    {words:['お金を','持たなくても','いいです'],r:['おかねを','もたなくても','いいです'],hint:'No tienes que llevar dinero',use:'naku'},
+    // なければなりません (7)
+    {words:['毎日','勉強しなければ','なりません'],r:['まいにち','べんきょうしなければ','なりません'],hint:'Tienes que estudiar todos los días',use:'neba'},
+    {words:['早く','起きなければ','なりません'],r:['はやく','おきなければ','なりません'],hint:'Tienes que levantarte temprano',use:'neba'},
+    {words:['薬を','飲まなければ','なりません'],r:['くすりを','のまなければ','なりません'],hint:'Tienes que tomar la medicina',use:'neba'},
+    {words:['宿題を','しなければ','なりません'],r:['しゅくだいを','しなければ','なりません'],hint:'Tienes que hacer la tarea',use:'neba'},
+    {words:['野菜を','食べなければ','なりません'],r:['やさいを','たべなければ','なりません'],hint:'Tienes que comer verduras',use:'neba'},
+    {words:['もっと','練習しなければ','なりません'],r:['もっと','れんしゅうしなければ','なりません'],hint:'Tienes que practicar más',use:'neba'},
+    {words:['準備しなければ','なりません'],r:['じゅんびしなければ','なりません'],hint:'Tienes que prepararte',use:'neba'},
+    {words:['手を','洗わなければ','なりません'],r:['てを','あらわなければ','なりません'],hint:'Tienes que lavarte las manos',use:'neba'},
+    {words:['制服を','着なければ','なりません'],r:['せいふくを','きなければ','なりません'],hint:'Tienes que ponerte el uniforme',use:'neba'},
+    {words:['電車に','乗らなければ','なりません'],r:['でんしゃに','のらなければ','なりません'],hint:'Tienes que tomar el tren',use:'neba'},
+    {words:['先生に','話さなければ','なりません'],r:['せんせいに','はなさなければ','なりません'],hint:'Tienes que hablar con el profesor',use:'neba'},
+    {words:['明日','早く','起きなければ','なりません'],r:['あした','はやく','おきなければ','なりません'],hint:'Tienes que levantarte temprano mañana',use:'neba'},
+    // ないほうがいい (7)
+    {words:['たくさん','食べないほうが','いいです'],r:['たくさん','たべないほうが','いいです'],hint:'Es mejor no comer demasiado',use:'nbou'},
+    {words:['夜遅く','寝ないほうが','いいです'],r:['よるおそく','ねないほうが','いいです'],hint:'Es mejor no acostarse tarde',use:'nbou'},
+    {words:['今日は','外で','遊ばないほうが','いいです'],r:['きょうは','そとで','あそばないほうが','いいです'],hint:'Es mejor no jugar afuera hoy',use:'nbou'},
+    {words:['お酒を','飲まないほうが','いいです'],r:['おさけを','のまないほうが','いいです'],hint:'Es mejor no beber alcohol',use:'nbou'},
+    {words:['無理を','しないほうが','いいです'],r:['むりを','しないほうが','いいです'],hint:'Es mejor no esforzarse demasiado',use:'nbou'},
+    {words:['急がないほうが','いいです'],r:['いそがないほうが','いいです'],hint:'Es mejor no apurarse',use:'nbou'},
+    {words:['電車の中で','電話しないほうが','いいです'],r:['でんしゃのなかで','でんわしないほうが','いいです'],hint:'Es mejor no llamar por teléfono en el tren',use:'nbou'},
+    {words:['夜遅く','食べないほうが','いいです'],r:['よるおそく','たべないほうが','いいです'],hint:'Es mejor no comer tarde por la noche',use:'nbou'},
+    {words:['一人で','行かないほうが','いいです'],r:['ひとりで','いかないほうが','いいです'],hint:'Es mejor no ir solo',use:'nbou'},
+    {words:['今日は','外に','出ないほうが','いいです'],r:['きょうは','そとに','でないほうが','いいです'],hint:'Es mejor no salir hoy',use:'nbou'},
+    {words:['遅く','起きないほうが','いいです'],r:['おそく','おきないほうが','いいです'],hint:'Es mejor no levantarse tarde',use:'nbou'},
+    {words:['授業を','休まないほうが','いいです'],r:['じゅぎょうを','やすまないほうが','いいです'],hint:'Es mejor no faltar a clase',use:'nbou'},
 ];
 
 // ===== VOCAB DATA & FUNCTIONS =====
