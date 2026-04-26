@@ -1109,17 +1109,19 @@
         .vocab-mode-tabs{display:flex;gap:0.5rem;margin-bottom:1rem;justify-content:center}
         .vocab-mode-tab{padding:0.5rem 1rem;border:2px solid var(--primary);border-radius:var(--radius-sm);background:transparent;color:var(--primary);font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s}
         .vocab-mode-tab.active{background:var(--primary);color:white}
-        .vocab-cat-tabs{display:flex;flex-wrap:wrap;gap:0.3rem;margin-bottom:1rem}
-        .vocab-cat-tab{padding:0.4rem 0.6rem;border:1px solid var(--ocean);border-radius:var(--radius-sm);background:transparent;color:var(--ocean);font-size:0.75rem;cursor:pointer;transition:all 0.2s}
+        .vocab-cat-tabs{margin-bottom:1rem}
+        .vocab-cat-group-label{font-size:0.68rem;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:0.08em;margin:0.5rem 0 0.25rem}
+        .vocab-cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0.3rem;margin-bottom:0.2rem}
+        .vocab-cat-tab{height:2.1rem;padding:0 0.3rem;border:1px solid var(--ocean);border-radius:var(--radius-sm);background:transparent;color:var(--ocean);font-size:0.72rem;font-weight:500;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.2;width:100%}
         .vocab-cat-tab.active{background:var(--ocean);color:white}
-        .vocab-cat-tab.matome{border-color:var(--accent);color:var(--accent)}
+        .vocab-cat-tab.matome{border-color:var(--accent);color:var(--accent);width:100%;margin-top:0.4rem}
         .vocab-cat-tab.matome.active{background:var(--accent);color:white}
         .vocab-list{display:flex;flex-direction:column;gap:0.4rem}
         .vocab-item{display:flex;align-items:center;gap:0.8rem;padding:0.6rem 0.8rem;background:white;border-radius:var(--radius-sm);box-shadow:0 1px 3px rgba(0,0,0,0.08)}
         .vocab-group-header{font-weight:700;color:white;background:var(--ocean);padding:0.35rem 0.8rem;border-radius:var(--radius-sm);margin:0.6rem 0 0.3rem;font-size:0.85rem;letter-spacing:0.05em}
         .verb-group-section{margin-bottom:1rem}
-        .verb-chips{display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.4rem}
-        .verb-chip{background:white;border:1.5px solid var(--ocean);border-radius:20px;padding:0.25rem 0.7rem;font-family:'Noto Sans JP';font-size:0.95rem;font-weight:600;color:var(--night);cursor:pointer;transition:all 0.2s;position:relative;min-width:6rem;text-align:center;box-sizing:border-box}
+        .verb-chips{display:grid;grid-template-columns:repeat(3,1fr);gap:0.4rem;margin-top:0.4rem}
+        .verb-chip{background:white;border:1.5px solid var(--ocean);border-radius:20px;padding:0.25rem 0.7rem;font-family:'Noto Sans JP';font-size:0.95rem;font-weight:600;color:var(--night);cursor:pointer;transition:all 0.2s;position:relative;width:100%;text-align:center;box-sizing:border-box}
         .verb-chip.revealed{background:var(--ocean);color:white;border-color:var(--ocean)}
         .verb-chip-meaning{font-size:0.72rem;font-weight:400;display:block;max-height:0;overflow:hidden;transition:max-height 0.2s}
         .verb-chip.revealed .verb-chip-meaning{max-height:2rem}
@@ -6981,6 +6983,46 @@ const vocabData = [
         ]
     },
     {
+        name: '数字', es: 'Números',
+        words: [
+            {type:'header',w:'0〜10'},
+            {w:'ゼロ・<ruby>零<rt>れい</rt></ruby>',r:'zero / rei',m:'0 (cero)'},
+            {w:'<ruby>一<rt>いち</rt></ruby>',r:'ichi',m:'1 (uno)'},
+            {w:'<ruby>二<rt>に</rt></ruby>',r:'ni',m:'2 (dos)'},
+            {w:'<ruby>三<rt>さん</rt></ruby>',r:'san',m:'3 (tres)'},
+            {w:'<ruby>四<rt>し・よん</rt></ruby>',r:'shi / yon',m:'4 (cuatro)'},
+            {w:'<ruby>五<rt>ご</rt></ruby>',r:'go',m:'5 (cinco)'},
+            {w:'<ruby>六<rt>ろく</rt></ruby>',r:'roku',m:'6 (seis)'},
+            {w:'<ruby>七<rt>しち・なな</rt></ruby>',r:'shichi / nana',m:'7 (siete)'},
+            {w:'<ruby>八<rt>はち</rt></ruby>',r:'hachi',m:'8 (ocho)'},
+            {w:'<ruby>九<rt>く・きゅう</rt></ruby>',r:'ku / kyuu',m:'9 (nueve)'},
+            {w:'<ruby>十<rt>じゅう</rt></ruby>',r:'juu',m:'10 (diez)'},
+            {type:'header',w:'11〜19'},
+            {w:'<ruby>十一<rt>じゅういち</rt></ruby>',r:'juuichi',m:'11 (once)'},
+            {w:'<ruby>十二<rt>じゅうに</rt></ruby>',r:'juuni',m:'12 (doce)'},
+            {w:'<ruby>十三<rt>じゅうさん</rt></ruby>',r:'juusan',m:'13 (trece)'},
+            {w:'<ruby>十四<rt>じゅうし・じゅうよん</rt></ruby>',r:'juushi / juuyon',m:'14 (catorce)'},
+            {w:'<ruby>十五<rt>じゅうご</rt></ruby>',r:'juugo',m:'15 (quince)'},
+            {w:'<ruby>十六<rt>じゅうろく</rt></ruby>',r:'juuroku',m:'16 (dieciséis)'},
+            {w:'<ruby>十七<rt>じゅうしち・じゅうなな</rt></ruby>',r:'juushichi / juunana',m:'17 (diecisiete)'},
+            {w:'<ruby>十八<rt>じゅうはち</rt></ruby>',r:'juuhachi',m:'18 (dieciocho)'},
+            {w:'<ruby>十九<rt>じゅうく・じゅうきゅう</rt></ruby>',r:'juuku / juukyuu',m:'19 (diecinueve)'},
+            {type:'header',w:'Decenas'},
+            {w:'<ruby>二十<rt>にじゅう</rt></ruby>',r:'nijuu',m:'20 (veinte)'},
+            {w:'<ruby>三十<rt>さんじゅう</rt></ruby>',r:'sanjuu',m:'30 (treinta)'},
+            {w:'<ruby>四十<rt>よんじゅう</rt></ruby>',r:'yonjuu',m:'40 (cuarenta)'},
+            {w:'<ruby>五十<rt>ごじゅう</rt></ruby>',r:'gojuu',m:'50 (cincuenta)'},
+            {w:'<ruby>六十<rt>ろくじゅう</rt></ruby>',r:'rokujuu',m:'60 (sesenta)'},
+            {w:'<ruby>七十<rt>ななじゅう</rt></ruby>',r:'nanajuu',m:'70 (setenta)'},
+            {w:'<ruby>八十<rt>はちじゅう</rt></ruby>',r:'hachijuu',m:'80 (ochenta)'},
+            {w:'<ruby>九十<rt>きゅうじゅう</rt></ruby>',r:'kyuujuu',m:'90 (noventa)'},
+            {type:'header',w:'Grandes números'},
+            {w:'<ruby>百<rt>ひゃく</rt></ruby>',r:'hyaku',m:'100 (cien)'},
+            {w:'<ruby>千<rt>せん</rt></ruby>',r:'sen',m:'1.000 (mil)'},
+            {w:'<ruby>万<rt>まん</rt></ruby>',r:'man',m:'10.000 (diez mil)'}
+        ]
+    },
+    {
         name: '〜時〜分', es: 'La hora',
         words: [
             {w:'<ruby>何時<rt>なんじ</rt></ruby>',r:'nanji',m:'¿qué hora?'},
@@ -7405,6 +7447,30 @@ const vocabData = [
     }
 ];
 
+const vocabGroups = [
+    {label:'Básico',    names:['あいさつ','人・家族','家族']},
+    {label:'Tiempo',    names:['時間','数字','〜時〜分','曜日・月']},
+    {label:'Lugares',   names:['場所','方向・位置','乗り物']},
+    {label:'Vida',      names:['食べ物・飲み物','動物','自然・季節','からだ','生活用品','助数詞']},
+    {label:'Expresión', names:['動詞','い形容詞','な形容詞','その他']},
+];
+
+function renderVocabCatTabs(){
+    const REPASO=vocabData.length;
+    let html='';
+    vocabGroups.forEach(g=>{
+        html+=`<div class="vocab-cat-group-label">${g.label}</div><div class="vocab-cat-grid">`;
+        g.names.forEach(name=>{
+            const i=vocabData.findIndex(c=>c.name===name);
+            if(i===-1)return;
+            html+=`<button class="vocab-cat-tab ${i===vocabCategory?'active':''}" onclick="setVocabCategory(${i})">${vocabData[i].es}</button>`;
+        });
+        html+=`</div>`;
+    });
+    html+=`<button class="vocab-cat-tab matome ${vocabCategory===REPASO?'active':''}" onclick="setVocabCategory(${REPASO})">⭐ Repaso</button>`;
+    return html;
+}
+
 function setVocabMode(mode){
     vocabMode=mode;
     renderVocab();
@@ -7429,10 +7495,7 @@ function renderVocabLearn(){
     const REPASO=vocabData.length;
     const isMatome=vocabCategory===REPASO;
     document.getElementById('vocab-content').innerHTML=`
-        <div class="vocab-cat-tabs">
-            ${vocabData.map((c,i)=>`<button class="vocab-cat-tab ${i===vocabCategory?'active':''}" onclick="setVocabCategory(${i})">${c.es}</button>`).join('')}
-            <button class="vocab-cat-tab matome ${isMatome?'active':''}" onclick="setVocabCategory(${REPASO})">⭐ Repaso</button>
-        </div>
+        <div class="vocab-cat-tabs">${renderVocabCatTabs()}</div>
         ${isMatome?renderVocabMatome():cat.name==='動詞'?renderVerbosGrouped(cat):`
         <div style="text-align:right;margin-bottom:0.5rem">
             <button class="hint-btn" id="vocab-pista-btn" onclick="toggleVocabPista()">${vocabPista?'🙈 Ocultar romaji':'💡 Pista (romaji)'}</button>
@@ -7475,10 +7538,7 @@ function renderVocabPractice(){
         return;
     }
     document.getElementById('vocab-content').innerHTML=`
-        <div class="vocab-cat-tabs">
-            ${vocabData.map((c,i)=>`<button class="vocab-cat-tab ${i===vocabCategory?'active':''}" onclick="setVocabCategory(${i})">${c.es}</button>`).join('')}
-            <button class="vocab-cat-tab matome ${vocabCategory===vocabData.length?'active':''}" onclick="setVocabCategory(${REPASO})">⭐ Repaso</button>
-        </div>
+        <div class="vocab-cat-tabs">${renderVocabCatTabs()}</div>
         <div class="grammar-card" style="text-align:center;">
             <h3>🎯 Vocabulario Quiz</h3>
             <div class="kanji-quiz-types">
