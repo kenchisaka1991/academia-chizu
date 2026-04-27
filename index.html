@@ -1863,6 +1863,14 @@ let naiCardIdx = 0;
 let naiOuyouCardIdx = 0;
 let naiQuizIdx = 0; let naiCorrect = 0; let naiQuestions = []; let naiErrors = [];
 let naiReorderIdx = 0; let naiReorderCorrect = 0; let naiReorderQuestions = []; let naiReorderErrors = []; let naiCurrentAnswer = [];
+let gimonPracMode = 'fill'; // 'fill' | 'reorder'
+let gimonFillIdx = 0; let gimonFillCorrect = 0; let gimonFillQuestions = []; let gimonFillErrors = [];
+let gimonReorderIdx = 0; let gimonReorderCorrect = 0; let gimonReorderQuestions = []; let gimonReorderErrors = []; let gimonCurrentAnswer = []; let gimonReorderCurrentWords = [];
+let shijiQuizIdx = 0; let shijiCorrect = 0; let shijiQuestions = []; let shijiErrors = [];
+let kutePracMode = 'katsu'; // 'katsu' | 'reorder'
+let kuteType = 'i'; // 'i' | 'na'
+let kuteKatsuIdx = 0; let kuteKatsuCorrect = 0; let kuteKatsuQuestions = []; let kuteKatsuErrors = [];
+let kuteReorderIdx = 0; let kuteReorderCorrect = 0; let kuteReorderQuestions = []; let kuteReorderErrors = []; let kuteCurrentAnswer = [];
 let aruPracMode = 'quiz'; // 'quiz' | 'reorder'
 let aruQuizIdx = 0; let aruCorrect = 0; let aruQuestions = []; let aruErrors = [];
 let aruReorderIdx = 0; let aruReorderCorrect = 0; let aruReorderQuestions = []; let aruReorderErrors = []; let aruCurrentAnswer = [];
@@ -2644,9 +2652,12 @@ function renderGrammar(){
         <div class="grammar-lesson-tabs">
             <button class="lesson-tab ${currentLesson==='desu'?'active':''}" onclick="setCurrentLesson('desu')">📌 Ser/Estar<span class="lesson-tab-jp">です</span></button>
             <button class="lesson-tab ${currentLesson==='katsu'?'active':''}" onclick="setCurrentLesson('katsu')">🔄 Conj.<span class="lesson-tab-jp">です活用</span></button>
+            <button class="lesson-tab ${currentLesson==='shiji'?'active':''}" onclick="setCurrentLesson('shiji')">👉 こそあど<span class="lesson-tab-jp">指示語</span></button>
+            <button class="lesson-tab ${currentLesson==='gimon'?'active':''}" onclick="setCurrentLesson('gimon')">❓ Preguntas<span class="lesson-tab-jp">疑問詞</span></button>
             <button class="lesson-tab ${currentLesson==='masu'?'active':''}" onclick="setCurrentLesson('masu')">✋ Verbos<span class="lesson-tab-jp">ます</span></button>
             <button class="lesson-tab ${currentLesson==='aru'?'active':''}" onclick="setCurrentLesson('aru')">📍 Existencia<span class="lesson-tab-jp">あります/います</span></button>
             <button class="lesson-tab ${currentLesson==='keiyo'?'active':''}" onclick="setCurrentLesson('keiyo')">🌈 Adjetivos<span class="lesson-tab-jp">形容詞</span></button>
+            <button class="lesson-tab ${currentLesson==='kute'?'active':''}" onclick="setCurrentLesson('kute')">🔗 Conexión<span class="lesson-tab-jp">〜くて・で</span></button>
             <button class="lesson-tab ${currentLesson==='mashou'?'active':''}" onclick="setCurrentLesson('mashou')">🤝 Invitaciones<span class="lesson-tab-jp">ましょう</span></button>
             <button class="lesson-tab ${currentLesson==='tai'?'active':''}" onclick="setCurrentLesson('tai')">💭 Deseos<span class="lesson-tab-jp">〜たい</span></button>
             <button class="lesson-tab ${currentLesson==='maeni'?'active':''}" onclick="setCurrentLesson('maeni')">⏰ Antes/Después<span class="lesson-tab-jp">〜前に・後で</span></button>
@@ -2699,6 +2710,15 @@ function renderGrammar(){
     } else if(currentLesson==='nai'){
         if(grammarMode==='learn') renderNaiLearn();
         else renderNaiPractice();
+    } else if(currentLesson==='kute'){
+        if(grammarMode==='learn') renderKuteLearn();
+        else renderKutePractice();
+    } else if(currentLesson==='gimon'){
+        if(grammarMode==='learn') renderGimonLearn();
+        else renderGimonPractice();
+    } else if(currentLesson==='shiji'){
+        if(grammarMode==='learn') renderShijiLearn();
+        else renderShijiPractice();
     } else {
         if(grammarMode==='learn') renderJoshiLearn();
         else renderJoshiPractice();
@@ -5676,6 +5696,591 @@ function showAruReorderResult(){
     `;
 }
 
+// ===== KUTE (〜くて・で) FUNCTIONS =====
+function renderKute(){
+    if(grammarMode==='learn') renderKuteLearn();
+    else renderKutePractice();
+}
+
+function setKuteType(t){
+    kuteType = t;
+    if(grammarMode==='learn') renderKuteLearn();
+    else renderKutePractice();
+}
+
+function setKutePracMode(m){
+    kutePracMode = m;
+    renderKutePractice();
+}
+
+function renderKuteLearn(){
+    const isI = kuteType === 'i';
+    const data = isI ? kuteIData : kuteNaData;
+    const accentColor = isI ? 'var(--primary)' : 'var(--ocean)';
+    const subTabs = `<div class="joshi-grp-tabs" style="margin-bottom:0;">
+        <button class="joshi-grp-tab ${isI?'active':''}" onclick="setKuteType('i')">い<ruby>形容詞<rt>けいようし</rt></ruby><span class="btn-es">Adj-い</span></button>
+        <button class="joshi-grp-tab ${!isI?'active':''}" onclick="setKuteType('na')">な<ruby>形容詞<rt>けいようし</rt></ruby><span class="btn-es">Adj-な</span></button>
+    </div>`;
+    const ruleBox = isI
+        ? `<div class="grammar-point">
+            <p>📌 <strong>Adj-い → 〜くて</strong></p>
+            <p style="text-align:center;font-size:1.1rem;margin:0.5rem 0;"><strong>〜い → 〜<span style="color:var(--primary)">くて</span></strong></p>
+            <p style="color:var(--text-light);">Ej.: <strong><ruby>大<rt>おお</rt></ruby>きい</strong> → <strong><ruby>大<rt>おお</rt></ruby>き<span style="color:var(--primary)">くて</span></strong></p>
+            <p style="color:var(--text-light);">⚠️ Excepción: <strong>いい</strong> → <strong>よ<span style="color:var(--primary)">くて</span></strong></p>
+          </div>
+          <div class="grammar-point" style="margin-top:1rem;">
+            <p>📌 <strong>Uso: conecta dos adjetivos en una oración.</strong></p>
+            <div style="background:var(--cream);border-left:3px solid var(--primary);padding:0.6rem 1rem;border-radius:0 var(--radius-sm) var(--radius-sm) 0;margin:0.4rem 0;"><ruby>広<rt>ひろ</rt></ruby>い ＋ <ruby>明<rt>あか</rt></ruby>るい → この<ruby>部屋<rt>へや</rt></ruby>は<ruby>広<rt>ひろ</rt></ruby>く<strong>て</strong><ruby>明<rt>あか</rt></ruby>るいです。<div style="color:var(--text-light);font-size:0.85rem;">Esta habitación es amplia y luminosa.</div></div>
+            <div style="background:var(--cream);border-left:3px solid var(--primary);padding:0.6rem 1rem;border-radius:0 var(--radius-sm) var(--radius-sm) 0;margin:0.4rem 0;"><ruby>安<rt>やす</rt></ruby>い ＋ おいしい → あのレストランは<ruby>安<rt>やす</rt></ruby>く<strong>て</strong>おいしいです。<div style="color:var(--text-light);font-size:0.85rem;">Ese restaurante es barato y delicioso.</div></div>
+          </div>`
+        : `<div class="grammar-point">
+            <p>📌 <strong>Adj-な → 〜で</strong></p>
+            <p style="text-align:center;font-size:1.1rem;margin:0.5rem 0;"><strong>Raíz ＋ <span style="color:var(--ocean)">で</span></strong></p>
+            <p style="color:var(--text-light);">Ej.: <strong><ruby>元気<rt>げんき</rt></ruby></strong> → <strong><ruby>元気<rt>げんき</rt></ruby><span style="color:var(--ocean)">で</span></strong></p>
+          </div>
+          <div class="grammar-point" style="margin-top:1rem;">
+            <p>📌 <strong>Uso: conecta dos adjetivos en una oración.</strong></p>
+            <div style="background:var(--cream);border-left:3px solid var(--ocean);padding:0.6rem 1rem;border-radius:0 var(--radius-sm) var(--radius-sm) 0;margin:0.4rem 0;">きれい ＋ <ruby>親切<rt>しんせつ</rt></ruby> → <ruby>彼女<rt>かのじょ</rt></ruby>はきれい<strong>で</strong><ruby>親切<rt>しんせつ</rt></ruby>です。<div style="color:var(--text-light);font-size:0.85rem;">Ella es bonita y amable.</div></div>
+            <div style="background:var(--cream);border-left:3px solid var(--ocean);padding:0.6rem 1rem;border-radius:0 var(--radius-sm) var(--radius-sm) 0;margin:0.4rem 0;"><ruby>便利<rt>べんり</rt></ruby> ＋ <ruby>楽<rt>たの</rt></ruby>しい → <ruby>東京<rt>とうきょう</rt></ruby>は<ruby>便利<rt>べんり</rt></ruby><strong>で</strong><ruby>楽<rt>たの</rt></ruby>しいです。<div style="color:var(--text-light);font-size:0.85rem;">Tokio es conveniente y divertido.</div></div>
+          </div>`;
+    document.getElementById('grammar-content').innerHTML = `
+        <div class="grammar-card">
+            <div style="display:flex;align-items:center;gap:0.8rem;flex-wrap:wrap;margin-bottom:0.3rem;">
+                <div class="grammar-title" style="margin-bottom:0;">〜くて・で</div>
+                ${subTabs}
+            </div>
+            <div class="grammar-subtitle">Conexión de adjetivos con 〜くて / 〜で</div>
+            <div class="grammar-desc">
+                ${ruleBox}
+                <div class="verb-table-scroll" style="margin-top:0.8rem;">
+                    <table class="verb-table">
+                        <tr><th>${isI?'Adj-い':'Adj-な'}</th><th style="color:${accentColor};">${isI?'〜くて形':'〜で形'}</th><th>Español</th></tr>
+                        ${data.map(v=>`<tr><td>${v.base}</td><td style="color:${accentColor};font-weight:600;">${isI?v.kute:v.de}</td><td>${v.es}</td></tr>`).join('')}
+                    </table>
+                </div>
+            </div>
+            <button class="btn-practice" onclick="setGrammarMode('practice')">🎯 Practicar</button>
+        </div>
+    `;
+}
+
+function renderKutePractice(){
+    const isKatsu = kutePracMode === 'katsu';
+    const isI = kuteType === 'i';
+    const subTabs = `<div class="joshi-grp-tabs" style="margin-bottom:0;">
+        <button class="joshi-grp-tab ${isI?'active':''}" onclick="setKuteType('i')">い<ruby>形容詞<rt>けいようし</rt></ruby></button>
+        <button class="joshi-grp-tab ${!isI?'active':''}" onclick="setKuteType('na')">な<ruby>形容詞<rt>けいようし</rt></ruby></button>
+    </div>`;
+    document.getElementById('grammar-content').innerHTML = `
+        <div class="grammar-card" style="text-align:center;">
+            <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:1rem;">
+                <button class="mode-tab ${isKatsu?'active':''}" onclick="setKutePracMode('katsu')">📊 Conjugación</button>
+                <button class="mode-tab ${!isKatsu?'active':''}" onclick="setKutePracMode('reorder')">🔤 Conexión</button>
+            </div>
+            ${isKatsu ? `
+            <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:1rem;">${subTabs}</div>
+            <h3>🎯 Práctica: 〜くて・で — Conjugación (${isI?'Adj-い':'Adj-な'})</h3>
+            <p style="color:var(--text-light);margin:0.5rem 0;">Selecciona la forma correcta de conexión.</p>
+            <p style="color:var(--text-light);font-size:0.9rem;">5 preguntas aleatorias</p>
+            <button class="btn-practice" onclick="startKuteKatsu()">Comenzar</button>` : `
+            <h3>🎯 Práctica: 〜くて・で — Conexión</h3>
+            <p style="color:var(--text-light);margin:0.5rem 0;">Ordena las palabras para formar la oración.</p>
+            <p style="color:var(--text-light);font-size:0.9rem;">5 preguntas aleatorias (い形・な形 mezcladas)</p>
+            <button class="btn-practice" onclick="startKuteReorder()">Comenzar</button>`}
+        </div>
+        <div id="kute-quiz-area"></div>
+    `;
+}
+
+function startKuteKatsu(){
+    kuteKatsuIdx = 0; kuteKatsuCorrect = 0; kuteKatsuErrors = [];
+    const pool = kuteType === 'i' ? kuteIData : kuteNaData;
+    const shuffled = [...pool].sort(()=>Math.random()-0.5).slice(0,5);
+    kuteKatsuQuestions = shuffled.map(item => {
+        const correct = kuteType === 'i' ? item.kute : item.de;
+        const others = pool.filter(x => stripRuby(kuteType==='i'?x.kute:x.de) !== stripRuby(correct));
+        const wrongs = [...others].sort(()=>Math.random()-0.5).slice(0,3).map(x => kuteType==='i'?x.kute:x.de);
+        const opts = [correct, ...wrongs].sort(()=>Math.random()-0.5);
+        return {...item, correct, opts};
+    });
+    document.getElementById('grammar-content').querySelector('.grammar-card').style.display = 'none';
+    showKuteKatsuQuestion();
+}
+
+function showKuteKatsuQuestion(){
+    const q = kuteKatsuQuestions[kuteKatsuIdx];
+    document.getElementById('kute-quiz-area').innerHTML = `
+        <div class="reorder-box">
+            <div class="reorder-progress">${kuteKatsuIdx+1} / 5</div>
+            <div class="masu-q-verb">${q.base}</div>
+            <div class="masu-q-form">→ ${kuteType==='i'?'〜くて形':'〜で形'}</div>
+            <div class="masu-q-meaning">(${q.es})</div>
+            <div class="masu-options">
+                ${q.opts.map((o,i)=>`<button class="masu-opt" onclick="checkKuteKatsuAnswer(${i})"><span>${o}</span></button>`).join('')}
+            </div>
+            <div id="kute-feedback"></div>
+        </div>
+    `;
+}
+
+function checkKuteKatsuAnswer(idx){
+    const q = kuteKatsuQuestions[kuteKatsuIdx];
+    const selected = q.opts[idx];
+    const isCorrect = stripRuby(selected) === stripRuby(q.correct);
+    document.querySelectorAll('#kute-quiz-area .masu-opt').forEach((b,i) => {
+        b.disabled = true;
+        if(stripRuby(q.opts[i]) === stripRuby(q.correct)) b.classList.add('correct');
+        else if(i === idx && !isCorrect) b.classList.add('wrong');
+    });
+    if(isCorrect){
+        kuteKatsuCorrect++;
+        document.getElementById('kute-feedback').innerHTML = `<div class="reorder-feedback correct">⭕ ¡Correcto!</div>`;
+    } else {
+        kuteKatsuErrors.push({base:q.base, correct:q.correct, selected:selected, es:q.es});
+        document.getElementById('kute-feedback').innerHTML = `<div class="reorder-feedback wrong">❌ Incorrecto<br>Respuesta: ${q.correct}</div>`;
+    }
+    setTimeout(()=>{ kuteKatsuIdx++; if(kuteKatsuIdx<5) showKuteKatsuQuestion(); else showKuteKatsuResult(); }, 1500);
+}
+
+function showKuteKatsuResult(){
+    const pct = Math.round((kuteKatsuCorrect/5)*100);
+    saveScore('kute', pct);
+    const msg = pct===100?'🎉 ¡Perfecto!':pct>=80?'🌟 ¡Excelente!':pct>=60?'👍 ¡Muy bien!':'📚 ¡Sigue practicando!';
+    let errHtml = '';
+    if(kuteKatsuErrors.length>0){
+        errHtml = `<div class="error-review"><h4>❌ Errores (${kuteKatsuErrors.length})</h4>${kuteKatsuErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${e.base} (${e.es})</div><div class="error-your">Tu respuesta: ${e.selected}</div><div class="error-correct">✅ Correcta: ${e.correct}</div></div>`).join('')}</div>`;
+    }
+    document.getElementById('kute-quiz-area').innerHTML = `
+        <div class="grammar-result">
+            <div class="gr-score">${pct}%</div>
+            <div class="gr-msg">${msg}</div>
+            <div class="gr-detail">${kuteKatsuCorrect} / 5 correctas</div>
+            <button class="btn-practice" onclick="startKuteKatsu()">🔄 Intentar de nuevo</button>
+            <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
+            ${errHtml}
+        </div>
+    `;
+}
+
+function startKuteReorder(){
+    kuteReorderIdx = 0; kuteReorderCorrect = 0; kuteReorderErrors = []; kuteCurrentAnswer = [];
+    kuteReorderQuestions = [...kuteReorderPool].sort(()=>Math.random()-0.5).slice(0,5);
+    document.getElementById('grammar-content').querySelector('.grammar-card').style.display = 'none';
+    showKuteReorderQuestion();
+}
+
+function showKuteReorderQuestion(){
+    kuteCurrentAnswer = [];
+    const q = kuteReorderQuestions[kuteReorderIdx];
+    const indices = q.words.map((_,i)=>i).sort(()=>Math.random()-0.5);
+    const shuffledWords = indices.map(i=>q.words[i]);
+    const shuffledR = q.r ? indices.map(i=>q.r[i]) : shuffledWords;
+    window._kuteReorderPool = shuffledWords;
+    const typeColor = q.type==='i'?'var(--primary)':'var(--ocean)';
+    const typeLabel = q.type==='i'?'い形容詞 → 〜くて':'な形容詞 → 〜で';
+    document.getElementById('kute-quiz-area').innerHTML = `
+        <div class="reorder-box">
+            <div class="reorder-progress">${kuteReorderIdx+1} / 5</div>
+            <div style="font-size:0.8rem;color:${typeColor};font-weight:600;margin-bottom:0.3rem;">${typeLabel}</div>
+            <div class="reorder-hint">${q.hint}</div>
+            <button class="hint-btn" id="kute-pista-btn" onclick="toggleKuteReorderHint()">💡 Pista (furigana)</button>
+            <div class="reorder-words" id="kute-word-pool">
+                ${shuffledWords.map((w,i)=>`<div class="word-btn-wrap"><button class="word-btn" onclick="selectKuteWord(${i})" id="kutewb-${i}">${stripRuby(w)}</button><span class="word-romaji" style="display:none;">${shuffledR[i]}</span></div>`).join('')}
+            </div>
+            <div class="reorder-answer" id="kute-answer-area">
+                <span class="reorder-placeholder">Toca las palabras en orden</span>
+            </div>
+            <button class="btn-check" id="kute-check-btn" onclick="checkKuteReorderAnswer()" disabled>Verificar</button>
+            <div id="kute-feedback"></div>
+        </div>
+    `;
+}
+
+function toggleKuteReorderHint(){
+    const spans = document.querySelectorAll('#kute-word-pool .word-romaji');
+    const btn = document.getElementById('kute-pista-btn');
+    const isOn = spans[0] && spans[0].style.display !== 'none';
+    spans.forEach(s => s.style.display = isOn ? 'none' : 'block');
+    if(btn) btn.textContent = isOn ? '💡 Pista (furigana)' : '💡 Pista ON';
+}
+
+function selectKuteWord(idx){
+    const btn = document.getElementById('kutewb-'+idx);
+    if(btn.classList.contains('selected')) return;
+    btn.classList.add('selected');
+    kuteCurrentAnswer.push({idx, word:window._kuteReorderPool[idx]});
+    renderKuteAnswerArea();
+}
+
+function removeKuteWord(ansIdx){
+    const removed = kuteCurrentAnswer.splice(ansIdx,1)[0];
+    document.getElementById('kutewb-'+removed.idx).classList.remove('selected');
+    renderKuteAnswerArea();
+}
+
+function renderKuteAnswerArea(){
+    const area = document.getElementById('kute-answer-area');
+    if(kuteCurrentAnswer.length===0){
+        area.innerHTML = '<span class="reorder-placeholder">Toca las palabras en orden</span>';
+    } else {
+        area.innerHTML = kuteCurrentAnswer.map((a,i)=>`<button class="answer-btn" onclick="removeKuteWord(${i})">${stripRuby(a.word)}</button>`).join('');
+    }
+    document.getElementById('kute-check-btn').disabled = kuteCurrentAnswer.length !== window._kuteReorderPool.length;
+}
+
+function checkKuteReorderAnswer(){
+    const q = kuteReorderQuestions[kuteReorderIdx];
+    const userAnswer = kuteCurrentAnswer.map(a=>a.word).join('');
+    const isCorrect = stripRuby(userAnswer) === stripRuby(q.answer);
+    const fb = document.getElementById('kute-feedback');
+    if(isCorrect){
+        kuteReorderCorrect++;
+        fb.innerHTML = `<div class="reorder-feedback correct">⭕ ¡Correcto!</div>`;
+    } else {
+        kuteReorderErrors.push({hint:q.hint, user:userAnswer, correct:q.answer, explain:q.explain});
+        fb.innerHTML = `<div class="reorder-feedback wrong">❌ Incorrecto<br>Respuesta: ${q.answer}</div>`;
+    }
+    document.getElementById('kute-check-btn').disabled = true;
+    document.querySelectorAll('#kute-word-pool .word-btn, #kute-answer-area .answer-btn').forEach(b=>b.style.pointerEvents='none');
+    setTimeout(()=>{ kuteReorderIdx++; if(kuteReorderIdx<5) showKuteReorderQuestion(); else showKuteReorderResult(); }, 1500);
+}
+
+function showKuteReorderResult(){
+    const pct = Math.round((kuteReorderCorrect/5)*100);
+    saveScore('kute', pct);
+    const msg = pct===100?'🎉 ¡Perfecto!':pct>=80?'🌟 ¡Excelente!':pct>=60?'👍 ¡Muy bien!':'📚 ¡Sigue practicando!';
+    let errHtml = '';
+    if(kuteReorderErrors.length>0){
+        errHtml = `<div class="error-review"><h4>❌ Errores (${kuteReorderErrors.length})</h4>${kuteReorderErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${e.hint}</div><div class="error-your">Tu respuesta: ${e.user}</div><div class="error-correct">✅ Correcta: ${e.correct}</div><div class="error-explain">📖 ${e.explain}</div></div>`).join('')}</div>`;
+    }
+    document.getElementById('kute-quiz-area').innerHTML = `
+        <div class="grammar-result">
+            <div class="gr-score">${pct}%</div>
+            <div class="gr-msg">${msg}</div>
+            <div class="gr-detail">${kuteReorderCorrect} / 5 correctas</div>
+            <button class="btn-practice" onclick="startKuteReorder()">🔄 Intentar de nuevo</button>
+            <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
+            ${errHtml}
+        </div>
+    `;
+}
+
+// ===== GIMON (疑問詞) FUNCTIONS =====
+function renderGimonLearn(){
+    document.getElementById('grammar-content').innerHTML = `
+        <div class="grammar-card">
+            <div class="grammar-title">Palabras interrogativas</div>
+            <div class="grammar-subtitle">疑問詞（ぎもんし）</div>
+            <div class="grammar-desc">Las palabras interrogativas se colocan donde está el elemento desconocido. El orden de las palabras no cambia respecto a una oración normal.</div>
+            <div class="verb-table-scroll" style="margin-top:1rem;">
+                <table class="verb-table">
+                    <tr><th>Palabra</th><th>Romaji</th><th>Significado</th><th>Partícula</th><th>Ejemplo</th></tr>
+                    ${gimonData.map(g=>`<tr><td style="font-size:1.1rem;font-weight:700">${g.w}</td><td style="color:var(--ocean)">${g.r}</td><td>${g.m}</td><td style="font-size:0.85rem">${g.p}</td><td>${g.ex}<br><small style="color:#888">${g.tr}</small></td></tr>`).join('')}
+                </table>
+            </div>
+            <button class="btn-practice" onclick="setGrammarMode('practice')" style="margin-top:1rem;">🎯 Practicar</button>
+        </div>
+    `;
+}
+
+function renderGimonPractice(){
+    const isFill = gimonPracMode === 'fill';
+    document.getElementById('grammar-content').innerHTML = `
+        <div class="grammar-card" style="text-align:center;">
+            <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:1rem;">
+                <button class="mode-tab ${isFill?'active':''}" onclick="setGimonMode('fill')">📝 Selección</button>
+                <button class="mode-tab ${!isFill?'active':''}" onclick="setGimonMode('reorder')">🔤 Ordenar</button>
+            </div>
+            <h3>🎯 Práctica: Palabras interrogativas — ${isFill?'Selección':'Ordenar'}</h3>
+            <p style="color:var(--text-light);margin:0.5rem 0;">${isFill?'Elige la palabra interrogativa correcta para completar la oración.':'Ordena las palabras para formar la oración correcta.'}</p>
+            <p style="color:var(--text-light);font-size:0.9rem;">5 preguntas aleatorias</p>
+            <button class="btn-practice" onclick="${isFill?'startGimonFill()':'startGimonReorder()'}">Comenzar</button>
+        </div>
+        <div id="gimon-quiz-area"></div>
+    `;
+}
+
+function setGimonMode(mode){
+    gimonPracMode = mode;
+    renderGimonPractice();
+}
+
+function startGimonFill(){
+    document.getElementById('grammar-content').querySelector('.grammar-card').style.display = 'none';
+    const shuffled = [...gimonFillPool].sort(()=>Math.random()-0.5);
+    gimonFillQuestions = shuffled.slice(0,5);
+    gimonFillIdx = 0; gimonFillCorrect = 0; gimonFillErrors = [];
+    showGimonFillQ();
+}
+
+function showGimonFillQ(){
+    const q = gimonFillQuestions[gimonFillIdx];
+    const opts = [...q.opts].sort(()=>Math.random()-0.5);
+    window._gimonOpts = opts;
+    document.getElementById('gimon-quiz-area').innerHTML = `
+        <div class="reorder-box">
+            <div class="reorder-progress">${gimonFillIdx+1} / 5</div>
+            <div class="joshi-fill-q">${q.q.replace('___','<span class="joshi-blank">___</span>')}</div>
+            <div class="reorder-hint">${q.h}</div>
+            <div class="masu-options">${opts.map((o,i)=>`<button class="masu-opt" onclick="checkGimonFill(${i})" id="gimon-opt-${i}">${o}</button>`).join('')}</div>
+            <div id="gimon-feedback"></div>
+        </div>
+    `;
+}
+
+function checkGimonFill(idx){
+    const q = gimonFillQuestions[gimonFillIdx];
+    const opts = window._gimonOpts;
+    const isCorrect = stripRuby(opts[idx]) === stripRuby(q.a);
+    document.querySelectorAll('.masu-opt').forEach((b,i)=>{
+        b.disabled = true;
+        if(stripRuby(opts[i])===stripRuby(q.a)) b.classList.add('correct');
+        if(i===idx && !isCorrect) b.classList.add('wrong');
+    });
+    const fb = document.getElementById('gimon-feedback');
+    if(isCorrect){
+        gimonFillCorrect++;
+        fb.innerHTML = '<div class="reorder-feedback correct">⭕ ¡Correcto!</div>';
+    } else {
+        gimonFillErrors.push({q:q.q, h:q.h, user:stripRuby(opts[idx]), correct:stripRuby(q.a), exp:q.exp});
+        fb.innerHTML = `<div class="reorder-feedback wrong">❌ Respuesta: ${q.a}<br><small>${q.exp}</small></div>`;
+    }
+    setTimeout(()=>{
+        gimonFillIdx++;
+        if(gimonFillIdx<5) showGimonFillQ();
+        else showGimonFillResult();
+    }, 1500);
+}
+
+function showGimonFillResult(){
+    const pct = Math.round((gimonFillCorrect/5)*100);
+    saveScore('gimon', pct);
+    const msg = pct===100?'🎉 ¡Perfecto!':pct>=80?'🌟 ¡Excelente!':pct>=60?'👍 ¡Muy bien!':'📚 ¡Sigue practicando!';
+    let errHtml = '';
+    if(gimonFillErrors.length>0){
+        errHtml = `<div class="error-review"><h4>❌ Errores (${gimonFillErrors.length})</h4>${gimonFillErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${e.q}</div><div class="error-your">Tu: ${e.user}</div><div class="error-correct">✅ ${e.correct} — ${e.exp}</div></div>`).join('')}</div>`;
+    }
+    document.getElementById('gimon-quiz-area').innerHTML = `
+        <div class="grammar-result">
+            <div class="gr-score">${pct}%</div>
+            <div class="gr-msg">${msg}</div>
+            <div class="gr-detail">${gimonFillCorrect} / 5 correctas</div>
+            <button class="btn-practice" onclick="startGimonFill()">🔄 Intentar de nuevo</button>
+            <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
+            ${errHtml}
+        </div>
+    `;
+}
+
+function startGimonReorder(){
+    document.getElementById('grammar-content').querySelector('.grammar-card').style.display = 'none';
+    const shuffled = [...gimonReorderPool].sort(()=>Math.random()-0.5);
+    gimonReorderQuestions = shuffled.slice(0,5);
+    gimonReorderIdx = 0; gimonReorderCorrect = 0; gimonReorderErrors = []; gimonCurrentAnswer = [];
+    showGimonReorderQ();
+}
+
+function showGimonReorderQ(){
+    const q = gimonReorderQuestions[gimonReorderIdx];
+    gimonReorderCurrentWords = [...q.words].sort(()=>Math.random()-0.5);
+    gimonCurrentAnswer = [];
+    document.getElementById('gimon-quiz-area').innerHTML = `
+        <div class="reorder-box">
+            <div class="reorder-progress">${gimonReorderIdx+1} / 5</div>
+            <div class="reorder-hint">${q.h}</div>
+            <button class="hint-btn" id="gimon-hint-btn" onclick="toggleGimonHint()">💡 Pista (romaji)</button>
+            <div class="reorder-words" id="gimon-word-pool">
+                ${gimonReorderCurrentWords.map((w,i)=>`<div class="word-btn-wrap"><button class="word-btn" onclick="gimonSelectWord(${i})" id="gimon-wb-${i}">${w}</button><span class="word-romaji">${kanaToRomaji(rubyToHiragana(w))}</span></div>`).join('')}
+            </div>
+            <div class="reorder-answer" id="gimon-answer-area">
+                <span class="reorder-placeholder">Toca las palabras en orden</span>
+            </div>
+            <button class="btn-check" id="gimon-check-btn" onclick="checkGimonReorderAnswer()" disabled>Verificar</button>
+            <div id="gimon-reorder-feedback"></div>
+        </div>
+    `;
+}
+
+function toggleGimonHint(){
+    const btn = document.getElementById('gimon-hint-btn');
+    const active = document.getElementById('gimon-word-pool').classList.toggle('pista-active');
+    btn.textContent = active ? '🙈 Ocultar pista' : '💡 Pista (romaji)';
+}
+
+function gimonSelectWord(idx){
+    const btn = document.getElementById(`gimon-wb-${idx}`);
+    if(btn.classList.contains('selected')) return;
+    gimonCurrentAnswer.push({word: gimonReorderCurrentWords[idx], btnIdx: idx});
+    btn.classList.add('selected');
+    updateGimonAnswerArea();
+}
+
+function updateGimonAnswerArea(){
+    const area = document.getElementById('gimon-answer-area');
+    area.innerHTML = gimonCurrentAnswer.length === 0
+        ? '<span class="reorder-placeholder">Toca las palabras en orden</span>'
+        : gimonCurrentAnswer.map((a,i)=>`<button class="answer-btn" onclick="gimonRemoveWord(${i})">${a.word}</button>`).join('');
+    document.getElementById('gimon-check-btn').disabled = gimonCurrentAnswer.length !== gimonReorderCurrentWords.length;
+}
+
+function gimonRemoveWord(i){
+    const removed = gimonCurrentAnswer.splice(i,1)[0];
+    document.getElementById(`gimon-wb-${removed.btnIdx}`).classList.remove('selected');
+    updateGimonAnswerArea();
+}
+
+function checkGimonReorderAnswer(){
+    const q = gimonReorderQuestions[gimonReorderIdx];
+    const userAns = gimonCurrentAnswer.map(a=>stripRuby(a.word)).join('');
+    const correct = stripRuby(q.answer);
+    const fb = document.getElementById('gimon-reorder-feedback');
+    document.getElementById('gimon-check-btn').disabled = true;
+    document.querySelectorAll('#gimon-word-pool .word-btn, #gimon-answer-area .answer-btn').forEach(b=>b.style.pointerEvents='none');
+    if(userAns === correct){
+        gimonReorderCorrect++;
+        fb.innerHTML = '<div class="reorder-feedback correct">⭕ ¡Correcto!</div>';
+    } else {
+        gimonReorderErrors.push({hint:q.h, user:userAns, correct:stripRuby(q.answer)});
+        fb.innerHTML = `<div class="reorder-feedback wrong">❌ Correcta: ${q.answer}<br><small>${q.exp}</small></div>`;
+    }
+    setTimeout(()=>{
+        gimonReorderIdx++;
+        if(gimonReorderIdx<5) showGimonReorderQ();
+        else showGimonReorderResult();
+    }, 1800);
+}
+
+function showGimonReorderResult(){
+    const pct = Math.round((gimonReorderCorrect/5)*100);
+    saveScore('gimon', pct);
+    const msg = pct===100?'🎉 ¡Perfecto!':pct>=80?'🌟 ¡Excelente!':pct>=60?'👍 ¡Muy bien!':'📚 ¡Sigue practicando!';
+    let errHtml = '';
+    if(gimonReorderErrors.length>0){
+        errHtml = `<div class="error-review"><h4>❌ Errores (${gimonReorderErrors.length})</h4>${gimonReorderErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${e.hint}</div><div class="error-your">Tu: ${e.user}</div><div class="error-correct">✅ ${e.correct}</div></div>`).join('')}</div>`;
+    }
+    document.getElementById('gimon-quiz-area').innerHTML = `
+        <div class="grammar-result">
+            <div class="gr-score">${pct}%</div>
+            <div class="gr-msg">${msg}</div>
+            <div class="gr-detail">${gimonReorderCorrect} / 5 correctas</div>
+            <button class="btn-practice" onclick="startGimonReorder()">🔄 Intentar de nuevo</button>
+            <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
+            ${errHtml}
+        </div>
+    `;
+}
+
+// ===== SHIJI (指示語) FUNCTIONS =====
+function renderShijiLearn(){
+    const rows = kosoAdoTable;
+    document.getElementById('grammar-content').innerHTML = `
+        <div class="grammar-card">
+            <div class="grammar-title">Demostrativos</div>
+            <div class="grammar-subtitle">指示語・こそあど</div>
+            <div class="grammar-desc">El sistema こそあど organiza los demostrativos según la distancia entre hablante y oyente. Cada columna cambia según el uso (objeto, adjetivo, lugar, dirección).</div>
+            <div class="verb-table-scroll" style="margin-top:1rem;">
+                <table class="verb-table">
+                    <tr>
+                        <th>Serie</th><th>Distancia</th>
+                        <th>Objeto</th><th>Adjetivo + sust.</th>
+                        <th>Lugar</th><th>Dirección</th>
+                    </tr>
+                    ${rows.map(r=>`
+                        <tr>
+                            <td style="font-size:1.3rem;font-weight:900;color:var(--primary)">${r.kana}〜</td>
+                            <td style="font-size:0.85rem;color:#666">${r.dist}</td>
+                            <td><strong>${r.mono}</strong><br><small style="color:#888">${r.exMono}<br>${r.trMono}</small></td>
+                            <td><strong>${r.adj}</strong><br><small style="color:#888">${r.exAdj}<br>${r.trAdj}</small></td>
+                            <td><strong>${r.lugar}</strong><br><small style="color:#888">${r.exLugar}<br>${r.trLugar}</small></td>
+                            <td><strong>${r.dir}</strong></td>
+                        </tr>
+                    `).join('')}
+                </table>
+            </div>
+            <button class="btn-practice" onclick="setGrammarMode('practice')" style="margin-top:1rem;">🎯 Practicar</button>
+        </div>
+    `;
+}
+
+function renderShijiPractice(){
+    document.getElementById('grammar-content').innerHTML = `
+        <div class="grammar-card" style="text-align:center;">
+            <h3>🎯 Selección: Demostrativos こそあど</h3>
+            <p style="color:var(--text-light);margin:0.5rem 0;">Elige el demostrativo correcto según la distancia indicada.</p>
+            <p style="color:var(--text-light);font-size:0.9rem;">5 preguntas aleatorias</p>
+            <button class="btn-practice" onclick="startShijiFill()">Comenzar</button>
+        </div>
+        <div id="shiji-quiz-area"></div>
+    `;
+}
+
+function startShijiFill(){
+    document.getElementById('grammar-content').querySelector('.grammar-card').style.display = 'none';
+    const shuffled = [...shijiQuizPool].sort(()=>Math.random()-0.5);
+    shijiQuestions = shuffled.slice(0,5);
+    shijiQuizIdx = 0; shijiCorrect = 0; shijiErrors = [];
+    showShijiFillQ();
+}
+
+function showShijiFillQ(){
+    const q = shijiQuestions[shijiQuizIdx];
+    const opts = [...q.opts].sort(()=>Math.random()-0.5);
+    window._shijiOpts = opts;
+    document.getElementById('shiji-quiz-area').innerHTML = `
+        <div class="reorder-box">
+            <div class="reorder-progress">${shijiQuizIdx+1} / 5</div>
+            <div class="joshi-fill-q">${q.q.replace('___','<span class="joshi-blank">___</span>')}</div>
+            <div class="reorder-hint">${q.h}</div>
+            <div class="masu-options">${opts.map((o,i)=>`<button class="masu-opt" onclick="checkShijiFill(${i})">${o}</button>`).join('')}</div>
+            <div id="shiji-feedback"></div>
+        </div>
+    `;
+}
+
+function checkShijiFill(idx){
+    const q = shijiQuestions[shijiQuizIdx];
+    const opts = window._shijiOpts;
+    const isCorrect = opts[idx] === q.a;
+    document.querySelectorAll('#shiji-quiz-area .masu-opt').forEach((b,i)=>{
+        b.disabled = true;
+        if(opts[i]===q.a) b.classList.add('correct');
+        if(i===idx && !isCorrect) b.classList.add('wrong');
+    });
+    const fb = document.getElementById('shiji-feedback');
+    if(isCorrect){
+        shijiCorrect++;
+        fb.innerHTML = '<div class="reorder-feedback correct">⭕ ¡Correcto!</div>';
+    } else {
+        shijiErrors.push({q:q.q, h:q.h, user:opts[idx], correct:q.a, exp:q.exp});
+        fb.innerHTML = `<div class="reorder-feedback wrong">❌ Respuesta: ${q.a}<br><small>${q.exp}</small></div>`;
+    }
+    setTimeout(()=>{
+        shijiQuizIdx++;
+        if(shijiQuizIdx<5) showShijiFillQ();
+        else showShijiResult();
+    }, 1500);
+}
+
+function showShijiResult(){
+    const pct = Math.round((shijiCorrect/5)*100);
+    saveScore('shiji', pct);
+    const msg = pct===100?'🎉 ¡Perfecto!':pct>=80?'🌟 ¡Excelente!':pct>=60?'👍 ¡Muy bien!':'📚 ¡Sigue practicando!';
+    let errHtml = '';
+    if(shijiErrors.length>0){
+        errHtml = `<div class="error-review"><h4>❌ Errores (${shijiErrors.length})</h4>${shijiErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${e.q}</div><div class="error-your">Tu: ${e.user}</div><div class="error-correct">✅ ${e.correct} — ${e.exp}</div></div>`).join('')}</div>`;
+    }
+    document.getElementById('shiji-quiz-area').innerHTML = `
+        <div class="grammar-result">
+            <div class="gr-score">${pct}%</div>
+            <div class="gr-msg">${msg}</div>
+            <div class="gr-detail">${shijiCorrect} / 5 correctas</div>
+            <button class="btn-practice" onclick="startShijiFill()">🔄 Intentar de nuevo</button>
+            <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
+            ${errHtml}
+        </div>
+    `;
+}
+
 // ===== JOSHI (助詞) DATA & FUNCTIONS =====
 let joshiGroup = 0;
 let joshiQuizIdx = 0;
@@ -6879,6 +7484,227 @@ const naiReorderPool = [
     {words:['今日は','外に','出ないほうが','いいです'],r:['きょうは','そとに','でないほうが','いいです'],hint:'Es mejor no salir hoy',use:'nbou'},
     {words:['遅く','起きないほうが','いいです'],r:['おそく','おきないほうが','いいです'],hint:'Es mejor no levantarse tarde',use:'nbou'},
     {words:['授業を','休まないほうが','いいです'],r:['じゅぎょうを','やすまないほうが','いいです'],hint:'Es mejor no faltar a clase',use:'nbou'},
+];
+
+// ===== GIMON (疑問詞) DATA =====
+const gimonData = [
+  { w:'<ruby>何<rt>なに</rt></ruby>', r:'nani', m:'¿qué cosa?', p:'が・を', ex:'<ruby>何<rt>なに</rt></ruby>が<ruby>好<rt>す</rt></ruby>きですか。', tr:'¿Qué te gusta?' },
+  { w:'どこ', r:'doko', m:'¿dónde?', p:'に・へ・で', ex:'<ruby>家<rt>いえ</rt></ruby>はどこにありますか。', tr:'¿Dónde está tu casa?' },
+  { w:'<ruby>誰<rt>だれ</rt></ruby>', r:'dare', m:'¿quién?', p:'が・を', ex:'<ruby>誰<rt>だれ</rt></ruby>があなたの<ruby>友<rt>とも</rt></ruby>だちですか。', tr:'¿Quién es tu amigo?' },
+  { w:'いつ', r:'itsu', m:'¿cuándo?', p:'に', ex:'いつ<ruby>日本<rt>にほん</rt></ruby>に<ruby>行<rt>い</rt></ruby>きますか。', tr:'¿Cuándo irás a Japón?' },
+  { w:'なぜ・どうして', r:'naze / doushite', m:'¿por qué?', p:'（文頭）', ex:'なぜ<ruby>勉強<rt>べんきょう</rt></ruby>するのですか。', tr:'¿Por qué estudias?' },
+  { w:'どれ', r:'dore', m:'¿cuál? (de 3+)', p:'が', ex:'どれが<ruby>一番<rt>いちばん</rt></ruby><ruby>好<rt>す</rt></ruby>きですか。', tr:'¿Cuál te gusta más?' },
+  { w:'どの', r:'dono', m:'¿qué...? (adj.)', p:'＋<ruby>名詞<rt>めいし</rt></ruby>', ex:'どの<ruby>本<rt>ほん</rt></ruby>がおもしろいですか。', tr:'¿Qué libro es interesante?' },
+  { w:'どう', r:'dou', m:'¿cómo? / ¿qué tal?', p:'（述語修飾）', ex:'<ruby>日本<rt>にほん</rt></ruby>はどうですか。', tr:'¿Qué tal es Japón?' },
+  { w:'いくら', r:'ikura', m:'¿cuánto cuesta?', p:'が', ex:'このシャツはいくらですか。', tr:'¿Cuánto cuesta esta camisa?' },
+  { w:'いくつ', r:'ikutsu', m:'¿cuántos? / ¿qué edad?', p:'が', ex:'<ruby>子供<rt>こども</rt></ruby>さんはいくつですか。', tr:'¿Cuántos años tiene tu hijo?' },
+];
+
+const gimonFillPool = [
+  { q:'___が<ruby>好<rt>す</rt></ruby>きですか。', a:'<ruby>何<rt>なに</rt></ruby>', opts:['<ruby>何<rt>なに</rt></ruby>','どこ','<ruby>誰<rt>だれ</rt></ruby>','いつ'], h:'¿Qué te gusta?', exp:'「何（なに）」は物・事柄を問います。' },
+  { q:'___に<ruby>住<rt>す</rt></ruby>んでいますか。', a:'どこ', opts:['どこ','いつ','どの','なぜ'], h:'¿Dónde vives?', exp:'「どこ」は場所を問います。に・へ・で と一緒に使います。' },
+  { q:'___があなたの<ruby>先生<rt>せんせい</rt></ruby>ですか。', a:'<ruby>誰<rt>だれ</rt></ruby>', opts:['<ruby>誰<rt>だれ</rt></ruby>','<ruby>何<rt>なに</rt></ruby>','どこ','いくら'], h:'¿Quién es tu profesor?', exp:'「誰（だれ）」は人を問います。' },
+  { q:'___<ruby>日本<rt>にほん</rt></ruby>に<ruby>行<rt>い</rt></ruby>きますか。', a:'いつ', opts:['いつ','どこ','どう','いくら'], h:'¿Cuándo irás a Japón?', exp:'「いつ」は時間・時期を問います。' },
+  { q:'___ビデオゲームをするのですか。', a:'なぜ', opts:['なぜ','どれ','いくつ','どの'], h:'¿Por qué juegas videojuegos?', exp:'「なぜ」は理由を問います。「どうして」も同じ意味です。' },
+  { q:'___<ruby>映画<rt>えいが</rt></ruby>を<ruby>見<rt>み</rt></ruby>ましたか。', a:'どの', opts:['どの','どれ','いつ','どこ'], h:'¿Qué película viste?', exp:'「どの」は名詞を修飾する形の疑問詞です。' },
+  { q:'<ruby>日本語<rt>にほんご</rt></ruby>は___ですか。', a:'どう', opts:['どう','いつ','いくら','どれ'], h:'¿Qué tal el japonés?', exp:'「どう」は様子・感想を問います。' },
+  { q:'このケーキは___ですか。', a:'いくら', opts:['いくら','いくつ','どこ','いつ'], h:'¿Cuánto cuesta este pastel?', exp:'「いくら」は値段・金額を問います。' },
+  { q:'<ruby>机<rt>つくえ</rt></ruby>の<ruby>上<rt>うえ</rt></ruby>に___がありますか。', a:'<ruby>何<rt>なに</rt></ruby>', opts:['<ruby>何<rt>なに</rt></ruby>','どれ','どこ','いくつ'], h:'¿Qué hay sobre el escritorio?', exp:'「何（なに）」は物・事柄を問います。' },
+  { q:'りんごが___ありますか。', a:'いくつ', opts:['いくつ','いくら','どれ','どの'], h:'¿Cuántas manzanas hay?', exp:'「いくつ」は数量・個数を問います。' },
+  { q:'___<ruby>来<rt>こ</rt></ruby>ませんでしたか。', a:'どうして', opts:['どうして','どこ','いつ','どれ'], h:'¿Por qué no viniste?', exp:'「どうして」は理由を問います。「なぜ」と同じです。' },
+  { q:'___が一番<ruby>好<rt>す</rt></ruby>きですか。<ruby>三<rt>みっ</rt></ruby>つの中で。', a:'どれ', opts:['どれ','どの','<ruby>何<rt>なに</rt></ruby>','いくつ'], h:'¿Cuál te gusta más de los tres?', exp:'「どれ」は3つ以上の中から選ぶ時に使います。' },
+  { q:'___が<ruby>来<rt>き</rt></ruby>ましたか。', a:'<ruby>誰<rt>だれ</rt></ruby>', opts:['<ruby>誰<rt>だれ</rt></ruby>','<ruby>何<rt>なに</rt></ruby>','どこ','いつ'], h:'¿Quién vino?', exp:'「誰（だれ）」は人物を問います。' },
+  { q:'___に<ruby>行<rt>い</rt></ruby>きますか。<ruby>明日<rt>あした</rt></ruby>。', a:'どこ', opts:['どこ','いつ','なぜ','<ruby>誰<rt>だれ</rt></ruby>'], h:'¿Adónde irás mañana?', exp:'「どこ」は目的地を問います。' },
+  { q:'このかばんは___ですか。', a:'いくら', opts:['いくら','いくつ','どれ','どう'], h:'¿Cuánto cuesta esta bolsa?', exp:'「いくら」は値段を問います。' },
+];
+
+const gimonReorderPool = [
+  { words:['どこ','に','<ruby>住<rt>す</rt></ruby>んでいますか'], answer:'どこに<ruby>住<rt>す</rt></ruby>んでいますか', h:'¿Dónde vives?', exp:'どこ＋に＋動詞で場所を聞きます。' },
+  { words:['<ruby>何<rt>なに</rt></ruby>','を','<ruby>飲<rt>の</rt></ruby>みますか'], answer:'<ruby>何<rt>なに</rt></ruby>を<ruby>飲<rt>の</rt></ruby>みますか', h:'¿Qué bebes?', exp:'「何を」で直接目的語を問います。' },
+  { words:['いつ','<ruby>来<rt>き</rt></ruby>ますか'], answer:'いつ<ruby>来<rt>き</rt></ruby>ますか', h:'¿Cuándo vienes?', exp:'「いつ」は助詞なしで時間を聞きます。' },
+  { words:['<ruby>誰<rt>だれ</rt></ruby>','が','<ruby>日本<rt>にほん</rt></ruby>から','<ruby>来<rt>き</rt></ruby>ましたか'], answer:'<ruby>誰<rt>だれ</rt></ruby>が<ruby>日本<rt>にほん</rt></ruby>から<ruby>来<rt>き</rt></ruby>ましたか', h:'¿Quién vino de Japón?', exp:'「誰が」で主語となる人を問います。' },
+  { words:['<ruby>仕事<rt>しごと</rt></ruby>は','どう','ですか'], answer:'<ruby>仕事<rt>しごと</rt></ruby>はどうですか', h:'¿Qué tal el trabajo?', exp:'「は＋どう」で状態・様子を聞きます。' },
+  { words:['どの','<ruby>季節<rt>きせつ</rt></ruby>','が','<ruby>好<rt>す</rt></ruby>きですか'], answer:'どの<ruby>季節<rt>きせつ</rt></ruby>が<ruby>好<rt>す</rt></ruby>きですか', h:'¿Qué estación te gusta?', exp:'「どの＋名詞」で複数の中から一つを選びます。' },
+  { words:['このカメラは','いくら','ですか'], answer:'このカメラはいくらですか', h:'¿Cuánto cuesta esta cámara?', exp:'「は＋いくら」で値段を聞きます。' },
+  { words:['<ruby>何<rt>なに</rt></ruby>','が','<ruby>欲<rt>ほ</rt></ruby>しいですか'], answer:'<ruby>何<rt>なに</rt></ruby>が<ruby>欲<rt>ほ</rt></ruby>しいですか', h:'¿Qué quieres?', exp:'「何が欲しい」で欲しい物を聞きます。' },
+  { words:['なぜ','<ruby>勉強<rt>べんきょう</rt></ruby>するのですか'], answer:'なぜ<ruby>勉強<rt>べんきょう</rt></ruby>するのですか', h:'¿Por qué estudias?', exp:'「なぜ＋動詞」で理由を聞きます。' },
+  { words:['<ruby>妹<rt>いもうと</rt></ruby>さんは','いくつ','ですか'], answer:'<ruby>妹<rt>いもうと</rt></ruby>さんはいくつですか', h:'¿Cuántos años tiene tu hermana?', exp:'「は＋いくつ」で年齢・数を聞きます。' },
+];
+
+// ===== SHIJI (指示語) DATA =====
+const kosoAdoTable = [
+  {
+    kana: 'こ', dist: 'Cerca del hablante',
+    mono: 'これ', adj: 'この', lugar: 'ここ', dir: 'こちら',
+    exMono: 'これは<ruby>私<rt>わたし</rt></ruby>の<ruby>本<rt>ほん</rt></ruby>です。', trMono: 'Este es mi libro.',
+    exAdj:  'この<ruby>本<rt>ほん</rt></ruby>はおもしろいです。',          trAdj:  'Este libro es interesante.',
+    exLugar: 'ここは<ruby>図書館<rt>としょかん</rt></ruby>です。',         trLugar: 'Este lugar es la biblioteca.',
+  },
+  {
+    kana: 'そ', dist: 'Cerca del oyente',
+    mono: 'それ', adj: 'その', lugar: 'そこ', dir: 'そちら',
+    exMono: 'それは<ruby>田中<rt>たなか</rt></ruby>さんのペンです。',       trMono: 'Ese es el bolígrafo del Sr. Tanaka.',
+    exAdj:  'その<ruby>傘<rt>かさ</rt></ruby>はあなたのですか。',          trAdj:  '¿Es ese paraguas tuyo?',
+    exLugar: 'そこに<ruby>駅<rt>えき</rt></ruby>があります。',             trLugar: 'Hay una estación allí.',
+  },
+  {
+    kana: 'あ', dist: 'Lejos de ambos',
+    mono: 'あれ', adj: 'あの', lugar: 'あそこ', dir: 'あちら',
+    exMono: 'あれは<ruby>富士山<rt>ふじさん</rt></ruby>です。',            trMono: 'Eso es el Monte Fuji.',
+    exAdj:  'あの<ruby>人<rt>ひと</rt></ruby>は<ruby>先生<rt>せんせい</rt></ruby>です。', trAdj: 'Esa persona es una maestra.',
+    exLugar: 'あそこは<ruby>公園<rt>こうえん</rt></ruby>です。',            trLugar: 'Ese lugar es un parque.',
+  },
+  {
+    kana: 'ど', dist: 'Pregunta',
+    mono: 'どれ', adj: 'どの', lugar: 'どこ', dir: 'どちら',
+    exMono: '<ruby>私<rt>わたし</rt></ruby>のかばんはどれですか。',         trMono: '¿Cuál es mi bolsa?',
+    exAdj:  'どの<ruby>本<rt>ほん</rt></ruby>が<ruby>好<rt>す</rt></ruby>きですか。', trAdj: '¿Qué libro te gusta?',
+    exLugar: 'あなたはどこから来ましたか。',                               trLugar: '¿De dónde viniste?',
+  },
+];
+
+const shijiQuizPool = [
+  // これ/それ/あれ/どれ (物)
+  { q:'___は<ruby>私<rt>わたし</rt></ruby>のかばんです。(cerca del hablante)', a:'これ', opts:['これ','それ','あれ','どれ'], h:'La bolsa está cerca del hablante.', exp:'話し手の近くにある物は「これ」です。' },
+  { q:'___は<ruby>田中<rt>たなか</rt></ruby>さんのペンですか。(cerca del oyente)', a:'それ', opts:['これ','それ','あれ','どれ'], h:'¿Ese bolígrafo es del Sr. Tanaka?', exp:'聞き手の近くにある物は「それ」です。' },
+  { q:'___は<ruby>私<rt>わたし</rt></ruby>の<ruby>傘<rt>かさ</rt></ruby>です。(cerca del hablante)', a:'これ', opts:['これ','それ','あれ','どれ'], h:'Este paraguas es mío.', exp:'話し手の近くにある物は「これ」です。' },
+  { q:'___が<ruby>好<rt>す</rt></ruby>きですか。(pregunta, de 3 o más)', a:'どれ', opts:['これ','それ','あれ','どれ'], h:'¿Cuál te gusta de los tres?', exp:'3つ以上の中から選ぶ質問は「どれ」です。' },
+  { q:'___が一番<ruby>好<rt>す</rt></ruby>きですか。(pregunta, de 3 o más)', a:'どれ', opts:['これ','それ','あれ','どれ'], h:'¿Cuál te gusta más?', exp:'3つ以上の中から選ぶ質問は「どれ」を使います。' },
+  { q:'<ruby>私<rt>わたし</rt></ruby>のペンはこれです。___はどこですか。(objeto del oyente)', a:'それ', opts:['これ','それ','あれ','どれ'], h:'Mi bolígrafo es este. ¿Dónde está el tuyo?', exp:'聞き手の近くにある物は「それ」を使います。' },
+  { q:'___は<ruby>新<rt>あたら</rt></ruby>しいかばんです。(objeto cerca del hablante)', a:'これ', opts:['これ','それ','あれ','どれ'], h:'Esta es una bolsa nueva.', exp:'話し手の近くにある物は「これ」です。' },
+  { q:'___は<ruby>有名<rt>ゆうめい</rt></ruby>な<ruby>山<rt>やま</rt></ruby>です。(objeto lejos de ambos)', a:'あれ', opts:['これ','それ','あれ','どれ'], h:'Aquello es una montaña famosa.', exp:'両者から遠くにある物は「あれ」です。' },
+  { q:'___は<ruby>田中<rt>たなか</rt></ruby>さんの<ruby>携帯<rt>けいたい</rt></ruby>ですか。(objeto cerca del oyente)', a:'それ', opts:['これ','それ','あれ','どれ'], h:'¿Es ese el celular del Sr. Tanaka?', exp:'聞き手の近くにある物は「それ」です。' },
+  { q:'___は<ruby>何<rt>なに</rt></ruby>ですか。(objeto lejos de ambos)', a:'あれ', opts:['これ','それ','あれ','どれ'], h:'¿Qué es aquello?', exp:'両者から遠くにある物は「あれ」です。' },
+  { q:'___を<ruby>見<rt>み</rt></ruby>てください。(objeto cerca del hablante)', a:'これ', opts:['これ','それ','あれ','どれ'], h:'Por favor mira esto.', exp:'話し手の近くにある物は「これ」です。' },
+  { q:'___はおいしそうですね。(objeto cerca del hablante)', a:'これ', opts:['これ','それ','あれ','どれ'], h:'Eso se ve delicioso, ¿verdad?', exp:'話し手の近くにある物は「これ」です。' },
+  // この/その/あの/どの (修飾)
+  { q:'___<ruby>机<rt>つくえ</rt></ruby>は<ruby>田中<rt>たなか</rt></ruby>さんのです。(cerca del oyente)', a:'その', opts:['この','その','あの','どの'], h:'El escritorio está cerca del oyente.', exp:'聞き手の近くの物を修飾するのは「その」です。' },
+  { q:'___<ruby>建物<rt>たてもの</rt></ruby>は<ruby>学校<rt>がっこう</rt></ruby>です。(lejos de ambos)', a:'あの', opts:['この','その','あの','どの'], h:'Ese edificio lejano es una escuela.', exp:'両者から遠い物を修飾するのは「あの」です。' },
+  { q:'___<ruby>花<rt>はな</rt></ruby>はきれいですね。(delante del oyente)', a:'その', opts:['この','その','あの','どの'], h:'Esa flor es bonita.', exp:'聞き手の近くの物を修飾するのは「その」です。' },
+  { q:'___<ruby>人<rt>ひと</rt></ruby>は<ruby>誰<rt>だれ</rt></ruby>ですか。(persona lejos de ambos)', a:'あの', opts:['この','その','あの','どの'], h:'¿Quién es esa persona lejana?', exp:'両者から遠い人を修飾するのは「あの」です。' },
+  { q:'___カフェでコーヒーを<ruby>飲<rt>の</rt></ruby>みました。(café lejos de ambos)', a:'あの', opts:['この','その','あの','どの'], h:'Bebí café en ese café lejano.', exp:'両者から遠い場所を修飾するのは「あの」です。' },
+  { q:'___<ruby>映画<rt>えいが</rt></ruby>はおもしろいですね。(adjetivo, cerca del hablante)', a:'この', opts:['この','その','あの','どの'], h:'Esta película es interesante, ¿verdad?', exp:'話し手の近くの物を修飾するのは「この」です。' },
+  { q:'___ケーキはおいしいです。(adjetivo, cerca del hablante)', a:'この', opts:['この','その','あの','どの'], h:'Este pastel está delicioso.', exp:'話し手の近くの物を修飾するのは「この」です。' },
+  { q:'___<ruby>本<rt>ほん</rt></ruby>を<ruby>読<rt>よ</rt></ruby>みましたか。(adjetivo, cerca del oyente)', a:'その', opts:['この','その','あの','どの'], h:'¿Leíste ese libro?', exp:'聞き手の近くの物を修飾するのは「その」です。' },
+  { q:'___<ruby>電車<rt>でんしゃ</rt></ruby>に<ruby>乗<rt>の</rt></ruby>りますか。(pregunta, adjetivo)', a:'どの', opts:['この','その','あの','どの'], h:'¿A qué tren subes?', exp:'修飾する疑問詞は「どの」です。' },
+  { q:'___<ruby>部屋<rt>へや</rt></ruby>が<ruby>好<rt>す</rt></ruby>きですか。(pregunta, adjetivo)', a:'どの', opts:['この','その','あの','どの'], h:'¿Qué habitación te gusta?', exp:'修飾する疑問詞は「どの」です。' },
+  { q:'___の<ruby>学校<rt>がっこう</rt></ruby>はどこですか。(adjetivo, cerca del oyente)', a:'その', opts:['この','その','あの','どの'], h:'¿Dónde está esa escuela?', exp:'聞き手の近くの物を修飾するのは「その」です。' },
+  // ここ/そこ/あそこ/どこ (場所)
+  { q:'___は<ruby>京都<rt>きょうと</rt></ruby>です。(lugar lejos de ambos)', a:'あそこ', opts:['ここ','そこ','あそこ','どこ'], h:'Ese lugar lejano es Kioto.', exp:'両者から遠い場所は「あそこ」です。' },
+  { q:'ここは<ruby>駅<rt>えき</rt></ruby>です。___は<ruby>学校<rt>がっこう</rt></ruby>です。(lado del oyente)', a:'そこ', opts:['ここ','そこ','あそこ','どこ'], h:'Este es la estación. Ese lugar es la escuela.', exp:'聞き手に近い場所は「そこ」です。' },
+  { q:'___に<ruby>山<rt>やま</rt></ruby>があります。(lugar lejos de ambos)', a:'あそこ', opts:['ここ','そこ','あそこ','どこ'], h:'Hay una montaña allá lejos.', exp:'両者から遠い場所は「あそこ」です。' },
+  { q:'___から<ruby>来<rt>き</rt></ruby>ましたか。(pregunta de lugar)', a:'どこ', opts:['ここ','そこ','あそこ','どこ'], h:'¿De dónde viniste?', exp:'場所を聞くとき「どこ」を使います。' },
+  { q:'___は<ruby>私<rt>わたし</rt></ruby>の<ruby>家<rt>いえ</rt></ruby>です。(lugar del hablante)', a:'ここ', opts:['ここ','そこ','あそこ','どこ'], h:'Este lugar es mi casa.', exp:'話し手がいる場所は「ここ」です。' },
+  { q:'___に<ruby>座<rt>すわ</rt></ruby>ってください。(lugar del hablante)', a:'ここ', opts:['ここ','そこ','あそこ','どこ'], h:'Por favor siéntate aquí.', exp:'話し手がいる場所は「ここ」です。' },
+  { q:'___から<ruby>動<rt>うご</rt></ruby>かないでください。(lugar del oyente)', a:'そこ', opts:['ここ','そこ','あそこ','どこ'], h:'Por favor no te muevas de ahí.', exp:'聞き手がいる場所は「そこ」です。' },
+  { q:'___で<ruby>働<rt>はたら</rt></ruby>いていますか。(pregunta de lugar)', a:'どこ', opts:['ここ','そこ','あそこ','どこ'], h:'¿Dónde trabajas?', exp:'場所を聞くとき「どこ」を使います。' },
+  { q:'___には<ruby>何<rt>なに</rt></ruby>がありますか。(pregunta de lugar)', a:'どこ', opts:['ここ','そこ','あそこ','どこ'], h:'¿Qué hay en ese lugar?', exp:'場所を聞くとき「どこ」を使います。' },
+  // こちら/そちら/あちら/どちら (方向)
+  { q:'___へ<ruby>行<rt>い</rt></ruby>きますか。(pregunta de dirección)', a:'どちら', opts:['こちら','そちら','あちら','どちら'], h:'¿A dónde vas?', exp:'方向を聞くとき「どちら」を使います。' },
+  { q:'___へどうぞ。(dirección del hablante)', a:'こちら', opts:['こちら','そちら','あちら','どちら'], h:'Por favor pase por aquí.', exp:'話し手の方向は「こちら」です。' },
+  { q:'___が<ruby>山田<rt>やまだ</rt></ruby>さんです。(persona cerca del hablante)', a:'こちら', opts:['こちら','そちら','あちら','どちら'], h:'Esta es la Sra. Yamada.', exp:'話し手の側の人を丁寧に指すのは「こちら」です。' },
+  { q:'___のお<ruby>天気<rt>てんき</rt></ruby>はいかがですか。(área del oyente)', a:'そちら', opts:['こちら','そちら','あちら','どちら'], h:'¿Cómo está el tiempo por ahí?', exp:'聞き手のいる方向は「そちら」です。' },
+  { q:'<ruby>入<rt>い</rt></ruby>り<ruby>口<rt>ぐち</rt></ruby>は___です。(dirección del oyente)', a:'そちら', opts:['こちら','そちら','あちら','どちら'], h:'La entrada está por allá (hacia ti).', exp:'聞き手のいる方向は「そちら」です。' },
+  { q:'___のレストランはおいしいです。(dirección lejos de ambos)', a:'あちら', opts:['こちら','そちら','あちら','どちら'], h:'El restaurante de aquel lado es delicioso.', exp:'両者から遠い方向は「あちら」です。' },
+  { q:'お<ruby>待<rt>ま</rt></ruby>ちください、___へどうぞ。(dirección lejana)', a:'あちら', opts:['こちら','そちら','あちら','どちら'], h:'Por favor espere, pase por aquel lado.', exp:'両者から遠い方向は「あちら」です。' },
+  { q:'<ruby>日本語<rt>にほんご</rt></ruby>と<ruby>英語<rt>えいご</rt></ruby>、___が<ruby>好<rt>す</rt></ruby>きですか。(elección entre dos)', a:'どちら', opts:['こちら','そちら','あちら','どちら'], h:'Japonés o inglés, ¿cuál prefieres?', exp:'2つの中から選ぶ質問は「どちら」を使います。' },
+];
+
+// ===== KUTE (〜くて・で) DATA =====
+const kuteIData = [
+    {base:'<ruby>大<rt>おお</rt></ruby>きい',  baser:'おおきい',  kute:'<ruby>大<rt>おお</rt></ruby>きくて',  kuter:'おおきくて',  es:'grande'},
+    {base:'<ruby>小<rt>ちい</rt></ruby>さい',  baser:'ちいさい',  kute:'<ruby>小<rt>ちい</rt></ruby>さくて',  kuter:'ちいさくて',  es:'pequeño'},
+    {base:'<ruby>高<rt>たか</rt></ruby>い',   baser:'たかい',   kute:'<ruby>高<rt>たか</rt></ruby>くて',   kuter:'たかくて',   es:'alto/caro'},
+    {base:'<ruby>安<rt>やす</rt></ruby>い',   baser:'やすい',   kute:'<ruby>安<rt>やす</rt></ruby>くて',   kuter:'やすくて',   es:'barato'},
+    {base:'<ruby>長<rt>なが</rt></ruby>い',   baser:'ながい',   kute:'<ruby>長<rt>なが</rt></ruby>くて',   kuter:'ながくて',   es:'largo'},
+    {base:'<ruby>短<rt>みじか</rt></ruby>い',  baser:'みじかい',  kute:'<ruby>短<rt>みじか</rt></ruby>くて',  kuter:'みじかくて',  es:'corto'},
+    {base:'<ruby>新<rt>あたら</rt></ruby>しい', baser:'あたらしい', kute:'<ruby>新<rt>あたら</rt></ruby>しくて', kuter:'あたらしくて', es:'nuevo'},
+    {base:'<ruby>古<rt>ふる</rt></ruby>い',   baser:'ふるい',   kute:'<ruby>古<rt>ふる</rt></ruby>くて',   kuter:'ふるくて',   es:'viejo'},
+    {base:'<ruby>楽<rt>たの</rt></ruby>しい',  baser:'たのしい',  kute:'<ruby>楽<rt>たの</rt></ruby>しくて',  kuter:'たのしくて',  es:'divertido'},
+    {base:'おいしい',              baser:'おいしい',   kute:'おいしくて',              kuter:'おいしくて',   es:'delicioso'},
+    {base:'<ruby>暑<rt>あつ</rt></ruby>い',   baser:'あつい',   kute:'<ruby>暑<rt>あつ</rt></ruby>くて',   kuter:'あつくて',   es:'caluroso'},
+    {base:'<ruby>寒<rt>さむ</rt></ruby>い',   baser:'さむい',   kute:'<ruby>寒<rt>さむ</rt></ruby>くて',   kuter:'さむくて',   es:'frío'},
+    {base:'<ruby>広<rt>ひろ</rt></ruby>い',   baser:'ひろい',   kute:'<ruby>広<rt>ひろ</rt></ruby>くて',   kuter:'ひろくて',   es:'amplio'},
+    {base:'<ruby>忙<rt>いそが</rt></ruby>しい', baser:'いそがしい', kute:'<ruby>忙<rt>いそが</rt></ruby>しくて', kuter:'いそがしくて', es:'ocupado'},
+    {base:'<ruby>難<rt>むずか</rt></ruby>しい', baser:'むずかしい', kute:'<ruby>難<rt>むずか</rt></ruby>しくて', kuter:'むずかしくて', es:'difícil'},
+    {base:'いい',                      baser:'いい',      kute:'よくて',                     kuter:'よくて',      es:'bueno (excepción)'},
+    {base:'<ruby>悪<rt>わる</rt></ruby>い',      baser:'わるい',    kute:'<ruby>悪<rt>わる</rt></ruby>くて',      kuter:'わるくて',    es:'malo'},
+    {base:'<ruby>明<rt>あか</rt></ruby>るい',     baser:'あかるい',  kute:'<ruby>明<rt>あか</rt></ruby>るくて',    kuter:'あかるくて',  es:'luminoso'},
+    {base:'<ruby>近<rt>ちか</rt></ruby>い',      baser:'ちかい',    kute:'<ruby>近<rt>ちか</rt></ruby>くて',      kuter:'ちかくて',    es:'cercano'},
+    {base:'<ruby>面白<rt>おもしろ</rt></ruby>い',  baser:'おもしろい', kute:'<ruby>面白<rt>おもしろ</rt></ruby>くて', kuter:'おもしろくて', es:'interesante'},
+];
+const kuteNaData = [
+    {base:'<ruby>元気<rt>げんき</rt></ruby>',   baser:'げんき',  de:'<ruby>元気<rt>げんき</rt></ruby>で',   der:'げんきで',   es:'saludable'},
+    {base:'<ruby>静<rt>しず</rt></ruby>か',    baser:'しずか',  de:'<ruby>静<rt>しず</rt></ruby>かで',    der:'しずかで',   es:'tranquilo'},
+    {base:'<ruby>有名<rt>ゆうめい</rt></ruby>',  baser:'ゆうめい', de:'<ruby>有名<rt>ゆうめい</rt></ruby>で',  der:'ゆうめいで',  es:'famoso'},
+    {base:'<ruby>便利<rt>べんり</rt></ruby>',   baser:'べんり',  de:'<ruby>便利<rt>べんり</rt></ruby>で',   der:'べんりで',   es:'conveniente'},
+    {base:'きれい',                baser:'きれい',  de:'きれいで',                der:'きれいで',   es:'bonito/limpio'},
+    {base:'<ruby>親切<rt>しんせつ</rt></ruby>',  baser:'しんせつ', de:'<ruby>親切<rt>しんせつ</rt></ruby>で',  der:'しんせつで',  es:'amable'},
+    {base:'<ruby>上手<rt>じょうず</rt></ruby>',  baser:'じょうず', de:'<ruby>上手<rt>じょうず</rt></ruby>で',  der:'じょうずで',  es:'hábil'},
+    {base:'<ruby>好<rt>す</rt></ruby>き',     baser:'すき',   de:'<ruby>好<rt>す</rt></ruby>きで',     der:'すきで',    es:'gustar'},
+    {base:'<ruby>大切<rt>たいせつ</rt></ruby>',  baser:'たいせつ', de:'<ruby>大切<rt>たいせつ</rt></ruby>で',  der:'たいせつで',  es:'importante'},
+    {base:'<ruby>丁寧<rt>ていねい</rt></ruby>',  baser:'ていねい', de:'<ruby>丁寧<rt>ていねい</rt></ruby>で',  der:'ていねいで',  es:'educado'},
+    {base:'<ruby>下手<rt>へた</rt></ruby>',      baser:'へた',      de:'<ruby>下手<rt>へた</rt></ruby>で',      der:'へたで',      es:'torpe'},
+    {base:'<ruby>嫌<rt>きら</rt></ruby>い',      baser:'きらい',    de:'<ruby>嫌<rt>きら</rt></ruby>いで',      der:'きらいで',    es:'disgustar'},
+    {base:'<ruby>大丈夫<rt>だいじょうぶ</rt></ruby>', baser:'だいじょうぶ', de:'<ruby>大丈夫<rt>だいじょうぶ</rt></ruby>で', der:'だいじょうぶで', es:'bien/OK'},
+    {base:'<ruby>暇<rt>ひま</rt></ruby>',        baser:'ひま',      de:'<ruby>暇<rt>ひま</rt></ruby>で',        der:'ひまで',      es:'libre'},
+    {base:'<ruby>簡単<rt>かんたん</rt></ruby>',   baser:'かんたん',  de:'<ruby>簡単<rt>かんたん</rt></ruby>で',   der:'かんたんで',  es:'fácil'},
+];
+const kuteReorderPool = [
+    // い形容詞 くて (15問)
+    {words:['この','<ruby>部屋<rt>へや</rt></ruby>は','<ruby>広<rt>ひろ</rt></ruby>くて','<ruby>明<rt>あか</rt></ruby>るいです'], r:['この','へやは','ひろくて','あかるいです'], answer:'この<ruby>部屋<rt>へや</rt></ruby>は<ruby>広<rt>ひろ</rt></ruby>くて<ruby>明<rt>あか</rt></ruby>るいです', hint:'Esta habitación es amplia y luminosa.', explain:'<ruby>広<rt>ひろ</rt></ruby>い → <ruby>広<rt>ひろ</rt></ruby>くて', type:'i'},
+    {words:['あのレストランは','<ruby>安<rt>やす</rt></ruby>くて','おいしいです'], r:['あのレストランは','やすくて','おいしいです'], answer:'あのレストランは<ruby>安<rt>やす</rt></ruby>くておいしいです', hint:'Ese restaurante es barato y delicioso.', explain:'<ruby>安<rt>やす</rt></ruby>い → <ruby>安<rt>やす</rt></ruby>くて', type:'i'},
+    {words:['この<ruby>映画<rt>えいが</rt></ruby>は','<ruby>長<rt>なが</rt></ruby>くて','<ruby>難<rt>むずか</rt></ruby>しいです'], r:['このえいがは','ながくて','むずかしいです'], answer:'この<ruby>映画<rt>えいが</rt></ruby>は<ruby>長<rt>なが</rt></ruby>くて<ruby>難<rt>むずか</rt></ruby>しいです', hint:'Esta película es larga y difícil.', explain:'<ruby>長<rt>なが</rt></ruby>い → <ruby>長<rt>なが</rt></ruby>くて', type:'i'},
+    {words:['このかばんは','<ruby>新<rt>あたら</rt></ruby>しくて','<ruby>軽<rt>かる</rt></ruby>いです'], r:['このかばんは','あたらしくて','かるいです'], answer:'このかばんは<ruby>新<rt>あたら</rt></ruby>しくて<ruby>軽<rt>かる</rt></ruby>いです', hint:'Esta bolsa es nueva y liviana.', explain:'<ruby>新<rt>あたら</rt></ruby>しい → <ruby>新<rt>あたら</rt></ruby>しくて', type:'i'},
+    {words:['<ruby>今日<rt>きょう</rt></ruby>は','<ruby>暑<rt>あつ</rt></ruby>くて','<ruby>大変<rt>たいへん</rt></ruby>です'], r:['きょうは','あつくて','たいへんです'], answer:'<ruby>今日<rt>きょう</rt></ruby>は<ruby>暑<rt>あつ</rt></ruby>くて<ruby>大変<rt>たいへん</rt></ruby>です', hint:'Hoy hace calor y es agotador.', explain:'<ruby>暑<rt>あつ</rt></ruby>い → <ruby>暑<rt>あつ</rt></ruby>くて', type:'i'},
+    {words:['この<ruby>本<rt>ほん</rt></ruby>は','<ruby>古<rt>ふる</rt></ruby>くて','<ruby>短<rt>みじか</rt></ruby>いです'], r:['このほんは','ふるくて','みじかいです'], answer:'この<ruby>本<rt>ほん</rt></ruby>は<ruby>古<rt>ふる</rt></ruby>くて<ruby>短<rt>みじか</rt></ruby>いです', hint:'Este libro es viejo y corto.', explain:'<ruby>古<rt>ふる</rt></ruby>い → <ruby>古<rt>ふる</rt></ruby>くて', type:'i'},
+    {words:['<ruby>彼<rt>かれ</rt></ruby>は','<ruby>背<rt>せ</rt></ruby>が','<ruby>高<rt>たか</rt></ruby>くて','かっこいいです'], r:['かれは','せが','たかくて','かっこいいです'], answer:'<ruby>彼<rt>かれ</rt></ruby>は<ruby>背<rt>せ</rt></ruby>が<ruby>高<rt>たか</rt></ruby>くてかっこいいです', hint:'Él es alto y guapo.', explain:'<ruby>高<rt>たか</rt></ruby>い → <ruby>高<rt>たか</rt></ruby>くて', type:'i'},
+    {words:['<ruby>日本語<rt>にほんご</rt></ruby>は','<ruby>難<rt>むずか</rt></ruby>しくて','おもしろいです'], r:['にほんごは','むずかしくて','おもしろいです'], answer:'<ruby>日本語<rt>にほんご</rt></ruby>は<ruby>難<rt>むずか</rt></ruby>しくておもしろいです', hint:'El japonés es difícil e interesante.', explain:'<ruby>難<rt>むずか</rt></ruby>しい → <ruby>難<rt>むずか</rt></ruby>しくて', type:'i'},
+    {words:['このケーキは','<ruby>甘<rt>あま</rt></ruby>くて','おいしいです'], r:['このケーキは','あまくて','おいしいです'], answer:'このケーキは<ruby>甘<rt>あま</rt></ruby>くておいしいです', hint:'Este pastel es dulce y delicioso.', explain:'<ruby>甘<rt>あま</rt></ruby>い → <ruby>甘<rt>あま</rt></ruby>くて', type:'i'},
+    {words:['<ruby>彼女<rt>かのじょ</rt></ruby>は','<ruby>忙<rt>いそが</rt></ruby>しくて','<ruby>疲<rt>つか</rt></ruby>れています'], r:['かのじょは','いそがしくて','つかれています'], answer:'<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>忙<rt>いそが</rt></ruby>しくて<ruby>疲<rt>つか</rt></ruby>れています', hint:'Ella está ocupada y cansada.', explain:'<ruby>忙<rt>いそが</rt></ruby>しい → <ruby>忙<rt>いそが</rt></ruby>しくて', type:'i'},
+    {words:['<ruby>今日<rt>きょう</rt></ruby>は','<ruby>寒<rt>さむ</rt></ruby>くて','<ruby>風<rt>かぜ</rt></ruby>が','<ruby>強<rt>つよ</rt></ruby>いです'], r:['きょうは','さむくて','かぜが','つよいです'], answer:'<ruby>今日<rt>きょう</rt></ruby>は<ruby>寒<rt>さむ</rt></ruby>くて<ruby>風<rt>かぜ</rt></ruby>が<ruby>強<rt>つよ</rt></ruby>いです', hint:'Hoy hace frío y hay mucho viento.', explain:'<ruby>寒<rt>さむ</rt></ruby>い → <ruby>寒<rt>さむ</rt></ruby>くて', type:'i'},
+    {words:['この<ruby>部屋<rt>へや</rt></ruby>は','<ruby>小<rt>ちい</rt></ruby>さくて','<ruby>暗<rt>くら</rt></ruby>いです'], r:['このへやは','ちいさくて','くらいです'], answer:'この<ruby>部屋<rt>へや</rt></ruby>は<ruby>小<rt>ちい</rt></ruby>さくて<ruby>暗<rt>くら</rt></ruby>いです', hint:'Esta habitación es pequeña y oscura.', explain:'<ruby>小<rt>ちい</rt></ruby>さい → <ruby>小<rt>ちい</rt></ruby>さくて', type:'i'},
+    {words:['あの<ruby>店<rt>みせ</rt></ruby>は','<ruby>新<rt>あたら</rt></ruby>しくて','<ruby>広<rt>ひろ</rt></ruby>いです'], r:['あのみせは','あたらしくて','ひろいです'], answer:'あの<ruby>店<rt>みせ</rt></ruby>は<ruby>新<rt>あたら</rt></ruby>しくて<ruby>広<rt>ひろ</rt></ruby>いです', hint:'Esa tienda es nueva y amplia.', explain:'<ruby>新<rt>あたら</rt></ruby>しい → <ruby>新<rt>あたら</rt></ruby>しくて', type:'i'},
+    {words:['この<ruby>問題<rt>もんだい</rt></ruby>は','<ruby>難<rt>むずか</rt></ruby>しくて','<ruby>長<rt>なが</rt></ruby>いです'], r:['このもんだいは','むずかしくて','ながいです'], answer:'この<ruby>問題<rt>もんだい</rt></ruby>は<ruby>難<rt>むずか</rt></ruby>しくて<ruby>長<rt>なが</rt></ruby>いです', hint:'Este problema es difícil y largo.', explain:'<ruby>難<rt>むずか</rt></ruby>しい → <ruby>難<rt>むずか</rt></ruby>しくて', type:'i'},
+    {words:['<ruby>彼<rt>かれ</rt></ruby>の<ruby>部屋<rt>へや</rt></ruby>は','<ruby>古<rt>ふる</rt></ruby>くて','<ruby>小<rt>ちい</rt></ruby>さいです'], r:['かれのへやは','ふるくて','ちいさいです'], answer:'<ruby>彼<rt>かれ</rt></ruby>の<ruby>部屋<rt>へや</rt></ruby>は<ruby>古<rt>ふる</rt></ruby>くて<ruby>小<rt>ちい</rt></ruby>さいです', hint:'La habitación de él es vieja y pequeña.', explain:'<ruby>古<rt>ふる</rt></ruby>い → <ruby>古<rt>ふる</rt></ruby>くて', type:'i'},
+    // な形容詞 で (15問)
+    {words:['<ruby>彼女<rt>かのじょ</rt></ruby>は','きれいで','<ruby>親切<rt>しんせつ</rt></ruby>です'], r:['かのじょは','きれいで','しんせつです'], answer:'<ruby>彼女<rt>かのじょ</rt></ruby>はきれいで<ruby>親切<rt>しんせつ</rt></ruby>です', hint:'Ella es bonita y amable.', explain:'きれい → きれいで', type:'na'},
+    {words:['<ruby>東京<rt>とうきょう</rt></ruby>は','<ruby>便利<rt>べんり</rt></ruby>で','<ruby>楽<rt>たの</rt></ruby>しいです'], r:['とうきょうは','べんりで','たのしいです'], answer:'<ruby>東京<rt>とうきょう</rt></ruby>は<ruby>便利<rt>べんり</rt></ruby>で<ruby>楽<rt>たの</rt></ruby>しいです', hint:'Tokio es conveniente y divertido.', explain:'<ruby>便利<rt>べんり</rt></ruby> → <ruby>便利<rt>べんり</rt></ruby>で', type:'na'},
+    {words:['この<ruby>公園<rt>こうえん</rt></ruby>は','<ruby>静<rt>しず</rt></ruby>かで','きれいです'], r:['このこうえんは','しずかで','きれいです'], answer:'この<ruby>公園<rt>こうえん</rt></ruby>は<ruby>静<rt>しず</rt></ruby>かできれいです', hint:'Este parque es tranquilo y bonito.', explain:'<ruby>静<rt>しず</rt></ruby>か → <ruby>静<rt>しず</rt></ruby>かで', type:'na'},
+    {words:['<ruby>田中<rt>たなか</rt></ruby>さんは','<ruby>元気<rt>げんき</rt></ruby>で','<ruby>上手<rt>じょうず</rt></ruby>です'], r:['たなかさんは','げんきで','じょうずです'], answer:'<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>元気<rt>げんき</rt></ruby>で<ruby>上手<rt>じょうず</rt></ruby>です', hint:'El Sr. Tanaka es enérgico y hábil.', explain:'<ruby>元気<rt>げんき</rt></ruby> → <ruby>元気<rt>げんき</rt></ruby>で', type:'na'},
+    {words:['<ruby>彼<rt>かれ</rt></ruby>は','<ruby>有名<rt>ゆうめい</rt></ruby>で','<ruby>親切<rt>しんせつ</rt></ruby>です'], r:['かれは','ゆうめいで','しんせつです'], answer:'<ruby>彼<rt>かれ</rt></ruby>は<ruby>有名<rt>ゆうめい</rt></ruby>で<ruby>親切<rt>しんせつ</rt></ruby>です', hint:'Él es famoso y amable.', explain:'<ruby>有名<rt>ゆうめい</rt></ruby> → <ruby>有名<rt>ゆうめい</rt></ruby>で', type:'na'},
+    {words:['この<ruby>先生<rt>せんせい</rt></ruby>は','<ruby>親切<rt>しんせつ</rt></ruby>で','<ruby>上手<rt>じょうず</rt></ruby>です'], r:['このせんせいは','しんせつで','じょうずです'], answer:'この<ruby>先生<rt>せんせい</rt></ruby>は<ruby>親切<rt>しんせつ</rt></ruby>で<ruby>上手<rt>じょうず</rt></ruby>です', hint:'Este profesor es amable y hábil.', explain:'<ruby>親切<rt>しんせつ</rt></ruby> → <ruby>親切<rt>しんせつ</rt></ruby>で', type:'na'},
+    {words:['<ruby>日本語<rt>にほんご</rt></ruby>は','<ruby>大切<rt>たいせつ</rt></ruby>で','おもしろいです'], r:['にほんごは','たいせつで','おもしろいです'], answer:'<ruby>日本語<rt>にほんご</rt></ruby>は<ruby>大切<rt>たいせつ</rt></ruby>でおもしろいです', hint:'El japonés es importante e interesante.', explain:'<ruby>大切<rt>たいせつ</rt></ruby> → <ruby>大切<rt>たいせつ</rt></ruby>で', type:'na'},
+    {words:['<ruby>彼女<rt>かのじょ</rt></ruby>は','<ruby>丁寧<rt>ていねい</rt></ruby>で','<ruby>静<rt>しず</rt></ruby>かです'], r:['かのじょは','ていねいで','しずかです'], answer:'<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>丁寧<rt>ていねい</rt></ruby>で<ruby>静<rt>しず</rt></ruby>かです', hint:'Ella es educada y tranquila.', explain:'<ruby>丁寧<rt>ていねい</rt></ruby> → <ruby>丁寧<rt>ていねい</rt></ruby>で', type:'na'},
+    {words:['この<ruby>道具<rt>どうぐ</rt></ruby>は','<ruby>便利<rt>べんり</rt></ruby>で','<ruby>大切<rt>たいせつ</rt></ruby>です'], r:['このどうぐは','べんりで','たいせつです'], answer:'この<ruby>道具<rt>どうぐ</rt></ruby>は<ruby>便利<rt>べんり</rt></ruby>で<ruby>大切<rt>たいせつ</rt></ruby>です', hint:'Esta herramienta es conveniente e importante.', explain:'<ruby>便利<rt>べんり</rt></ruby> → <ruby>便利<rt>べんり</rt></ruby>で', type:'na'},
+    {words:['<ruby>山田<rt>やまだ</rt></ruby>さんは','<ruby>元気<rt>げんき</rt></ruby>で','<ruby>有名<rt>ゆうめい</rt></ruby>です'], r:['やまださんは','げんきで','ゆうめいです'], answer:'<ruby>山田<rt>やまだ</rt></ruby>さんは<ruby>元気<rt>げんき</rt></ruby>で<ruby>有名<rt>ゆうめい</rt></ruby>です', hint:'El Sr. Yamada es enérgico y famoso.', explain:'<ruby>元気<rt>げんき</rt></ruby> → <ruby>元気<rt>げんき</rt></ruby>で', type:'na'},
+    {words:['この<ruby>店<rt>みせ</rt></ruby>は','<ruby>有名<rt>ゆうめい</rt></ruby>で','<ruby>便利<rt>べんり</rt></ruby>です'], r:['このみせは','ゆうめいで','べんりです'], answer:'この<ruby>店<rt>みせ</rt></ruby>は<ruby>有名<rt>ゆうめい</rt></ruby>で<ruby>便利<rt>べんり</rt></ruby>です', hint:'Esta tienda es famosa y conveniente.', explain:'<ruby>有名<rt>ゆうめい</rt></ruby> → <ruby>有名<rt>ゆうめい</rt></ruby>で', type:'na'},
+    {words:['<ruby>先生<rt>せんせい</rt></ruby>は','<ruby>丁寧<rt>ていねい</rt></ruby>で','<ruby>親切<rt>しんせつ</rt></ruby>です'], r:['せんせいは','ていねいで','しんせつです'], answer:'<ruby>先生<rt>せんせい</rt></ruby>は<ruby>丁寧<rt>ていねい</rt></ruby>で<ruby>親切<rt>しんせつ</rt></ruby>です', hint:'El profesor es educado y amable.', explain:'<ruby>丁寧<rt>ていねい</rt></ruby> → <ruby>丁寧<rt>ていねい</rt></ruby>で', type:'na'},
+    {words:['この<ruby>映画<rt>えいが</rt></ruby>は','<ruby>有名<rt>ゆうめい</rt></ruby>で','おもしろいです'], r:['このえいがは','ゆうめいで','おもしろいです'], answer:'この<ruby>映画<rt>えいが</rt></ruby>は<ruby>有名<rt>ゆうめい</rt></ruby>でおもしろいです', hint:'Esta película es famosa e interesante.', explain:'<ruby>有名<rt>ゆうめい</rt></ruby> → <ruby>有名<rt>ゆうめい</rt></ruby>で', type:'na'},
+    {words:['<ruby>彼<rt>かれ</rt></ruby>の<ruby>説明<rt>せつめい</rt></ruby>は','<ruby>丁寧<rt>ていねい</rt></ruby>で','わかりやすいです'], r:['かれのせつめいは','ていねいで','わかりやすいです'], answer:'<ruby>彼<rt>かれ</rt></ruby>の<ruby>説明<rt>せつめい</rt></ruby>は<ruby>丁寧<rt>ていねい</rt></ruby>でわかりやすいです', hint:'Su explicación es detallada y fácil de entender.', explain:'<ruby>丁寧<rt>ていねい</rt></ruby> → <ruby>丁寧<rt>ていねい</rt></ruby>で', type:'na'},
+    {words:['あの<ruby>人<rt>ひと</rt></ruby>は','<ruby>元気<rt>げんき</rt></ruby>で','<ruby>親切<rt>しんせつ</rt></ruby>です'], r:['あのひとは','げんきで','しんせつです'], answer:'あの<ruby>人<rt>ひと</rt></ruby>は<ruby>元気<rt>げんき</rt></ruby>で<ruby>親切<rt>しんせつ</rt></ruby>です', hint:'Esa persona es enérgica y amable.', explain:'<ruby>元気<rt>げんき</rt></ruby> → <ruby>元気<rt>げんき</rt></ruby>で', type:'na'},
+    // い形容詞 くて 追加10問
+    {words:['この<ruby>映画<rt>えいが</rt></ruby>は','よくて','<ruby>面白<rt>おもしろ</rt></ruby>いです'], r:['このえいがは','よくて','おもしろいです'], answer:'この<ruby>映画<rt>えいが</rt></ruby>はよくて<ruby>面白<rt>おもしろ</rt></ruby>いです', hint:'Esta película es buena e interesante.', explain:'いい → よくて（不規則）', type:'i'},
+    {words:['<ruby>天気<rt>てんき</rt></ruby>が','<ruby>悪<rt>わる</rt></ruby>くて','<ruby>寒<rt>さむ</rt></ruby>いです'], r:['てんきが','わるくて','さむいです'], answer:'<ruby>天気<rt>てんき</rt></ruby>が<ruby>悪<rt>わる</rt></ruby>くて<ruby>寒<rt>さむ</rt></ruby>いです', hint:'El clima es malo y hace frío.', explain:'<ruby>悪<rt>わる</rt></ruby>い → <ruby>悪<rt>わる</rt></ruby>くて', type:'i'},
+    {words:['この<ruby>教室<rt>きょうしつ</rt></ruby>は','<ruby>明<rt>あか</rt></ruby>るくて','<ruby>広<rt>ひろ</rt></ruby>いです'], r:['このきょうしつは','あかるくて','ひろいです'], answer:'この<ruby>教室<rt>きょうしつ</rt></ruby>は<ruby>明<rt>あか</rt></ruby>るくて<ruby>広<rt>ひろ</rt></ruby>いです', hint:'Esta aula es luminosa y amplia.', explain:'<ruby>明<rt>あか</rt></ruby>るい → <ruby>明<rt>あか</rt></ruby>るくて', type:'i'},
+    {words:['<ruby>駅<rt>えき</rt></ruby>が','<ruby>近<rt>ちか</rt></ruby>くて','<ruby>便利<rt>べんり</rt></ruby>です'], r:['えきが','ちかくて','べんりです'], answer:'<ruby>駅<rt>えき</rt></ruby>が<ruby>近<rt>ちか</rt></ruby>くて<ruby>便利<rt>べんり</rt></ruby>です', hint:'La estación está cerca y es conveniente.', explain:'<ruby>近<rt>ちか</rt></ruby>い → <ruby>近<rt>ちか</rt></ruby>くて', type:'i'},
+    {words:['この<ruby>本<rt>ほん</rt></ruby>は','<ruby>面白<rt>おもしろ</rt></ruby>くて','<ruby>楽<rt>たの</rt></ruby>しいです'], r:['このほんは','おもしろくて','たのしいです'], answer:'この<ruby>本<rt>ほん</rt></ruby>は<ruby>面白<rt>おもしろ</rt></ruby>くて<ruby>楽<rt>たの</rt></ruby>しいです', hint:'Este libro es interesante y divertido.', explain:'<ruby>面白<rt>おもしろ</rt></ruby>い → <ruby>面白<rt>おもしろ</rt></ruby>くて', type:'i'},
+    {words:['このかばんは','<ruby>重<rt>おも</rt></ruby>くて','<ruby>大<rt>おお</rt></ruby>きいです'], r:['このかばんは','おもくて','おおきいです'], answer:'このかばんは<ruby>重<rt>おも</rt></ruby>くて<ruby>大<rt>おお</rt></ruby>きいです', hint:'Esta bolsa es pesada y grande.', explain:'<ruby>重<rt>おも</rt></ruby>い → <ruby>重<rt>おも</rt></ruby>くて', type:'i'},
+    {words:['このパソコンは','<ruby>軽<rt>かる</rt></ruby>くて','<ruby>新<rt>あたら</rt></ruby>しいです'], r:['このパソコンは','かるくて','あたらしいです'], answer:'このパソコンは<ruby>軽<rt>かる</rt></ruby>くて<ruby>新<rt>あたら</rt></ruby>しいです', hint:'Esta computadora es liviana y nueva.', explain:'<ruby>軽<rt>かる</rt></ruby>い → <ruby>軽<rt>かる</rt></ruby>くて', type:'i'},
+    {words:['このジュースは','<ruby>冷<rt>つめ</rt></ruby>たくて','おいしいです'], r:['このジュースは','つめたくて','おいしいです'], answer:'このジュースは<ruby>冷<rt>つめ</rt></ruby>たくておいしいです', hint:'Este jugo está frío y delicioso.', explain:'<ruby>冷<rt>つめ</rt></ruby>たい → <ruby>冷<rt>つめ</rt></ruby>たくて', type:'i'},
+    {words:['<ruby>宿題<rt>しゅくだい</rt></ruby>が','<ruby>多<rt>おお</rt></ruby>くて','<ruby>大変<rt>たいへん</rt></ruby>です'], r:['しゅくだいが','おおくて','たいへんです'], answer:'<ruby>宿題<rt>しゅくだい</rt></ruby>が<ruby>多<rt>おお</rt></ruby>くて<ruby>大変<rt>たいへん</rt></ruby>です', hint:'Hay mucha tarea y es agotador.', explain:'<ruby>多<rt>おお</rt></ruby>い → <ruby>多<rt>おお</rt></ruby>くて', type:'i'},
+    {words:['<ruby>学校<rt>がっこう</rt></ruby>は','<ruby>遠<rt>とお</rt></ruby>くて','<ruby>古<rt>ふる</rt></ruby>いです'], r:['がっこうは','とおくて','ふるいです'], answer:'<ruby>学校<rt>がっこう</rt></ruby>は<ruby>遠<rt>とお</rt></ruby>くて<ruby>古<rt>ふる</rt></ruby>いです', hint:'La escuela está lejos y es vieja.', explain:'<ruby>遠<rt>とお</rt></ruby>い → <ruby>遠<rt>とお</rt></ruby>くて', type:'i'},
+    // な形容詞 で 追加10問
+    {words:['<ruby>彼<rt>かれ</rt></ruby>は','<ruby>料理<rt>りょうり</rt></ruby>が','<ruby>下手<rt>へた</rt></ruby>で','<ruby>大変<rt>たいへん</rt></ruby>です'], r:['かれは','りょうりが','へたで','たいへんです'], answer:'<ruby>彼<rt>かれ</rt></ruby>は<ruby>料理<rt>りょうり</rt></ruby>が<ruby>下手<rt>へた</rt></ruby>で<ruby>大変<rt>たいへん</rt></ruby>です', hint:'Él es malo cocinando y es difícil.', explain:'<ruby>下手<rt>へた</rt></ruby> → <ruby>下手<rt>へた</rt></ruby>で', type:'na'},
+    {words:['<ruby>彼<rt>かれ</rt></ruby>は','スポーツが','<ruby>嫌<rt>きら</rt></ruby>いで','<ruby>下手<rt>へた</rt></ruby>です'], r:['かれは','スポーツが','きらいで','へたです'], answer:'<ruby>彼<rt>かれ</rt></ruby>はスポーツが<ruby>嫌<rt>きら</rt></ruby>いで<ruby>下手<rt>へた</rt></ruby>です', hint:'A él no le gustan los deportes y es torpe.', explain:'<ruby>嫌<rt>きら</rt></ruby>い → <ruby>嫌<rt>きら</rt></ruby>いで', type:'na'},
+    {words:['この<ruby>仕事<rt>しごと</rt></ruby>は','<ruby>大丈夫<rt>だいじょうぶ</rt></ruby>で','<ruby>簡単<rt>かんたん</rt></ruby>です'], r:['このしごとは','だいじょうぶで','かんたんです'], answer:'この<ruby>仕事<rt>しごと</rt></ruby>は<ruby>大丈夫<rt>だいじょうぶ</rt></ruby>で<ruby>簡単<rt>かんたん</rt></ruby>です', hint:'Este trabajo está bien y es fácil.', explain:'<ruby>大丈夫<rt>だいじょうぶ</rt></ruby> → <ruby>大丈夫<rt>だいじょうぶ</rt></ruby>で', type:'na'},
+    {words:['<ruby>今日<rt>きょう</rt></ruby>は','<ruby>暇<rt>ひま</rt></ruby>で','<ruby>楽<rt>たの</rt></ruby>しいです'], r:['きょうは','ひまで','たのしいです'], answer:'<ruby>今日<rt>きょう</rt></ruby>は<ruby>暇<rt>ひま</rt></ruby>で<ruby>楽<rt>たの</rt></ruby>しいです', hint:'Hoy estoy libre y es divertido.', explain:'<ruby>暇<rt>ひま</rt></ruby> → <ruby>暇<rt>ひま</rt></ruby>で', type:'na'},
+    {words:['この<ruby>問題<rt>もんだい</rt></ruby>は','<ruby>簡単<rt>かんたん</rt></ruby>で','<ruby>短<rt>みじか</rt></ruby>いです'], r:['このもんだいは','かんたんで','みじかいです'], answer:'この<ruby>問題<rt>もんだい</rt></ruby>は<ruby>簡単<rt>かんたん</rt></ruby>で<ruby>短<rt>みじか</rt></ruby>いです', hint:'Este problema es fácil y corto.', explain:'<ruby>簡単<rt>かんたん</rt></ruby> → <ruby>簡単<rt>かんたん</rt></ruby>で', type:'na'},
+    {words:['<ruby>仕事<rt>しごと</rt></ruby>は','<ruby>大変<rt>たいへん</rt></ruby>で','<ruby>忙<rt>いそが</rt></ruby>しいです'], r:['しごとは','たいへんで','いそがしいです'], answer:'<ruby>仕事<rt>しごと</rt></ruby>は<ruby>大変<rt>たいへん</rt></ruby>で<ruby>忙<rt>いそが</rt></ruby>しいです', hint:'El trabajo es difícil y estoy ocupado.', explain:'<ruby>大変<rt>たいへん</rt></ruby> → <ruby>大変<rt>たいへん</rt></ruby>で', type:'na'},
+    {words:['この<ruby>町<rt>まち</rt></ruby>は','<ruby>賑<rt>にぎ</rt></ruby>やかで','<ruby>楽<rt>たの</rt></ruby>しいです'], r:['このまちは','にぎやかで','たのしいです'], answer:'この<ruby>町<rt>まち</rt></ruby>は<ruby>賑<rt>にぎ</rt></ruby>やかで<ruby>楽<rt>たの</rt></ruby>しいです', hint:'Esta ciudad es animada y divertida.', explain:'<ruby>賑<rt>にぎ</rt></ruby>やか → <ruby>賑<rt>にぎ</rt></ruby>やかで', type:'na'},
+    {words:['<ruby>彼女<rt>かのじょ</rt></ruby>は','<ruby>料理<rt>りょうり</rt></ruby>が','<ruby>得意<rt>とくい</rt></ruby>で','<ruby>上手<rt>じょうず</rt></ruby>です'], r:['かのじょは','りょうりが','とくいで','じょうずです'], answer:'<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>料理<rt>りょうり</rt></ruby>が<ruby>得意<rt>とくい</rt></ruby>で<ruby>上手<rt>じょうず</rt></ruby>です', hint:'Ella es buena cocinando y tiene mucha habilidad.', explain:'<ruby>得意<rt>とくい</rt></ruby> → <ruby>得意<rt>とくい</rt></ruby>で', type:'na'},
+    {words:['<ruby>私<rt>わたし</rt></ruby>は','<ruby>数学<rt>すうがく</rt></ruby>が','<ruby>苦手<rt>にがて</rt></ruby>で','<ruby>難<rt>むずか</rt></ruby>しいです'], r:['わたしは','すうがくが','にがてで','むずかしいです'], answer:'<ruby>私<rt>わたし</rt></ruby>は<ruby>数学<rt>すうがく</rt></ruby>が<ruby>苦手<rt>にがて</rt></ruby>で<ruby>難<rt>むずか</rt></ruby>しいです', hint:'Soy malo/a en matemáticas y es difícil.', explain:'<ruby>苦手<rt>にがて</rt></ruby> → <ruby>苦手<rt>にがて</rt></ruby>で', type:'na'},
+    {words:['あの<ruby>駅<rt>えき</rt></ruby>は','<ruby>賑<rt>にぎ</rt></ruby>やかで','<ruby>有名<rt>ゆうめい</rt></ruby>です'], r:['あのえきは','にぎやかで','ゆうめいです'], answer:'あの<ruby>駅<rt>えき</rt></ruby>は<ruby>賑<rt>にぎ</rt></ruby>やかで<ruby>有名<rt>ゆうめい</rt></ruby>です', hint:'Esa estación es animada y famosa.', explain:'<ruby>賑<rt>にぎ</rt></ruby>やか → <ruby>賑<rt>にぎ</rt></ruby>やかで', type:'na'},
 ];
 
 // ===== VOCAB DATA & FUNCTIONS =====
