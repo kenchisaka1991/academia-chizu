@@ -31,7 +31,7 @@ const firebaseConfig = {
 | Section | ID | 内容 |
 |---|---|---|
 | 文字 (もじ) | `#moji` | ひらがな / カタカナ / 漢字 のタブ、各々 Aprender/Practicar・Tarjeta/Quiz |
-| 文法 (ぶんぽう) | `#grammar` | 16タブ（下記参照） |
+| 文法 (ぶんぽう) | `#grammar` | 17タブ（下記参照） |
 | 語彙 (ごい) | `#vocab` | カテゴリ別語彙（20カテゴリ＋Repaso）、グループ化タブ、Aprender / Practicar モード |
 
 統計（学習済み数など）は `#moji` の上部に常時表示。
@@ -40,13 +40,13 @@ const firebaseConfig = {
 
 ## 文法モジュール（Grammar）
 
-### タブ構成（renderGrammar の if-else 16分岐）
+### タブ構成（renderGrammar の if-else 17分岐）
 ```
-desu → katsu → keiyo → masu → aru → mashou → tai → maeni → niiku → te → ta → nai → kute → gimon → shiji → joshi（else）
+desu → katsu → keiyo → masu → aru → mashou → tai → maeni → niiku → te → ta → nai → kute → gimon → shiji → yori → joshi（else）
 ```
 **タブボタン表示順（視覚的な並び）:**
 ```
-desu → katsu → shiji → gimon → masu → aru → keiyo → kute → mashou → tai → maeni → niiku → joshi → te → ta → nai
+desu → katsu → shiji → gimon → masu → aru → keiyo → yori → kute → mashou → tai → maeni → niiku → joshi → te → ta → nai
 ```
 **新レッスン追加時は必ず3箇所に追記：**
 1. タブボタン HTML（renderGrammar内）
@@ -64,6 +64,7 @@ desu → katsu → shiji → gimon → masu → aru → keiyo → kute → masho
 | `masu` | ます | `masuLesson`, `masuQuizPool` | 4択 |
 | `aru` | あります/がいます | `aruQuizPool`(30問), `aruReorderPool`(30問) | 4択 / 並び替え |
 | `keiyo` | 形容詞 | `keiyoIData`(46語), `keiyoNaData`(18語), `keiyoIMeishiData`, `keiyoNaMeishiData` | Conjugación / Uso con sustantivos |
+| `yori` | より〜の方が | `yoriLesson`, `yoriReorderPool`(30問), `yoriFillPool`(30問) | Ordenar(並び替え) / Selección(4択) |
 | `kute` | 〜くて・で | `kuteIData`(20語), `kuteNaData`(15語), `kuteReorderPool`(50問) | Conjugación(4択) / Conexión(並び替え) |
 | `mashou` | ましょう | `mashouLesson`(15語), `mashouQuizPool`(12問) | 並び替え |
 | `tai` | 〜たい | `taiData`(15語), `taiQuizPool`, `taiReorderPool`(12問) | Conjugación / Orden de palabras |
@@ -82,6 +83,21 @@ desu → katsu → shiji → gimon → masu → aru → keiyo → kute → masho
 └── Practicar: [Conjugación] [Uso con sustantivos] モード選択
 ```
 State: `keiyoType('i'|'na')`, `keiyoPracMode('katsu'|'meishi')`
+
+### より〜の方がモジュール（yoriXxx）
+```
+より〜の方がタブ
+├── Aprender: 説明（3ブロック）+ 例文6個
+└── Practicar: [Ordenar(並び替え)] [Selección(4択)] モード選択
+```
+State: `yoriPracMode('reorder'|'fill')`, `yoriReorderIdx`, `yoriReorderCorrect`, `yoriReorderQuestions`, `yoriReorderErrors`, `yoriCurrentAnswer[]`, `yoriCurrentWords[]`, `yoriFillIdx`, `yoriFillCorrect`, `yoriFillQuestions`, `yoriFillErrors`
+- `yoriLesson`: title・subtitle・desc(3ブロック: 基本構文/疑問文/答え方表)・例文6個
+- `yoriReorderPool`: 30問（AよりBの方が系22問 + どちらが疑問文8問）。どちらが問題は「AとBと」を1チップに統合
+- `yoriFillPool`: 30問（より10問・の方が10問・どちら/どちらも10問）
+- Pistaボタン: Ordenar＝`.word-romaji`スパンをトグル、Selección＝ruby付き問題文をトグル
+- チップ表示: `stripRuby(w)` でフリガナなし。Pista押下時のみフリガナ表示
+- 採点: 並び替えは `stripRuby` 連結比較、4択は `window._yoriOpts` インデックスベース
+- スコア保存: `saveScore('yori', pct)`
 
 ### 〜くて・でモジュール（kuteXxx）
 ```
@@ -272,7 +288,7 @@ State: `taiPracMode('katsu'|'reorder')`
 ### 🟡 中優先（文法補完）
 | 優先 | 項目 | 規模 | 状態 |
 |---|---|---|---|
-| 1 | 〜より〜の方が | 小 | ❌ 未実装 |
+| 1 | 〜より〜の方が | 小 | ✅ 完了（yoriタブ） |
 | 2 | 〜はどうですか / 〜と思います | 小 | ❌ 未実装 |
 | 3 | 疑問詞（なに・どこ・だれ・いつ…） | 小 | ✅ 完了（gimonタブ） |
 | 4 | 指示語（これ/それ/あれ/この…） | 小 | ✅ 完了（shijiタブ） |

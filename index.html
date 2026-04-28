@@ -1873,6 +1873,10 @@ let gimonPracMode = 'fill'; // 'fill' | 'reorder'
 let gimonFillIdx = 0; let gimonFillCorrect = 0; let gimonFillQuestions = []; let gimonFillErrors = [];
 let gimonReorderIdx = 0; let gimonReorderCorrect = 0; let gimonReorderQuestions = []; let gimonReorderErrors = []; let gimonCurrentAnswer = []; let gimonReorderCurrentWords = [];
 let shijiQuizIdx = 0; let shijiCorrect = 0; let shijiQuestions = []; let shijiErrors = [];
+// 〜より〜の方が
+let yoriPracMode = 'reorder'; // 'reorder' | 'fill'
+let yoriReorderIdx = 0; let yoriReorderCorrect = 0; let yoriReorderQuestions = []; let yoriReorderErrors = []; let yoriCurrentAnswer = []; let yoriCurrentWords = [];
+let yoriFillIdx = 0; let yoriFillCorrect = 0; let yoriFillQuestions = []; let yoriFillErrors = [];
 let kutePracMode = 'katsu'; // 'katsu' | 'reorder'
 let kuteType = 'i'; // 'i' | 'na'
 let kuteKatsuIdx = 0; let kuteKatsuCorrect = 0; let kuteKatsuQuestions = []; let kuteKatsuErrors = [];
@@ -2663,6 +2667,7 @@ function renderGrammar(){
             <button class="lesson-tab ${currentLesson==='masu'?'active':''}" onclick="setCurrentLesson('masu')">✋ Verbos<span class="lesson-tab-jp">ます</span></button>
             <button class="lesson-tab ${currentLesson==='aru'?'active':''}" onclick="setCurrentLesson('aru')">📍 Existencia<span class="lesson-tab-jp">あります/います</span></button>
             <button class="lesson-tab ${currentLesson==='keiyo'?'active':''}" onclick="setCurrentLesson('keiyo')">🌈 Adjetivos<span class="lesson-tab-jp">形容詞</span></button>
+            <button class="lesson-tab ${currentLesson==='yori'?'active':''}" onclick="setCurrentLesson('yori')">⚖️ Comparar<span class="lesson-tab-jp">より〜の方が</span></button>
             <button class="lesson-tab ${currentLesson==='kute'?'active':''}" onclick="setCurrentLesson('kute')">🔗 Conexión<span class="lesson-tab-jp">〜くて・で</span></button>
             <button class="lesson-tab ${currentLesson==='mashou'?'active':''}" onclick="setCurrentLesson('mashou')">🤝 Invitaciones<span class="lesson-tab-jp">ましょう</span></button>
             <button class="lesson-tab ${currentLesson==='tai'?'active':''}" onclick="setCurrentLesson('tai')">💭 Deseos<span class="lesson-tab-jp">〜たい</span></button>
@@ -2725,6 +2730,9 @@ function renderGrammar(){
     } else if(currentLesson==='shiji'){
         if(grammarMode==='learn') renderShijiLearn();
         else renderShijiPractice();
+    } else if(currentLesson==='yori'){
+        if(grammarMode==='learn') renderYoriLearn();
+        else renderYoriPractice();
     } else {
         if(grammarMode==='learn') renderJoshiLearn();
         else renderJoshiPractice();
@@ -5971,6 +5979,231 @@ function showKuteReorderResult(){
     `;
 }
 
+// ===== 〜より〜の方が FUNCTIONS =====
+function renderYoriLearn(){
+    const L = yoriLesson;
+    document.getElementById('grammar-content').innerHTML = `
+        <div class="grammar-card">
+            <div class="grammar-title">${L.title}</div>
+            <div class="grammar-subtitle">${L.subtitle}</div>
+            <div class="grammar-desc">${L.desc}</div>
+            <div class="grammar-examples" style="margin-top:1rem;">
+                <h4>📝 Ejemplos</h4>
+                ${L.examples.map(ex=>`
+                    <div class="grammar-ex">
+                        <div class="ex-jp">${ex[0]}</div>
+                        <div class="ex-ro" style="font-size:0.82rem;color:var(--text-light);margin-bottom:0.2rem;">${ex[1]}</div>
+                        <div class="ex-es">${ex[2]}</div>
+                    </div>
+                `).join('')}
+            </div>
+            <button class="btn-practice" onclick="setGrammarMode('practice')" style="margin-top:1rem;">🎯 Practicar</button>
+        </div>
+    `;
+}
+
+function renderYoriPractice(){
+    const isReorder = yoriPracMode === 'reorder';
+    document.getElementById('grammar-content').innerHTML = `
+        <div class="grammar-card" style="text-align:center;">
+            <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:1rem;">
+                <button class="mode-tab ${isReorder?'active':''}" onclick="setYoriMode('reorder')">🔤 Ordenar</button>
+                <button class="mode-tab ${!isReorder?'active':''}" onclick="setYoriMode('fill')">📝 Selección</button>
+            </div>
+            <h3>🎯 Práctica: より〜の方が — ${isReorder?'Ordenar palabras':'Selección'}</h3>
+            <p style="color:var(--text-light);margin:0.5rem 0;">${isReorder?'Ordena las palabras para formar la oración correcta.':'Elige より / の方が / どちら para completar la oración.'}</p>
+            <p style="color:var(--text-light);font-size:0.9rem;">5 preguntas aleatorias</p>
+            <button class="btn-practice" onclick="${isReorder?'startYoriReorder()':'startYoriFill()'}">Comenzar</button>
+        </div>
+        <div id="yori-quiz-area"></div>
+    `;
+}
+
+function setYoriMode(mode){
+    yoriPracMode = mode;
+    renderYoriPractice();
+}
+
+function startYoriReorder(){
+    document.getElementById('grammar-content').querySelector('.grammar-card').style.display = 'none';
+    yoriReorderQuestions = [...yoriReorderPool].sort(()=>Math.random()-0.5).slice(0,5);
+    yoriReorderIdx = 0; yoriReorderCorrect = 0; yoriReorderErrors = [];
+    showYoriReorderQuestion();
+}
+
+function showYoriReorderQuestion(){
+    const q = yoriReorderQuestions[yoriReorderIdx];
+    yoriCurrentWords = [...q.words].sort(()=>Math.random()-0.5);
+    yoriCurrentAnswer = [];
+    document.getElementById('yori-quiz-area').innerHTML = `
+        <div class="reorder-box">
+            <div class="reorder-progress">${yoriReorderIdx+1} / 5</div>
+            <div class="reorder-hint">${q.hint}</div>
+            <button class="hint-btn" id="yori-pista-btn" onclick="toggleYoriPista()">💡 Pista (furigana)</button>
+            <div class="reorder-words" id="yori-word-pool">
+                ${yoriCurrentWords.map((w,i)=>`<span style="display:inline-block;text-align:center;margin:0.2rem;"><button class="word-btn" onclick="selectYoriWord(${i})" id="yori-wb-${i}">${stripRuby(w)}</button><div class="word-romaji" style="display:none;font-size:0.75rem;color:var(--text-light);text-align:center;">${rubyToHiragana(w)}</div></span>`).join('')}
+            </div>
+            <div class="reorder-answer" id="yori-answer-area">
+                <span class="reorder-placeholder">Toca las palabras en orden</span>
+            </div>
+            <button class="btn-check" id="yori-check-btn" onclick="checkYoriReorderAnswer()" disabled>Verificar</button>
+            <div id="yori-reorder-feedback"></div>
+        </div>
+    `;
+}
+
+function toggleYoriPista(){
+    const spans = document.querySelectorAll('#yori-word-pool .word-romaji');
+    const showing = spans[0] && spans[0].style.display !== 'none';
+    spans.forEach(s => s.style.display = showing ? 'none' : 'block');
+    const btn = document.getElementById('yori-pista-btn');
+    if(btn) btn.textContent = showing ? '💡 Pista (furigana)' : '🙈 Ocultar pista';
+}
+
+function selectYoriWord(idx){
+    const btn = document.getElementById('yori-wb-'+idx);
+    if(btn.classList.contains('selected')) return;
+    btn.classList.add('selected');
+    yoriCurrentAnswer.push({word: yoriCurrentWords[idx], btnIdx: idx});
+    renderYoriAnswerArea();
+}
+
+function removeYoriWord(i){
+    const removed = yoriCurrentAnswer.splice(i,1)[0];
+    document.getElementById('yori-wb-'+removed.btnIdx).classList.remove('selected');
+    renderYoriAnswerArea();
+}
+
+function renderYoriAnswerArea(){
+    const area = document.getElementById('yori-answer-area');
+    area.innerHTML = yoriCurrentAnswer.length === 0
+        ? '<span class="reorder-placeholder">Toca las palabras en orden</span>'
+        : yoriCurrentAnswer.map((a,i)=>`<button class="answer-btn" onclick="removeYoriWord(${i})">${stripRuby(a.word)}</button>`).join('');
+    document.getElementById('yori-check-btn').disabled = yoriCurrentAnswer.length !== yoriCurrentWords.length;
+}
+
+function checkYoriReorderAnswer(){
+    const q = yoriReorderQuestions[yoriReorderIdx];
+    const userAns = yoriCurrentAnswer.map(a=>stripRuby(a.word)).join('');
+    const correct = stripRuby(q.answer);
+    const fb = document.getElementById('yori-reorder-feedback');
+    document.getElementById('yori-check-btn').disabled = true;
+    document.querySelectorAll('#yori-word-pool .word-btn, #yori-answer-area .answer-btn').forEach(b=>b.style.pointerEvents='none');
+    if(userAns === correct){
+        yoriReorderCorrect++;
+        fb.innerHTML = '<div class="reorder-feedback correct">⭕ ¡Correcto!</div>';
+    } else {
+        yoriReorderErrors.push({hint:q.hint, user:userAns, correct:q.answer, exp:q.explain});
+        fb.innerHTML = `<div class="reorder-feedback wrong">❌ Correcta: ${q.answer}<br><small>${q.explain}</small></div>`;
+    }
+    setTimeout(()=>{
+        yoriReorderIdx++;
+        if(yoriReorderIdx < 5) showYoriReorderQuestion();
+        else showYoriReorderResult();
+    }, 1800);
+}
+
+function showYoriReorderResult(){
+    const pct = Math.round((yoriReorderCorrect/5)*100);
+    saveScore('yori', pct);
+    const msg = pct===100?'🎉 ¡Perfecto!':pct>=80?'🌟 ¡Excelente!':pct>=60?'👍 ¡Muy bien!':'📚 ¡Sigue practicando!';
+    let errHtml = '';
+    if(yoriReorderErrors.length > 0){
+        errHtml = `<div class="error-review"><h4>❌ Errores (${yoriReorderErrors.length})</h4>${yoriReorderErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${e.hint}</div><div class="error-your">Tu respuesta: ${e.user}</div><div class="error-correct">✅ Correcta: ${e.correct}</div><div class="error-explain">📖 ${e.exp}</div></div>`).join('')}</div>`;
+    }
+    document.getElementById('yori-quiz-area').innerHTML = `
+        <div class="grammar-result">
+            <div class="gr-score">${pct}%</div>
+            <div class="gr-msg">${msg}</div>
+            <div class="gr-detail">${yoriReorderCorrect} / 5 correctas</div>
+            <button class="btn-practice" onclick="startYoriReorder()">🔄 Intentar de nuevo</button>
+            <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
+            ${errHtml}
+        </div>
+    `;
+}
+
+function startYoriFill(){
+    document.getElementById('grammar-content').querySelector('.grammar-card').style.display = 'none';
+    yoriFillQuestions = [...yoriFillPool].sort(()=>Math.random()-0.5).slice(0,5);
+    yoriFillIdx = 0; yoriFillCorrect = 0; yoriFillErrors = [];
+    showYoriFillQuestion();
+}
+
+function showYoriFillQuestion(){
+    const q = yoriFillQuestions[yoriFillIdx];
+    const opts = [...q.opts].sort(()=>Math.random()-0.5);
+    window._yoriOpts = opts;
+    const withFurigana = q.q.replace('___','<span class="joshi-blank">___</span>');
+    const noFurigana = stripRuby(q.q).replace('___','<span class="joshi-blank">___</span>');
+    document.getElementById('yori-quiz-area').innerHTML = `
+        <div class="reorder-box">
+            <div class="reorder-progress">${yoriFillIdx+1} / 5</div>
+            <div class="joshi-fill-q">${noFurigana}</div>
+            <button class="hint-btn" id="yori-fill-pista-btn" onclick="toggleYoriFillPista()">💡 Pista (furigana)</button>
+            <div id="yori-fill-pista" style="display:none;font-size:1rem;text-align:center;margin:0.3rem 0 0.5rem;">${withFurigana}</div>
+            <div class="reorder-hint">${q.h}</div>
+            <div class="masu-options">
+                ${opts.map((o,i)=>`<button class="masu-opt" onclick="checkYoriFill(${i})">${o}</button>`).join('')}
+            </div>
+            <div id="yori-fill-feedback"></div>
+        </div>
+    `;
+}
+
+function toggleYoriFillPista(){
+    const el = document.getElementById('yori-fill-pista');
+    if(!el) return;
+    const showing = el.style.display !== 'none';
+    el.style.display = showing ? 'none' : 'block';
+    const btn = document.getElementById('yori-fill-pista-btn');
+    if(btn) btn.textContent = showing ? '💡 Pista (furigana)' : '🙈 Ocultar pista';
+}
+
+function checkYoriFill(idx){
+    const q = yoriFillQuestions[yoriFillIdx];
+    const opts = window._yoriOpts;
+    const isCorrect = stripRuby(opts[idx]) === stripRuby(q.a);
+    document.querySelectorAll('#yori-quiz-area .masu-opt').forEach((b,i)=>{
+        b.disabled = true;
+        if(stripRuby(opts[i])===stripRuby(q.a)) b.classList.add('correct');
+        if(i===idx && !isCorrect) b.classList.add('wrong');
+    });
+    const fb = document.getElementById('yori-fill-feedback');
+    if(isCorrect){
+        yoriFillCorrect++;
+        fb.innerHTML = '<div class="reorder-feedback correct">⭕ ¡Correcto!</div>';
+    } else {
+        yoriFillErrors.push({q:q.q, h:q.h, user:stripRuby(opts[idx]), correct:stripRuby(q.a), exp:q.exp});
+        fb.innerHTML = `<div class="reorder-feedback wrong">❌ Respuesta: ${q.a}<br><small>${q.exp}</small></div>`;
+    }
+    setTimeout(()=>{
+        yoriFillIdx++;
+        if(yoriFillIdx < 5) showYoriFillQuestion();
+        else showYoriFillResult();
+    }, 1500);
+}
+
+function showYoriFillResult(){
+    const pct = Math.round((yoriFillCorrect/5)*100);
+    saveScore('yori', pct);
+    const msg = pct===100?'🎉 ¡Perfecto!':pct>=80?'🌟 ¡Excelente!':pct>=60?'👍 ¡Muy bien!':'📚 ¡Sigue practicando!';
+    let errHtml = '';
+    if(yoriFillErrors.length > 0){
+        errHtml = `<div class="error-review"><h4>❌ Errores (${yoriFillErrors.length})</h4>${yoriFillErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${e.q}</div><div class="error-your">Tu: ${e.user}</div><div class="error-correct">✅ ${e.correct} — ${e.exp}</div></div>`).join('')}</div>`;
+    }
+    document.getElementById('yori-quiz-area').innerHTML = `
+        <div class="grammar-result">
+            <div class="gr-score">${pct}%</div>
+            <div class="gr-msg">${msg}</div>
+            <div class="gr-detail">${yoriFillCorrect} / 5 correctas</div>
+            <button class="btn-practice" onclick="startYoriFill()">🔄 Intentar de nuevo</button>
+            <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
+            ${errHtml}
+        </div>
+    `;
+}
+
 // ===== GIMON (疑問詞) FUNCTIONS =====
 function renderGimonLearn(){
     document.getElementById('grammar-content').innerHTML = `
@@ -7614,6 +7847,116 @@ const shijiQuizPool = [
   { q:'___のレストランはおいしいです。(dirección lejos de ambos)', a:'あちら', opts:['こちら','そちら','あちら','どちら'], h:'El restaurante de aquel lado es delicioso.', exp:'La dirección lejos de ambos usa 「あちら」.' },
   { q:'お<ruby>待<rt>ま</rt></ruby>ちください、___へどうぞ。(dirección lejana)', a:'あちら', opts:['こちら','そちら','あちら','どちら'], h:'Por favor espere, pase por aquel lado.', exp:'La dirección lejos de ambos usa 「あちら」.' },
   { q:'<ruby>日本語<rt>にほんご</rt></ruby>と<ruby>英語<rt>えいご</rt></ruby>、___が<ruby>好<rt>す</rt></ruby>きですか。(elección entre dos)', a:'どちら', opts:['こちら','そちら','あちら','どちら'], h:'Japonés o inglés, ¿cuál prefieres?', exp:'Para elegir entre 2 opciones se usa 「どちら」.' },
+];
+
+// ===== 〜より〜の方が DATA =====
+const yoriLesson = {
+    title: '〜より〜の方が',
+    subtitle: 'Comparaciones en japonés',
+    desc: `
+<p><strong>〜より〜の方が</strong> es la estructura básica para hacer comparaciones en japonés.</p>
+<div class="grammar-point">
+<p>📌 <strong>Estructura básica (comparación):</strong></p>
+<p style="font-family:'Noto Sans JP';font-size:1.1rem;text-align:center;margin:0.6rem 0;">
+  A <strong>より</strong> B <strong>の<ruby>方<rt>ほう</rt></ruby>が</strong> [ADJ] です
+</p>
+<p style="text-align:center;color:#666;">→ <em>B es más [ADJ] que A</em></p>
+</div>
+<div class="grammar-point">
+<p>📌 <strong>Pregunta con どちら (entre 2 opciones):</strong></p>
+<p style="font-family:'Noto Sans JP';font-size:1.1rem;text-align:center;margin:0.6rem 0;">
+  A <strong>と</strong> B <strong>と どちらが</strong> [ADJ] ですか
+</p>
+<p style="text-align:center;color:#666;">→ <em>¿Cuál es más [ADJ], A o B?</em></p>
+</div>
+<div class="grammar-point">
+<p>📌 <strong>Respuestas posibles:</strong></p>
+<table style="width:100%;text-align:center;font-size:0.92rem;margin-top:0.4rem;">
+  <tr style="background:#f0f0f0;"><th>Situación</th><th>Forma</th><th>Significado</th></tr>
+  <tr><td>B es más</td><td style="font-family:'Noto Sans JP';">B の<ruby>方<rt>ほう</rt></ruby>が [ADJ] です</td><td>B es más [ADJ]</td></tr>
+  <tr><td>A es más</td><td style="font-family:'Noto Sans JP';">A の<ruby>方<rt>ほう</rt></ruby>が [ADJ] です</td><td>A es más [ADJ]</td></tr>
+  <tr><td>Igual</td><td style="font-family:'Noto Sans JP';">どちらも [ADJ] です</td><td>Ambos son [ADJ]</td></tr>
+</table>
+</div>`,
+    examples: [
+        ['<ruby>車<rt>くるま</rt></ruby><strong style="color:var(--primary)">より</strong><ruby>電車<rt>でんしゃ</rt></ruby><strong style="color:var(--ocean)">の<ruby>方<rt>ほう</rt></ruby>が</strong><ruby>速<rt>はや</rt></ruby>いです。','kuruma yori densha no hō ga hayai desu.','El tren es más rápido que el coche.'],
+        ['<ruby>夏<rt>なつ</rt></ruby><strong style="color:var(--primary)">より</strong><ruby>冬<rt>ふゆ</rt></ruby><strong style="color:var(--ocean)">の<ruby>方<rt>ほう</rt></ruby>が</strong><ruby>寒<rt>さむ</rt></ruby>いです。','natsu yori fuyu no hō ga samui desu.','El invierno es más frío que el verano.'],
+        ['コーヒー<strong style="color:var(--primary)">より</strong>お<ruby>茶<rt>ちゃ</rt></ruby><strong style="color:var(--ocean)">の<ruby>方<rt>ほう</rt></ruby>が</strong><ruby>好<rt>す</rt></ruby>きです。','kōhī yori ocha no hō ga suki desu.','Me gusta más el té que el café.'],
+        ['<ruby>東京<rt>とうきょう</rt></ruby><strong style="color:var(--accent)">と</strong><ruby>大阪<rt>おおさか</rt></ruby><strong style="color:var(--accent)">とどちらが</strong><ruby>大<rt>おお</rt></ruby>きいですか。','Tōkyō to Ōsaka to dochira ga ōkii desu ka.','¿Cuál es más grande, Tokio u Osaka?'],
+        ['<ruby>東京<rt>とうきょう</rt></ruby><strong style="color:var(--ocean)">の<ruby>方<rt>ほう</rt></ruby>が</strong><ruby>大<rt>おお</rt></ruby>きいです。','Tōkyō no hō ga ōkii desu.','Tokio es más grande.'],
+        ['<strong style="color:var(--accent)">どちらも</strong><ruby>有名<rt>ゆうめい</rt></ruby>です。','Dochira mo yūmei desu.','Ambas son famosas.']
+    ]
+};
+
+const yoriReorderPool = [
+    // ===== AよりBの方が系 (22問) =====
+    {words:['<ruby>電車<rt>でんしゃ</rt></ruby>より','<ruby>車<rt>くるま</rt></ruby>の方が','<ruby>便利<rt>べんり</rt></ruby>です'],answer:'<ruby>電車<rt>でんしゃ</rt></ruby>より<ruby>車<rt>くるま</rt></ruby>の方が<ruby>便利<rt>べんり</rt></ruby>です',hint:'El coche es más conveniente que el tren.',explain:'「A より B の方が [adj]」= B es más [adj] que A. より marca el punto de comparación.'},
+    {words:['コーヒーより','<ruby>紅茶<rt>こうちゃ</rt></ruby>の方が','<ruby>好<rt>す</rt></ruby>きです'],answer:'コーヒーより<ruby>紅茶<rt>こうちゃ</rt></ruby>の方が<ruby>好<rt>す</rt></ruby>きです',hint:'Me gusta más el té negro que el café.',explain:'「より」= que (punto de comparación). 「の方が好きです」= me gusta más.'},
+    {words:['<ruby>夏<rt>なつ</rt></ruby>より','<ruby>冬<rt>ふゆ</rt></ruby>の方が','<ruby>寒<rt>さむ</rt></ruby>いです'],answer:'<ruby>夏<rt>なつ</rt></ruby>より<ruby>冬<rt>ふゆ</rt></ruby>の方が<ruby>寒<rt>さむ</rt></ruby>いです',hint:'El invierno es más frío que el verano.',explain:'「寒い」es い形容詞. A = verano, B = invierno.'},
+    {words:['<ruby>猫<rt>ねこ</rt></ruby>より','<ruby>犬<rt>いぬ</rt></ruby>の方が','<ruby>大<rt>おお</rt></ruby>きいです'],answer:'<ruby>猫<rt>ねこ</rt></ruby>より<ruby>犬<rt>いぬ</rt></ruby>の方が<ruby>大<rt>おお</rt></ruby>きいです',hint:'El perro es más grande que el gato.',explain:'「大きい」es い形容詞. La estructura AよりBの方が no cambia.'},
+    {words:['スーパーより','コンビニの方が','<ruby>便利<rt>べんり</rt></ruby>です'],answer:'スーパーよりコンビニの方が<ruby>便利<rt>べんり</rt></ruby>です',hint:'El konbini es más conveniente que el supermercado.',explain:'「便利な」es な形容詞. En predicado se usa sin な: 便利です.'},
+    {words:['<ruby>電車<rt>でんしゃ</rt></ruby>より','<ruby>飛行機<rt>ひこうき</rt></ruby>の方が','<ruby>速<rt>はや</rt></ruby>いです'],answer:'<ruby>電車<rt>でんしゃ</rt></ruby>より<ruby>飛行機<rt>ひこうき</rt></ruby>の方が<ruby>速<rt>はや</rt></ruby>いです',hint:'El avión es más rápido que el tren.',explain:'「速い」= rápido (い形容詞). より siempre va después del término A.'},
+    {words:['<ruby>昨日<rt>きのう</rt></ruby>より','<ruby>今日<rt>きょう</rt></ruby>の方が','<ruby>暑<rt>あつ</rt></ruby>いです'],answer:'<ruby>昨日<rt>きのう</rt></ruby>より<ruby>今日<rt>きょう</rt></ruby>の方が<ruby>暑<rt>あつ</rt></ruby>いです',hint:'Hoy hace más calor que ayer.',explain:'「暑い」= caluroso. より también se usa con expresiones de tiempo.'},
+    {words:['<ruby>山田<rt>やまだ</rt></ruby>さんより','<ruby>田中<rt>たなか</rt></ruby>さんの方が','<ruby>背<rt>せ</rt></ruby>が<ruby>高<rt>たか</rt></ruby>いです'],answer:'<ruby>山田<rt>やまだ</rt></ruby>さんより<ruby>田中<rt>たなか</rt></ruby>さんの方が<ruby>背<rt>せ</rt></ruby>が<ruby>高<rt>たか</rt></ruby>いです',hint:'Tanaka es más alto que Yamada.',explain:'「背が高い」= ser alto. La estructura AよりBの方が se mantiene igual.'},
+    {words:['りんごより','みかんの方が','<ruby>安<rt>やす</rt></ruby>いです'],answer:'りんごよりみかんの方が<ruby>安<rt>やす</rt></ruby>いです',hint:'La mandarina es más barata que la manzana.',explain:'「安い」= barato (い形容詞). La partícula より va directamente después de A.'},
+    {words:['バスより','<ruby>電車<rt>でんしゃ</rt></ruby>の方が','<ruby>速<rt>はや</rt></ruby>いです'],answer:'バスより<ruby>電車<rt>でんしゃ</rt></ruby>の方が<ruby>速<rt>はや</rt></ruby>いです',hint:'El tren es más rápido que el autobús.',explain:'「速い」es い形容詞. Aquí A = バス, B = 電車.'},
+    {words:['<ruby>春<rt>はる</rt></ruby>より','<ruby>秋<rt>あき</rt></ruby>の方が','<ruby>涼<rt>すず</rt></ruby>しいです'],answer:'<ruby>春<rt>はる</rt></ruby>より<ruby>秋<rt>あき</rt></ruby>の方が<ruby>涼<rt>すず</rt></ruby>しいです',hint:'El otoño es más fresco que la primavera.',explain:'「涼しい」= fresco (い形容詞). より marca la estación de comparación.'},
+    {words:['<ruby>英語<rt>えいご</rt></ruby>より','<ruby>日本語<rt>にほんご</rt></ruby>の方が','<ruby>難<rt>むずか</rt></ruby>しいです'],answer:'<ruby>英語<rt>えいご</rt></ruby>より<ruby>日本語<rt>にほんご</rt></ruby>の方が<ruby>難<rt>むずか</rt></ruby>しいです',hint:'El japonés es más difícil que el inglés.',explain:'「難しい」= difícil (い形容詞). A = inglés, B = japonés.'},
+    {words:['<ruby>肉<rt>にく</rt></ruby>より','<ruby>魚<rt>さかな</rt></ruby>の方が','<ruby>好<rt>す</rt></ruby>きです'],answer:'<ruby>肉<rt>にく</rt></ruby>より<ruby>魚<rt>さかな</rt></ruby>の方が<ruby>好<rt>す</rt></ruby>きです',hint:'Me gusta más el pescado que la carne.',explain:'「好き」es な形容詞. 「の方が好きです」= me gusta más.'},
+    {words:['<ruby>自転車<rt>じてんしゃ</rt></ruby>より','<ruby>車<rt>くるま</rt></ruby>の方が','<ruby>速<rt>はや</rt></ruby>いです'],answer:'<ruby>自転車<rt>じてんしゃ</rt></ruby>より<ruby>車<rt>くるま</rt></ruby>の方が<ruby>速<rt>はや</rt></ruby>いです',hint:'El coche es más rápido que la bicicleta.',explain:'「速い」es い形容詞. A = bicicleta (自転車), B = coche (車).'},
+    {words:['<ruby>山<rt>やま</rt></ruby>より','<ruby>海<rt>うみ</rt></ruby>の方が','<ruby>好<rt>す</rt></ruby>きです'],answer:'<ruby>山<rt>やま</rt></ruby>より<ruby>海<rt>うみ</rt></ruby>の方が<ruby>好<rt>す</rt></ruby>きです',hint:'Me gusta más el mar que la montaña.',explain:'「好き」es な形容詞. Indica preferencia personal: B の方が好き.'},
+    {words:['<ruby>水<rt>みず</rt></ruby>より','ジュースの方が','<ruby>甘<rt>あま</rt></ruby>いです'],answer:'<ruby>水<rt>みず</rt></ruby>よりジュースの方が<ruby>甘<rt>あま</rt></ruby>いです',hint:'El jugo es más dulce que el agua.',explain:'「甘い」= dulce (い形容詞). A = agua, B = jugo.'},
+    {words:['<ruby>東京<rt>とうきょう</rt></ruby>より','<ruby>大阪<rt>おおさか</rt></ruby>の方が','<ruby>物価<rt>ぶっか</rt></ruby>が<ruby>安<rt>やす</rt></ruby>いです'],answer:'<ruby>東京<rt>とうきょう</rt></ruby>より<ruby>大阪<rt>おおさか</rt></ruby>の方が<ruby>物価<rt>ぶっか</rt></ruby>が<ruby>安<rt>やす</rt></ruby>いです',hint:'Los precios en Osaka son más baratos que en Tokio.',explain:'の方が puede usarse con expresiones más complejas como 物価が安い.'},
+    {words:['この<ruby>映画<rt>えいが</rt></ruby>より','あの<ruby>映画<rt>えいが</rt></ruby>の方が','おもしろいです'],answer:'この<ruby>映画<rt>えいが</rt></ruby>よりあの<ruby>映画<rt>えいが</rt></ruby>の方がおもしろいです',hint:'Aquella película es más interesante que esta.',explain:'「おもしろい」= interesante. この/あの (こそあど) también se usan con より.'},
+    {words:['ラーメンより','<ruby>寿司<rt>すし</rt></ruby>の方が','<ruby>高<rt>たか</rt></ruby>いです'],answer:'ラーメンより<ruby>寿司<rt>すし</rt></ruby>の方が<ruby>高<rt>たか</rt></ruby>いです',hint:'El sushi es más caro que el ramen.',explain:'「高い」= caro (い形容詞). A = ramen, B = sushi.'},
+    {words:['コーヒーより','お<ruby>茶<rt>ちゃ</rt></ruby>の方が','<ruby>体<rt>からだ</rt></ruby>にいいです'],answer:'コーヒーよりお<ruby>茶<rt>ちゃ</rt></ruby>の方が<ruby>体<rt>からだ</rt></ruby>にいいです',hint:'El té es mejor para el cuerpo que el café.',explain:'「体にいい」= bueno para el cuerpo. より sirve con expresiones más largas.'},
+    {words:['<ruby>今年<rt>ことし</rt></ruby>より','<ruby>去年<rt>きょねん</rt></ruby>の方が','<ruby>寒<rt>さむ</rt></ruby>かったです'],answer:'<ruby>今年<rt>ことし</rt></ruby>より<ruby>去年<rt>きょねん</rt></ruby>の方が<ruby>寒<rt>さむ</rt></ruby>かったです',hint:'El año pasado fue más frío que este año.',explain:'「寒かった」= pasado de 寒い. La estructura AよりBの方が no cambia en pasado.'},
+    {words:['<ruby>電車<rt>でんしゃ</rt></ruby>より','<ruby>地下鉄<rt>ちかてつ</rt></ruby>の方が','<ruby>安<rt>やす</rt></ruby>いです'],answer:'<ruby>電車<rt>でんしゃ</rt></ruby>より<ruby>地下鉄<rt>ちかてつ</rt></ruby>の方が<ruby>安<rt>やす</rt></ruby>いです',hint:'El metro es más barato que el tren.',explain:'「安い」= barato. 地下鉄 = metro. La partícula より va después de 電車.'},
+    // ===== どちらが疑問文 (8問) =====
+    {words:['<ruby>犬<rt>いぬ</rt></ruby>と<ruby>猫<rt>ねこ</rt></ruby>と','どちらが','<ruby>好<rt>す</rt></ruby>きですか'],answer:'<ruby>犬<rt>いぬ</rt></ruby>と<ruby>猫<rt>ねこ</rt></ruby>とどちらが<ruby>好<rt>す</rt></ruby>きですか',hint:'¿Cuál prefieres, el perro o el gato?',explain:'「AとBと」がひとつのまとまり。どちらが で2択を問う。Los dos と son obligatorios.'},
+    {words:['<ruby>夏<rt>なつ</rt></ruby>と<ruby>冬<rt>ふゆ</rt></ruby>と','どちらが','<ruby>好<rt>す</rt></ruby>きですか'],answer:'<ruby>夏<rt>なつ</rt></ruby>と<ruby>冬<rt>ふゆ</rt></ruby>とどちらが<ruby>好<rt>す</rt></ruby>きですか',hint:'¿Cuál te gusta más, el verano o el invierno?',explain:'「AとBとどちら」は2択の疑問文. どちら = cuál (entre dos opciones).'},
+    {words:['<ruby>日本語<rt>にほんご</rt></ruby>と<ruby>英語<rt>えいご</rt></ruby>と','どちらが','<ruby>難<rt>むずか</rt></ruby>しいですか'],answer:'<ruby>日本語<rt>にほんご</rt></ruby>と<ruby>英語<rt>えいご</rt></ruby>とどちらが<ruby>難<rt>むずか</rt></ruby>しいですか',hint:'¿Cuál es más difícil, el japonés o el inglés?',explain:'「難しい」は い形容詞. AとBとどちらが は常にこの順番で.'},
+    {words:['<ruby>電車<rt>でんしゃ</rt></ruby>とバスと','どちらが','<ruby>安<rt>やす</rt></ruby>いですか'],answer:'<ruby>電車<rt>でんしゃ</rt></ruby>とバスとどちらが<ruby>安<rt>やす</rt></ruby>いですか',hint:'¿Cuál es más barato, el tren o el autobús?',explain:'「安い」= barato. バス はカタカナだが構造は同じ.'},
+    {words:['<ruby>山<rt>やま</rt></ruby>と<ruby>海<rt>うみ</rt></ruby>と','どちらが','<ruby>好<rt>す</rt></ruby>きですか'],answer:'<ruby>山<rt>やま</rt></ruby>と<ruby>海<rt>うみ</rt></ruby>とどちらが<ruby>好<rt>す</rt></ruby>きですか',hint:'¿Cuál prefieres, la montaña o el mar?',explain:'「AとBとどちらが好きですか」で好みを聞く。「どちら」= which of the two.'},
+    {words:['<ruby>肉<rt>にく</rt></ruby>と<ruby>魚<rt>さかな</rt></ruby>と','どちらが','<ruby>好<rt>す</rt></ruby>きですか'],answer:'<ruby>肉<rt>にく</rt></ruby>と<ruby>魚<rt>さかな</rt></ruby>とどちらが<ruby>好<rt>す</rt></ruby>きですか',hint:'¿Qué prefieres, la carne o el pescado?',explain:'「どちら」はいつも2択の比較に使う。「どれ」は3つ以上.'},
+    {words:['コーヒーとお<ruby>茶<rt>ちゃ</rt></ruby>と','どちらが','<ruby>好<rt>す</rt></ruby>きですか'],answer:'コーヒーとお<ruby>茶<rt>ちゃ</rt></ruby>とどちらが<ruby>好<rt>す</rt></ruby>きですか',hint:'¿Cuál prefieres, el café o el té?',explain:'「AとBとどちらが好きですか」で2択の好みを聞く。と を2回使うのがポイント.'},
+    {words:['<ruby>東京<rt>とうきょう</rt></ruby>と<ruby>大阪<rt>おおさか</rt></ruby>と','どちらが','<ruby>大<rt>おお</rt></ruby>きいですか'],answer:'<ruby>東京<rt>とうきょう</rt></ruby>と<ruby>大阪<rt>おおさか</rt></ruby>とどちらが<ruby>大<rt>おお</rt></ruby>きいですか',hint:'¿Cuál es más grande, Tokio u Osaka?',explain:'「大きい」は い形容詞. AとBとどちらが の構造は好み以外にも使える.'}
+];
+
+const yoriFillPool = [
+    // ===== より (10問) =====
+    {q:'<ruby>東京<rt>とうきょう</rt></ruby>は<ruby>大阪<rt>おおさか</rt></ruby>___<ruby>大<rt>おお</rt></ruby>きいです。',a:'より',opts:['より','の方が','どちらも','と'],h:'Tokio es más grande que Osaka.',exp:'「AはBより形容詞」= A es más [adj] que B. より が比較の基準を示す.'},
+    {q:'<ruby>電車<rt>でんしゃ</rt></ruby>はバス___<ruby>速<rt>はや</rt></ruby>いです。',a:'より',opts:['より','の方が','どちら','も'],h:'El tren es más rápido que el autobús.',exp:'「AはBより速い」= A es más rápido que B. より の前に比較対象(B)が来る.'},
+    {q:'<ruby>日本語<rt>にほんご</rt></ruby>は<ruby>英語<rt>えいご</rt></ruby>___<ruby>難<rt>むずか</rt></ruby>しいです。',a:'より',opts:['より','の方が','どちら','だけ'],h:'El japonés es más difícil que el inglés.',exp:'「AはBより形容詞」構造。より = que (punto de comparación).'},
+    {q:'この<ruby>本<rt>ほん</rt></ruby>はあの<ruby>本<rt>ほん</rt></ruby>___おもしろいです。',a:'より',opts:['より','の方が','どちらも','ほど'],h:'Este libro es más interesante que aquel.',exp:'「AはBより形容詞」構造。この/あの と一緒に使える.'},
+    {q:'<ruby>夏<rt>なつ</rt></ruby>は<ruby>冬<rt>ふゆ</rt></ruby>___<ruby>暑<rt>あつ</rt></ruby>いです。',a:'より',opts:['より','の方が','どちら','と'],h:'El verano es más caluroso que el invierno.',exp:'AはB___形容詞 → より を使う。より の前に比較対象(B)が来る.'},
+    {q:'コーヒーはお<ruby>茶<rt>ちゃ</rt></ruby>___<ruby>苦<rt>にが</rt></ruby>いです。',a:'より',opts:['より','の方が','どちらも','も'],h:'El café es más amargo que el té.',exp:'「苦い」= amargo (い形容詞). AはBより形容詞 の構造.'},
+    {q:'<ruby>冬<rt>ふゆ</rt></ruby>は<ruby>秋<rt>あき</rt></ruby>___<ruby>寒<rt>さむ</rt></ruby>いです。',a:'より',opts:['より','の方が','どちら','だけ'],h:'El invierno es más frío que el otoño.',exp:'「AはBより形容詞」= A es más [adj] que B.'},
+    {q:'<ruby>象<rt>ぞう</rt></ruby>は<ruby>馬<rt>うま</rt></ruby>___<ruby>重<rt>おも</rt></ruby>いです。',a:'より',opts:['より','の方が','どちらも','と'],h:'El elefante es más pesado que el caballo.',exp:'「重い」= pesado. AはBより = A es más que B.'},
+    {q:'スーパーはコンビニ___<ruby>安<rt>やす</rt></ruby>いです。',a:'より',opts:['より','の方が','どちら','も'],h:'El supermercado es más barato que el konbini.',exp:'「AはBより安い」= A es más barato que B.'},
+    {q:'<ruby>秋<rt>あき</rt></ruby>は<ruby>夏<rt>なつ</rt></ruby>___<ruby>涼<rt>すず</rt></ruby>しいです。',a:'より',opts:['より','の方が','どちらも','ほど'],h:'El otoño es más fresco que el verano.',exp:'「涼しい」= fresco. AはBより形容詞 の構造.'},
+    // ===== の方が (10問) =====
+    {q:'コーヒーより<ruby>紅茶<rt>こうちゃ</rt></ruby>___<ruby>好<rt>す</rt></ruby>きです。',a:'の方が',opts:['の方が','より','どちらも','だけ'],h:'Me gusta más el té negro que el café.',exp:'「AよりB___好き」→「の方が」. B が「より好き」な側.'},
+    {q:'バスより<ruby>電車<rt>でんしゃ</rt></ruby>___<ruby>便利<rt>べんり</rt></ruby>です。',a:'の方が',opts:['の方が','より','どちら','も'],h:'El tren es más conveniente que el autobús.',exp:'「AよりB___形容詞」→「の方が」. B が比較で上の側.'},
+    {q:'<ruby>夏<rt>なつ</rt></ruby>より<ruby>冬<rt>ふゆ</rt></ruby>___<ruby>寒<rt>さむ</rt></ruby>いです。',a:'の方が',opts:['の方が','より','どちらも','ほど'],h:'El invierno es más frío que el verano.',exp:'「AよりB___寒い」→「の方が」.'},
+    {q:'<ruby>猫<rt>ねこ</rt></ruby>より<ruby>犬<rt>いぬ</rt></ruby>___<ruby>大<rt>おお</rt></ruby>きいです。',a:'の方が',opts:['の方が','より','どちら','と'],h:'El perro es más grande que el gato.',exp:'「より」の後ろに来る B に「の方が」をつける.'},
+    {q:'<ruby>英語<rt>えいご</rt></ruby>より<ruby>日本語<rt>にほんご</rt></ruby>___<ruby>難<rt>むずか</rt></ruby>しいです。',a:'の方が',opts:['の方が','より','どちらも','だけ'],h:'El japonés es más difícil que el inglés.',exp:'「AよりBの方が形容詞」= B es más [adj] que A. B に の方が がつく.'},
+    {q:'<ruby>自転車<rt>じてんしゃ</rt></ruby>より<ruby>車<rt>くるま</rt></ruby>___<ruby>速<rt>はや</rt></ruby>いです。',a:'の方が',opts:['の方が','より','どちら','も'],h:'El coche es más rápido que la bicicleta.',exp:'「より」で比較の基準を示し、「の方が」で比較で上の側を示す.'},
+    {q:'ラーメンより<ruby>寿司<rt>すし</rt></ruby>___<ruby>高<rt>たか</rt></ruby>いです。',a:'の方が',opts:['の方が','より','どちらも','と'],h:'El sushi es más caro que el ramen.',exp:'「高い」= caro. AよりBの方が形容詞 の構造.'},
+    {q:'<ruby>肉<rt>にく</rt></ruby>より<ruby>魚<rt>さかな</rt></ruby>___<ruby>好<rt>す</rt></ruby>きです。',a:'の方が',opts:['の方が','より','どちら','だけ'],h:'Me gusta más el pescado que la carne.',exp:'「好き」は な形容詞. AよりBの方が好きです の構造.'},
+    {q:'<ruby>春<rt>はる</rt></ruby>より<ruby>秋<rt>あき</rt></ruby>___<ruby>涼<rt>すず</rt></ruby>しいです。',a:'の方が',opts:['の方が','より','どちらも','も'],h:'El otoño es más fresco que la primavera.',exp:'の方が は常に B（比較で上の側）の直後に来る.'},
+    {q:'<ruby>電車<rt>でんしゃ</rt></ruby>より<ruby>飛行機<rt>ひこうき</rt></ruby>___<ruby>速<rt>はや</rt></ruby>いです。',a:'の方が',opts:['の方が','より','どちら','も'],h:'El avión es más rápido que el tren.',exp:'「速い」= rápido. B（飛行機）に の方が をつける.'},
+    // ===== どちら / どちらも (10問) =====
+    {q:'<ruby>犬<rt>いぬ</rt></ruby>と<ruby>猫<rt>ねこ</rt></ruby>と、___が<ruby>好<rt>す</rt></ruby>きですか。',a:'どちら',opts:['どちら','より','の方が','どれ'],h:'¿Cuál prefieres, el perro o el gato?',exp:'「AとBと___が」の形では「どちら」を使う。2択の疑問文の決まり表現.'},
+    {q:'コーヒーとお<ruby>茶<rt>ちゃ</rt></ruby>と、___が<ruby>好<rt>す</rt></ruby>きですか。',a:'どちら',opts:['どちら','より','の方が','どれ'],h:'¿Cuál prefieres, el café o el té?',exp:'「AとBとどちらが」= ¿Cuál, A o B? 2択の場合に使う.'},
+    {q:'<ruby>山<rt>やま</rt></ruby>と<ruby>海<rt>うみ</rt></ruby>と、___が<ruby>好<rt>す</rt></ruby>きですか。',a:'どちら',opts:['どちら','より','どちらも','どれ'],h:'¿Cuál prefieres, la montaña o el mar?',exp:'「どちら」は必ず2択。「どれ」は3つ以上の選択肢に使う.'},
+    {q:'<ruby>日本語<rt>にほんご</rt></ruby>と<ruby>英語<rt>えいご</rt></ruby>、___も<ruby>難<rt>むずか</rt></ruby>しいです。',a:'どちら',opts:['どちら','より','の方が','どれ'],h:'Tanto el japonés como el inglés son difíciles.',exp:'「どちらも」= ambos/tanto...como. どちら＋も のセットになる.'},
+    {q:'<ruby>牛乳<rt>ぎゅうにゅう</rt></ruby>とジュースと、___も<ruby>甘<rt>あま</rt></ruby>いです。',a:'どちら',opts:['どちら','より','の方が','どれ'],h:'Tanto la leche como el jugo son dulces.',exp:'「どちらも」で両方に当てはまることを表す.'},
+    {q:'<ruby>東京<rt>とうきょう</rt></ruby>と<ruby>大阪<rt>おおさか</rt></ruby>と、___が<ruby>大<rt>おお</rt></ruby>きいですか。',a:'どちら',opts:['どちら','より','の方が','どれ'],h:'¿Cuál es más grande, Tokio u Osaka?',exp:'「どちら」= cuál (2択). 「どれ」は使わない.'},
+    {q:'<ruby>夏<rt>なつ</rt></ruby>と<ruby>冬<rt>ふゆ</rt></ruby>と、___も<ruby>好<rt>す</rt></ruby>きです。',a:'どちら',opts:['どちら','より','の方が','どれ'],h:'Me gustan tanto el verano como el invierno.',exp:'「どちらも好き」= me gustan ambos. どちらも は中立な答えに使う.'},
+    {q:'<ruby>肉<rt>にく</rt></ruby>と<ruby>魚<rt>さかな</rt></ruby>と、___が<ruby>好<rt>す</rt></ruby>きですか。',a:'どちら',opts:['どちら','より','の方が','どれ'],h:'¿Qué prefieres, la carne o el pescado?',exp:'「AとBとどちらが好きですか」で好みを聞く.'},
+    {q:'バスと<ruby>電車<rt>でんしゃ</rt></ruby>と、___も<ruby>便利<rt>べんり</rt></ruby>です。',a:'どちら',opts:['どちら','より','の方が','どれ'],h:'Tanto el autobús como el tren son convenientes.',exp:'「どちらも便利」= ambos son convenientes. どちらも で「両方」を表す.'},
+    {q:'<ruby>春<rt>はる</rt></ruby>と<ruby>秋<rt>あき</rt></ruby>と、___が<ruby>涼<rt>すず</rt></ruby>しいですか。',a:'どちら',opts:['どちら','より','の方が','どれ'],h:'¿Cuál es más fresco, la primavera o el otoño?',exp:'2択の疑問には「どちら」。「どれ」は3つ以上の選択肢.'}
 ];
 
 // ===== KUTE (〜くて・で) DATA =====
