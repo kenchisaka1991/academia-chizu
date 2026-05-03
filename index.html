@@ -1851,18 +1851,20 @@ let maeniErrors = [];
 let masuPracMode = 'quiz';
 let masuReorderIdx=0;let masuReorderCorrect=0;let masuReorderQuestions=[];let masuReorderErrors=[];let masuCurrentAnswer=[];
 let niikuPracMode = 'conj';
-let tePracMode = 'conj'; // 'conj' | 'reorder'
+let tePracMode = 'conj'; // 'conj' | 'reorder' | 'kara'
 let teLearnSubTab = 'base'; // 'base' | 'ouyou'
 let teCardIdx = 0;
 let teOuyouCardIdx = 0;
 let teQuizIdx = 0; let teCorrect = 0; let teQuestions = []; let teErrors = [];
 let teReorderIdx = 0; let teReorderCorrect = 0; let teReorderQuestions = []; let teReorderErrors = []; let teCurrentAnswer = [];
-let taPracMode = 'conj'; // 'conj' | 'reorder'
+let teKaraIdx = 0; let teKaraCorrect = 0; let teKaraQuestions = []; let teKaraErrors = []; let teKaraAnswer = [];
+let taPracMode = 'conj'; // 'conj' | 'reorder' | 'tari'
 let taLearnSubTab = 'base'; // 'base' | 'ouyou'
 let taCardIdx = 0;
 let taOuyouCardIdx = 0;
 let taQuizIdx = 0; let taCorrect = 0; let taQuestions = []; let taErrors = [];
 let taReorderIdx = 0; let taReorderCorrect = 0; let taReorderQuestions = []; let taReorderErrors = []; let taCurrentAnswer = [];
+let taTariIdx = 0; let taTariCorrect = 0; let taTariQuestions = []; let taTariErrors = []; let taTariAnswer = [];
 let naiPracMode = 'conj'; // 'conj' | 'reorder'
 let naiLearnSubTab = 'base'; // 'base' | 'ouyou'
 let naiCardIdx = 0;
@@ -1877,6 +1879,12 @@ let shijiQuizIdx = 0; let shijiCorrect = 0; let shijiQuestions = []; let shijiEr
 let yoriPracMode = 'reorder'; // 'reorder' | 'fill'
 let yoriReorderIdx = 0; let yoriReorderCorrect = 0; let yoriReorderQuestions = []; let yoriReorderErrors = []; let yoriCurrentAnswer = []; let yoriCurrentWords = [];
 let yoriFillIdx = 0; let yoriFillCorrect = 0; let yoriFillQuestions = []; let yoriFillErrors = [];
+let douPracMode = 'reorder'; // 'reorder' | 'fill'
+let douReorderIdx = 0; let douReorderCorrect = 0; let douReorderQuestions = []; let douReorderErrors = []; let douCurrentAnswer = []; let douCurrentWords = [];
+let douFillIdx = 0; let douFillCorrect = 0; let douFillQuestions = []; let douFillErrors = [];
+let omouPracMode = 'reorder';
+let omouReorderIdx = 0; let omouReorderCorrect = 0; let omouReorderQuestions = []; let omouReorderErrors = []; let omouCurrentAnswer = []; let omouCurrentWords = [];
+let omouFillIdx = 0; let omouFillCorrect = 0; let omouFillQuestions = []; let omouFillErrors = [];
 let kutePracMode = 'katsu'; // 'katsu' | 'reorder'
 let kuteType = 'i'; // 'i' | 'na'
 let kuteKatsuIdx = 0; let kuteKatsuCorrect = 0; let kuteKatsuQuestions = []; let kuteKatsuErrors = [];
@@ -2668,6 +2676,8 @@ function renderGrammar(){
             <button class="lesson-tab ${currentLesson==='aru'?'active':''}" onclick="setCurrentLesson('aru')">📍 Existencia<span class="lesson-tab-jp">あります/います</span></button>
             <button class="lesson-tab ${currentLesson==='keiyo'?'active':''}" onclick="setCurrentLesson('keiyo')">🌈 Adjetivos<span class="lesson-tab-jp">形容詞</span></button>
             <button class="lesson-tab ${currentLesson==='yori'?'active':''}" onclick="setCurrentLesson('yori')">⚖️ Comparar<span class="lesson-tab-jp">より〜の方が</span></button>
+            <button class="lesson-tab ${currentLesson==='dou'?'active':''}" onclick="setCurrentLesson('dou')">💬 Opinión<span class="lesson-tab-jp">〜はどうですか</span></button>
+            <button class="lesson-tab ${currentLesson==='omou'?'active':''}" onclick="setCurrentLesson('omou')">💭 Opinión<span class="lesson-tab-jp">〜と思います</span></button>
             <button class="lesson-tab ${currentLesson==='kute'?'active':''}" onclick="setCurrentLesson('kute')">🔗 Conexión<span class="lesson-tab-jp">〜くて・で</span></button>
             <button class="lesson-tab ${currentLesson==='mashou'?'active':''}" onclick="setCurrentLesson('mashou')">🤝 Invitaciones<span class="lesson-tab-jp">ましょう</span></button>
             <button class="lesson-tab ${currentLesson==='tai'?'active':''}" onclick="setCurrentLesson('tai')">💭 Deseos<span class="lesson-tab-jp">〜たい</span></button>
@@ -2733,6 +2743,12 @@ function renderGrammar(){
     } else if(currentLesson==='yori'){
         if(grammarMode==='learn') renderYoriLearn();
         else renderYoriPractice();
+    } else if(currentLesson==='dou'){
+        if(grammarMode==='learn') renderDouLearn();
+        else renderDouPractice();
+    } else if(currentLesson==='omou'){
+        if(grammarMode==='learn') renderOmouLearn();
+        else renderOmouPractice();
     } else {
         if(grammarMode==='learn') renderJoshiLearn();
         else renderJoshiPractice();
@@ -4633,6 +4649,17 @@ function renderTaOuyouLearn(){
                 {jp:'もう<ruby>宿題<rt>しゅくだい</rt></ruby>をした。',es:'Ya hice la tarea.'},
             ]
         },
+        {
+            title:'Lista de acciones',
+            expr:'〜たり〜たりします',
+            formation:'Forma た ＋ り、Forma た ＋ り ＋ します',
+            desc:'"Hacer cosas como A y B." Lista ejemplos de acciones sin ser exhaustivo.',
+            note:'No es necesario mencionar todas las acciones. El tiempo se expresa al final: ～たりします (presente) / ～たりしました (pasado).',
+            exs:[
+                {jp:'<ruby>週末<rt>しゅうまつ</rt></ruby>は<ruby>音楽<rt>おんがく</rt></ruby>を<ruby>聴<rt>き</rt></ruby>いたり、<ruby>本<rt>ほん</rt></ruby>を<ruby>読<rt>よ</rt></ruby>んだりします。',es:'Los fines de semana escucho música, leo libros, entre otras cosas.'},
+                {jp:'<ruby>映画<rt>えいが</rt></ruby>を<ruby>見<rt>み</rt></ruby>たり、<ruby>料理<rt>りょうり</rt></ruby>したりしました。',es:'Vi películas, cociné, entre otras cosas.'},
+            ]
+        },
     ];
     const c = cards[taOuyouCardIdx];
     document.getElementById('grammar-content').innerHTML = `
@@ -4669,17 +4696,21 @@ function setTePracMode(mode){
 }
 
 function renderTePractice(){
-    const isConj = tePracMode === 'conj';
+    const m = tePracMode;
+    const titles = {conj:'Conjugación', reorder:'Orden de palabras', kara:'〜てから'};
+    const descs = {conj:'Selecciona la forma て correcta del verbo.', reorder:'Ordena las palabras para formar la oración.', kara:'Ordena las palabras usando ～てから (después de hacer A, hacer B).'};
+    const starters = {conj:'startTeConjQuiz()', reorder:'startTeReorderQuiz()', kara:'startTeKaraQuiz()'};
     document.getElementById('grammar-content').innerHTML = `
         <div class="grammar-card" style="text-align:center;">
-            <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:1rem;">
-                <button class="mode-tab ${isConj?'active':''}" onclick="setTePracMode('conj')">📊 Conjugación</button>
-                <button class="mode-tab ${!isConj?'active':''}" onclick="setTePracMode('reorder')">🔤 Orden de palabras</button>
+            <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:1rem;flex-wrap:wrap;">
+                <button class="mode-tab ${m==='conj'?'active':''}" onclick="setTePracMode('conj')">📊 Conjugación</button>
+                <button class="mode-tab ${m==='reorder'?'active':''}" onclick="setTePracMode('reorder')">🔤 Orden</button>
+                <button class="mode-tab ${m==='kara'?'active':''}" onclick="setTePracMode('kara')">💬 〜てから</button>
             </div>
-            <h3>🎯 Práctica: て形 — ${isConj?'Conjugación':'Orden de palabras'}</h3>
-            <p style="color:var(--text-light);margin:0.5rem 0;">${isConj?'Selecciona la forma て correcta del verbo.':'Ordena las palabras para formar la oración.'}</p>
+            <h3>🎯 Práctica: て形 — ${titles[m]}</h3>
+            <p style="color:var(--text-light);margin:0.5rem 0;">${descs[m]}</p>
             <p style="color:var(--text-light);font-size:0.9rem;">5 preguntas aleatorias</p>
-            <button class="btn-practice" onclick="${isConj?'startTeConjQuiz()':'startTeReorderQuiz()'}">Comenzar</button>
+            <button class="btn-practice" onclick="${starters[m]}">Comenzar</button>
         </div>
         <div id="te-quiz-area"></div>
     `;
@@ -4870,6 +4901,84 @@ function showTeReorderResult(){
     `;
 }
 
+// ===== て形 〜てから クイズ =====
+function startTeKaraQuiz(){
+    teKaraIdx = 0; teKaraCorrect = 0; teKaraErrors = [];
+    teKaraQuestions = [...teReorderPool].filter(q=>q.use==='kara').sort(()=>Math.random()-0.5).slice(0,5);
+    teKaraAnswer = [];
+    document.getElementById('grammar-content').querySelector('.grammar-card').style.display = 'none';
+    showTeKaraQuestion();
+}
+function toggleTeKaraHint(){
+    const active = document.getElementById('tekara-word-pool').classList.toggle('pista-active');
+    document.getElementById('tekara-pista-btn').textContent = active ? '🙈 Ocultar furigana' : '💡 Pista (furigana)';
+}
+function showTeKaraQuestion(){
+    teKaraAnswer = [];
+    const q = teKaraQuestions[teKaraIdx];
+    const indices = q.words.map((_,i)=>i).sort(()=>Math.random()-0.5);
+    const sw = indices.map(i=>q.words[i]);
+    const sr = q.r ? indices.map(i=>q.r[i]) : sw;
+    window._teKaraPool = sw;
+    document.getElementById('te-quiz-area').innerHTML = `
+        <div class="reorder-box">
+            <div class="reorder-progress">${teKaraIdx+1} / 5</div>
+            <div class="reorder-hint">${q.hint}</div>
+            <button class="hint-btn" id="tekara-pista-btn" onclick="toggleTeKaraHint()">💡 Pista (furigana)</button>
+            <div class="reorder-words" id="tekara-word-pool">
+                ${sw.map((w,i)=>`<div class="word-btn-wrap"><button class="word-btn" onclick="selectTeKaraWord(${i})" id="tekarawb-${i}">${w}</button><span class="word-romaji">${sr[i]}</span></div>`).join('')}
+            </div>
+            <div class="reorder-answer" id="tekara-answer-area"><span class="reorder-placeholder">Toca las palabras en orden</span></div>
+            <button class="btn-check" id="tekara-check-btn" onclick="checkTeKaraAnswer()" disabled>Verificar</button>
+            <div id="tekara-feedback"></div>
+        </div>`;
+}
+function selectTeKaraWord(idx){
+    const btn = document.getElementById('tekarawb-'+idx);
+    if(btn.classList.contains('selected')) return;
+    btn.classList.add('selected');
+    teKaraAnswer.push({idx, word:window._teKaraPool[idx]});
+    renderTeKaraAnswerArea();
+}
+function removeTeKaraWord(i){
+    const removed = teKaraAnswer.splice(i,1)[0];
+    document.getElementById('tekarawb-'+removed.idx).classList.remove('selected');
+    renderTeKaraAnswerArea();
+}
+function renderTeKaraAnswerArea(){
+    const area = document.getElementById('tekara-answer-area');
+    area.innerHTML = teKaraAnswer.length === 0
+        ? '<span class="reorder-placeholder">Toca las palabras en orden</span>'
+        : teKaraAnswer.map((a,i)=>`<button class="answer-btn" onclick="removeTeKaraWord(${i})">${a.word}</button>`).join('');
+    document.getElementById('tekara-check-btn').disabled = teKaraAnswer.length !== window._teKaraPool.length;
+}
+function checkTeKaraAnswer(){
+    const q = teKaraQuestions[teKaraIdx];
+    const userAnswer = teKaraAnswer.map(a=>a.word).join('');
+    const correctAnswer = q.words.join('');
+    const isCorrect = stripRuby(userAnswer) === stripRuby(correctAnswer);
+    document.getElementById('tekara-check-btn').disabled = true;
+    document.querySelectorAll('#tekara-word-pool .word-btn, #tekara-answer-area .answer-btn').forEach(b=>b.style.pointerEvents='none');
+    const fb = document.getElementById('tekara-feedback');
+    if(isCorrect){ teKaraCorrect++; fb.innerHTML = `<div class="reorder-feedback correct">⭕ ¡Correcto!</div>`; }
+    else { teKaraErrors.push({hint:q.hint, user:userAnswer, correct:correctAnswer}); fb.innerHTML = `<div class="reorder-feedback wrong">❌ Incorrecto<br>Respuesta: ${correctAnswer}</div>`; }
+    setTimeout(()=>{ teKaraIdx++; if(teKaraIdx<5) showTeKaraQuestion(); else showTeKaraResult(); }, 1500);
+}
+function showTeKaraResult(){
+    const pct = Math.round((teKaraCorrect/5)*100);
+    saveScore('te_kara', pct);
+    const msg = pct===100?'🎉 ¡Perfecto!':pct>=80?'🌟 ¡Excelente!':pct>=60?'👍 ¡Muy bien!':'📚 ¡Sigue practicando!';
+    const errHtml = teKaraErrors.length > 0 ? `<div class="error-review"><h4>❌ Errores (${teKaraErrors.length})</h4>${teKaraErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${e.hint}</div><div class="error-your">Tu respuesta: ${e.user}</div><div class="error-correct">✅ Correcta: ${e.correct}</div></div>`).join('')}</div>` : '';
+    document.getElementById('te-quiz-area').innerHTML = `
+        <div class="grammar-result">
+            <div class="gr-score">${pct}%</div><div class="gr-msg">${msg}</div>
+            <div class="gr-detail">${teKaraCorrect} / 5 correctas</div>
+            <button class="btn-practice" onclick="startTeKaraQuiz()">🔄 Intentar de nuevo</button>
+            <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
+            ${errHtml}
+        </div>`;
+}
+
 // ===== た形 PRACTICAR =====
 function setTaPracMode(mode){
     taPracMode = mode;
@@ -4877,17 +4986,21 @@ function setTaPracMode(mode){
 }
 
 function renderTaPractice(){
-    const isConj = taPracMode === 'conj';
+    const m = taPracMode;
+    const titles = {conj:'Conjugación', reorder:'Orden de palabras', tari:'〜たり〜たり'};
+    const descs = {conj:'Selecciona la forma た correcta del verbo.', reorder:'Ordena las palabras para formar la oración.', tari:'Ordena las palabras usando ～たり～たりします (hacer cosas como A y B).'};
+    const starters = {conj:'startTaConjQuiz()', reorder:'startTaReorderQuiz()', tari:'startTaTariQuiz()'};
     document.getElementById('grammar-content').innerHTML = `
         <div class="grammar-card" style="text-align:center;">
-            <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:1rem;">
-                <button class="mode-tab ${isConj?'active':''}" onclick="setTaPracMode('conj')">📊 Conjugación</button>
-                <button class="mode-tab ${!isConj?'active':''}" onclick="setTaPracMode('reorder')">🔤 Orden de palabras</button>
+            <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:1rem;flex-wrap:wrap;">
+                <button class="mode-tab ${m==='conj'?'active':''}" onclick="setTaPracMode('conj')">📊 Conjugación</button>
+                <button class="mode-tab ${m==='reorder'?'active':''}" onclick="setTaPracMode('reorder')">🔤 Orden</button>
+                <button class="mode-tab ${m==='tari'?'active':''}" onclick="setTaPracMode('tari')">💬 〜たり</button>
             </div>
-            <h3>🎯 Práctica: た形 — ${isConj?'Conjugación':'Orden de palabras'}</h3>
-            <p style="color:var(--text-light);margin:0.5rem 0;">${isConj?'Selecciona la forma た correcta del verbo.':'Ordena las palabras para formar la oración.'}</p>
+            <h3>🎯 Práctica: た形 — ${titles[m]}</h3>
+            <p style="color:var(--text-light);margin:0.5rem 0;">${descs[m]}</p>
             <p style="color:var(--text-light);font-size:0.9rem;">5 preguntas aleatorias</p>
-            <button class="btn-practice" onclick="${isConj?'startTaConjQuiz()':'startTaReorderQuiz()'}">Comenzar</button>
+            <button class="btn-practice" onclick="${starters[m]}">Comenzar</button>
         </div>
         <div id="ta-quiz-area"></div>
     `;
@@ -5076,6 +5189,83 @@ function showTaReorderResult(){
     `;
 }
 
+// ===== た形 たり〜たり PRACTICAR =====
+function startTaTariQuiz(){
+    taTariIdx = 0; taTariCorrect = 0; taTariErrors = [];
+    taTariQuestions = [...taReorderPool].filter(q=>q.use==='tari').sort(()=>Math.random()-0.5).slice(0,5);
+    taTariAnswer = [];
+    document.getElementById('grammar-content').querySelector('.grammar-card').style.display = 'none';
+    showTaTariQuestion();
+}
+function toggleTaTariHint(){
+    const active = document.getElementById('tatari-word-pool').classList.toggle('pista-active');
+    document.getElementById('tatari-pista-btn').textContent = active ? '🙈 Ocultar furigana' : '💡 Pista (furigana)';
+}
+function showTaTariQuestion(){
+    taTariAnswer = [];
+    const q = taTariQuestions[taTariIdx];
+    const indices = q.words.map((_,i)=>i).sort(()=>Math.random()-0.5);
+    const sw = indices.map(i=>q.words[i]);
+    const sr = q.r ? indices.map(i=>q.r[i]) : sw;
+    window._taTariPool = sw;
+    document.getElementById('ta-quiz-area').innerHTML = `
+        <div class="reorder-box">
+            <div class="reorder-progress">${taTariIdx+1} / 5</div>
+            <div class="reorder-hint">${q.hint}</div>
+            <button class="hint-btn" id="tatari-pista-btn" onclick="toggleTaTariHint()">💡 Pista (furigana)</button>
+            <div class="reorder-words" id="tatari-word-pool">
+                ${sw.map((w,i)=>`<div class="word-btn-wrap"><button class="word-btn" onclick="selectTaTariWord(${i})" id="tatariwb-${i}">${w}</button><span class="word-romaji">${sr[i]}</span></div>`).join('')}
+            </div>
+            <div class="reorder-answer" id="tatari-answer-area"><span class="reorder-placeholder">Toca las palabras en orden</span></div>
+            <button class="btn-check" id="tatari-check-btn" onclick="checkTaTariAnswer()" disabled>Verificar</button>
+            <div id="tatari-feedback"></div>
+        </div>`;
+}
+function selectTaTariWord(idx){
+    const btn = document.getElementById('tatariwb-'+idx);
+    if(btn.classList.contains('selected')) return;
+    btn.classList.add('selected');
+    taTariAnswer.push({idx, word:window._taTariPool[idx]});
+    renderTaTariAnswerArea();
+}
+function removeTaTariWord(i){
+    const removed = taTariAnswer.splice(i,1)[0];
+    document.getElementById('tatariwb-'+removed.idx).classList.remove('selected');
+    renderTaTariAnswerArea();
+}
+function renderTaTariAnswerArea(){
+    const area = document.getElementById('tatari-answer-area');
+    area.innerHTML = taTariAnswer.length === 0
+        ? '<span class="reorder-placeholder">Toca las palabras en orden</span>'
+        : taTariAnswer.map((a,i)=>`<button class="answer-btn" onclick="removeTaTariWord(${i})">${a.word}</button>`).join('');
+    document.getElementById('tatari-check-btn').disabled = taTariAnswer.length !== window._taTariPool.length;
+}
+function checkTaTariAnswer(){
+    const q = taTariQuestions[taTariIdx];
+    const userAnswer = taTariAnswer.map(a=>a.word).join('');
+    const correctAnswer = q.words.join('');
+    const isCorrect = stripRuby(userAnswer) === stripRuby(correctAnswer);
+    document.getElementById('tatari-check-btn').disabled = true;
+    document.querySelectorAll('#tatari-word-pool .word-btn, #tatari-answer-area .answer-btn').forEach(b=>b.style.pointerEvents='none');
+    const fb = document.getElementById('tatari-feedback');
+    if(isCorrect){ taTariCorrect++; fb.innerHTML = `<div class="reorder-feedback correct">⭕ ¡Correcto!</div>`; }
+    else { taTariErrors.push({hint:q.hint, user:userAnswer, correct:correctAnswer}); fb.innerHTML = `<div class="reorder-feedback wrong">❌ Incorrecto<br>Respuesta: ${correctAnswer}</div>`; }
+    setTimeout(()=>{ taTariIdx++; if(taTariIdx<5) showTaTariQuestion(); else showTaTariResult(); }, 1500);
+}
+function showTaTariResult(){
+    const pct = Math.round((taTariCorrect/5)*100);
+    saveScore('ta_tari', pct);
+    const msg = pct===100?'🎉 ¡Perfecto!':pct>=80?'🌟 ¡Excelente!':pct>=60?'👍 ¡Muy bien!':'📚 ¡Sigue practicando!';
+    const errHtml = taTariErrors.length > 0 ? `<div class="error-review"><h4>❌ Errores (${taTariErrors.length})</h4>${taTariErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${e.hint}</div><div class="error-your">Tu respuesta: ${e.user}</div><div class="error-correct">✅ Correcta: ${e.correct}</div></div>`).join('')}</div>` : '';
+    document.getElementById('ta-quiz-area').innerHTML = `
+        <div class="grammar-result">
+            <div class="gr-score">${pct}%</div><div class="gr-msg">${msg}</div>
+            <div class="gr-detail">${taTariCorrect} / 5 correctas</div>
+            <button class="btn-practice" onclick="startTaTariQuiz()">🔄 Intentar de nuevo</button>
+            <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
+            ${errHtml}
+        </div>`;
+}
 
 // ===== ない形 LEARN =====
 function renderNaiLearn(){
@@ -6198,6 +6388,442 @@ function showYoriFillResult(){
             <div class="gr-msg">${msg}</div>
             <div class="gr-detail">${yoriFillCorrect} / 5 correctas</div>
             <button class="btn-practice" onclick="startYoriFill()">🔄 Intentar de nuevo</button>
+            <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
+            ${errHtml}
+        </div>
+    `;
+}
+
+// ===== DOU (〜はどうですか) FUNCTIONS =====
+function renderDouLearn(){
+    const L = douLesson;
+    document.getElementById('grammar-content').innerHTML = `
+        <div class="grammar-card">
+            <div class="grammar-title">${L.title}</div>
+            <div class="grammar-subtitle">${L.subtitle}</div>
+            <div class="grammar-desc">${L.desc}</div>
+            <div class="grammar-examples" style="margin-top:1rem;">
+                <h4>📝 Ejemplos</h4>
+                ${L.examples.map(ex=>`
+                    <div class="grammar-ex">
+                        <div class="ex-jp">${ex[0]}</div>
+                        <div class="ex-ro" style="font-size:0.82rem;color:var(--text-light);margin-bottom:0.2rem;">${ex[1]}</div>
+                        <div class="ex-es">${ex[2]}</div>
+                    </div>
+                `).join('')}
+            </div>
+            <button class="btn-practice" onclick="setGrammarMode('practice')" style="margin-top:1rem;">🎯 Practicar</button>
+        </div>
+    `;
+}
+
+function renderDouPractice(){
+    const isReorder = douPracMode === 'reorder';
+    document.getElementById('grammar-content').innerHTML = `
+        <div class="grammar-card" style="text-align:center;">
+            <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:1rem;">
+                <button class="mode-tab ${isReorder?'active':''}" onclick="setDouMode('reorder')">🔤 Ordenar</button>
+                <button class="mode-tab ${!isReorder?'active':''}" onclick="setDouMode('fill')">📝 Selección</button>
+            </div>
+            <h3>🎯 Práctica: はどうですか — ${isReorder?'Ordenar palabras':'Selección'}</h3>
+            <p style="color:var(--text-light);margin:0.5rem 0;">${isReorder?'Ordena las palabras para formar la pregunta correcta.':'Elige どうですか o いかがですか para completar la oración.'}</p>
+            <p style="color:var(--text-light);font-size:0.9rem;">5 preguntas aleatorias</p>
+            <button class="btn-practice" onclick="${isReorder?'startDouReorder()':'startDouFill()'}">Comenzar</button>
+        </div>
+        <div id="dou-quiz-area"></div>
+    `;
+}
+
+function setDouMode(mode){
+    douPracMode = mode;
+    renderDouPractice();
+}
+
+function startDouReorder(){
+    document.getElementById('grammar-content').querySelector('.grammar-card').style.display = 'none';
+    douReorderQuestions = [...douReorderPool].sort(()=>Math.random()-0.5).slice(0,5);
+    douReorderIdx = 0; douReorderCorrect = 0; douReorderErrors = [];
+    showDouReorderQuestion();
+}
+
+function showDouReorderQuestion(){
+    const q = douReorderQuestions[douReorderIdx];
+    douCurrentWords = [...q.words].sort(()=>Math.random()-0.5);
+    douCurrentAnswer = [];
+    document.getElementById('dou-quiz-area').innerHTML = `
+        <div class="reorder-box">
+            <div class="reorder-progress">${douReorderIdx+1} / 5</div>
+            <div class="reorder-hint">${q.hint}</div>
+            <button class="hint-btn" id="dou-pista-btn" onclick="toggleDouPista()">💡 Pista (furigana)</button>
+            <div class="reorder-words" id="dou-word-pool">
+                ${douCurrentWords.map((w,i)=>`<span style="display:inline-block;text-align:center;margin:0.2rem;"><button class="word-btn" onclick="selectDouWord(${i})" id="dou-wb-${i}">${stripRuby(w)}</button><div class="word-romaji" style="display:none;font-size:0.75rem;color:var(--text-light);text-align:center;">${rubyToHiragana(w)}</div></span>`).join('')}
+            </div>
+            <div class="reorder-answer" id="dou-answer-area">
+                <span class="reorder-placeholder">Toca las palabras en orden</span>
+            </div>
+            <button class="btn-check" id="dou-check-btn" onclick="checkDouReorderAnswer()" disabled>Verificar</button>
+            <div id="dou-reorder-feedback"></div>
+        </div>
+    `;
+}
+
+function toggleDouPista(){
+    const spans = document.querySelectorAll('#dou-word-pool .word-romaji');
+    const showing = spans[0] && spans[0].style.display !== 'none';
+    spans.forEach(s => s.style.display = showing ? 'none' : 'block');
+    const btn = document.getElementById('dou-pista-btn');
+    if(btn) btn.textContent = showing ? '💡 Pista (furigana)' : '🙈 Ocultar pista';
+}
+
+function selectDouWord(idx){
+    const btn = document.getElementById('dou-wb-'+idx);
+    if(btn.classList.contains('selected')) return;
+    btn.classList.add('selected');
+    douCurrentAnswer.push({word: douCurrentWords[idx], btnIdx: idx});
+    renderDouAnswerArea();
+}
+
+function removeDouWord(i){
+    const removed = douCurrentAnswer.splice(i,1)[0];
+    document.getElementById('dou-wb-'+removed.btnIdx).classList.remove('selected');
+    renderDouAnswerArea();
+}
+
+function renderDouAnswerArea(){
+    const area = document.getElementById('dou-answer-area');
+    area.innerHTML = douCurrentAnswer.length === 0
+        ? '<span class="reorder-placeholder">Toca las palabras en orden</span>'
+        : douCurrentAnswer.map((a,i)=>`<button class="answer-btn" onclick="removeDouWord(${i})">${stripRuby(a.word)}</button>`).join('');
+    document.getElementById('dou-check-btn').disabled = douCurrentAnswer.length !== douCurrentWords.length;
+}
+
+function checkDouReorderAnswer(){
+    const q = douReorderQuestions[douReorderIdx];
+    const userAns = douCurrentAnswer.map(a=>stripRuby(a.word)).join('');
+    const correct = stripRuby(q.answerDisplay);
+    const fb = document.getElementById('dou-reorder-feedback');
+    document.getElementById('dou-check-btn').disabled = true;
+    document.querySelectorAll('#dou-word-pool .word-btn, #dou-answer-area .answer-btn').forEach(b=>b.style.pointerEvents='none');
+    if(userAns === correct){
+        douReorderCorrect++;
+        fb.innerHTML = '<div class="reorder-feedback correct">⭕ ¡Correcto!</div>';
+    } else {
+        douReorderErrors.push({hint:q.hint, user:userAns, correct:q.answerDisplay, exp:q.explain});
+        fb.innerHTML = `<div class="reorder-feedback wrong">❌ Correcta: ${q.answerDisplay}<br><small>${q.explain}</small></div>`;
+    }
+    setTimeout(()=>{
+        douReorderIdx++;
+        if(douReorderIdx < 5) showDouReorderQuestion();
+        else showDouReorderResult();
+    }, 1800);
+}
+
+function showDouReorderResult(){
+    const pct = Math.round((douReorderCorrect/5)*100);
+    saveScore('dou', pct);
+    const msg = pct===100?'🎉 ¡Perfecto!':pct>=80?'🌟 ¡Excelente!':pct>=60?'👍 ¡Muy bien!':'📚 ¡Sigue practicando!';
+    let errHtml = '';
+    if(douReorderErrors.length > 0){
+        errHtml = `<div class="error-review"><h4>❌ Errores (${douReorderErrors.length})</h4>${douReorderErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${e.hint}</div><div class="error-your">Tu: ${e.user}</div><div class="error-correct">✅ ${e.correct} — ${e.exp}</div></div>`).join('')}</div>`;
+    }
+    document.getElementById('dou-quiz-area').innerHTML = `
+        <div class="grammar-result">
+            <div class="gr-score">${pct}%</div>
+            <div class="gr-msg">${msg}</div>
+            <div class="gr-detail">${douReorderCorrect} / 5 correctas</div>
+            <button class="btn-practice" onclick="startDouReorder()">🔄 Intentar de nuevo</button>
+            <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
+            ${errHtml}
+        </div>
+    `;
+}
+
+function startDouFill(){
+    document.getElementById('grammar-content').querySelector('.grammar-card').style.display = 'none';
+    douFillQuestions = [...douFillPool].sort(()=>Math.random()-0.5).slice(0,5);
+    douFillIdx = 0; douFillCorrect = 0; douFillErrors = [];
+    showDouFillQuestion();
+}
+
+function showDouFillQuestion(){
+    const q = douFillQuestions[douFillIdx];
+    const shuffled = [...q.opts].sort(()=>Math.random()-0.5);
+    window._douOpts = shuffled;
+    window._douFillPistaOn = false;
+    document.getElementById('dou-quiz-area').innerHTML = `
+        <div class="reorder-box">
+            <div class="reorder-progress">${douFillIdx+1} / 5</div>
+            <div class="reorder-hint">${q.h}</div>
+            <button class="hint-btn" id="dou-fill-pista-btn" onclick="toggleDouFillPista()">💡 Pista (furigana)</button>
+            <div class="ex-jp" id="dou-fill-question" style="margin:1rem 0;font-size:1.1rem;">${stripRuby(q.q)}</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-top:0.5rem;">
+                ${shuffled.map((opt,i)=>`<button class="word-btn" style="padding:0.7rem;font-family:'Noto Sans JP';" onclick="checkDouFill(${i})">${opt}</button>`).join('')}
+            </div>
+            <div id="dou-fill-feedback" style="margin-top:1rem;"></div>
+        </div>
+    `;
+}
+
+function toggleDouFillPista(){
+    const q = douFillQuestions[douFillIdx];
+    window._douFillPistaOn = !window._douFillPistaOn;
+    const el = document.getElementById('dou-fill-question');
+    const btn = document.getElementById('dou-fill-pista-btn');
+    if(el) el.innerHTML = window._douFillPistaOn ? q.q : stripRuby(q.q);
+    if(btn) btn.textContent = window._douFillPistaOn ? '🙈 Ocultar pista' : '💡 Pista (furigana)';
+}
+
+function checkDouFill(idx){
+    const q = douFillQuestions[douFillIdx];
+    const chosen = window._douOpts[idx];
+    const fb = document.getElementById('dou-fill-feedback');
+    document.querySelectorAll('#dou-quiz-area .word-btn').forEach(b=>b.style.pointerEvents='none');
+    if(chosen === q.a){
+        douFillCorrect++;
+        fb.innerHTML = '<div class="reorder-feedback correct">⭕ ¡Correcto!</div>';
+    } else {
+        douFillErrors.push({q:q.q, user:chosen, correct:q.a, exp:q.exp});
+        fb.innerHTML = `<div class="reorder-feedback wrong">❌ Correcta: ${q.a}<br><small>${q.exp}</small></div>`;
+    }
+    setTimeout(()=>{
+        douFillIdx++;
+        if(douFillIdx < 5) showDouFillQuestion();
+        else showDouFillResult();
+    }, 1800);
+}
+
+function showDouFillResult(){
+    const pct = Math.round((douFillCorrect/5)*100);
+    saveScore('dou', pct);
+    const msg = pct===100?'🎉 ¡Perfecto!':pct>=80?'🌟 ¡Excelente!':pct>=60?'👍 ¡Muy bien!':'📚 ¡Sigue practicando!';
+    let errHtml = '';
+    if(douFillErrors.length > 0){
+        errHtml = `<div class="error-review"><h4>❌ Errores (${douFillErrors.length})</h4>${douFillErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${e.q}</div><div class="error-your">Tu: ${e.user}</div><div class="error-correct">✅ ${e.correct} — ${e.exp}</div></div>`).join('')}</div>`;
+    }
+    document.getElementById('dou-quiz-area').innerHTML = `
+        <div class="grammar-result">
+            <div class="gr-score">${pct}%</div>
+            <div class="gr-msg">${msg}</div>
+            <div class="gr-detail">${douFillCorrect} / 5 correctas</div>
+            <button class="btn-practice" onclick="startDouFill()">🔄 Intentar de nuevo</button>
+            <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
+            ${errHtml}
+        </div>
+    `;
+}
+
+// ===== OMOU (〜と思います) FUNCTIONS =====
+function renderOmouLearn(){
+    const L = omouLesson;
+    document.getElementById('grammar-content').innerHTML = `
+        <div class="grammar-card">
+            <div class="grammar-title">${L.title}</div>
+            <div class="grammar-subtitle">${L.subtitle}</div>
+            <div class="grammar-desc">${L.desc}</div>
+            <div class="grammar-examples" style="margin-top:1rem;">
+                <h4>📝 Ejemplos</h4>
+                ${L.examples.map(ex=>`
+                    <div class="grammar-ex">
+                        <div class="ex-jp">${ex[0]}</div>
+                        <div class="ex-ro" style="font-size:0.82rem;color:var(--text-light);margin-bottom:0.2rem;">${ex[1]}</div>
+                        <div class="ex-es">${ex[2]}</div>
+                    </div>
+                `).join('')}
+            </div>
+            <button class="btn-practice" onclick="setGrammarMode('practice')" style="margin-top:1rem;">🎯 Practicar</button>
+        </div>
+    `;
+}
+
+function renderOmouPractice(){
+    const isReorder = omouPracMode === 'reorder';
+    document.getElementById('grammar-content').innerHTML = `
+        <div class="grammar-card" style="text-align:center;">
+            <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:1rem;">
+                <button class="mode-tab ${isReorder?'active':''}" onclick="setOmouMode('reorder')">🔤 Ordenar</button>
+                <button class="mode-tab ${!isReorder?'active':''}" onclick="setOmouMode('fill')">📝 Selección</button>
+            </div>
+            <h3>🎯 Práctica: と思います — ${isReorder?'Ordenar palabras':'Selección'}</h3>
+            <p style="color:var(--text-light);margin:0.5rem 0;">${isReorder?'Ordena las palabras para formar la oración correcta.':'Elige la forma correcta para completar la oración.'}</p>
+            <p style="color:var(--text-light);font-size:0.9rem;">5 preguntas aleatorias</p>
+            <button class="btn-practice" onclick="${isReorder?'startOmouReorder()':'startOmouFill()'}">Comenzar</button>
+        </div>
+        <div id="omou-quiz-area"></div>
+    `;
+}
+
+function setOmouMode(mode){
+    omouPracMode = mode;
+    renderOmouPractice();
+}
+
+function startOmouReorder(){
+    document.getElementById('grammar-content').querySelector('.grammar-card').style.display = 'none';
+    omouReorderQuestions = [...omouReorderPool].sort(()=>Math.random()-0.5).slice(0,5);
+    omouReorderIdx = 0; omouReorderCorrect = 0; omouReorderErrors = [];
+    showOmouReorderQuestion();
+}
+
+function showOmouReorderQuestion(){
+    const q = omouReorderQuestions[omouReorderIdx];
+    omouCurrentWords = [...q.words].sort(()=>Math.random()-0.5);
+    omouCurrentAnswer = [];
+    document.getElementById('omou-quiz-area').innerHTML = `
+        <div class="reorder-box">
+            <div class="reorder-progress">${omouReorderIdx+1} / 5</div>
+            <div class="reorder-hint">${q.hint}</div>
+            <button class="hint-btn" id="omou-pista-btn" onclick="toggleOmouPista()">💡 Pista (furigana)</button>
+            <div class="reorder-words" id="omou-word-pool">
+                ${omouCurrentWords.map((w,i)=>`<span style="display:inline-block;text-align:center;margin:0.2rem;"><button class="word-btn" onclick="selectOmouWord(${i})" id="omou-wb-${i}">${stripRuby(w)}</button><div class="word-romaji" style="display:none;font-size:0.75rem;color:var(--text-light);text-align:center;">${rubyToHiragana(w)}</div></span>`).join('')}
+            </div>
+            <div class="reorder-answer" id="omou-answer-area">
+                <span class="reorder-placeholder">Toca las palabras en orden</span>
+            </div>
+            <button class="btn-check" id="omou-check-btn" onclick="checkOmouReorderAnswer()" disabled>Verificar</button>
+            <div id="omou-reorder-feedback"></div>
+        </div>
+    `;
+}
+
+function toggleOmouPista(){
+    const spans = document.querySelectorAll('#omou-word-pool .word-romaji');
+    const showing = spans[0] && spans[0].style.display !== 'none';
+    spans.forEach(s => s.style.display = showing ? 'none' : 'block');
+    const btn = document.getElementById('omou-pista-btn');
+    if(btn) btn.textContent = showing ? '💡 Pista (furigana)' : '🙈 Ocultar pista';
+}
+
+function selectOmouWord(idx){
+    const btn = document.getElementById('omou-wb-'+idx);
+    if(btn.classList.contains('selected')) return;
+    btn.classList.add('selected');
+    omouCurrentAnswer.push({word: omouCurrentWords[idx], btnIdx: idx});
+    renderOmouAnswerArea();
+}
+
+function removeOmouWord(i){
+    const removed = omouCurrentAnswer.splice(i,1)[0];
+    document.getElementById('omou-wb-'+removed.btnIdx).classList.remove('selected');
+    renderOmouAnswerArea();
+}
+
+function renderOmouAnswerArea(){
+    const area = document.getElementById('omou-answer-area');
+    area.innerHTML = omouCurrentAnswer.length === 0
+        ? '<span class="reorder-placeholder">Toca las palabras en orden</span>'
+        : omouCurrentAnswer.map((a,i)=>`<button class="answer-btn" onclick="removeOmouWord(${i})">${stripRuby(a.word)}</button>`).join('');
+    document.getElementById('omou-check-btn').disabled = omouCurrentAnswer.length !== omouCurrentWords.length;
+}
+
+function checkOmouReorderAnswer(){
+    const q = omouReorderQuestions[omouReorderIdx];
+    const userAns = omouCurrentAnswer.map(a=>stripRuby(a.word)).join('');
+    const correct = stripRuby(q.answer);
+    const fb = document.getElementById('omou-reorder-feedback');
+    document.getElementById('omou-check-btn').disabled = true;
+    document.querySelectorAll('#omou-word-pool .word-btn, #omou-answer-area .answer-btn').forEach(b=>b.style.pointerEvents='none');
+    if(userAns === correct){
+        omouReorderCorrect++;
+        fb.innerHTML = '<div class="reorder-feedback correct">⭕ ¡Correcto!</div>';
+    } else {
+        omouReorderErrors.push({hint:q.hint, user:userAns, correct:q.answer, exp:q.explain});
+        fb.innerHTML = `<div class="reorder-feedback wrong">❌ Correcta: ${q.answer}<br><small>${q.explain}</small></div>`;
+    }
+    setTimeout(()=>{
+        omouReorderIdx++;
+        if(omouReorderIdx < 5) showOmouReorderQuestion();
+        else showOmouReorderResult();
+    }, 1800);
+}
+
+function showOmouReorderResult(){
+    const pct = Math.round((omouReorderCorrect/5)*100);
+    saveScore('omou', pct);
+    const msg = pct===100?'🎉 ¡Perfecto!':pct>=80?'🌟 ¡Excelente!':pct>=60?'👍 ¡Muy bien!':'📚 ¡Sigue practicando!';
+    let errHtml = '';
+    if(omouReorderErrors.length > 0){
+        errHtml = `<div class="error-review"><h4>❌ Errores (${omouReorderErrors.length})</h4>${omouReorderErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${e.hint}</div><div class="error-your">Tu respuesta: ${stripRuby(e.user)}</div><div class="error-correct">✅ ${e.correct} — ${e.exp}</div></div>`).join('')}</div>`;
+    }
+    document.getElementById('omou-quiz-area').innerHTML = `
+        <div class="grammar-result">
+            <div class="gr-score">${pct}%</div>
+            <div class="gr-msg">${msg}</div>
+            <div class="gr-detail">${omouReorderCorrect} / 5 correctas</div>
+            <button class="btn-practice" onclick="startOmouReorder()">🔄 Intentar de nuevo</button>
+            <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
+            ${errHtml}
+        </div>
+    `;
+}
+
+function startOmouFill(){
+    document.getElementById('grammar-content').querySelector('.grammar-card').style.display = 'none';
+    omouFillQuestions = [...omouFillPool].sort(()=>Math.random()-0.5).slice(0,5);
+    omouFillIdx = 0; omouFillCorrect = 0; omouFillErrors = [];
+    showOmouFillQuestion();
+}
+
+function showOmouFillQuestion(){
+    const q = omouFillQuestions[omouFillIdx];
+    const shuffled = [...q.opts].sort(()=>Math.random()-0.5);
+    window._omouOpts = shuffled;
+    window._omouFillPistaOn = false;
+    document.getElementById('omou-quiz-area').innerHTML = `
+        <div class="reorder-box">
+            <div class="reorder-progress">${omouFillIdx+1} / 5</div>
+            <div class="reorder-hint">${q.h}</div>
+            <button class="hint-btn" id="omou-fill-pista-btn" onclick="toggleOmouFillPista()">💡 Pista (furigana)</button>
+            <div class="ex-jp" id="omou-fill-question" style="margin:1rem 0;font-size:1.1rem;">${stripRuby(q.q)}</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-top:0.5rem;">
+                ${shuffled.map((opt,i)=>`<button class="word-btn" style="padding:0.7rem;font-family:'Noto Sans JP';" onclick="checkOmouFill(${i})">${opt}</button>`).join('')}
+            </div>
+            <div id="omou-fill-feedback" style="margin-top:1rem;"></div>
+        </div>
+    `;
+}
+
+function toggleOmouFillPista(){
+    const q = omouFillQuestions[omouFillIdx];
+    window._omouFillPistaOn = !window._omouFillPistaOn;
+    const el = document.getElementById('omou-fill-question');
+    const btn = document.getElementById('omou-fill-pista-btn');
+    if(el) el.innerHTML = window._omouFillPistaOn ? q.q : stripRuby(q.q);
+    if(btn) btn.textContent = window._omouFillPistaOn ? '🙈 Ocultar pista' : '💡 Pista (furigana)';
+}
+
+function checkOmouFill(idx){
+    const q = omouFillQuestions[omouFillIdx];
+    const chosen = window._omouOpts[idx];
+    const fb = document.getElementById('omou-fill-feedback');
+    document.querySelectorAll('#omou-quiz-area .word-btn').forEach(b=>b.style.pointerEvents='none');
+    if(chosen === q.a){
+        omouFillCorrect++;
+        fb.innerHTML = '<div class="reorder-feedback correct">⭕ ¡Correcto!</div>';
+    } else {
+        omouFillErrors.push({q:q.q, user:chosen, correct:q.a, exp:q.exp});
+        fb.innerHTML = `<div class="reorder-feedback wrong">❌ Correcta: ${q.a}<br><small>${q.exp}</small></div>`;
+    }
+    setTimeout(()=>{
+        omouFillIdx++;
+        if(omouFillIdx < 5) showOmouFillQuestion();
+        else showOmouFillResult();
+    }, 1800);
+}
+
+function showOmouFillResult(){
+    const pct = Math.round((omouFillCorrect/5)*100);
+    saveScore('omou', pct);
+    const msg = pct===100?'🎉 ¡Perfecto!':pct>=80?'🌟 ¡Excelente!':pct>=60?'👍 ¡Muy bien!':'📚 ¡Sigue practicando!';
+    let errHtml = '';
+    if(omouFillErrors.length > 0){
+        errHtml = `<div class="error-review"><h4>❌ Errores (${omouFillErrors.length})</h4>${omouFillErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${e.q}</div><div class="error-your">Tu: ${e.user}</div><div class="error-correct">✅ ${e.correct} — ${e.exp}</div></div>`).join('')}</div>`;
+    }
+    document.getElementById('omou-quiz-area').innerHTML = `
+        <div class="grammar-result">
+            <div class="gr-score">${pct}%</div>
+            <div class="gr-msg">${msg}</div>
+            <div class="gr-detail">${omouFillCorrect} / 5 correctas</div>
+            <button class="btn-practice" onclick="startOmouFill()">🔄 Intentar de nuevo</button>
             <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
             ${errHtml}
         </div>
@@ -7612,6 +8238,17 @@ const taReorderPool = [
     {words:['走った','から','疲れました'],r:['はしった','から','つかれました'],hint:'Me cansé porque corrí',use:'kara'},
     {words:['早く','起きた','から','時間が','あります'],r:['はやく','おきた','から','じかんが','あります'],hint:'Tengo tiempo porque me levanté temprano',use:'kara'},
     {words:['勉強した','から','テストが','できました'],r:['べんきょうした','から','テストが','できました'],hint:'Pude hacer el examen porque estudié',use:'kara'},
+    // たり〜たりします
+    {words:['音楽を','聴いたり','本を','読んだり','します'],r:['おんがくを','きいたり','ほんを','よんだり','します'],hint:'Escucho música, leo libros, entre otras cosas',use:'tari'},
+    {words:['映画を','見たり','料理したり','します'],r:['えいがを','みたり','りょうりしたり','します'],hint:'Veo películas, cocino, entre otras cosas',use:'tari'},
+    {words:['友達と','話したり','笑ったり','しました'],r:['ともだちと','はなしたり','わらったり','しました'],hint:'Hablé y reí con amigos, entre otras cosas',use:'tari'},
+    {words:['公園で','走ったり','歩いたり','します'],r:['こうえんで','はしったり','あるいたり','します'],hint:'Corro y camino en el parque, entre otras cosas',use:'tari'},
+    {words:['週末は','買い物したり','料理したり','します'],r:['しゅうまつは','かいものしたり','りょうりしたり','します'],hint:'Los fines de semana hago compras y cocino, entre otras cosas',use:'tari'},
+    {words:['テレビを','見たり','ゲームを','したり','します'],r:['テレビを','みたり','ゲームを','したり','します'],hint:'Veo televisión y juego, entre otras cosas',use:'tari'},
+    {words:['写真を','撮ったり','散歩したり','しました'],r:['しゃしんを','とったり','さんぽしたり','しました'],hint:'Tomé fotos y paseé, entre otras cosas',use:'tari'},
+    {words:['勉強したり','運動したり','します'],r:['べんきょうしたり','うんどうしたり','します'],hint:'Estudio y hago ejercicio, entre otras cosas',use:'tari'},
+    {words:['本を','読んだり','音楽を','聴いたり','しました'],r:['ほんを','よんだり','おんがくを','きいたり','しました'],hint:'Leí libros y escuché música, entre otras cosas',use:'tari'},
+    {words:['料理したり','掃除したり','しました'],r:['りょうりしたり','そうじしたり','しました'],hint:'Cociné y limpié, entre otras cosas',use:'tari'},
 ];
 
 // ===== NAI VERB POOL =====
@@ -7957,6 +8594,248 @@ const yoriFillPool = [
     {q:'<ruby>肉<rt>にく</rt></ruby>と<ruby>魚<rt>さかな</rt></ruby>と、___が<ruby>好<rt>す</rt></ruby>きですか。',a:'どちら',opts:['どちら','より','の方が','どれ'],h:'¿Qué prefieres, la carne o el pescado?',exp:'「AとBとどちらが好きですか」で好みを聞く.'},
     {q:'バスと<ruby>電車<rt>でんしゃ</rt></ruby>と、___も<ruby>便利<rt>べんり</rt></ruby>です。',a:'どちら',opts:['どちら','より','の方が','どれ'],h:'Tanto el autobús como el tren son convenientes.',exp:'「どちらも便利」= ambos son convenientes. どちらも で「両方」を表す.'},
     {q:'<ruby>春<rt>はる</rt></ruby>と<ruby>秋<rt>あき</rt></ruby>と、___が<ruby>涼<rt>すず</rt></ruby>しいですか。',a:'どちら',opts:['どちら','より','の方が','どれ'],h:'¿Cuál es más fresco, la primavera o el otoño?',exp:'2択の疑問には「どちら」。「どれ」は3つ以上の選択肢.'}
+];
+
+// ===== DOU (〜はどうですか) DATA =====
+const douLesson = {
+    title: '〜はどうですか',
+    subtitle: 'Pedir y dar opiniones',
+    desc: `
+<div class="grammar-point">
+<p>📌 <strong>Estructura básica:</strong></p>
+<p style="font-family:'Noto Sans JP';font-size:1.1rem;text-align:center;margin:0.6rem 0;">
+  [tema] <strong>は どうですか</strong>
+</p>
+<p style="text-align:center;color:#666;">→ <em>¿Qué te parece ~? / ¿Cómo está ~?</em></p>
+</div>
+<div class="grammar-point">
+<p>📌 <strong>Forma formal (en tiendas, restaurantes):</strong></p>
+<p style="font-family:'Noto Sans JP';font-size:1.1rem;text-align:center;margin:0.6rem 0;">
+  [tema] <strong>は いかがですか</strong>
+</p>
+<p style="text-align:center;color:#666;">→ <em>¿Le parece bien ~? (más formal)</em></p>
+</div>
+<div class="grammar-point">
+<p>📌 <strong>Respuestas típicas:</strong></p>
+<table style="width:100%;text-align:center;font-size:0.92rem;margin-top:0.4rem;">
+  <tr style="background:#f0f0f0;"><th>Situación</th><th>Japonés</th><th>Significado</th></tr>
+  <tr><td>Positivo</td><td style="font-family:'Noto Sans JP';">いいですね！</td><td>¡Qué bien! / ¡Me parece bien!</td></tr>
+  <tr><td>Negativo</td><td style="font-family:'Noto Sans JP';">ちょっと…</td><td>Hmm, un poco... (rechazo suave)</td></tr>
+  <tr><td>Neutral</td><td style="font-family:'Noto Sans JP';">まあまあです。</td><td>Más o menos.</td></tr>
+</table>
+</div>`,
+    examples: [
+        ['この<ruby>料理<rt>りょうり</rt></ruby>は<strong style="color:var(--primary)">どうですか</strong>。','Kono ryōri wa dō desu ka.','¿Qué te parece esta comida?'],
+        ['<ruby>日本語<rt>にほんご</rt></ruby>の<ruby>勉強<rt>べんきょう</rt></ruby>は<strong style="color:var(--primary)">どうですか</strong>。','Nihongo no benkyō wa dō desu ka.','¿Cómo van los estudios de japonés?'],
+        ['<ruby>今日<rt>きょう</rt></ruby>の<ruby>天気<rt>てんき</rt></ruby>は<strong style="color:var(--primary)">どうですか</strong>。','Kyō no tenki wa dō desu ka.','¿Cómo está el tiempo hoy?'],
+        ['コーヒーは<strong style="color:var(--ocean)">いかがですか</strong>。','Kōhī wa ikaga desu ka.','¿Le apetece un café? (formal)'],
+        ['<ruby>新<rt>あたら</rt></ruby>しい<ruby>仕事<rt>しごと</rt></ruby>は<strong style="color:var(--primary)">どうですか</strong>。','Atarashii shigoto wa dō desu ka.','¿Qué tal el nuevo trabajo?'],
+        ['<ruby>日本<rt>にほん</rt></ruby>の<ruby>生活<rt>せいかつ</rt></ruby>は<strong style="color:var(--primary)">どうですか</strong>。','Nihon no seikatsu wa dō desu ka.','¿Cómo es la vida en Japón?']
+    ]
+};
+
+const douReorderPool = [
+    {words:['この','<ruby>料理<rt>りょうり</rt></ruby>は','どうですか'],answerDisplay:'この<ruby>料理<rt>りょうり</rt></ruby>はどうですか',hint:'¿Qué te parece esta comida?',explain:'「esta cosa + はどうですか」se usa para pedir opinión sobre algo que está delante.'},
+    {words:['<ruby>日本語<rt>にほんご</rt></ruby>の','<ruby>勉強<rt>べんきょう</rt></ruby>は','どうですか'],answerDisplay:'<ruby>日本語<rt>にほんご</rt></ruby>の<ruby>勉強<rt>べんきょう</rt></ruby>はどうですか',hint:'¿Cómo van los estudios de japonés?',explain:'「の」conecta dos sustantivos. 日本語の勉強 = los estudios de japonés.'},
+    {words:['<ruby>新<rt>あたら</rt></ruby>しい','<ruby>仕事<rt>しごと</rt></ruby>は','どうですか'],answerDisplay:'<ruby>新<rt>あたら</rt></ruby>しい<ruby>仕事<rt>しごと</rt></ruby>はどうですか',hint:'¿Qué tal el nuevo trabajo?',explain:'Adjetivo い + sustantivo + はどうですか. 新しい仕事 = el nuevo trabajo.'},
+    {words:['<ruby>日本<rt>にほん</rt></ruby>の','<ruby>生活<rt>せいかつ</rt></ruby>は','どうですか'],answerDisplay:'<ruby>日本<rt>にほん</rt></ruby>の<ruby>生活<rt>せいかつ</rt></ruby>はどうですか',hint:'¿Cómo es la vida en Japón?',explain:'Lugar + の + sustantivo + はどうですか. Pregunta por la situación en ese lugar.'},
+    {words:['<ruby>今日<rt>きょう</rt></ruby>の','<ruby>天気<rt>てんき</rt></ruby>は','どうですか'],answerDisplay:'<ruby>今日<rt>きょう</rt></ruby>の<ruby>天気<rt>てんき</rt></ruby>はどうですか',hint:'¿Cómo está el tiempo hoy?',explain:'天気はどうですか = ¿cómo está el tiempo? Se usa para preguntar el estado de algo.'},
+    {words:['この','<ruby>映画<rt>えいが</rt></ruby>は','どうですか'],answerDisplay:'この<ruby>映画<rt>えいが</rt></ruby>はどうですか',hint:'¿Qué te parece esta película?',explain:'この映画 = esta película. はどうですか para pedir una valoración u opinión.'},
+    {words:['あの','レストランは','どうですか'],answerDisplay:'あのレストランはどうですか',hint:'¿Qué tal aquel restaurante?',explain:'あの = aquel (lejos del hablante y del oyente). Misma estructura que この + sustantivo.'},
+    {words:['<ruby>学校<rt>がっこう</rt></ruby>は','どうですか'],answerDisplay:'<ruby>学校<rt>がっこう</rt></ruby>はどうですか',hint:'¿Qué tal la escuela?',explain:'Sustantivo + はどうですか. Se usa para preguntar por la vida cotidiana (trabajo, escuela...).'},
+    {words:['<ruby>新<rt>あたら</rt></ruby>しい','<ruby>家<rt>いえ</rt></ruby>は','どうですか'],answerDisplay:'<ruby>新<rt>あたら</rt></ruby>しい<ruby>家<rt>いえ</rt></ruby>はどうですか',hint:'¿Qué tal la casa nueva?',explain:'Adjetivo い + sustantivo + はどうですか. 新しい家 = la casa nueva.'},
+    {words:['この','<ruby>本<rt>ほん</rt></ruby>は','どうですか'],answerDisplay:'この<ruby>本<rt>ほん</rt></ruby>はどうですか',hint:'¿Qué te parece este libro?',explain:'本はどうですか = ¿qué te parece el libro? Para pedir una opinión informal.'},
+    {words:['コーヒーは','いかがですか'],answerDisplay:'コーヒーはいかがですか',hint:'¿Le apetece un café? (contexto formal)',explain:'いかがですか es la forma formal de どうですか. Se usa en tiendas, restaurantes y servicios.'},
+    {words:['<ruby>日本<rt>にほん</rt></ruby>の','<ruby>食<rt>た</rt></ruby>べ<ruby>物<rt>もの</rt></ruby>は','どうですか'],answerDisplay:'<ruby>日本<rt>にほん</rt></ruby>の<ruby>食<rt>た</rt></ruby>べ<ruby>物<rt>もの</rt></ruby>はどうですか',hint:'¿Qué te parece la comida japonesa?',explain:'食べ物 = comida. 日本の食べ物 = la comida japonesa. の conecta lugar y tema.'},
+    {words:['この','<ruby>服<rt>ふく</rt></ruby>は','どうですか'],answerDisplay:'この<ruby>服<rt>ふく</rt></ruby>はどうですか',hint:'¿Qué te parece esta ropa?',explain:'Expresión típica en tiendas para ofrecer un artículo al cliente.'},
+    {words:['<ruby>今日<rt>きょう</rt></ruby>の','<ruby>授業<rt>じゅぎょう</rt></ruby>は','どうですか'],answerDisplay:'<ruby>今日<rt>きょう</rt></ruby>の<ruby>授業<rt>じゅぎょう</rt></ruby>はどうですか',hint:'¿Qué tal la clase de hoy?',explain:'授業 = clase. 今日の授業はどうですか = ¿qué tal la clase de hoy?'},
+    {words:['<ruby>健康<rt>けんこう</rt></ruby>は','どうですか'],answerDisplay:'<ruby>健康<rt>けんこう</rt></ruby>はどうですか',hint:'¿Cómo está tu salud?',explain:'健康 = salud. Pregunta de cortesía habitual para saber cómo se encuentra alguien.'},
+    {words:['<ruby>旅行<rt>りょこう</rt></ruby>は','どうですか'],answerDisplay:'<ruby>旅行<rt>りょこう</rt></ruby>はどうですか',hint:'¿Qué tal el viaje?',explain:'旅行 = viaje. はどうですか para preguntar cómo resultó algo.'},
+    {words:['<ruby>日本<rt>にほん</rt></ruby>の','<ruby>音楽<rt>おんがく</rt></ruby>は','どうですか'],answerDisplay:'<ruby>日本<rt>にほん</rt></ruby>の<ruby>音楽<rt>おんがく</rt></ruby>はどうですか',hint:'¿Qué te parece la música japonesa?',explain:'日本の音楽 = la música japonesa. の conecta origen y tema.'},
+    {words:['この','<ruby>町<rt>まち</rt></ruby>は','どうですか'],answerDisplay:'この<ruby>町<rt>まち</rt></ruby>はどうですか',hint:'¿Qué te parece este pueblo?',explain:'町 = pueblo, ciudad. この町はどうですか = ¿qué te parece este lugar?'},
+    {words:['<ruby>新<rt>あたら</rt></ruby>しい','<ruby>先生<rt>せんせい</rt></ruby>は','どうですか'],answerDisplay:'<ruby>新<rt>あたら</rt></ruby>しい<ruby>先生<rt>せんせい</rt></ruby>はどうですか',hint:'¿Qué tal el nuevo profesor?',explain:'新しい先生 = el nuevo profesor. Pregunta habitual entre estudiantes.'},
+    {words:['<ruby>日本語<rt>にほんご</rt></ruby>の','<ruby>授業<rt>じゅぎょう</rt></ruby>は','どうですか'],answerDisplay:'<ruby>日本語<rt>にほんご</rt></ruby>の<ruby>授業<rt>じゅぎょう</rt></ruby>はどうですか',hint:'¿Qué tal la clase de japonés?',explain:'日本語の授業 = la clase de japonés. の conecta tema y actividad.'},
+    {words:['お<ruby>茶<rt>ちゃ</rt></ruby>は','いかがですか'],answerDisplay:'お<ruby>茶<rt>ちゃ</rt></ruby>はいかがですか',hint:'¿Le apetece un té? (formal)',explain:'お茶 = té (con prefijo honorífico お). いかがですか en contexto de servicio.'},
+    {words:['この','ケーキは','どうですか'],answerDisplay:'このケーキはどうですか',hint:'¿Qué te parece este pastel?',explain:'ケーキ = pastel. この + katakana + はどうですか. Pregunta de opinión informal.'},
+    {words:['<ruby>試験<rt>しけん</rt></ruby>は','どうですか'],answerDisplay:'<ruby>試験<rt>しけん</rt></ruby>はどうですか',hint:'¿Qué tal el examen?',explain:'試験 = examen. はどうですか para preguntar cómo resultó algo.'},
+    {words:['この','<ruby>部屋<rt>へや</rt></ruby>は','どうですか'],answerDisplay:'この<ruby>部屋<rt>へや</rt></ruby>はどうですか',hint:'¿Qué te parece esta habitación?',explain:'部屋 = habitación. この部屋はどうですか se usa al mostrar o evaluar un cuarto.'},
+    {words:['<ruby>週末<rt>しゅうまつ</rt></ruby>は','どうですか'],answerDisplay:'<ruby>週末<rt>しゅうまつ</rt></ruby>はどうですか',hint:'¿Qué tal el fin de semana?',explain:'週末 = fin de semana. Saludo casual del lunes para preguntar por el fin de semana.'},
+    {words:['<ruby>日本<rt>にほん</rt></ruby>の','<ruby>冬<rt>ふゆ</rt></ruby>は','どうですか'],answerDisplay:'<ruby>日本<rt>にほん</rt></ruby>の<ruby>冬<rt>ふゆ</rt></ruby>はどうですか',hint:'¿Qué tal el invierno en Japón?',explain:'日本の冬 = el invierno de Japón. Estructura lugar + の + estación.'},
+    {words:['あの','<ruby>本<rt>ほん</rt></ruby>は','どうですか'],answerDisplay:'あの<ruby>本<rt>ほん</rt></ruby>はどうですか',hint:'¿Qué tal aquel libro?',explain:'あの = aquel (lejos de ambos). Contrasta con この本 (este) y その本 (ese).'},
+    {words:['<ruby>新<rt>あたら</rt></ruby>しい','クラスは','どうですか'],answerDisplay:'<ruby>新<rt>あたら</rt></ruby>しいクラスはどうですか',hint:'¿Qué tal la nueva clase?',explain:'クラス = clase (grupo). 新しいクラス = la nueva clase. Adjetivo い + katakana.'},
+    {words:['<ruby>最近<rt>さいきん</rt></ruby>の','<ruby>日本語<rt>にほんご</rt></ruby>は','どうですか'],answerDisplay:'<ruby>最近<rt>さいきん</rt></ruby>の<ruby>日本語<rt>にほんご</rt></ruby>はどうですか',hint:'¿Cómo va el japonés últimamente?',explain:'最近 = últimamente. 最近の + sustantivo = el ~ de últimamente. Pregunta de progreso.'},
+    {words:['お<ruby>水<rt>みず</rt></ruby>は','いかがですか'],answerDisplay:'お<ruby>水<rt>みず</rt></ruby>はいかがですか',hint:'¿Le apetece un poco de agua? (formal)',explain:'お水 = agua (honorífico お). いかがですか al ofrecer algo en contexto de servicio.'},
+    {words:['<ruby>日本<rt>にほん</rt></ruby>の','<ruby>夏<rt>なつ</rt></ruby>は','どうですか'],answerDisplay:'<ruby>日本<rt>にほん</rt></ruby>の<ruby>夏<rt>なつ</rt></ruby>はどうですか',hint:'¿Qué tal el verano en Japón?',explain:'日本の夏 = el verano de Japón. の marca relación entre lugar y estación.'},
+    {words:['この','アパートは','どうですか'],answerDisplay:'このアパートはどうですか',hint:'¿Qué te parece este apartamento?',explain:'アパート = apartamento. この + katakana + はどうですか.'},
+    {words:['<ruby>新<rt>あたら</rt></ruby>しい','<ruby>生活<rt>せいかつ</rt></ruby>は','どうですか'],answerDisplay:'<ruby>新<rt>あたら</rt></ruby>しい<ruby>生活<rt>せいかつ</rt></ruby>はどうですか',hint:'¿Qué tal la nueva vida?',explain:'新しい生活 = la nueva vida. Se usa cuando alguien empieza una nueva etapa.'},
+    {words:['あの','<ruby>映画<rt>えいが</rt></ruby>は','どうですか'],answerDisplay:'あの<ruby>映画<rt>えいが</rt></ruby>はどうですか',hint:'¿Qué tal aquella película?',explain:'あの = aquel. Contrasta con この映画 (esta) y その映画 (esa).'},
+    {words:['お<ruby>仕事<rt>しごと</rt></ruby>は','いかがですか'],answerDisplay:'お<ruby>仕事<rt>しごと</rt></ruby>はいかがですか',hint:'¿Cómo le va en el trabajo? (formal)',explain:'お仕事 = trabajo (honorífico お). いかがですか con personas mayores o en situación formal.'},
+    {words:['この','<ruby>歌<rt>うた</rt></ruby>は','どうですか'],answerDisplay:'この<ruby>歌<rt>うた</rt></ruby>はどうですか',hint:'¿Qué te parece esta canción?',explain:'歌 = canción. この歌はどうですか = ¿qué te parece esta canción?'},
+    {words:['<ruby>今日<rt>きょう</rt></ruby>の','<ruby>気分<rt>きぶん</rt></ruby>は','どうですか'],answerDisplay:'<ruby>今日<rt>きょう</rt></ruby>の<ruby>気分<rt>きぶん</rt></ruby>はどうですか',hint:'¿Cómo te sientes hoy?',explain:'気分 = estado de ánimo. 今日の気分はどうですか = ¿cómo te encuentras hoy?'},
+    {words:['<ruby>日本<rt>にほん</rt></ruby>の','<ruby>春<rt>はる</rt></ruby>は','どうですか'],answerDisplay:'<ruby>日本<rt>にほん</rt></ruby>の<ruby>春<rt>はる</rt></ruby>はどうですか',hint:'¿Qué tal la primavera en Japón?',explain:'日本の春 = la primavera de Japón. Pregunta típica sobre las estaciones japonesas.'},
+    {words:['この','スポーツは','どうですか'],answerDisplay:'このスポーツはどうですか',hint:'¿Qué te parece este deporte?',explain:'スポーツ = deporte. この + katakana + はどうですか. Pregunta de opinión.'},
+    {words:['ご<ruby>家族<rt>かぞく</rt></ruby>は','いかがですか'],answerDisplay:'ご<ruby>家族<rt>かぞく</rt></ruby>はいかがですか',hint:'¿Cómo está su familia? (formal)',explain:'ご家族 = su familia (honorífico ご). いかがですか con personas mayores o en situación formal.'},
+    {words:['<ruby>新<rt>あたら</rt></ruby>しい','<ruby>友達<rt>ともだち</rt></ruby>は','どうですか'],answerDisplay:'<ruby>新<rt>あたら</rt></ruby>しい<ruby>友達<rt>ともだち</rt></ruby>はどうですか',hint:'¿Qué tal el nuevo amigo?',explain:'新しい友達 = el nuevo amigo. Pregunta habitual después de conocer a alguien nuevo.'},
+    {words:['この','ホテルは','どうですか'],answerDisplay:'このホテルはどうですか',hint:'¿Qué te parece este hotel?',explain:'ホテル = hotel. この + katakana + はどうですか. Típico al mostrar alojamiento.'},
+    {words:['<ruby>昨日<rt>きのう</rt></ruby>の','パーティーは','どうですか'],answerDisplay:'<ruby>昨日<rt>きのう</rt></ruby>のパーティーはどうですか',hint:'¿Qué tal la fiesta de ayer?',explain:'昨日の = el ~ de ayer. 昨日のパーティー = la fiesta de ayer.'},
+    {words:['<ruby>今週<rt>こんしゅう</rt></ruby>の','<ruby>仕事<rt>しごと</rt></ruby>は','どうですか'],answerDisplay:'<ruby>今週<rt>こんしゅう</rt></ruby>の<ruby>仕事<rt>しごと</rt></ruby>はどうですか',hint:'¿Qué tal el trabajo esta semana?',explain:'今週の = de esta semana. 今週の仕事 = el trabajo de esta semana.'},
+    {words:['お<ruby>体<rt>からだ</rt></ruby>は','いかがですか'],answerDisplay:'お<ruby>体<rt>からだ</rt></ruby>はいかがですか',hint:'¿Cómo está su salud? (formal)',explain:'お体 = su salud (honorífico お). いかがですか con personas mayores o en situación formal.'}
+];
+
+const douFillPool = [
+    {q:'この<ruby>料理<rt>りょうり</rt></ruby>は___。',a:'どうですか',opts:['どうですか','いかがでした','なんですか','どこですか'],h:'¿Qué te parece esta comida?',exp:'はどうですか = ¿qué te parece ~? Pregunta de opinión sobre algo presente. Contexto informal.'},
+    {q:'（<ruby>店員<rt>てんいん</rt></ruby>）コーヒーは___。',a:'いかがですか',opts:['いかがですか','どうですか','なんですか','いつですか'],h:'(Dependiente) ¿Le apetece un café?',exp:'いかがですか es la forma formal de どうですか. Los dependientes y el personal de servicio usan いかがですか con los clientes.'},
+    {q:'<ruby>新<rt>あたら</rt></ruby>しい<ruby>仕事<rt>しごと</rt></ruby>は___。',a:'どうですか',opts:['どうですか','どこですか','だれですか','いつですか'],h:'¿Qué tal el nuevo trabajo?',exp:'仕事はどうですか = ¿qué tal el trabajo? Pregunta habitual sobre la vida cotidiana entre conocidos.'},
+    {q:'<ruby>日本語<rt>にほんご</rt></ruby>の<ruby>勉強<rt>べんきょう</rt></ruby>は___。',a:'どうですか',opts:['どうですか','なんですか','いかがでした','どこですか'],h:'¿Cómo van los estudios de japonés?',exp:'勉強はどうですか = ¿cómo van los estudios? Pregunta sobre el progreso de alguien.'},
+    {q:'（<ruby>店員<rt>てんいん</rt></ruby>）この<ruby>服<rt>ふく</rt></ruby>は___。',a:'いかがですか',opts:['いかがですか','どうですか','なんですか','いくらですか'],h:'(Dependiente) ¿Qué le parece esta ropa?',exp:'El dependiente usa いかがですか (formal) para ofrecer artículos al cliente. どうですか sería demasiado casual.'},
+    {q:'<ruby>今日<rt>きょう</rt></ruby>の<ruby>天気<rt>てんき</rt></ruby>は___。',a:'どうですか',opts:['どうですか','どこですか','いくつですか','なんですか'],h:'¿Cómo está el tiempo hoy?',exp:'天気はどうですか = ¿cómo está el tiempo? Se usa para preguntar el estado actual de algo.'},
+    {q:'<ruby>日本<rt>にほん</rt></ruby>の<ruby>生活<rt>せいかつ</rt></ruby>は___。',a:'どうですか',opts:['どうですか','いかがでした','どこですか','だれですか'],h:'¿Cómo es la vida en Japón?',exp:'生活はどうですか = ¿cómo es la vida ~? Pregunta muy común entre amigos o conocidos.'},
+    {q:'（<ruby>店員<rt>てんいん</rt></ruby>）お<ruby>茶<rt>ちゃ</rt></ruby>は___。',a:'いかがですか',opts:['いかがですか','どうですか','なにですか','いつですか'],h:'(Dependiente) ¿Le apetece un té?',exp:'En contextos de servicio (restaurante, recepción), el personal usa いかがですか para ofrecer algo formalmente.'},
+    {q:'この<ruby>映画<rt>えいが</rt></ruby>は___。',a:'どうですか',opts:['どうですか','いつですか','どこですか','いくらですか'],h:'¿Qué te parece esta película?',exp:'映画はどうですか = ¿qué te parece la película? Para pedir una valoración a un amigo.'},
+    {q:'<ruby>学校<rt>がっこう</rt></ruby>は___。',a:'どうですか',opts:['どうですか','なんですか','だれですか','いかがでした'],h:'¿Qué tal la escuela?',exp:'Sustantivo + はどうですか. Pregunta cotidiana sobre la vida escolar entre amigos o familiares.'},
+    {q:'この<ruby>本<rt>ほん</rt></ruby>は___。',a:'どうですか',opts:['どうですか','どこですか','いつですか','なんですか'],h:'¿Qué te parece este libro?',exp:'本はどうですか = ¿qué te parece el libro? Para pedir una opinión informal.'},
+    {q:'（<ruby>店員<rt>てんいん</rt></ruby>）ジュースは___。',a:'いかがですか',opts:['いかがですか','どうですか','いくつですか','なんですか'],h:'(Dependiente) ¿Le apetece un zumo?',exp:'El dependiente usa いかがですか para ofrecer productos. Con amigos se diría どうですか.'},
+    {q:'<ruby>新<rt>あたら</rt></ruby>しい<ruby>家<rt>いえ</rt></ruby>は___。',a:'どうですか',opts:['どうですか','いかがでした','どこですか','いつですか'],h:'¿Qué tal la casa nueva?',exp:'新しい家はどうですか = ¿qué tal la casa nueva? Pregunta casual entre amigos o familiares.'},
+    {q:'<ruby>健康<rt>けんこう</rt></ruby>は___。',a:'どうですか',opts:['どうですか','なんですか','いくつですか','どこですか'],h:'¿Cómo está tu salud?',exp:'健康はどうですか = ¿cómo está tu salud? Pregunta de cortesía habitual entre conocidos.'},
+    {q:'（<ruby>店員<rt>てんいん</rt></ruby>）この<ruby>料理<rt>りょうり</rt></ruby>は___。',a:'いかがですか',opts:['いかがですか','どうですか','なにですか','いつですか'],h:'(Dependiente) ¿Qué le parece este plato?',exp:'En restaurantes y tiendas se usa いかがですか. Clave: si habla el dependiente → いかがですか; entre amigos → どうですか.'},
+    {q:'<ruby>旅行<rt>りょこう</rt></ruby>は___。',a:'どうですか',opts:['どうですか','いかがでした','なんですか','どこですか'],h:'¿Qué tal el viaje?',exp:'旅行はどうですか = ¿qué tal el viaje? Pregunta casual entre amigos después de un viaje.'},
+    {q:'（<ruby>店員<rt>てんいん</rt></ruby>）お<ruby>水<rt>みず</rt></ruby>は___。',a:'いかがですか',opts:['いかがですか','どうですか','なんですか','いくらですか'],h:'(Dependiente) ¿Le apetece un poco de agua?',exp:'El personal de servicio usa いかがですか. お水 = agua con honorífico お.'},
+    {q:'<ruby>試験<rt>しけん</rt></ruby>は___。',a:'どうですか',opts:['どうですか','いかがでした','だれですか','いつですか'],h:'¿Qué tal el examen?',exp:'試験はどうですか = ¿qué tal el examen? Pregunta habitual después de un examen.'},
+    {q:'この<ruby>部屋<rt>へや</rt></ruby>は___。',a:'どうですか',opts:['どうですか','どこですか','なんですか','いくつですか'],h:'¿Qué te parece esta habitación?',exp:'部屋はどうですか = ¿qué te parece la habitación? Para pedir opinión sobre un espacio.'},
+    {q:'<ruby>週末<rt>しゅうまつ</rt></ruby>は___。',a:'どうですか',opts:['どうですか','いかがでした','いつですか','どこですか'],h:'¿Qué tal el fin de semana?',exp:'週末はどうですか = ¿qué tal el fin de semana? Saludo casual del lunes.'},
+    {q:'（<ruby>店員<rt>てんいん</rt></ruby>）このケーキは___。',a:'いかがですか',opts:['いかがですか','どうですか','なんですか','いつですか'],h:'(Dependiente) ¿Qué le parece este pastel?',exp:'En pastelerías y cafeterías el dependiente usa いかがですか al ofrecer productos.'},
+    {q:'<ruby>日本<rt>にほん</rt></ruby>の<ruby>音楽<rt>おんがく</rt></ruby>は___。',a:'どうですか',opts:['どうですか','いかがでした','どこですか','だれですか'],h:'¿Qué te parece la música japonesa?',exp:'日本の音楽はどうですか = ¿qué te parece la música japonesa? Pregunta de opinión informal.'},
+    {q:'この<ruby>町<rt>まち</rt></ruby>は___。',a:'どうですか',opts:['どうですか','なんですか','いつですか','いくらですか'],h:'¿Qué te parece este pueblo?',exp:'町はどうですか = ¿qué te parece este lugar? Se usa al visitar un nuevo sitio.'},
+    {q:'<ruby>新<rt>あたら</rt></ruby>しい<ruby>先生<rt>せんせい</rt></ruby>は___。',a:'どうですか',opts:['どうですか','いかがでした','どこですか','なんですか'],h:'¿Qué tal el nuevo profesor?',exp:'新しい先生はどうですか = ¿qué tal el nuevo profesor? Pregunta habitual entre estudiantes.'},
+    {q:'（<ruby>店員<rt>てんいん</rt></ruby>）このホテルの<ruby>部屋<rt>へや</rt></ruby>は___。',a:'いかがですか',opts:['いかがですか','どうですか','なんですか','どこですか'],h:'(Recepcionista) ¿Qué le parece la habitación?',exp:'En hoteles el personal usa いかがですか al pedir la opinión del cliente sobre la habitación.'},
+    {q:'<ruby>最近<rt>さいきん</rt></ruby>の<ruby>日本語<rt>にほんご</rt></ruby>は___。',a:'どうですか',opts:['どうですか','いかがでした','だれですか','なんですか'],h:'¿Cómo va el japonés últimamente?',exp:'最近のどうですか = ¿cómo va el ~ últimamente? Pregunta de progreso informal.'},
+    {q:'<ruby>今日<rt>きょう</rt></ruby>の<ruby>気分<rt>きぶん</rt></ruby>は___。',a:'どうですか',opts:['どうですか','なんですか','いつですか','いくらですか'],h:'¿Cómo te sientes hoy?',exp:'気分はどうですか = ¿cómo te encuentras? Se usa para preguntar por el estado de ánimo.'},
+    {q:'（<ruby>店員<rt>てんいん</rt></ruby>）ワインは___。',a:'いかがですか',opts:['いかがですか','どうですか','なんですか','いくらですか'],h:'(Dependiente) ¿Le apetece un vino?',exp:'En restaurantes el personal usa いかがですか al ofrecer bebidas a los clientes.'},
+    {q:'この<ruby>歌<rt>うた</rt></ruby>は___。',a:'どうですか',opts:['どうですか','いつですか','だれですか','どこですか'],h:'¿Qué te parece esta canción?',exp:'歌はどうですか = ¿qué te parece esta canción? Pregunta de opinión casual.'},
+    {q:'あの<ruby>映画<rt>えいが</rt></ruby>は___。',a:'どうですか',opts:['どうですか','いかがでした','なんですか','いつですか'],h:'¿Qué tal aquella película?',exp:'あの映画 = aquella película. どうですか para pedir opinión entre amigos.'},
+    {q:'<ruby>新<rt>あたら</rt></ruby>しい<ruby>友達<rt>ともだち</rt></ruby>は___。',a:'どうですか',opts:['どうですか','いかがでした','どこですか','だれですか'],h:'¿Qué tal el nuevo amigo?',exp:'新しい友達はどうですか = ¿qué tal el nuevo amigo? Pregunta casual entre conocidos.'},
+    {q:'<ruby>今週<rt>こんしゅう</rt></ruby>の<ruby>仕事<rt>しごと</rt></ruby>は___。',a:'どうですか',opts:['どうですか','なんですか','いつですか','どこですか'],h:'¿Qué tal el trabajo esta semana?',exp:'今週の仕事はどうですか = ¿qué tal el trabajo esta semana? Pregunta casual de colega.'},
+    {q:'（<ruby>店員<rt>てんいん</rt></ruby>）デザートは___。',a:'いかがですか',opts:['いかがですか','どうですか','なんですか','いつですか'],h:'(Dependiente) ¿Le apetece un postre?',exp:'デザート = postre. En restaurantes el dependiente ofrece el postre con いかがですか.'},
+    {q:'<ruby>日本<rt>にほん</rt></ruby>の<ruby>春<rt>はる</rt></ruby>は___。',a:'どうですか',opts:['どうですか','いかがでした','なんですか','どこですか'],h:'¿Qué tal la primavera en Japón?',exp:'日本の春はどうですか = ¿qué tal la primavera de Japón? Pregunta sobre experiencias.'},
+    {q:'このスポーツは___。',a:'どうですか',opts:['どうですか','いつですか','どこですか','だれですか'],h:'¿Qué te parece este deporte?',exp:'スポーツはどうですか = ¿qué te parece este deporte? Pregunta de opinión.'},
+    {q:'（<ruby>店員<rt>てんいん</rt></ruby>）この<ruby>本<rt>ほん</rt></ruby>は___。',a:'いかがですか',opts:['いかがですか','どうですか','なんですか','いくらですか'],h:'(Dependiente) ¿Qué le parece este libro?',exp:'En librerías el dependiente usa いかがですか para recomendar libros a los clientes.'},
+    {q:'<ruby>昨日<rt>きのう</rt></ruby>のパーティーは___。',a:'どうですか',opts:['どうですか','いかがでした','いつですか','どこですか'],h:'¿Qué tal la fiesta de ayer?',exp:'昨日のパーティーはどうですか = ¿qué tal la fiesta de ayer? Pregunta casual del día siguiente.'},
+    {q:'ご<ruby>家族<rt>かぞく</rt></ruby>は___。',a:'いかがですか',opts:['いかがですか','どうですか','なんですか','だれですか'],h:'¿Cómo está su familia? (formal)',exp:'ご家族 = su familia (honorífico ご). いかがですか con personas mayores o en situación formal.'},
+    {q:'この<ruby>音楽<rt>おんがく</rt></ruby>は___。',a:'どうですか',opts:['どうですか','いつですか','どこですか','なんですか'],h:'¿Qué te parece esta música?',exp:'音楽はどうですか = ¿qué te parece esta música? Pregunta de opinión informal.'},
+    {q:'お<ruby>体<rt>からだ</rt></ruby>は___。',a:'いかがですか',opts:['いかがですか','どうですか','なんですか','いつですか'],h:'¿Cómo está su salud? (formal)',exp:'お体 = su salud (honorífico お). いかがですか con personas mayores o en situación formal.'},
+    {q:'<ruby>日本語<rt>にほんご</rt></ruby>の<ruby>授業<rt>じゅぎょう</rt></ruby>は___。',a:'どうですか',opts:['どうですか','いかがでした','どこですか','だれですか'],h:'¿Qué tal la clase de japonés?',exp:'日本語の授業はどうですか = ¿qué tal la clase de japonés? Pregunta de progreso.'},
+    {q:'（<ruby>店員<rt>てんいん</rt></ruby>）このアパートは___。',a:'いかがですか',opts:['いかがですか','どうですか','なんですか','いつですか'],h:'(Agente) ¿Qué le parece este apartamento?',exp:'Los agentes inmobiliarios usan いかがですか al mostrar propiedades a los clientes.'},
+    {q:'このホテルは___。',a:'どうですか',opts:['どうですか','いかがでした','どこですか','なんですか'],h:'¿Qué te parece este hotel?',exp:'ホテルはどうですか = ¿qué te parece el hotel? Pregunta entre amigos o conocidos.'},
+    {q:'<ruby>新<rt>あたら</rt></ruby>しいアパートは___。',a:'どうですか',opts:['どうですか','いかがでした','どこですか','いつですか'],h:'¿Qué tal el nuevo apartamento?',exp:'新しいアパートはどうですか = ¿qué tal el nuevo apartamento? Pregunta casual.'},
+    {q:'お<ruby>仕事<rt>しごと</rt></ruby>は___。',a:'いかがですか',opts:['いかがですか','どうですか','なんですか','いつですか'],h:'¿Cómo le va en el trabajo? (formal)',exp:'お仕事 = trabajo (honorífico お). いかがですか al preguntar de manera formal o respetuosa.'}
+];
+
+// ===== OMOU (〜と思います) DATA =====
+const omouLesson = {
+    title: '〜と<ruby>思<rt>おも</rt></ruby>います',
+    subtitle: 'Expresar opiniones y suposiciones',
+    desc: `
+<div class="grammar-point">
+<p>📌 <strong>Estructura básica:</strong></p>
+<p style="font-family:'Noto Sans JP';font-size:1.1rem;text-align:center;margin:0.6rem 0;">
+  [<ruby>普通体<rt>ふつうたい</rt></ruby>] <strong>と<ruby>思<rt>おも</rt></ruby>います</strong>
+</p>
+<p style="text-align:center;color:#666;">→ <em>Creo que ~ / Pienso que ~</em></p>
+</div>
+<div class="grammar-point">
+<p>📌 <strong>Formas según el tipo de palabra:</strong></p>
+<table style="width:100%;text-align:center;font-size:0.9rem;margin-top:0.4rem;">
+  <tr style="background:#f0f0f0;"><th>Tipo</th><th>Forma</th><th>Ejemplo</th></tr>
+  <tr><td>動詞（辞書形）</td><td style="font-family:'Noto Sans JP';">V + と<ruby>思<rt>おも</rt></ruby>います</td><td style="font-family:'Noto Sans JP';"><ruby>行<rt>い</rt></ruby>くと<ruby>思<rt>おも</rt></ruby>います</td></tr>
+  <tr><td>動詞（ない形）</td><td style="font-family:'Noto Sans JP';">Vない + と<ruby>思<rt>おも</rt></ruby>います</td><td style="font-family:'Noto Sans JP';"><ruby>行<rt>い</rt></ruby>かないと<ruby>思<rt>おも</rt></ruby>います</td></tr>
+  <tr><td>い形容詞</td><td style="font-family:'Noto Sans JP';">adj + と<ruby>思<rt>おも</rt></ruby>います</td><td style="font-family:'Noto Sans JP';">おいしいと<ruby>思<rt>おも</rt></ruby>います</td></tr>
+  <tr><td>な形容詞</td><td style="font-family:'Noto Sans JP';">adj<strong>だ</strong> + と<ruby>思<rt>おも</rt></ruby>います</td><td style="font-family:'Noto Sans JP';"><ruby>便利<rt>べんり</rt></ruby>だと<ruby>思<rt>おも</rt></ruby>います</td></tr>
+  <tr><td>名詞</td><td style="font-family:'Noto Sans JP';">N<strong>だ</strong> + と<ruby>思<rt>おも</rt></ruby>います</td><td style="font-family:'Noto Sans JP';"><ruby>先生<rt>せんせい</rt></ruby>だと<ruby>思<rt>おも</rt></ruby>います</td></tr>
+</table>
+</div>
+<div class="grammar-point">
+<p>📌 <strong>Forma negativa:</strong></p>
+<p style="font-family:'Noto Sans JP';font-size:1rem;text-align:center;margin:0.4rem 0;">
+  [<ruby>普通体<rt>ふつうたい</rt></ruby>] + と<ruby>思<rt>おも</rt></ruby>い<strong>ません</strong>
+</p>
+<p style="text-align:center;color:#666;font-size:0.9rem;">→ <em>No creo que ~ / No pienso que ~</em></p>
+</div>`,
+    examples: [
+        ['この<ruby>映画<rt>えいが</rt></ruby>はおもしろいと<ruby>思<rt>おも</rt></ruby>います。','Kono eiga wa omoshiroi to omoimasu.','Creo que esta película es interesante.'],
+        ['<ruby>明日<rt>あした</rt></ruby>は<ruby>雨<rt>あめ</rt></ruby>が<ruby>降<rt>ふ</rt></ruby>ると<ruby>思<rt>おも</rt></ruby>います。','Ashita wa ame ga furu to omoimasu.','Creo que mañana lloverá.'],
+        ['<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>来<rt>こ</rt></ruby>ないと<ruby>思<rt>おも</rt></ruby>います。','Tanaka-san wa konai to omoimasu.','Creo que el señor Tanaka no vendrá.'],
+        ['この<ruby>問題<rt>もんだい</rt></ruby>は<ruby>難<rt>むずか</rt></ruby>しくないと<ruby>思<rt>おも</rt></ruby>います。','Kono mondai wa muzukashikunai to omoimasu.','Creo que este problema no es difícil.'],
+        ['あの<ruby>店<rt>みせ</rt></ruby>は<ruby>有名<rt>ゆうめい</rt></ruby>だと<ruby>思<rt>おも</rt></ruby>います。','Ano mise wa yūmei da to omoimasu.','Creo que aquella tienda es famosa.'],
+        ['これは<ruby>日本語<rt>にほんご</rt></ruby>だと<ruby>思<rt>おも</rt></ruby>います。','Kore wa nihongo da to omoimasu.','Creo que esto es japonés.'],
+        ['<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>学生<rt>がくせい</rt></ruby>だと<ruby>思<rt>おも</rt></ruby>います。','Kanojo wa gakusei da to omoimasu.','Creo que ella es estudiante.'],
+        ['<ruby>明日<rt>あした</rt></ruby>は<ruby>休<rt>やす</rt></ruby>まないと<ruby>思<rt>おも</rt></ruby>います。','Ashita wa yasumanai to omoimasu.','Creo que mañana no descansaré.']
+    ]
+};
+
+const omouReorderPool = [
+    // ===== 動詞辞書形 + と思います (7問) =====
+    {words:['この<ruby>映画<rt>えいが</rt></ruby>は','おもしろいと','<ruby>思<rt>おも</rt></ruby>います'],answer:'この<ruby>映画<rt>えいが</rt></ruby>はおもしろいと<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que esta película es interesante.',explain:'い形容詞「おもしろい」+ と思います. 形容詞の場合はだ不要。'},
+    {words:['<ruby>明日<rt>あした</rt></ruby>は','<ruby>雨<rt>あめ</rt></ruby>が<ruby>降<rt>ふ</rt></ruby>ると','<ruby>思<rt>おも</rt></ruby>います'],answer:'<ruby>明日<rt>あした</rt></ruby>は<ruby>雨<rt>あめ</rt></ruby>が<ruby>降<rt>ふ</rt></ruby>ると<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que mañana lloverá.',explain:'動詞辞書形「降る」+ と思います. 推量・予測を表す。'},
+    {words:['<ruby>田中<rt>たなか</rt></ruby>さんは','<ruby>日本語<rt>にほんご</rt></ruby>を','<ruby>話<rt>はな</rt></ruby>すと<ruby>思<rt>おも</rt></ruby>います'],answer:'<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>日本語<rt>にほんご</rt></ruby>を<ruby>話<rt>はな</rt></ruby>すと<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que el señor Tanaka habla japonés.',explain:'動詞辞書形「話す」+ と思います. 他人についての推測。'},
+    {words:['<ruby>彼<rt>かれ</rt></ruby>は','<ruby>来<rt>く</rt></ruby>ると','<ruby>思<rt>おも</rt></ruby>います'],answer:'<ruby>彼<rt>かれ</rt></ruby>は<ruby>来<rt>く</rt></ruby>ると<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que él vendrá.',explain:'動詞辞書形「来る」+ と思います. 将来についての推測。'},
+    {words:['この<ruby>試験<rt>しけん</rt></ruby>は','<ruby>合格<rt>ごうかく</rt></ruby>すると','<ruby>思<rt>おも</rt></ruby>います'],answer:'この<ruby>試験<rt>しけん</rt></ruby>は<ruby>合格<rt>ごうかく</rt></ruby>すると<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que aprobaré este examen.',explain:'動詞辞書形「合格する」+ と思います. 自分の予測・期待。'},
+    {words:['<ruby>先生<rt>せんせい</rt></ruby>は','<ruby>知<rt>し</rt></ruby>ると','<ruby>思<rt>おも</rt></ruby>います'],answer:'<ruby>先生<rt>せんせい</rt></ruby>は<ruby>知<rt>し</rt></ruby>ると<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que el profesor lo sabe.',explain:'動詞辞書形「知る」+ と思います. 他人の知識についての推測。'},
+    {words:['この<ruby>店<rt>みせ</rt></ruby>は','<ruby>閉<rt>し</rt></ruby>まると','<ruby>思<rt>おも</rt></ruby>います'],answer:'この<ruby>店<rt>みせ</rt></ruby>は<ruby>閉<rt>し</rt></ruby>まると<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que esta tienda cerrará.',explain:'動詞辞書形「閉まる」+ と思います. 状況についての推測。'},
+    // ===== ない形 + と思います (7問) =====
+    {words:['<ruby>田中<rt>たなか</rt></ruby>さんは','<ruby>来<rt>こ</rt></ruby>ないと','<ruby>思<rt>おも</rt></ruby>います'],answer:'<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>来<rt>こ</rt></ruby>ないと<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que el señor Tanaka no vendrá.',explain:'ない形「来ない」+ と思います. 否定の推測を表す。'},
+    {words:['この<ruby>問題<rt>もんだい</rt></ruby>は','<ruby>難<rt>むずか</rt></ruby>しくないと','<ruby>思<rt>おも</rt></ruby>います'],answer:'この<ruby>問題<rt>もんだい</rt></ruby>は<ruby>難<rt>むずか</rt></ruby>しくないと<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que este problema no es difícil.',explain:'い形容詞ない形「難しくない」+ と思います. 形容詞の否定推測。'},
+    {words:['<ruby>明日<rt>あした</rt></ruby>は','<ruby>休<rt>やす</rt></ruby>まないと','<ruby>思<rt>おも</rt></ruby>います'],answer:'<ruby>明日<rt>あした</rt></ruby>は<ruby>休<rt>やす</rt></ruby>まないと<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que mañana no descansaré.',explain:'ない形「休まない」+ と思います. 自分の予定の否定。'},
+    {words:['<ruby>彼女<rt>かのじょ</rt></ruby>は','<ruby>分<rt>わ</rt></ruby>からないと','<ruby>思<rt>おも</rt></ruby>います'],answer:'<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>分<rt>わ</rt></ruby>からないと<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que ella no entiende.',explain:'ない形「分からない」+ と思います. 他人についての否定推測。'},
+    {words:['この<ruby>薬<rt>くすり</rt></ruby>は','<ruby>効<rt>き</rt></ruby>かないと','<ruby>思<rt>おも</rt></ruby>います'],answer:'この<ruby>薬<rt>くすり</rt></ruby>は<ruby>効<rt>き</rt></ruby>かないと<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que esta medicina no funciona.',explain:'ない形「効かない」+ と思います. 事物についての否定推測。'},
+    {words:['<ruby>今日<rt>きょう</rt></ruby>は','<ruby>行<rt>い</rt></ruby>かないと','<ruby>思<rt>おも</rt></ruby>います'],answer:'<ruby>今日<rt>きょう</rt></ruby>は<ruby>行<rt>い</rt></ruby>かないと<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que hoy no iré.',explain:'ない形「行かない」+ と思います. 自分の意図の否定推測。'},
+    {words:['あの<ruby>映画<rt>えいが</rt></ruby>は','よくないと','<ruby>思<rt>おも</rt></ruby>います'],answer:'あの<ruby>映画<rt>えいが</rt></ruby>はよくないと<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que aquella película no es buena.',explain:'い形容詞ない形「よくない」+ と思います. いい→よくない に注意。'},
+    // ===== い形容詞 + と思います (7問) =====
+    {words:['この<ruby>本<rt>ほん</rt></ruby>は','おもしろいと','<ruby>思<rt>おも</rt></ruby>います'],answer:'この<ruby>本<rt>ほん</rt></ruby>はおもしろいと<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que este libro es interesante.',explain:'い形容詞「おもしろい」+ と思います. だ不要。'},
+    {words:['この<ruby>料理<rt>りょうり</rt></ruby>は','おいしいと','<ruby>思<rt>おも</rt></ruby>います'],answer:'この<ruby>料理<rt>りょうり</rt></ruby>はおいしいと<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que esta comida es deliciosa.',explain:'い形容詞「おいしい」+ と思います. 感想・意見を表す。'},
+    {words:['<ruby>日本語<rt>にほんご</rt></ruby>は','<ruby>難<rt>むずか</rt></ruby>しいと','<ruby>思<rt>おも</rt></ruby>います'],answer:'<ruby>日本語<rt>にほんご</rt></ruby>は<ruby>難<rt>むずか</rt></ruby>しいと<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que el japonés es difícil.',explain:'い形容詞「難しい」+ と思います. 一般的な意見。'},
+    {words:['この<ruby>部屋<rt>へや</rt></ruby>は','<ruby>広<rt>ひろ</rt></ruby>いと','<ruby>思<rt>おも</rt></ruby>います'],answer:'この<ruby>部屋<rt>へや</rt></ruby>は<ruby>広<rt>ひろ</rt></ruby>いと<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que esta habitación es amplia.',explain:'い形容詞「広い」+ と思います. 評価・印象を表す。'},
+    {words:['あの<ruby>映画<rt>えいが</rt></ruby>は','<ruby>長<rt>なが</rt></ruby>いと','<ruby>思<rt>おも</rt></ruby>います'],answer:'あの<ruby>映画<rt>えいが</rt></ruby>は<ruby>長<rt>なが</rt></ruby>いと<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que aquella película es larga.',explain:'い形容詞「長い」+ と思います. 事物の評価。'},
+    {words:['この<ruby>仕事<rt>しごと</rt></ruby>は','<ruby>大変<rt>たいへん</rt></ruby>だと','<ruby>思<rt>おも</rt></ruby>います'],answer:'この<ruby>仕事<rt>しごと</rt></ruby>は<ruby>大変<rt>たいへん</rt></ruby>だと<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que este trabajo es duro.',explain:'な形容詞「大変だ」+ と思います. な形容詞にはだが必要。'},
+    {words:['あの<ruby>店<rt>みせ</rt></ruby>は','<ruby>高<rt>たか</rt></ruby>いと','<ruby>思<rt>おも</rt></ruby>います'],answer:'あの<ruby>店<rt>みせ</rt></ruby>は<ruby>高<rt>たか</rt></ruby>いと<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que aquella tienda es cara.',explain:'い形容詞「高い」+ と思います. 価格についての意見。'},
+    // ===== な形容詞 + だ + と思います (7問) =====
+    {words:['あの<ruby>店<rt>みせ</rt></ruby>は','<ruby>有名<rt>ゆうめい</rt></ruby>だと','<ruby>思<rt>おも</rt></ruby>います'],answer:'あの<ruby>店<rt>みせ</rt></ruby>は<ruby>有名<rt>ゆうめい</rt></ruby>だと<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que aquella tienda es famosa.',explain:'な形容詞「有名」+だ + と思います. な形容詞の後にだが必要。'},
+    {words:['この<ruby>町<rt>まち</rt></ruby>は','<ruby>静<rt>しず</rt></ruby>かだと','<ruby>思<rt>おも</rt></ruby>います'],answer:'この<ruby>町<rt>まち</rt></ruby>は<ruby>静<rt>しず</rt></ruby>かだと<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que esta ciudad es tranquila.',explain:'な形容詞「静か」+だ + と思います. だ は忘れずに。'},
+    {words:['<ruby>田中<rt>たなか</rt></ruby>さんは','<ruby>親切<rt>しんせつ</rt></ruby>だと','<ruby>思<rt>おも</rt></ruby>います'],answer:'<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>親切<rt>しんせつ</rt></ruby>だと<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que el señor Tanaka es amable.',explain:'な形容詞「親切」+だ + と思います. 人の性格についての意見。'},
+    {words:['この<ruby>仕事<rt>しごと</rt></ruby>は','<ruby>大切<rt>たいせつ</rt></ruby>だと','<ruby>思<rt>おも</rt></ruby>います'],answer:'この<ruby>仕事<rt>しごと</rt></ruby>は<ruby>大切<rt>たいせつ</rt></ruby>だと<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que este trabajo es importante.',explain:'な形容詞「大切」+だ + と思います. 重要性についての意見。'},
+    {words:['あの<ruby>公園<rt>こうえん</rt></ruby>は','<ruby>便利<rt>べんり</rt></ruby>だと','<ruby>思<rt>おも</rt></ruby>います'],answer:'あの<ruby>公園<rt>こうえん</rt></ruby>は<ruby>便利<rt>べんり</rt></ruby>だと<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que aquel parque es conveniente.',explain:'な形容詞「便利」+だ + と思います. 場所の評価。'},
+    {words:['この<ruby>問題<rt>もんだい</rt></ruby>は','<ruby>複雑<rt>ふくざつ</rt></ruby>だと','<ruby>思<rt>おも</rt></ruby>います'],answer:'この<ruby>問題<rt>もんだい</rt></ruby>は<ruby>複雑<rt>ふくざつ</rt></ruby>だと<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que este problema es complicado.',explain:'な形容詞「複雑」+だ + と思います. 状況の評価。'},
+    {words:['<ruby>彼女<rt>かのじょ</rt></ruby>は','<ruby>元気<rt>げんき</rt></ruby>だと','<ruby>思<rt>おも</rt></ruby>います'],answer:'<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>元気<rt>げんき</rt></ruby>だと<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que ella está bien.',explain:'な形容詞「元気」+だ + と思います. 人の状態についての推測。'},
+    // ===== 名詞 + だ + と思います (7問) =====
+    {words:['これは','<ruby>日本語<rt>にほんご</rt></ruby>だと','<ruby>思<rt>おも</rt></ruby>います'],answer:'これは<ruby>日本語<rt>にほんご</rt></ruby>だと<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que esto es japonés.',explain:'名詞「日本語」+だ + と思います. 名詞の後にもだが必要。'},
+    {words:['<ruby>彼女<rt>かのじょ</rt></ruby>は','<ruby>学生<rt>がくせい</rt></ruby>だと','<ruby>思<rt>おも</rt></ruby>います'],answer:'<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>学生<rt>がくせい</rt></ruby>だと<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que ella es estudiante.',explain:'名詞「学生」+だ + と思います. 人の職業・身分についての推測。'},
+    {words:['あの<ruby>人<rt>ひと</rt></ruby>は','<ruby>先生<rt>せんせい</rt></ruby>だと','<ruby>思<rt>おも</rt></ruby>います'],answer:'あの<ruby>人<rt>ひと</rt></ruby>は<ruby>先生<rt>せんせい</rt></ruby>だと<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que aquella persona es profesora.',explain:'名詞「先生」+だ + と思います. 見知らぬ人についての推測。'},
+    {words:['これは','<ruby>田中<rt>たなか</rt></ruby>さんの','カバンだと<ruby>思<rt>おも</rt></ruby>います'],answer:'これは<ruby>田中<rt>たなか</rt></ruby>さんのカバンだと<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que esta es la bolsa del señor Tanaka.',explain:'名詞「カバン」+だ + と思います. 所持品についての推測。'},
+    {words:['あそこは','<ruby>図書館<rt>としょかん</rt></ruby>だと','<ruby>思<rt>おも</rt></ruby>います'],answer:'あそこは<ruby>図書館<rt>としょかん</rt></ruby>だと<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que aquello es una biblioteca.',explain:'名詞「図書館」+だ + と思います. 場所についての推測。'},
+    {words:['<ruby>今日<rt>きょう</rt></ruby>は','<ruby>月曜日<rt>げつようび</rt></ruby>だと','<ruby>思<rt>おも</rt></ruby>います'],answer:'<ruby>今日<rt>きょう</rt></ruby>は<ruby>月曜日<rt>げつようび</rt></ruby>だと<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que hoy es lunes.',explain:'名詞「月曜日」+だ + と思います. 曜日についての推測。'},
+    {words:['これは','<ruby>山田<rt>やまだ</rt></ruby>さんだと','<ruby>思<rt>おも</rt></ruby>います'],answer:'これは<ruby>山田<rt>やまだ</rt></ruby>さんだと<ruby>思<rt>おも</rt></ruby>います',hint:'Creo que esta es la señora Yamada.',explain:'名詞（人名）+だ + と思います. 人物の特定についての推測。'}
+];
+
+const omouFillPool = [
+    {q:'この<ruby>映画<rt>えいが</rt></ruby>はおもしろい___。',a:'と思います',opts:['と思います','と思いません','と思いますか','だと思います'],h:'Creo que esta película es interesante.',exp:'い形容詞 + と思います. い形容詞の後にはだ不要。「おもしろい + と思います」'},
+    {q:'<ruby>明日<rt>あした</rt></ruby>は<ruby>雨<rt>あめ</rt></ruby>が<ruby>降<rt>ふ</rt></ruby>る___。',a:'と思います',opts:['と思います','と思いません','だと思います','と思いますか'],h:'Creo que mañana lloverá.',exp:'動詞辞書形 + と思います. 動詞の普通体（辞書形）の後にはだ不要。'},
+    {q:'<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>来<rt>こ</rt></ruby>ない___。',a:'と思います',opts:['と思います','と思いません','だと思います','と思いますか'],h:'Creo que el señor Tanaka no vendrá.',exp:'ない形 + と思います. ない形の後にはだ不要。否定の推測。'},
+    {q:'あの<ruby>店<rt>みせ</rt></ruby>は<ruby>有名<rt>ゆうめい</rt></ruby>___と思います。',a:'だ',opts:['だ','な','で','に'],h:'Creo que aquella tienda es famosa.',exp:'な形容詞 + だ + と思います. な形容詞の後には必ずだが必要。'},
+    {q:'<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>学生<rt>がくせい</rt></ruby>___と思います。',a:'だ',opts:['だ','な','の','が'],h:'Creo que ella es estudiante.',exp:'名詞 + だ + と思います. 名詞の後にも必ずだが必要。'},
+    {q:'この<ruby>料理<rt>りょうり</rt></ruby>はおいしい___。',a:'と思います',opts:['と思います','だと思います','と思いません','と思いますか'],h:'Creo que esta comida es deliciosa.',exp:'い形容詞「おいしい」+ と思います. い形容詞はだ不要。'},
+    {q:'<ruby>日本語<rt>にほんご</rt></ruby>は<ruby>難<rt>むずか</rt></ruby>しい___。',a:'と思います',opts:['と思います','だと思います','と思いません','と思いますか'],h:'Creo que el japonés es difícil.',exp:'い形容詞「難しい」+ と思います. だは不要。一般的な意見を表す。'},
+    {q:'この<ruby>町<rt>まち</rt></ruby>は<ruby>静<rt>しず</rt></ruby>か___と思います。',a:'だ',opts:['だ','な','で','に'],h:'Creo que esta ciudad es tranquila.',exp:'な形容詞「静か」+ だ + と思います. な形容詞の後にはだが必要。'},
+    {q:'あの<ruby>人<rt>ひと</rt></ruby>は<ruby>先生<rt>せんせい</rt></ruby>___と思います。',a:'だ',opts:['だ','な','の','が'],h:'Creo que aquella persona es profesora.',exp:'名詞「先生」+ だ + と思います. 名詞の後にはだが必要。'},
+    {q:'<ruby>今日<rt>きょう</rt></ruby>は<ruby>行<rt>い</rt></ruby>かない___。',a:'と思います',opts:['と思います','だと思います','と思いません','と思いますか'],h:'Creo que hoy no iré.',exp:'ない形「行かない」+ と思います. ない形の後にはだ不要。'},
+    {q:'この<ruby>本<rt>ほん</rt></ruby>はおもしろくない___。',a:'と思います',opts:['と思います','だと思います','と思いません','と思いますか'],h:'Creo que este libro no es interesante.',exp:'い形容詞ない形「おもしろくない」+ と思います. い形容詞のない形もだ不要。'},
+    {q:'<ruby>彼<rt>かれ</rt></ruby>は<ruby>医者<rt>いしゃ</rt></ruby>___と思います。',a:'だ',opts:['だ','な','の','が'],h:'Creo que él es médico.',exp:'名詞「医者」+ だ + と思います. 名詞の後には必ずだ。'},
+    {q:'このレストランは<ruby>有名<rt>ゆうめい</rt></ruby>___と思います。',a:'だ',opts:['だ','な','で','に'],h:'Creo que este restaurante es famoso.',exp:'な形容詞「有名」+ だ + と思います. な形容詞はだが必要。'},
+    {q:'<ruby>明日<rt>あした</rt></ruby>は<ruby>晴<rt>は</rt></ruby>れる___。',a:'と思います',opts:['と思います','だと思います','と思いません','と思いますか'],h:'Creo que mañana estará despejado.',exp:'動詞辞書形「晴れる」+ と思います. 天気についての推測。'},
+    {q:'この<ruby>問題<rt>もんだい</rt></ruby>は<ruby>簡単<rt>かんたん</rt></ruby>___と思います。',a:'だ',opts:['だ','な','で','に'],h:'Creo que este problema es fácil.',exp:'な形容詞「簡単」+ だ + と思います. な形容詞の後にはだが必要。'},
+    {q:'<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>親切<rt>しんせつ</rt></ruby>___と思います。',a:'だ',opts:['だ','な','で','に'],h:'Creo que el señor Tanaka es amable.',exp:'な形容詞「親切」+ だ + と思います. 人の性格についての意見。'},
+    {q:'この<ruby>仕事<rt>しごと</rt></ruby>は<ruby>大切<rt>たいせつ</rt></ruby>___と思います。',a:'だ',opts:['だ','な','で','に'],h:'Creo que este trabajo es importante.',exp:'な形容詞「大切」+ だ + と思います. 重要性についての意見。'},
+    {q:'<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>分<rt>わ</rt></ruby>からない___。',a:'と思います',opts:['と思います','だと思います','と思いません','と思いますか'],h:'Creo que ella no entiende.',exp:'ない形「分からない」+ と思います. 他人についての否定推測。'},
+    {q:'あそこは<ruby>図書館<rt>としょかん</rt></ruby>___と思います。',a:'だ',opts:['だ','な','の','が'],h:'Creo que aquello es una biblioteca.',exp:'名詞「図書館」+ だ + と思います. 場所についての推測。'},
+    {q:'この<ruby>部屋<rt>へや</rt></ruby>は<ruby>広<rt>ひろ</rt></ruby>い___。',a:'と思います',opts:['と思います','だと思います','と思いません','と思いますか'],h:'Creo que esta habitación es amplia.',exp:'い形容詞「広い」+ と思います. だ不要。評価・印象を表す。'}
 ];
 
 // ===== KUTE (〜くて・で) DATA =====
