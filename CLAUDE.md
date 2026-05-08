@@ -32,7 +32,7 @@ const firebaseConfig = {
 ### 文法モジュール一覧
 **renderGrammar の if-else 分岐順:**
 ```
-desu → katsu → keiyo → masu → aru → mashou → tai → maeni → niiku → te → ta → nai → kute → gimon → shiji → yori → dou → omou → joshi（else）
+desu → katsu → keiyo → masu → aru → mashou → tai → maeni → niiku → te → ta → nai → kute → gimon → shiji → yori → dou → omou → ichiban → naru → joshi（else）
 ```
 **⚠️ 新タブ追加時は必ず3箇所に追記：** ① タブボタンHTML ② if-else分岐（joshi elseの直前） ③ render関数本体
 
@@ -56,6 +56,8 @@ desu → katsu → keiyo → masu → aru → mashou → tai → maeni → niiku
 | `nai` | ない形 | `naiVerbPool`(38語), `naiReorderPool`(50問) | Conjugación / Orden |
 | `dou` | 〜はどうですか | `douLesson`, `douReorderPool`(47問), `douFillPool`(35問) | 並び替え / 4択 |
 | `omou` | 〜と思います | `omouLesson`, `omouReorderPool`(35問), `omouFillPool`(20問) | 並び替え / 4択 |
+| `ichiban` | 〜のなかで〜がいちばん〜 | `ichibanLesson`, `ichibanReorderPool`(20問), `ichibanFillPool`(15問) | 並び替え / 4択 |
+| `naru` | 〜になります/〜くなります | `naruLesson`, `naruReorderPool`(20問), `naruFillPool`(15問) | 並び替え / 4択 |
 | `joshi` | 助詞 | `joshiData`(10グループ) | 並び替え / 穴埋め |
 
 **て形・た形・ない形 Expresiones（応用表現）サブタブ:**
@@ -103,8 +105,8 @@ desu → katsu → keiyo → masu → aru → mashou → tai → maeni → niiku
 ### 🟡 文法補完
 | 優先 | 項目 | 規模 | 備考 |
 |---|---|---|---|
-| 7 | 〜のなかで〜がいちばん〜（最上級比較） | 小 | yoriタブに追加 |
-| 8 | 〜になります/〜くなります（変化） | 小 | 新セクションまたは既存タブ |
+| 7 | ✅完了 〜のなかで〜がいちばん〜（最上級比較） | — | `ichiban`タブとして独立実装（2026-05-08） |
+| 8 | ✅完了 〜になります/〜くなります（変化） | — | `naru`タブとして独立実装（2026-05-08） |
 | 9 | 助詞：や/など（例示） | 小 | joshiタブに追加 |
 | 10 | ✅完了 〜と思います（意見表現） | — | `omou`タブとして独立実装（2026-05-03） |
 | 11 | 接続詞：でも/しかし/だから/そして | 小 | 新タブ or 助詞タブ拡張 |

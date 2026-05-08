@@ -1885,6 +1885,12 @@ let douFillIdx = 0; let douFillCorrect = 0; let douFillQuestions = []; let douFi
 let omouPracMode = 'reorder';
 let omouReorderIdx = 0; let omouReorderCorrect = 0; let omouReorderQuestions = []; let omouReorderErrors = []; let omouCurrentAnswer = []; let omouCurrentWords = [];
 let omouFillIdx = 0; let omouFillCorrect = 0; let omouFillQuestions = []; let omouFillErrors = [];
+let ichibanPracMode = 'reorder';
+let ichibanReorderIdx = 0; let ichibanReorderCorrect = 0; let ichibanReorderQuestions = []; let ichibanReorderErrors = []; let ichibanCurrentAnswer = []; let ichibanCurrentWords = [];
+let ichibanFillIdx = 0; let ichibanFillCorrect = 0; let ichibanFillQuestions = []; let ichibanFillErrors = [];
+let naruPracMode = 'reorder';
+let naruReorderIdx = 0; let naruReorderCorrect = 0; let naruReorderQuestions = []; let naruReorderErrors = []; let naruCurrentAnswer = []; let naruCurrentWords = [];
+let naruFillIdx = 0; let naruFillCorrect = 0; let naruFillQuestions = []; let naruFillErrors = [];
 let kutePracMode = 'katsu'; // 'katsu' | 'reorder'
 let kuteType = 'i'; // 'i' | 'na'
 let kuteKatsuIdx = 0; let kuteKatsuCorrect = 0; let kuteKatsuQuestions = []; let kuteKatsuErrors = [];
@@ -2676,6 +2682,8 @@ function renderGrammar(){
             <button class="lesson-tab ${currentLesson==='aru'?'active':''}" onclick="setCurrentLesson('aru')">📍 Existencia<span class="lesson-tab-jp">あります/います</span></button>
             <button class="lesson-tab ${currentLesson==='keiyo'?'active':''}" onclick="setCurrentLesson('keiyo')">🌈 Adjetivos<span class="lesson-tab-jp">形容詞</span></button>
             <button class="lesson-tab ${currentLesson==='yori'?'active':''}" onclick="setCurrentLesson('yori')">⚖️ Comparar<span class="lesson-tab-jp">より〜の方が</span></button>
+            <button class="lesson-tab ${currentLesson==='ichiban'?'active':''}" onclick="setCurrentLesson('ichiban')">🏆 Superlativo<span class="lesson-tab-jp">〜が一番〜</span></button>
+            <button class="lesson-tab ${currentLesson==='naru'?'active':''}" onclick="setCurrentLesson('naru')">🔄 Cambio<span class="lesson-tab-jp">〜になります</span></button>
             <button class="lesson-tab ${currentLesson==='dou'?'active':''}" onclick="setCurrentLesson('dou')">💬 Opinión<span class="lesson-tab-jp">〜はどうですか</span></button>
             <button class="lesson-tab ${currentLesson==='omou'?'active':''}" onclick="setCurrentLesson('omou')">💭 Opinión<span class="lesson-tab-jp">〜と思います</span></button>
             <button class="lesson-tab ${currentLesson==='kute'?'active':''}" onclick="setCurrentLesson('kute')">🔗 Conexión<span class="lesson-tab-jp">〜くて・で</span></button>
@@ -2749,6 +2757,12 @@ function renderGrammar(){
     } else if(currentLesson==='omou'){
         if(grammarMode==='learn') renderOmouLearn();
         else renderOmouPractice();
+    } else if(currentLesson==='ichiban'){
+        if(grammarMode==='learn') renderIchibanLearn();
+        else renderIchibanPractice();
+    } else if(currentLesson==='naru'){
+        if(grammarMode==='learn') renderNaruLearn();
+        else renderNaruPractice();
     } else {
         if(grammarMode==='learn') renderJoshiLearn();
         else renderJoshiPractice();
@@ -6830,6 +6844,442 @@ function showOmouFillResult(){
     `;
 }
 
+// ===== ICHIBAN (〜のなかで〜がいちばん〜) FUNCTIONS =====
+function renderIchibanLearn(){
+    const L = ichibanLesson;
+    document.getElementById('grammar-content').innerHTML = `
+        <div class="grammar-card">
+            <div class="grammar-title">${L.title}</div>
+            <div class="grammar-subtitle">${L.subtitle}</div>
+            <div class="grammar-desc">${L.desc}</div>
+            <div class="grammar-examples" style="margin-top:1rem;">
+                <h4>📝 Ejemplos</h4>
+                ${L.examples.map(ex=>`
+                    <div class="grammar-ex">
+                        <div class="ex-jp">${ex[0]}</div>
+                        <div class="ex-ro" style="font-size:0.82rem;color:var(--text-light);margin-bottom:0.2rem;">${ex[1]}</div>
+                        <div class="ex-es">${ex[2]}</div>
+                    </div>
+                `).join('')}
+            </div>
+            <button class="btn-practice" onclick="setGrammarMode('practice')" style="margin-top:1rem;">🎯 Practicar</button>
+        </div>
+    `;
+}
+
+function renderIchibanPractice(){
+    const isReorder = ichibanPracMode === 'reorder';
+    document.getElementById('grammar-content').innerHTML = `
+        <div class="grammar-card" style="text-align:center;">
+            <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:1rem;">
+                <button class="mode-tab ${isReorder?'active':''}" onclick="setIchibanMode('reorder')">🔤 Ordenar</button>
+                <button class="mode-tab ${!isReorder?'active':''}" onclick="setIchibanMode('fill')">📝 Selección</button>
+            </div>
+            <h3>🎯 Práctica: が一番〜 — ${isReorder?'Ordenar palabras':'Selección'}</h3>
+            <p style="color:var(--text-light);margin:0.5rem 0;">${isReorder?'Ordena las palabras para formar la oración correcta.':'Elige la palabra correcta para completar la oración.'}</p>
+            <p style="color:var(--text-light);font-size:0.9rem;">5 preguntas aleatorias</p>
+            <button class="btn-practice" onclick="${isReorder?'startIchibanReorder()':'startIchibanFill()'}">Comenzar</button>
+        </div>
+        <div id="ichiban-quiz-area"></div>
+    `;
+}
+
+function setIchibanMode(mode){
+    ichibanPracMode = mode;
+    renderIchibanPractice();
+}
+
+function startIchibanReorder(){
+    document.getElementById('grammar-content').querySelector('.grammar-card').style.display = 'none';
+    ichibanReorderQuestions = [...ichibanReorderPool].sort(()=>Math.random()-0.5).slice(0,5);
+    ichibanReorderIdx = 0; ichibanReorderCorrect = 0; ichibanReorderErrors = [];
+    showIchibanReorderQuestion();
+}
+
+function showIchibanReorderQuestion(){
+    const q = ichibanReorderQuestions[ichibanReorderIdx];
+    ichibanCurrentWords = [...q.words].sort(()=>Math.random()-0.5);
+    ichibanCurrentAnswer = [];
+    document.getElementById('ichiban-quiz-area').innerHTML = `
+        <div class="reorder-box">
+            <div class="reorder-progress">${ichibanReorderIdx+1} / 5</div>
+            <div class="reorder-hint">${q.hint}</div>
+            <button class="hint-btn" id="ichiban-pista-btn" onclick="toggleIchibanPista()">💡 Pista (furigana)</button>
+            <div class="reorder-words" id="ichiban-word-pool">
+                ${ichibanCurrentWords.map((w,i)=>`<span style="display:inline-block;text-align:center;margin:0.2rem;"><button class="word-btn" onclick="selectIchibanWord(${i})" id="ichiban-wb-${i}">${stripRuby(w)}</button><div class="word-romaji" style="display:none;font-size:0.75rem;color:var(--text-light);text-align:center;">${rubyToHiragana(w)}</div></span>`).join('')}
+            </div>
+            <div class="reorder-answer" id="ichiban-answer-area">
+                <span class="reorder-placeholder">Toca las palabras en orden</span>
+            </div>
+            <button class="btn-check" id="ichiban-check-btn" onclick="checkIchibanReorderAnswer()" disabled>Verificar</button>
+            <div id="ichiban-reorder-feedback"></div>
+        </div>
+    `;
+}
+
+function toggleIchibanPista(){
+    const spans = document.querySelectorAll('#ichiban-word-pool .word-romaji');
+    const showing = spans[0] && spans[0].style.display !== 'none';
+    spans.forEach(s => s.style.display = showing ? 'none' : 'block');
+    const btn = document.getElementById('ichiban-pista-btn');
+    if(btn) btn.textContent = showing ? '💡 Pista (furigana)' : '🙈 Ocultar pista';
+}
+
+function selectIchibanWord(idx){
+    const btn = document.getElementById('ichiban-wb-'+idx);
+    if(btn.classList.contains('selected')) return;
+    btn.classList.add('selected');
+    ichibanCurrentAnswer.push({word: ichibanCurrentWords[idx], btnIdx: idx});
+    renderIchibanAnswerArea();
+}
+
+function removeIchibanWord(i){
+    const removed = ichibanCurrentAnswer.splice(i,1)[0];
+    document.getElementById('ichiban-wb-'+removed.btnIdx).classList.remove('selected');
+    renderIchibanAnswerArea();
+}
+
+function renderIchibanAnswerArea(){
+    const area = document.getElementById('ichiban-answer-area');
+    area.innerHTML = ichibanCurrentAnswer.length === 0
+        ? '<span class="reorder-placeholder">Toca las palabras en orden</span>'
+        : ichibanCurrentAnswer.map((a,i)=>`<button class="answer-btn" onclick="removeIchibanWord(${i})">${stripRuby(a.word)}</button>`).join('');
+    document.getElementById('ichiban-check-btn').disabled = ichibanCurrentAnswer.length !== ichibanCurrentWords.length;
+}
+
+function checkIchibanReorderAnswer(){
+    const q = ichibanReorderQuestions[ichibanReorderIdx];
+    const userAns = ichibanCurrentAnswer.map(a=>stripRuby(a.word)).join('');
+    const correct = stripRuby(q.answer);
+    const fb = document.getElementById('ichiban-reorder-feedback');
+    document.getElementById('ichiban-check-btn').disabled = true;
+    document.querySelectorAll('#ichiban-word-pool .word-btn, #ichiban-answer-area .answer-btn').forEach(b=>b.style.pointerEvents='none');
+    if(userAns === correct){
+        ichibanReorderCorrect++;
+        fb.innerHTML = '<div class="reorder-feedback correct">⭕ ¡Correcto!</div>';
+    } else {
+        ichibanReorderErrors.push({hint:q.hint, user:userAns, correct:q.answer, exp:q.explain});
+        fb.innerHTML = `<div class="reorder-feedback wrong">❌ Correcta: ${q.answer}<br><small>${q.explain}</small></div>`;
+    }
+    setTimeout(()=>{
+        ichibanReorderIdx++;
+        if(ichibanReorderIdx < 5) showIchibanReorderQuestion();
+        else showIchibanReorderResult();
+    }, 1800);
+}
+
+function showIchibanReorderResult(){
+    const pct = Math.round((ichibanReorderCorrect/5)*100);
+    saveScore('ichiban', pct);
+    const msg = pct===100?'🎉 ¡Perfecto!':pct>=80?'🌟 ¡Excelente!':pct>=60?'👍 ¡Muy bien!':'📚 ¡Sigue practicando!';
+    let errHtml = '';
+    if(ichibanReorderErrors.length > 0){
+        errHtml = `<div class="error-review"><h4>❌ Errores (${ichibanReorderErrors.length})</h4>${ichibanReorderErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${e.hint}</div><div class="error-your">Tu respuesta: ${e.user}</div><div class="error-correct">✅ Correcta: ${e.correct}</div><div class="error-explain">📖 ${e.exp}</div></div>`).join('')}</div>`;
+    }
+    document.getElementById('ichiban-quiz-area').innerHTML = `
+        <div class="grammar-result">
+            <div class="gr-score">${pct}%</div>
+            <div class="gr-msg">${msg}</div>
+            <div class="gr-detail">${ichibanReorderCorrect} / 5 correctas</div>
+            <button class="btn-practice" onclick="startIchibanReorder()">🔄 Intentar de nuevo</button>
+            <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
+            ${errHtml}
+        </div>
+    `;
+}
+
+function startIchibanFill(){
+    document.getElementById('grammar-content').querySelector('.grammar-card').style.display = 'none';
+    ichibanFillQuestions = [...ichibanFillPool].sort(()=>Math.random()-0.5).slice(0,5);
+    ichibanFillIdx = 0; ichibanFillCorrect = 0; ichibanFillErrors = [];
+    showIchibanFillQuestion();
+}
+
+function showIchibanFillQuestion(){
+    const q = ichibanFillQuestions[ichibanFillIdx];
+    const shuffled = [...q.opts].sort(()=>Math.random()-0.5);
+    window._ichibanOpts = shuffled;
+    window._ichibanFillPistaOn = false;
+    document.getElementById('ichiban-quiz-area').innerHTML = `
+        <div class="reorder-box">
+            <div class="reorder-progress">${ichibanFillIdx+1} / 5</div>
+            <div class="reorder-hint">${q.h}</div>
+            <button class="hint-btn" id="ichiban-fill-pista-btn" onclick="toggleIchibanFillPista()">💡 Pista (furigana)</button>
+            <div class="ex-jp" id="ichiban-fill-question" style="margin:1rem 0;font-size:1.1rem;">${stripRuby(q.q).replace('___','<span class="joshi-blank">___</span>')}</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-top:0.5rem;">
+                ${shuffled.map((opt,i)=>`<button class="word-btn" style="padding:0.7rem;font-family:'Noto Sans JP';" onclick="checkIchibanFill(${i})">${opt}</button>`).join('')}
+            </div>
+            <div id="ichiban-fill-feedback" style="margin-top:1rem;"></div>
+        </div>
+    `;
+}
+
+function toggleIchibanFillPista(){
+    const q = ichibanFillQuestions[ichibanFillIdx];
+    window._ichibanFillPistaOn = !window._ichibanFillPistaOn;
+    const el = document.getElementById('ichiban-fill-question');
+    const btn = document.getElementById('ichiban-fill-pista-btn');
+    if(el) el.innerHTML = (window._ichibanFillPistaOn ? q.q : stripRuby(q.q)).replace('___','<span class="joshi-blank">___</span>');
+    if(btn) btn.textContent = window._ichibanFillPistaOn ? '🙈 Ocultar pista' : '💡 Pista (furigana)';
+}
+
+function checkIchibanFill(idx){
+    const q = ichibanFillQuestions[ichibanFillIdx];
+    const chosen = window._ichibanOpts[idx];
+    const fb = document.getElementById('ichiban-fill-feedback');
+    document.querySelectorAll('#ichiban-quiz-area .word-btn').forEach(b=>b.style.pointerEvents='none');
+    if(stripRuby(chosen) === stripRuby(q.a)){
+        ichibanFillCorrect++;
+        fb.innerHTML = '<div class="reorder-feedback correct">⭕ ¡Correcto!</div>';
+    } else {
+        ichibanFillErrors.push({q:q.q, user:chosen, correct:q.a, exp:q.exp});
+        fb.innerHTML = `<div class="reorder-feedback wrong">❌ Correcta: ${q.a}<br><small>${q.exp}</small></div>`;
+    }
+    setTimeout(()=>{
+        ichibanFillIdx++;
+        if(ichibanFillIdx < 5) showIchibanFillQuestion();
+        else showIchibanFillResult();
+    }, 1800);
+}
+
+function showIchibanFillResult(){
+    const pct = Math.round((ichibanFillCorrect/5)*100);
+    saveScore('ichiban', pct);
+    const msg = pct===100?'🎉 ¡Perfecto!':pct>=80?'🌟 ¡Excelente!':pct>=60?'👍 ¡Muy bien!':'📚 ¡Sigue practicando!';
+    let errHtml = '';
+    if(ichibanFillErrors.length > 0){
+        errHtml = `<div class="error-review"><h4>❌ Errores (${ichibanFillErrors.length})</h4>${ichibanFillErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${e.q}</div><div class="error-your">Tu: ${e.user}</div><div class="error-correct">✅ ${e.correct} — ${e.exp}</div></div>`).join('')}</div>`;
+    }
+    document.getElementById('ichiban-quiz-area').innerHTML = `
+        <div class="grammar-result">
+            <div class="gr-score">${pct}%</div>
+            <div class="gr-msg">${msg}</div>
+            <div class="gr-detail">${ichibanFillCorrect} / 5 correctas</div>
+            <button class="btn-practice" onclick="startIchibanFill()">🔄 Intentar de nuevo</button>
+            <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
+            ${errHtml}
+        </div>
+    `;
+}
+
+// ===== NARU (〜になります/〜くなります) FUNCTIONS =====
+function renderNaruLearn(){
+    const L = naruLesson;
+    document.getElementById('grammar-content').innerHTML = `
+        <div class="grammar-card">
+            <div class="grammar-title">${L.title}</div>
+            <div class="grammar-subtitle">${L.subtitle}</div>
+            <div class="grammar-desc">${L.desc}</div>
+            <div class="grammar-examples" style="margin-top:1rem;">
+                <h4>📝 Ejemplos</h4>
+                ${L.examples.map(ex=>`
+                    <div class="grammar-ex">
+                        <div class="ex-jp">${ex[0]}</div>
+                        <div class="ex-ro" style="font-size:0.82rem;color:var(--text-light);margin-bottom:0.2rem;">${ex[1]}</div>
+                        <div class="ex-es">${ex[2]}</div>
+                    </div>
+                `).join('')}
+            </div>
+            <button class="btn-practice" onclick="setGrammarMode('practice')" style="margin-top:1rem;">🎯 Practicar</button>
+        </div>
+    `;
+}
+
+function renderNaruPractice(){
+    const isReorder = naruPracMode === 'reorder';
+    document.getElementById('grammar-content').innerHTML = `
+        <div class="grammar-card" style="text-align:center;">
+            <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:1rem;">
+                <button class="mode-tab ${isReorder?'active':''}" onclick="setNaruMode('reorder')">🔤 Ordenar</button>
+                <button class="mode-tab ${!isReorder?'active':''}" onclick="setNaruMode('fill')">📝 Selección</button>
+            </div>
+            <h3>🎯 Práctica: 〜になります／〜くなります — ${isReorder?'Ordenar palabras':'Selección'}</h3>
+            <p style="color:var(--text-light);margin:0.5rem 0;">${isReorder?'Ordena las palabras para formar la oración correcta.':'Elige la partícula correcta para completar la oración.'}</p>
+            <p style="color:var(--text-light);font-size:0.9rem;">5 preguntas aleatorias</p>
+            <button class="btn-practice" onclick="${isReorder?'startNaruReorder()':'startNaruFill()'}">Comenzar</button>
+        </div>
+        <div id="naru-quiz-area"></div>
+    `;
+}
+
+function setNaruMode(mode){
+    naruPracMode = mode;
+    renderNaruPractice();
+}
+
+function startNaruReorder(){
+    document.getElementById('grammar-content').querySelector('.grammar-card').style.display = 'none';
+    naruReorderQuestions = [...naruReorderPool].sort(()=>Math.random()-0.5).slice(0,5);
+    naruReorderIdx = 0; naruReorderCorrect = 0; naruReorderErrors = [];
+    showNaruReorderQuestion();
+}
+
+function showNaruReorderQuestion(){
+    const q = naruReorderQuestions[naruReorderIdx];
+    naruCurrentWords = [...q.words].sort(()=>Math.random()-0.5);
+    naruCurrentAnswer = [];
+    document.getElementById('naru-quiz-area').innerHTML = `
+        <div class="reorder-box">
+            <div class="reorder-progress">${naruReorderIdx+1} / 5</div>
+            <div class="reorder-hint">${q.hint}</div>
+            <button class="hint-btn" id="naru-pista-btn" onclick="toggleNaruPista()">💡 Pista (furigana)</button>
+            <div class="reorder-words" id="naru-word-pool">
+                ${naruCurrentWords.map((w,i)=>`<span style="display:inline-block;text-align:center;margin:0.2rem;"><button class="word-btn" onclick="selectNaruWord(${i})" id="naru-wb-${i}">${stripRuby(w)}</button><div class="word-romaji" style="display:none;font-size:0.75rem;color:var(--text-light);text-align:center;">${rubyToHiragana(w)}</div></span>`).join('')}
+            </div>
+            <div class="reorder-answer" id="naru-answer-area">
+                <span class="reorder-placeholder">Toca las palabras en orden</span>
+            </div>
+            <button class="btn-check" id="naru-check-btn" onclick="checkNaruReorderAnswer()" disabled>Verificar</button>
+            <div id="naru-reorder-feedback"></div>
+        </div>
+    `;
+}
+
+function toggleNaruPista(){
+    const spans = document.querySelectorAll('#naru-word-pool .word-romaji');
+    const showing = spans[0] && spans[0].style.display !== 'none';
+    spans.forEach(s => s.style.display = showing ? 'none' : 'block');
+    const btn = document.getElementById('naru-pista-btn');
+    if(btn) btn.textContent = showing ? '💡 Pista (furigana)' : '🙈 Ocultar pista';
+}
+
+function selectNaruWord(idx){
+    const btn = document.getElementById('naru-wb-'+idx);
+    if(btn.classList.contains('selected')) return;
+    btn.classList.add('selected');
+    naruCurrentAnswer.push({word: naruCurrentWords[idx], btnIdx: idx});
+    renderNaruAnswerArea();
+}
+
+function removeNaruWord(i){
+    const removed = naruCurrentAnswer.splice(i,1)[0];
+    document.getElementById('naru-wb-'+removed.btnIdx).classList.remove('selected');
+    renderNaruAnswerArea();
+}
+
+function renderNaruAnswerArea(){
+    const area = document.getElementById('naru-answer-area');
+    area.innerHTML = naruCurrentAnswer.length === 0
+        ? '<span class="reorder-placeholder">Toca las palabras en orden</span>'
+        : naruCurrentAnswer.map((a,i)=>`<button class="answer-btn" onclick="removeNaruWord(${i})">${stripRuby(a.word)}</button>`).join('');
+    document.getElementById('naru-check-btn').disabled = naruCurrentAnswer.length !== naruCurrentWords.length;
+}
+
+function checkNaruReorderAnswer(){
+    const q = naruReorderQuestions[naruReorderIdx];
+    const userAns = naruCurrentAnswer.map(a=>stripRuby(a.word)).join('');
+    const correct = stripRuby(q.answer);
+    const fb = document.getElementById('naru-reorder-feedback');
+    document.getElementById('naru-check-btn').disabled = true;
+    document.querySelectorAll('#naru-word-pool .word-btn, #naru-answer-area .answer-btn').forEach(b=>b.style.pointerEvents='none');
+    if(userAns === correct){
+        naruReorderCorrect++;
+        fb.innerHTML = '<div class="reorder-feedback correct">⭕ ¡Correcto!</div>';
+    } else {
+        naruReorderErrors.push({hint:q.hint, user:userAns, correct:q.answer, exp:q.explain});
+        fb.innerHTML = `<div class="reorder-feedback wrong">❌ Correcta: ${q.answer}<br><small>${q.explain}</small></div>`;
+    }
+    setTimeout(()=>{
+        naruReorderIdx++;
+        if(naruReorderIdx < 5) showNaruReorderQuestion();
+        else showNaruReorderResult();
+    }, 1800);
+}
+
+function showNaruReorderResult(){
+    const pct = Math.round((naruReorderCorrect/5)*100);
+    saveScore('naru', pct);
+    const msg = pct===100?'🎉 ¡Perfecto!':pct>=80?'🌟 ¡Excelente!':pct>=60?'👍 ¡Muy bien!':'📚 ¡Sigue practicando!';
+    let errHtml = '';
+    if(naruReorderErrors.length > 0){
+        errHtml = `<div class="error-review"><h4>❌ Errores (${naruReorderErrors.length})</h4>${naruReorderErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${e.hint}</div><div class="error-your">Tu respuesta: ${e.user}</div><div class="error-correct">✅ Correcta: ${e.correct}</div><div class="error-explain">📖 ${e.exp}</div></div>`).join('')}</div>`;
+    }
+    document.getElementById('naru-quiz-area').innerHTML = `
+        <div class="grammar-result">
+            <div class="gr-score">${pct}%</div>
+            <div class="gr-msg">${msg}</div>
+            <div class="gr-detail">${naruReorderCorrect} / 5 correctas</div>
+            <button class="btn-practice" onclick="startNaruReorder()">🔄 Intentar de nuevo</button>
+            <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
+            ${errHtml}
+        </div>
+    `;
+}
+
+function startNaruFill(){
+    document.getElementById('grammar-content').querySelector('.grammar-card').style.display = 'none';
+    naruFillQuestions = [...naruFillPool].sort(()=>Math.random()-0.5).slice(0,5);
+    naruFillIdx = 0; naruFillCorrect = 0; naruFillErrors = [];
+    showNaruFillQuestion();
+}
+
+function showNaruFillQuestion(){
+    const q = naruFillQuestions[naruFillIdx];
+    const shuffled = [...q.opts].sort(()=>Math.random()-0.5);
+    window._naruOpts = shuffled;
+    window._naruFillPistaOn = false;
+    document.getElementById('naru-quiz-area').innerHTML = `
+        <div class="reorder-box">
+            <div class="reorder-progress">${naruFillIdx+1} / 5</div>
+            <div class="reorder-hint">${q.h}</div>
+            <button class="hint-btn" id="naru-fill-pista-btn" onclick="toggleNaruFillPista()">💡 Pista (furigana)</button>
+            <div class="ex-jp" id="naru-fill-question" style="margin:1rem 0;font-size:1.1rem;">${stripRuby(q.q).replace('___','<span class="joshi-blank">___</span>')}</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-top:0.5rem;">
+                ${shuffled.map((opt,i)=>`<button class="word-btn" style="padding:0.7rem;font-family:'Noto Sans JP';" onclick="checkNaruFill(${i})">${opt}</button>`).join('')}
+            </div>
+            <div id="naru-fill-feedback" style="margin-top:1rem;"></div>
+        </div>
+    `;
+}
+
+function toggleNaruFillPista(){
+    const q = naruFillQuestions[naruFillIdx];
+    window._naruFillPistaOn = !window._naruFillPistaOn;
+    const el = document.getElementById('naru-fill-question');
+    const btn = document.getElementById('naru-fill-pista-btn');
+    if(el) el.innerHTML = (window._naruFillPistaOn ? q.q : stripRuby(q.q)).replace('___','<span class="joshi-blank">___</span>');
+    if(btn) btn.textContent = window._naruFillPistaOn ? '🙈 Ocultar pista' : '💡 Pista (furigana)';
+}
+
+function checkNaruFill(idx){
+    const q = naruFillQuestions[naruFillIdx];
+    const chosen = window._naruOpts[idx];
+    const fb = document.getElementById('naru-fill-feedback');
+    document.querySelectorAll('#naru-quiz-area .word-btn').forEach(b=>b.style.pointerEvents='none');
+    if(chosen === q.a){
+        naruFillCorrect++;
+        fb.innerHTML = '<div class="reorder-feedback correct">⭕ ¡Correcto!</div>';
+    } else {
+        naruFillErrors.push({q:q.q, user:chosen, correct:q.a, exp:q.exp});
+        fb.innerHTML = `<div class="reorder-feedback wrong">❌ Correcta: ${q.a}<br><small>${q.exp}</small></div>`;
+    }
+    setTimeout(()=>{
+        naruFillIdx++;
+        if(naruFillIdx < 5) showNaruFillQuestion();
+        else showNaruFillResult();
+    }, 1800);
+}
+
+function showNaruFillResult(){
+    const pct = Math.round((naruFillCorrect/5)*100);
+    saveScore('naru', pct);
+    const msg = pct===100?'🎉 ¡Perfecto!':pct>=80?'🌟 ¡Excelente!':pct>=60?'👍 ¡Muy bien!':'📚 ¡Sigue practicando!';
+    let errHtml = '';
+    if(naruFillErrors.length > 0){
+        errHtml = `<div class="error-review"><h4>❌ Errores (${naruFillErrors.length})</h4>${naruFillErrors.map(e=>`<div class="error-item"><div class="error-q">📝 ${e.q}</div><div class="error-your">Tu: ${e.user}</div><div class="error-correct">✅ ${e.correct} — ${e.exp}</div></div>`).join('')}</div>`;
+    }
+    document.getElementById('naru-quiz-area').innerHTML = `
+        <div class="grammar-result">
+            <div class="gr-score">${pct}%</div>
+            <div class="gr-msg">${msg}</div>
+            <div class="gr-detail">${naruFillCorrect} / 5 correctas</div>
+            <button class="btn-practice" onclick="startNaruFill()">🔄 Intentar de nuevo</button>
+            <button class="btn-practice" style="background:var(--night);margin-top:0.5rem;" onclick="setGrammarMode('learn')">📖 Volver a aprender</button>
+            ${errHtml}
+        </div>
+    `;
+}
+
 // ===== GIMON (疑問詞) FUNCTIONS =====
 function renderGimonLearn(){
     document.getElementById('grammar-content').innerHTML = `
@@ -8488,8 +8938,8 @@ const shijiQuizPool = [
 
 // ===== 〜より〜の方が DATA =====
 const yoriLesson = {
-    title: '〜より〜の方が',
-    subtitle: 'Comparaciones en japonés',
+    title: '〜より〜の方が・〜が一番〜',
+    subtitle: 'Comparaciones y superlativos en japonés',
     desc: `
 <p><strong>〜より〜の方が</strong> es la estructura básica para hacer comparaciones en japonés.</p>
 <div class="grammar-point">
@@ -8514,6 +8964,24 @@ const yoriLesson = {
   <tr><td>A es más</td><td style="font-family:'Noto Sans JP';">A の<ruby>方<rt>ほう</rt></ruby>が [ADJ] です</td><td>A es más [ADJ]</td></tr>
   <tr><td>Igual</td><td style="font-family:'Noto Sans JP';">どちらも [ADJ] です</td><td>Ambos son [ADJ]</td></tr>
 </table>
+</div>
+<hr style="margin:1.2rem 0;border:none;border-top:2px solid var(--accent);">
+<p><strong>〜の<ruby>中<rt>なか</rt></ruby>で〜が<ruby>一番<rt>いちばん</rt></ruby>〜</strong> es la estructura para expresar el superlativo (el más ~).</p>
+<div class="grammar-point">
+<p>📌 <strong>Superlativo — afirmación:</strong></p>
+<p style="font-family:'Noto Sans JP';font-size:1.1rem;text-align:center;margin:0.6rem 0;">
+  [<ruby>範囲<rt>はんい</rt></ruby>] <strong>の<ruby>中<rt>なか</rt></ruby>で</strong> [X] <strong>が<ruby>一番<rt>いちばん</rt></ruby></strong> [ADJ] です
+</p>
+<p style="text-align:center;color:#666;">→ <em>X es el/la más [ADJ] de [範囲]</em></p>
+</div>
+<div class="grammar-point">
+<p>📌 <strong>Superlativo — pregunta:</strong></p>
+<table style="width:100%;text-align:center;font-size:0.92rem;margin-top:0.4rem;">
+  <tr style="background:#f0f0f0;"><th>Pregunta sobre</th><th>Palabra interrogativa</th></tr>
+  <tr><td>cosa / objeto</td><td style="font-family:'Noto Sans JP';"><strong>何<rt>なに</rt>が</strong> / <strong>どれが</strong> <ruby>一番<rt>いちばん</rt></ruby>〜ですか</td></tr>
+  <tr><td>persona</td><td style="font-family:'Noto Sans JP';"><strong>だれが</strong> <ruby>一番<rt>いちばん</rt></ruby>〜ですか</td></tr>
+  <tr><td>lugar</td><td style="font-family:'Noto Sans JP';"><strong>どこが</strong> <ruby>一番<rt>いちばん</rt></ruby>〜ですか</td></tr>
+</table>
 </div>`,
     examples: [
         ['<ruby>車<rt>くるま</rt></ruby><strong style="color:var(--primary)">より</strong><ruby>電車<rt>でんしゃ</rt></ruby><strong style="color:var(--ocean)">の<ruby>方<rt>ほう</rt></ruby>が</strong><ruby>速<rt>はや</rt></ruby>いです。','kuruma yori densha no hō ga hayai desu.','El tren es más rápido que el coche.'],
@@ -8521,7 +8989,11 @@ const yoriLesson = {
         ['コーヒー<strong style="color:var(--primary)">より</strong>お<ruby>茶<rt>ちゃ</rt></ruby><strong style="color:var(--ocean)">の<ruby>方<rt>ほう</rt></ruby>が</strong><ruby>好<rt>す</rt></ruby>きです。','kōhī yori ocha no hō ga suki desu.','Me gusta más el té que el café.'],
         ['<ruby>東京<rt>とうきょう</rt></ruby><strong style="color:var(--accent)">と</strong><ruby>大阪<rt>おおさか</rt></ruby><strong style="color:var(--accent)">とどちらが</strong><ruby>大<rt>おお</rt></ruby>きいですか。','Tōkyō to Ōsaka to dochira ga ōkii desu ka.','¿Cuál es más grande, Tokio u Osaka?'],
         ['<ruby>東京<rt>とうきょう</rt></ruby><strong style="color:var(--ocean)">の<ruby>方<rt>ほう</rt></ruby>が</strong><ruby>大<rt>おお</rt></ruby>きいです。','Tōkyō no hō ga ōkii desu.','Tokio es más grande.'],
-        ['<strong style="color:var(--accent)">どちらも</strong><ruby>有名<rt>ゆうめい</rt></ruby>です。','Dochira mo yūmei desu.','Ambas son famosas.']
+        ['<strong style="color:var(--accent)">どちらも</strong><ruby>有名<rt>ゆうめい</rt></ruby>です。','Dochira mo yūmei desu.','Ambas son famosas.'],
+        ['<ruby>果物<rt>くだもの</rt></ruby><strong style="color:var(--night)">の<ruby>中<rt>なか</rt></ruby>で</strong>りんご<strong style="color:var(--primary)">が<ruby>一番<rt>いちばん</rt></ruby></strong><ruby>好<rt>す</rt></ruby>きです。','kudamono no naka de ringo ga ichiban suki desu.','Entre las frutas, las manzanas son las que más me gustan.'],
+        ['<ruby>季節<rt>きせつ</rt></ruby><strong style="color:var(--night)">の<ruby>中<rt>なか</rt></ruby>で</strong><ruby>秋<rt>あき</rt></ruby><strong style="color:var(--primary)">が<ruby>一番<rt>いちばん</rt></ruby></strong><ruby>好<rt>す</rt></ruby>きです。','kisetsu no naka de aki ga ichiban suki desu.','De las estaciones, el otoño es el que más me gusta.'],
+        ['クラス<strong style="color:var(--night)">の<ruby>中<rt>なか</rt></ruby>で</strong><strong style="color:var(--accent)">だれが</strong><strong style="color:var(--primary)"><ruby>一番<rt>いちばん</rt></ruby></strong><ruby>背<rt>せ</rt></ruby>が<ruby>高<rt>たか</rt></ruby>いですか。','kurasu no naka de dare ga ichiban se ga takai desu ka.','¿Quién es el más alto de la clase?'],
+        ['この<ruby>中<rt>なか</rt></ruby>で<strong style="color:var(--accent)">どれが</strong><strong style="color:var(--primary)"><ruby>一番<rt>いちばん</rt></ruby></strong><ruby>安<rt>やす</rt></ruby>いですか。','kono naka de dore ga ichiban yasui desu ka.','¿Cuál de estos es el más barato?']
     ]
 };
 
@@ -8536,12 +9008,12 @@ const yoriReorderPool = [
     {words:['<ruby>昨日<rt>きのう</rt></ruby>より','<ruby>今日<rt>きょう</rt></ruby>の方が','<ruby>暑<rt>あつ</rt></ruby>いです'],answer:'<ruby>昨日<rt>きのう</rt></ruby>より<ruby>今日<rt>きょう</rt></ruby>の方が<ruby>暑<rt>あつ</rt></ruby>いです',hint:'Hoy hace más calor que ayer.',explain:'「暑い」= caluroso. より también se usa con expresiones de tiempo.'},
     {words:['<ruby>山田<rt>やまだ</rt></ruby>さんより','<ruby>田中<rt>たなか</rt></ruby>さんの方が','<ruby>背<rt>せ</rt></ruby>が<ruby>高<rt>たか</rt></ruby>いです'],answer:'<ruby>山田<rt>やまだ</rt></ruby>さんより<ruby>田中<rt>たなか</rt></ruby>さんの方が<ruby>背<rt>せ</rt></ruby>が<ruby>高<rt>たか</rt></ruby>いです',hint:'Tanaka es más alto que Yamada.',explain:'「背が高い」= ser alto. La estructura AよりBの方が se mantiene igual.'},
     {words:['りんごより','みかんの方が','<ruby>安<rt>やす</rt></ruby>いです'],answer:'りんごよりみかんの方が<ruby>安<rt>やす</rt></ruby>いです',hint:'La mandarina es más barata que la manzana.',explain:'「安い」= barato (い形容詞). La partícula より va directamente después de A.'},
-    {words:['バスより','<ruby>電車<rt>でんしゃ</rt></ruby>の方が','<ruby>速<rt>はや</rt></ruby>いです'],answer:'バスより<ruby>電車<rt>でんしゃ</rt></ruby>の方が<ruby>速<rt>はや</rt></ruby>いです',hint:'El tren es más rápido que el autobús.',explain:'「速い」es い形容詞. Aquí A = バス, B = 電車.'},
+    {words:['バスより','<ruby>電車<rt>でんしゃ</rt></ruby>の方が','<ruby>速<rt>はや</rt></ruby>いです'],answer:'バスより<ruby>電車<rt>でんしゃ</rt></ruby>の方が<ruby>速<rt>はや</rt></ruby>いです',hint:'El tren es más rápido que el autobús.',explain:'速い = rápido (adjetivo-い). Aquí A = バス (autobús), B = 電車 (tren).'},
     {words:['<ruby>春<rt>はる</rt></ruby>より','<ruby>秋<rt>あき</rt></ruby>の方が','<ruby>涼<rt>すず</rt></ruby>しいです'],answer:'<ruby>春<rt>はる</rt></ruby>より<ruby>秋<rt>あき</rt></ruby>の方が<ruby>涼<rt>すず</rt></ruby>しいです',hint:'El otoño es más fresco que la primavera.',explain:'「涼しい」= fresco (い形容詞). より marca la estación de comparación.'},
     {words:['<ruby>英語<rt>えいご</rt></ruby>より','<ruby>日本語<rt>にほんご</rt></ruby>の方が','<ruby>難<rt>むずか</rt></ruby>しいです'],answer:'<ruby>英語<rt>えいご</rt></ruby>より<ruby>日本語<rt>にほんご</rt></ruby>の方が<ruby>難<rt>むずか</rt></ruby>しいです',hint:'El japonés es más difícil que el inglés.',explain:'「難しい」= difícil (い形容詞). A = inglés, B = japonés.'},
     {words:['<ruby>肉<rt>にく</rt></ruby>より','<ruby>魚<rt>さかな</rt></ruby>の方が','<ruby>好<rt>す</rt></ruby>きです'],answer:'<ruby>肉<rt>にく</rt></ruby>より<ruby>魚<rt>さかな</rt></ruby>の方が<ruby>好<rt>す</rt></ruby>きです',hint:'Me gusta más el pescado que la carne.',explain:'「好き」es な形容詞. 「の方が好きです」= me gusta más.'},
     {words:['<ruby>自転車<rt>じてんしゃ</rt></ruby>より','<ruby>車<rt>くるま</rt></ruby>の方が','<ruby>速<rt>はや</rt></ruby>いです'],answer:'<ruby>自転車<rt>じてんしゃ</rt></ruby>より<ruby>車<rt>くるま</rt></ruby>の方が<ruby>速<rt>はや</rt></ruby>いです',hint:'El coche es más rápido que la bicicleta.',explain:'「速い」es い形容詞. A = bicicleta (自転車), B = coche (車).'},
-    {words:['<ruby>山<rt>やま</rt></ruby>より','<ruby>海<rt>うみ</rt></ruby>の方が','<ruby>好<rt>す</rt></ruby>きです'],answer:'<ruby>山<rt>やま</rt></ruby>より<ruby>海<rt>うみ</rt></ruby>の方が<ruby>好<rt>す</rt></ruby>きです',hint:'Me gusta más el mar que la montaña.',explain:'「好き」es な形容詞. Indica preferencia personal: B の方が好き.'},
+    {words:['<ruby>山<rt>やま</rt></ruby>より','<ruby>海<rt>うみ</rt></ruby>の方が','<ruby>好<rt>す</rt></ruby>きです'],answer:'<ruby>山<rt>やま</rt></ruby>より<ruby>海<rt>うみ</rt></ruby>の方が<ruby>好<rt>す</rt></ruby>きです',hint:'Me gusta más el mar que la montaña.',explain:'好き = gustar (adjetivo-な). Indica preferencia personal: me gusta más B.'},
     {words:['<ruby>水<rt>みず</rt></ruby>より','ジュースの方が','<ruby>甘<rt>あま</rt></ruby>いです'],answer:'<ruby>水<rt>みず</rt></ruby>よりジュースの方が<ruby>甘<rt>あま</rt></ruby>いです',hint:'El jugo es más dulce que el agua.',explain:'「甘い」= dulce (い形容詞). A = agua, B = jugo.'},
     {words:['<ruby>東京<rt>とうきょう</rt></ruby>より','<ruby>大阪<rt>おおさか</rt></ruby>の方が','<ruby>物価<rt>ぶっか</rt></ruby>が<ruby>安<rt>やす</rt></ruby>いです'],answer:'<ruby>東京<rt>とうきょう</rt></ruby>より<ruby>大阪<rt>おおさか</rt></ruby>の方が<ruby>物価<rt>ぶっか</rt></ruby>が<ruby>安<rt>やす</rt></ruby>いです',hint:'Los precios en Osaka son más baratos que en Tokio.',explain:'の方が puede usarse con expresiones más complejas como 物価が安い.'},
     {words:['この<ruby>映画<rt>えいが</rt></ruby>より','あの<ruby>映画<rt>えいが</rt></ruby>の方が','おもしろいです'],answer:'この<ruby>映画<rt>えいが</rt></ruby>よりあの<ruby>映画<rt>えいが</rt></ruby>の方がおもしろいです',hint:'Aquella película es más interesante que esta.',explain:'「おもしろい」= interesante. この/あの (こそあど) también se usan con より.'},
@@ -8550,50 +9022,71 @@ const yoriReorderPool = [
     {words:['<ruby>今年<rt>ことし</rt></ruby>より','<ruby>去年<rt>きょねん</rt></ruby>の方が','<ruby>寒<rt>さむ</rt></ruby>かったです'],answer:'<ruby>今年<rt>ことし</rt></ruby>より<ruby>去年<rt>きょねん</rt></ruby>の方が<ruby>寒<rt>さむ</rt></ruby>かったです',hint:'El año pasado fue más frío que este año.',explain:'「寒かった」= pasado de 寒い. La estructura AよりBの方が no cambia en pasado.'},
     {words:['<ruby>電車<rt>でんしゃ</rt></ruby>より','<ruby>地下鉄<rt>ちかてつ</rt></ruby>の方が','<ruby>安<rt>やす</rt></ruby>いです'],answer:'<ruby>電車<rt>でんしゃ</rt></ruby>より<ruby>地下鉄<rt>ちかてつ</rt></ruby>の方が<ruby>安<rt>やす</rt></ruby>いです',hint:'El metro es más barato que el tren.',explain:'「安い」= barato. 地下鉄 = metro. La partícula より va después de 電車.'},
     // ===== どちらが疑問文 (8問) =====
-    {words:['<ruby>犬<rt>いぬ</rt></ruby>と<ruby>猫<rt>ねこ</rt></ruby>と','どちらが','<ruby>好<rt>す</rt></ruby>きですか'],answer:'<ruby>犬<rt>いぬ</rt></ruby>と<ruby>猫<rt>ねこ</rt></ruby>とどちらが<ruby>好<rt>す</rt></ruby>きですか',hint:'¿Cuál prefieres, el perro o el gato?',explain:'「AとBと」がひとつのまとまり。どちらが で2択を問う。Los dos と son obligatorios.'},
-    {words:['<ruby>夏<rt>なつ</rt></ruby>と<ruby>冬<rt>ふゆ</rt></ruby>と','どちらが','<ruby>好<rt>す</rt></ruby>きですか'],answer:'<ruby>夏<rt>なつ</rt></ruby>と<ruby>冬<rt>ふゆ</rt></ruby>とどちらが<ruby>好<rt>す</rt></ruby>きですか',hint:'¿Cuál te gusta más, el verano o el invierno?',explain:'「AとBとどちら」は2択の疑問文. どちら = cuál (entre dos opciones).'},
-    {words:['<ruby>日本語<rt>にほんご</rt></ruby>と<ruby>英語<rt>えいご</rt></ruby>と','どちらが','<ruby>難<rt>むずか</rt></ruby>しいですか'],answer:'<ruby>日本語<rt>にほんご</rt></ruby>と<ruby>英語<rt>えいご</rt></ruby>とどちらが<ruby>難<rt>むずか</rt></ruby>しいですか',hint:'¿Cuál es más difícil, el japonés o el inglés?',explain:'「難しい」は い形容詞. AとBとどちらが は常にこの順番で.'},
-    {words:['<ruby>電車<rt>でんしゃ</rt></ruby>とバスと','どちらが','<ruby>安<rt>やす</rt></ruby>いですか'],answer:'<ruby>電車<rt>でんしゃ</rt></ruby>とバスとどちらが<ruby>安<rt>やす</rt></ruby>いですか',hint:'¿Cuál es más barato, el tren o el autobús?',explain:'「安い」= barato. バス はカタカナだが構造は同じ.'},
-    {words:['<ruby>山<rt>やま</rt></ruby>と<ruby>海<rt>うみ</rt></ruby>と','どちらが','<ruby>好<rt>す</rt></ruby>きですか'],answer:'<ruby>山<rt>やま</rt></ruby>と<ruby>海<rt>うみ</rt></ruby>とどちらが<ruby>好<rt>す</rt></ruby>きですか',hint:'¿Cuál prefieres, la montaña o el mar?',explain:'「AとBとどちらが好きですか」で好みを聞く。「どちら」= which of the two.'},
-    {words:['<ruby>肉<rt>にく</rt></ruby>と<ruby>魚<rt>さかな</rt></ruby>と','どちらが','<ruby>好<rt>す</rt></ruby>きですか'],answer:'<ruby>肉<rt>にく</rt></ruby>と<ruby>魚<rt>さかな</rt></ruby>とどちらが<ruby>好<rt>す</rt></ruby>きですか',hint:'¿Qué prefieres, la carne o el pescado?',explain:'「どちら」はいつも2択の比較に使う。「どれ」は3つ以上.'},
-    {words:['コーヒーとお<ruby>茶<rt>ちゃ</rt></ruby>と','どちらが','<ruby>好<rt>す</rt></ruby>きですか'],answer:'コーヒーとお<ruby>茶<rt>ちゃ</rt></ruby>とどちらが<ruby>好<rt>す</rt></ruby>きですか',hint:'¿Cuál prefieres, el café o el té?',explain:'「AとBとどちらが好きですか」で2択の好みを聞く。と を2回使うのがポイント.'},
-    {words:['<ruby>東京<rt>とうきょう</rt></ruby>と<ruby>大阪<rt>おおさか</rt></ruby>と','どちらが','<ruby>大<rt>おお</rt></ruby>きいですか'],answer:'<ruby>東京<rt>とうきょう</rt></ruby>と<ruby>大阪<rt>おおさか</rt></ruby>とどちらが<ruby>大<rt>おお</rt></ruby>きいですか',hint:'¿Cuál es más grande, Tokio u Osaka?',explain:'「大きい」は い形容詞. AとBとどちらが の構造は好み以外にも使える.'}
+    {words:['<ruby>犬<rt>いぬ</rt></ruby>と<ruby>猫<rt>ねこ</rt></ruby>と','どちらが','<ruby>好<rt>す</rt></ruby>きですか'],answer:'<ruby>犬<rt>いぬ</rt></ruby>と<ruby>猫<rt>ねこ</rt></ruby>とどちらが<ruby>好<rt>す</rt></ruby>きですか',hint:'¿Cuál prefieres, el perro o el gato?',explain:'AとBと forman una unidad. どちらが pregunta entre 2 opciones. Los dos と son obligatorios.'},
+    {words:['<ruby>夏<rt>なつ</rt></ruby>と<ruby>冬<rt>ふゆ</rt></ruby>と','どちらが','<ruby>好<rt>す</rt></ruby>きですか'],answer:'<ruby>夏<rt>なつ</rt></ruby>と<ruby>冬<rt>ふゆ</rt></ruby>とどちらが<ruby>好<rt>す</rt></ruby>きですか',hint:'¿Cuál te gusta más, el verano o el invierno?',explain:'AとBとどちらが es la estructura para elegir entre 2 opciones. どちら = cuál (entre dos).'},
+    {words:['<ruby>日本語<rt>にほんご</rt></ruby>と<ruby>英語<rt>えいご</rt></ruby>と','どちらが','<ruby>難<rt>むずか</rt></ruby>しいですか'],answer:'<ruby>日本語<rt>にほんご</rt></ruby>と<ruby>英語<rt>えいご</rt></ruby>とどちらが<ruby>難<rt>むずか</rt></ruby>しいですか',hint:'¿Cuál es más difícil, el japonés o el inglés?',explain:'難しい = difícil (adjetivo-い). La estructura AとBとどちらが siempre mantiene este orden.'},
+    {words:['<ruby>電車<rt>でんしゃ</rt></ruby>とバスと','どちらが','<ruby>安<rt>やす</rt></ruby>いですか'],answer:'<ruby>電車<rt>でんしゃ</rt></ruby>とバスとどちらが<ruby>安<rt>やす</rt></ruby>いですか',hint:'¿Cuál es más barato, el tren o el autobús?',explain:'安い = barato. バス está en katakana pero la estructura es la misma.'},
+    {words:['<ruby>山<rt>やま</rt></ruby>と<ruby>海<rt>うみ</rt></ruby>と','どちらが','<ruby>好<rt>す</rt></ruby>きですか'],answer:'<ruby>山<rt>やま</rt></ruby>と<ruby>海<rt>うみ</rt></ruby>とどちらが<ruby>好<rt>す</rt></ruby>きですか',hint:'¿Cuál prefieres, la montaña o el mar?',explain:'AとBとどちらが好きですか pregunta preferencia entre dos opciones. どちら = cuál de los dos.'},
+    {words:['<ruby>肉<rt>にく</rt></ruby>と<ruby>魚<rt>さかな</rt></ruby>と','どちらが','<ruby>好<rt>す</rt></ruby>きですか'],answer:'<ruby>肉<rt>にく</rt></ruby>と<ruby>魚<rt>さかな</rt></ruby>とどちらが<ruby>好<rt>す</rt></ruby>きですか',hint:'¿Qué prefieres, la carne o el pescado?',explain:'どちら siempre se usa para 2 opciones. どれ se usa para 3 o más opciones.'},
+    {words:['コーヒーとお<ruby>茶<rt>ちゃ</rt></ruby>と','どちらが','<ruby>好<rt>す</rt></ruby>きですか'],answer:'コーヒーとお<ruby>茶<rt>ちゃ</rt></ruby>とどちらが<ruby>好<rt>す</rt></ruby>きですか',hint:'¿Cuál prefieres, el café o el té?',explain:'AとBとどちらが好きですか pregunta preferencia. Usar と dos veces es la clave.'},
+    {words:['<ruby>東京<rt>とうきょう</rt></ruby>と<ruby>大阪<rt>おおさか</rt></ruby>と','どちらが','<ruby>大<rt>おお</rt></ruby>きいですか'],answer:'<ruby>東京<rt>とうきょう</rt></ruby>と<ruby>大阪<rt>おおさか</rt></ruby>とどちらが<ruby>大<rt>おお</rt></ruby>きいですか',hint:'¿Cuál es más grande, Tokio u Osaka?',explain:'大きい = grande (adjetivo-い). La estructura AとBとどちらが también se usa para no-preferencias.'},
+    // ===== 追加問題 (10問) =====
+    {words:['バナナより','りんごの方が','<ruby>高<rt>たか</rt></ruby>いです'],answer:'バナナよりりんごの方が<ruby>高<rt>たか</rt></ruby>いです',hint:'Las manzanas son más caras que los plátanos.',explain:'高い = caro (adjetivo-い). A = plátano (バナナ), B = manzana (りんご).'},
+    {words:['<ruby>数学<rt>すうがく</rt></ruby>より','<ruby>国語<rt>こくご</rt></ruby>の方が','<ruby>好<rt>す</rt></ruby>きです'],answer:'<ruby>数学<rt>すうがく</rt></ruby>より<ruby>国語<rt>こくご</rt></ruby>の方が<ruby>好<rt>す</rt></ruby>きです',hint:'Me gusta más la lengua que las matemáticas.',explain:'好き = gustar (adjetivo-な). A = matemáticas (数学), B = lengua (国語).'},
+    {words:['<ruby>昼<rt>ひる</rt></ruby>より','<ruby>夜<rt>よる</rt></ruby>の方が','<ruby>涼<rt>すず</rt></ruby>しいです'],answer:'<ruby>昼<rt>ひる</rt></ruby>より<ruby>夜<rt>よる</rt></ruby>の方が<ruby>涼<rt>すず</rt></ruby>しいです',hint:'La noche es más fresca que el mediodía.',explain:'涼しい = fresco (adjetivo-い). A = mediodía (昼), B = noche (夜).'},
+    {words:['タクシーより','バスの方が','<ruby>安<rt>やす</rt></ruby>いです'],answer:'タクシーよりバスの方が<ruby>安<rt>やす</rt></ruby>いです',hint:'El autobús es más barato que el taxi.',explain:'安い = barato (adjetivo-い). A = taxi, B = autobús (バス).'},
+    {words:['<ruby>映画<rt>えいが</rt></ruby>より','<ruby>音楽<rt>おんがく</rt></ruby>の方が','<ruby>好<rt>す</rt></ruby>きです'],answer:'<ruby>映画<rt>えいが</rt></ruby>より<ruby>音楽<rt>おんがく</rt></ruby>の方が<ruby>好<rt>す</rt></ruby>きです',hint:'Me gusta más la música que las películas.',explain:'好き = gustar (adjetivo-な). A = películas (映画), B = música (音楽).'},
+    {words:['<ruby>日本語<rt>にほんご</rt></ruby>と','スペイン語と','どちらが<ruby>好<rt>す</rt></ruby>きですか'],answer:'<ruby>日本語<rt>にほんご</rt></ruby>とスペイン語とどちらが<ruby>好<rt>す</rt></ruby>きですか',hint:'¿Cuál prefieres, el japonés o el español?',explain:'AとBとどちらが好きですか pregunta preferencia entre dos idiomas. Los dos と son necesarios.'},
+    {words:['<ruby>春<rt>はる</rt></ruby>と<ruby>秋<rt>あき</rt></ruby>と','どちらが','<ruby>好<rt>す</rt></ruby>きですか'],answer:'<ruby>春<rt>はる</rt></ruby>と<ruby>秋<rt>あき</rt></ruby>とどちらが<ruby>好<rt>す</rt></ruby>きですか',hint:'¿Cuál prefieres, la primavera o el otoño?',explain:'どちらが pregunta cuál de los dos es preferido. どちら solo se usa con exactamente 2 opciones.'},
+    {words:['<ruby>音楽<rt>おんがく</rt></ruby>と<ruby>映画<rt>えいが</rt></ruby>と','どちらが','<ruby>好<rt>す</rt></ruby>きですか'],answer:'<ruby>音楽<rt>おんがく</rt></ruby>と<ruby>映画<rt>えいが</rt></ruby>とどちらが<ruby>好<rt>す</rt></ruby>きですか',hint:'¿Cuál prefieres, la música o las películas?',explain:'AとBとどちらが好きですか es la forma estándar para elegir entre 2 cosas.'},
+    {words:['ハンバーガーより','ピザの方が','<ruby>好<rt>す</rt></ruby>きです'],answer:'ハンバーガーよりピザの方が<ruby>好<rt>す</rt></ruby>きです',hint:'Me gusta más la pizza que la hamburguesa.',explain:'好き = gustar (adjetivo-な). A = hamburguesa, B = pizza. の方が indica la opción preferida.'},
+    {words:['スマホと','パソコンと','どちらが<ruby>便利<rt>べんり</rt></ruby>ですか'],answer:'スマホとパソコンとどちらが<ruby>便利<rt>べんり</rt></ruby>ですか',hint:'¿Cuál es más conveniente, el smartphone o la computadora?',explain:'便利 = conveniente (adjetivo-な). AとBとどちらが también se usa con adjetivos-な.'}
 ];
 
 const yoriFillPool = [
-    // ===== より (10問) =====
-    {q:'<ruby>東京<rt>とうきょう</rt></ruby>は<ruby>大阪<rt>おおさか</rt></ruby>___<ruby>大<rt>おお</rt></ruby>きいです。',a:'より',opts:['より','の方が','どちらも','と'],h:'Tokio es más grande que Osaka.',exp:'「AはBより形容詞」= A es más [adj] que B. より が比較の基準を示す.'},
-    {q:'<ruby>電車<rt>でんしゃ</rt></ruby>はバス___<ruby>速<rt>はや</rt></ruby>いです。',a:'より',opts:['より','の方が','どちら','も'],h:'El tren es más rápido que el autobús.',exp:'「AはBより速い」= A es más rápido que B. より の前に比較対象(B)が来る.'},
-    {q:'<ruby>日本語<rt>にほんご</rt></ruby>は<ruby>英語<rt>えいご</rt></ruby>___<ruby>難<rt>むずか</rt></ruby>しいです。',a:'より',opts:['より','の方が','どちら','だけ'],h:'El japonés es más difícil que el inglés.',exp:'「AはBより形容詞」構造。より = que (punto de comparación).'},
-    {q:'この<ruby>本<rt>ほん</rt></ruby>はあの<ruby>本<rt>ほん</rt></ruby>___おもしろいです。',a:'より',opts:['より','の方が','どちらも','ほど'],h:'Este libro es más interesante que aquel.',exp:'「AはBより形容詞」構造。この/あの と一緒に使える.'},
-    {q:'<ruby>夏<rt>なつ</rt></ruby>は<ruby>冬<rt>ふゆ</rt></ruby>___<ruby>暑<rt>あつ</rt></ruby>いです。',a:'より',opts:['より','の方が','どちら','と'],h:'El verano es más caluroso que el invierno.',exp:'AはB___形容詞 → より を使う。より の前に比較対象(B)が来る.'},
-    {q:'コーヒーはお<ruby>茶<rt>ちゃ</rt></ruby>___<ruby>苦<rt>にが</rt></ruby>いです。',a:'より',opts:['より','の方が','どちらも','も'],h:'El café es más amargo que el té.',exp:'「苦い」= amargo (い形容詞). AはBより形容詞 の構造.'},
-    {q:'<ruby>冬<rt>ふゆ</rt></ruby>は<ruby>秋<rt>あき</rt></ruby>___<ruby>寒<rt>さむ</rt></ruby>いです。',a:'より',opts:['より','の方が','どちら','だけ'],h:'El invierno es más frío que el otoño.',exp:'「AはBより形容詞」= A es más [adj] que B.'},
-    {q:'<ruby>象<rt>ぞう</rt></ruby>は<ruby>馬<rt>うま</rt></ruby>___<ruby>重<rt>おも</rt></ruby>いです。',a:'より',opts:['より','の方が','どちらも','と'],h:'El elefante es más pesado que el caballo.',exp:'「重い」= pesado. AはBより = A es más que B.'},
-    {q:'スーパーはコンビニ___<ruby>安<rt>やす</rt></ruby>いです。',a:'より',opts:['より','の方が','どちら','も'],h:'El supermercado es más barato que el konbini.',exp:'「AはBより安い」= A es más barato que B.'},
-    {q:'<ruby>秋<rt>あき</rt></ruby>は<ruby>夏<rt>なつ</rt></ruby>___<ruby>涼<rt>すず</rt></ruby>しいです。',a:'より',opts:['より','の方が','どちらも','ほど'],h:'El otoño es más fresco que el verano.',exp:'「涼しい」= fresco. AはBより形容詞 の構造.'},
-    // ===== の方が (10問) =====
-    {q:'コーヒーより<ruby>紅茶<rt>こうちゃ</rt></ruby>___<ruby>好<rt>す</rt></ruby>きです。',a:'の方が',opts:['の方が','より','どちらも','だけ'],h:'Me gusta más el té negro que el café.',exp:'「AよりB___好き」→「の方が」. B が「より好き」な側.'},
-    {q:'バスより<ruby>電車<rt>でんしゃ</rt></ruby>___<ruby>便利<rt>べんり</rt></ruby>です。',a:'の方が',opts:['の方が','より','どちら','も'],h:'El tren es más conveniente que el autobús.',exp:'「AよりB___形容詞」→「の方が」. B が比較で上の側.'},
-    {q:'<ruby>夏<rt>なつ</rt></ruby>より<ruby>冬<rt>ふゆ</rt></ruby>___<ruby>寒<rt>さむ</rt></ruby>いです。',a:'の方が',opts:['の方が','より','どちらも','ほど'],h:'El invierno es más frío que el verano.',exp:'「AよりB___寒い」→「の方が」.'},
-    {q:'<ruby>猫<rt>ねこ</rt></ruby>より<ruby>犬<rt>いぬ</rt></ruby>___<ruby>大<rt>おお</rt></ruby>きいです。',a:'の方が',opts:['の方が','より','どちら','と'],h:'El perro es más grande que el gato.',exp:'「より」の後ろに来る B に「の方が」をつける.'},
-    {q:'<ruby>英語<rt>えいご</rt></ruby>より<ruby>日本語<rt>にほんご</rt></ruby>___<ruby>難<rt>むずか</rt></ruby>しいです。',a:'の方が',opts:['の方が','より','どちらも','だけ'],h:'El japonés es más difícil que el inglés.',exp:'「AよりBの方が形容詞」= B es más [adj] que A. B に の方が がつく.'},
-    {q:'<ruby>自転車<rt>じてんしゃ</rt></ruby>より<ruby>車<rt>くるま</rt></ruby>___<ruby>速<rt>はや</rt></ruby>いです。',a:'の方が',opts:['の方が','より','どちら','も'],h:'El coche es más rápido que la bicicleta.',exp:'「より」で比較の基準を示し、「の方が」で比較で上の側を示す.'},
-    {q:'ラーメンより<ruby>寿司<rt>すし</rt></ruby>___<ruby>高<rt>たか</rt></ruby>いです。',a:'の方が',opts:['の方が','より','どちらも','と'],h:'El sushi es más caro que el ramen.',exp:'「高い」= caro. AよりBの方が形容詞 の構造.'},
-    {q:'<ruby>肉<rt>にく</rt></ruby>より<ruby>魚<rt>さかな</rt></ruby>___<ruby>好<rt>す</rt></ruby>きです。',a:'の方が',opts:['の方が','より','どちら','だけ'],h:'Me gusta más el pescado que la carne.',exp:'「好き」は な形容詞. AよりBの方が好きです の構造.'},
-    {q:'<ruby>春<rt>はる</rt></ruby>より<ruby>秋<rt>あき</rt></ruby>___<ruby>涼<rt>すず</rt></ruby>しいです。',a:'の方が',opts:['の方が','より','どちらも','も'],h:'El otoño es más fresco que la primavera.',exp:'の方が は常に B（比較で上の側）の直後に来る.'},
-    {q:'<ruby>電車<rt>でんしゃ</rt></ruby>より<ruby>飛行機<rt>ひこうき</rt></ruby>___<ruby>速<rt>はや</rt></ruby>いです。',a:'の方が',opts:['の方が','より','どちら','も'],h:'El avión es más rápido que el tren.',exp:'「速い」= rápido. B（飛行機）に の方が をつける.'},
-    // ===== どちら / どちらも (10問) =====
-    {q:'<ruby>犬<rt>いぬ</rt></ruby>と<ruby>猫<rt>ねこ</rt></ruby>と、___が<ruby>好<rt>す</rt></ruby>きですか。',a:'どちら',opts:['どちら','より','の方が','どれ'],h:'¿Cuál prefieres, el perro o el gato?',exp:'「AとBと___が」の形では「どちら」を使う。2択の疑問文の決まり表現.'},
-    {q:'コーヒーとお<ruby>茶<rt>ちゃ</rt></ruby>と、___が<ruby>好<rt>す</rt></ruby>きですか。',a:'どちら',opts:['どちら','より','の方が','どれ'],h:'¿Cuál prefieres, el café o el té?',exp:'「AとBとどちらが」= ¿Cuál, A o B? 2択の場合に使う.'},
-    {q:'<ruby>山<rt>やま</rt></ruby>と<ruby>海<rt>うみ</rt></ruby>と、___が<ruby>好<rt>す</rt></ruby>きですか。',a:'どちら',opts:['どちら','より','どちらも','どれ'],h:'¿Cuál prefieres, la montaña o el mar?',exp:'「どちら」は必ず2択。「どれ」は3つ以上の選択肢に使う.'},
-    {q:'<ruby>日本語<rt>にほんご</rt></ruby>と<ruby>英語<rt>えいご</rt></ruby>、___も<ruby>難<rt>むずか</rt></ruby>しいです。',a:'どちら',opts:['どちら','より','の方が','どれ'],h:'Tanto el japonés como el inglés son difíciles.',exp:'「どちらも」= ambos/tanto...como. どちら＋も のセットになる.'},
-    {q:'<ruby>牛乳<rt>ぎゅうにゅう</rt></ruby>とジュースと、___も<ruby>甘<rt>あま</rt></ruby>いです。',a:'どちら',opts:['どちら','より','の方が','どれ'],h:'Tanto la leche como el jugo son dulces.',exp:'「どちらも」で両方に当てはまることを表す.'},
-    {q:'<ruby>東京<rt>とうきょう</rt></ruby>と<ruby>大阪<rt>おおさか</rt></ruby>と、___が<ruby>大<rt>おお</rt></ruby>きいですか。',a:'どちら',opts:['どちら','より','の方が','どれ'],h:'¿Cuál es más grande, Tokio u Osaka?',exp:'「どちら」= cuál (2択). 「どれ」は使わない.'},
-    {q:'<ruby>夏<rt>なつ</rt></ruby>と<ruby>冬<rt>ふゆ</rt></ruby>と、___も<ruby>好<rt>す</rt></ruby>きです。',a:'どちら',opts:['どちら','より','の方が','どれ'],h:'Me gustan tanto el verano como el invierno.',exp:'「どちらも好き」= me gustan ambos. どちらも は中立な答えに使う.'},
-    {q:'<ruby>肉<rt>にく</rt></ruby>と<ruby>魚<rt>さかな</rt></ruby>と、___が<ruby>好<rt>す</rt></ruby>きですか。',a:'どちら',opts:['どちら','より','の方が','どれ'],h:'¿Qué prefieres, la carne o el pescado?',exp:'「AとBとどちらが好きですか」で好みを聞く.'},
-    {q:'バスと<ruby>電車<rt>でんしゃ</rt></ruby>と、___も<ruby>便利<rt>べんり</rt></ruby>です。',a:'どちら',opts:['どちら','より','の方が','どれ'],h:'Tanto el autobús como el tren son convenientes.',exp:'「どちらも便利」= ambos son convenientes. どちらも で「両方」を表す.'},
-    {q:'<ruby>春<rt>はる</rt></ruby>と<ruby>秋<rt>あき</rt></ruby>と、___が<ruby>涼<rt>すず</rt></ruby>しいですか。',a:'どちら',opts:['どちら','より','の方が','どれ'],h:'¿Cuál es más fresco, la primavera o el otoño?',exp:'2択の疑問には「どちら」。「どれ」は3つ以上の選択肢.'}
+    // ===== より (13問) =====
+    {q:'<ruby>東京<rt>とうきょう</rt></ruby>は<ruby>大阪<rt>おおさか</rt></ruby>___<ruby>大<rt>おお</rt></ruby>きいです。',a:'より',opts:['より','の方が','どちらも','と'],h:'Tokio es más grande que Osaka.',exp:'Estructura AはBより [adj]: A es más [adj] que B. より indica el elemento de comparación.'},
+    {q:'<ruby>電車<rt>でんしゃ</rt></ruby>はバス___<ruby>速<rt>はや</rt></ruby>いです。',a:'より',opts:['より','の方が','どちら','も'],h:'El tren es más rápido que el autobús.',exp:'AはBより [adj]: A es más [adj] que B. B (el punto de comparación) va antes de より.'},
+    {q:'<ruby>日本語<rt>にほんご</rt></ruby>は<ruby>英語<rt>えいご</rt></ruby>___<ruby>難<rt>むずか</rt></ruby>しいです。',a:'より',opts:['より','の方が','どちら','だけ'],h:'El japonés es más difícil que el inglés.',exp:'Estructura AはBより [adj]. より = que (punto de comparación).'},
+    {q:'この<ruby>本<rt>ほん</rt></ruby>はあの<ruby>本<rt>ほん</rt></ruby>___おもしろいです。',a:'より',opts:['より','の方が','どちらも','ほど'],h:'Este libro es más interesante que aquel.',exp:'Estructura AはBより [adj]. Los demostrativos この/あの también se usan con より.'},
+    {q:'<ruby>夏<rt>なつ</rt></ruby>は<ruby>冬<rt>ふゆ</rt></ruby>___<ruby>暑<rt>あつ</rt></ruby>いです。',a:'より',opts:['より','の方が','どちら','と'],h:'El verano es más caluroso que el invierno.',exp:'AはB___ [adj]: usar より. B es el elemento de comparación y va antes de より.'},
+    {q:'コーヒーはお<ruby>茶<rt>ちゃ</rt></ruby>___<ruby>苦<rt>にが</rt></ruby>いです。',a:'より',opts:['より','の方が','どちらも','も'],h:'El café es más amargo que el té.',exp:'苦い = amargo (adjetivo-い). Estructura AはBより [adj]: A es más [adj] que B.'},
+    {q:'<ruby>冬<rt>ふゆ</rt></ruby>は<ruby>秋<rt>あき</rt></ruby>___<ruby>寒<rt>さむ</rt></ruby>いです。',a:'より',opts:['より','の方が','どちら','だけ'],h:'El invierno es más frío que el otoño.',exp:'寒い = frío (adjetivo-い). Estructura AはBより [adj]: A es más [adj] que B.'},
+    {q:'<ruby>象<rt>ぞう</rt></ruby>は<ruby>馬<rt>うま</rt></ruby>___<ruby>重<rt>おも</rt></ruby>いです。',a:'より',opts:['より','の方が','どちらも','と'],h:'El elefante es más pesado que el caballo.',exp:'重い = pesado (adjetivo-い). AはBより [adj]: A es más pesado que B.'},
+    {q:'スーパーはコンビニ___<ruby>安<rt>やす</rt></ruby>いです。',a:'より',opts:['より','の方が','どちら','も'],h:'El supermercado es más barato que el konbini.',exp:'安い = barato (adjetivo-い). AはBより [adj]: A es más barato que B.'},
+    {q:'<ruby>秋<rt>あき</rt></ruby>は<ruby>夏<rt>なつ</rt></ruby>___<ruby>涼<rt>すず</rt></ruby>しいです。',a:'より',opts:['より','の方が','どちらも','ほど'],h:'El otoño es más fresco que el verano.',exp:'涼しい = fresco (adjetivo-い). Estructura AはBより [adj].'},
+    {q:'バナナはりんご___<ruby>安<rt>やす</rt></ruby>いです。',a:'より',opts:['より','の方が','どちらも','と'],h:'Los plátanos son más baratos que las manzanas.',exp:'AはBより [adj]: A es más [adj] que B. B (el punto de comparación) va justo antes de より.'},
+    {q:'タクシーはバス___<ruby>高<rt>たか</rt></ruby>いです。',a:'より',opts:['より','の方が','どちら','も'],h:'El taxi es más caro que el autobús.',exp:'高い = caro (adjetivo-い). A = taxi, B = autobús. A es más caro que B.'},
+    {q:'ピザはラーメン___<ruby>高<rt>たか</rt></ruby>いです。',a:'より',opts:['より','の方が','どちらも','だけ'],h:'La pizza es más cara que el ramen.',exp:'AはBより [adj]: usar より después del elemento de comparación B.'},
+    // ===== の方が (13問) =====
+    {q:'コーヒーより<ruby>紅茶<rt>こうちゃ</rt></ruby>___<ruby>好<rt>す</rt></ruby>きです。',a:'の方が',opts:['の方が','より','どちらも','だけ'],h:'Me gusta más el té negro que el café.',exp:'En AよりB ___ [adj], usar の方が. B es la opción preferida.'},
+    {q:'バスより<ruby>電車<rt>でんしゃ</rt></ruby>___<ruby>便利<rt>べんり</rt></ruby>です。',a:'の方が',opts:['の方が','より','どちら','も'],h:'El tren es más conveniente que el autobús.',exp:'En AよりB ___ [adj], usar の方が. B es el elemento que supera a A.'},
+    {q:'<ruby>夏<rt>なつ</rt></ruby>より<ruby>冬<rt>ふゆ</rt></ruby>___<ruby>寒<rt>さむ</rt></ruby>いです。',a:'の方が',opts:['の方が','より','どちらも','ほど'],h:'El invierno es más frío que el verano.',exp:'Después de より va A. El elemento B que supera a A lleva の方が.'},
+    {q:'<ruby>猫<rt>ねこ</rt></ruby>より<ruby>犬<rt>いぬ</rt></ruby>___<ruby>大<rt>おお</rt></ruby>きいです。',a:'の方が',opts:['の方が','より','どちら','と'],h:'El perro es más grande que el gato.',exp:'B (el elemento que supera a A) lleva の方が directamente detrás.'},
+    {q:'<ruby>英語<rt>えいご</rt></ruby>より<ruby>日本語<rt>にほんご</rt></ruby>___<ruby>難<rt>むずか</rt></ruby>しいです。',a:'の方が',opts:['の方が','より','どちらも','だけ'],h:'El japonés es más difícil que el inglés.',exp:'Estructura AよりBの方が [adj]: B es más [adj] que A. B lleva の方が.'},
+    {q:'<ruby>自転車<rt>じてんしゃ</rt></ruby>より<ruby>車<rt>くるま</rt></ruby>___<ruby>速<rt>はや</rt></ruby>いです。',a:'の方が',opts:['の方が','より','どちら','も'],h:'El coche es más rápido que la bicicleta.',exp:'より marca el punto de referencia A. の方が va después de B para mostrar que B supera a A.'},
+    {q:'ラーメンより<ruby>寿司<rt>すし</rt></ruby>___<ruby>高<rt>たか</rt></ruby>いです。',a:'の方が',opts:['の方が','より','どちらも','と'],h:'El sushi es más caro que el ramen.',exp:'高い = caro (adjetivo-い). Estructura AよりBの方が [adj].'},
+    {q:'<ruby>肉<rt>にく</rt></ruby>より<ruby>魚<rt>さかな</rt></ruby>___<ruby>好<rt>す</rt></ruby>きです。',a:'の方が',opts:['の方が','より','どちら','だけ'],h:'Me gusta más el pescado que la carne.',exp:'好き = gustar (adjetivo-な). Estructura AよりBの方が好きです.'},
+    {q:'<ruby>春<rt>はる</rt></ruby>より<ruby>秋<rt>あき</rt></ruby>___<ruby>涼<rt>すず</rt></ruby>しいです。',a:'の方が',opts:['の方が','より','どちらも','も'],h:'El otoño es más fresco que la primavera.',exp:'の方が siempre va inmediatamente después de B (el elemento superior en la comparación).'},
+    {q:'<ruby>電車<rt>でんしゃ</rt></ruby>より<ruby>飛行機<rt>ひこうき</rt></ruby>___<ruby>速<rt>はや</rt></ruby>いです。',a:'の方が',opts:['の方が','より','どちら','も'],h:'El avión es más rápido que el tren.',exp:'速い = rápido. B (飛行機 = avión) lleva の方が porque supera a A (電車 = tren).'},
+    {q:'ラーメンよりピザ___<ruby>好<rt>す</rt></ruby>きです。',a:'の方が',opts:['の方が','より','どちら','も'],h:'Me gusta más la pizza que el ramen.',exp:'En AよりB ___ 好き, usar の方が. B es la opción preferida.'},
+    {q:'バスよりタクシー___<ruby>速<rt>はや</rt></ruby>いです。',a:'の方が',opts:['の方が','より','どちらも','と'],h:'El taxi es más rápido que el autobús.',exp:'速い = rápido. B (taxi) va seguido de の方が para indicar que supera a A (autobús).'},
+    {q:'<ruby>音楽<rt>おんがく</rt></ruby>より<ruby>映画<rt>えいが</rt></ruby>___<ruby>好<rt>す</rt></ruby>きです。',a:'の方が',opts:['の方が','より','どちら','だけ'],h:'Me gustan más las películas que la música.',exp:'より marca A (música). の方が va después de B (películas), la opción preferida.'},
+    // ===== どちら / どちらも (14問) =====
+    {q:'<ruby>犬<rt>いぬ</rt></ruby>と<ruby>猫<rt>ねこ</rt></ruby>と、___が<ruby>好<rt>す</rt></ruby>きですか。',a:'どちら',opts:['どちら','より','の方が','どれ'],h:'¿Cuál prefieres, el perro o el gato?',exp:'En la forma AとBと___が, usar どちら. Es la expresión fija para preguntar entre 2 opciones.'},
+    {q:'コーヒーとお<ruby>茶<rt>ちゃ</rt></ruby>と、___が<ruby>好<rt>す</rt></ruby>きですか。',a:'どちら',opts:['どちら','より','の方が','どれ'],h:'¿Cuál prefieres, el café o el té?',exp:'AとBとどちらが = ¿Cuál, A o B? Se usa solo para exactamente 2 opciones.'},
+    {q:'<ruby>山<rt>やま</rt></ruby>と<ruby>海<rt>うみ</rt></ruby>と、___が<ruby>好<rt>す</rt></ruby>きですか。',a:'どちら',opts:['どちら','より','どちらも','どれ'],h:'¿Cuál prefieres, la montaña o el mar?',exp:'どちら se usa siempre para 2 opciones. どれ se usa para 3 o más opciones.'},
+    {q:'<ruby>日本語<rt>にほんご</rt></ruby>と<ruby>英語<rt>えいご</rt></ruby>、___も<ruby>難<rt>むずか</rt></ruby>しいです。',a:'どちら',opts:['どちら','より','の方が','どれ'],h:'Tanto el japonés como el inglés son difíciles.',exp:'どちらも = ambos / tanto...como. Es どちら + も en conjunto.'},
+    {q:'<ruby>牛乳<rt>ぎゅうにゅう</rt></ruby>とジュースと、___も<ruby>甘<rt>あま</rt></ruby>いです。',a:'どちら',opts:['どちら','より','の方が','どれ'],h:'Tanto la leche como el jugo son dulces.',exp:'どちらも indica que las dos opciones son verdad al mismo tiempo.'},
+    {q:'<ruby>東京<rt>とうきょう</rt></ruby>と<ruby>大阪<rt>おおさか</rt></ruby>と、___が<ruby>大<rt>おお</rt></ruby>きいですか。',a:'どちら',opts:['どちら','より','の方が','どれ'],h:'¿Cuál es más grande, Tokio u Osaka?',exp:'どちら = cuál (entre 2 opciones). No se usa どれ porque hay exactamente 2 opciones.'},
+    {q:'<ruby>夏<rt>なつ</rt></ruby>と<ruby>冬<rt>ふゆ</rt></ruby>と、___も<ruby>好<rt>す</rt></ruby>きです。',a:'どちら',opts:['どちら','より','の方が','どれ'],h:'Me gustan tanto el verano como el invierno.',exp:'どちらも好き = me gustan ambos. どちらも se usa para respuestas neutras que incluyen los dos.'},
+    {q:'<ruby>肉<rt>にく</rt></ruby>と<ruby>魚<rt>さかな</rt></ruby>と、___が<ruby>好<rt>す</rt></ruby>きですか。',a:'どちら',opts:['どちら','より','の方が','どれ'],h:'¿Qué prefieres, la carne o el pescado?',exp:'AとBとどちらが好きですか pregunta preferencia entre dos alimentos.'},
+    {q:'バスと<ruby>電車<rt>でんしゃ</rt></ruby>と、___も<ruby>便利<rt>べんり</rt></ruby>です。',a:'どちら',opts:['どちら','より','の方が','どれ'],h:'Tanto el autobús como el tren son convenientes.',exp:'どちらも便利 = ambos son convenientes. どちらも expresa que las dos opciones comparten la misma cualidad.'},
+    {q:'<ruby>春<rt>はる</rt></ruby>と<ruby>秋<rt>あき</rt></ruby>と、___が<ruby>涼<rt>すず</rt></ruby>しいですか。',a:'どちら',opts:['どちら','より','の方が','どれ'],h:'¿Cuál es más fresco, la primavera o el otoño?',exp:'Para preguntar entre 2 opciones se usa どちら. Para 3 o más se usa どれ.'},
+    {q:'<ruby>春<rt>はる</rt></ruby>と<ruby>秋<rt>あき</rt></ruby>と、___が<ruby>好<rt>す</rt></ruby>きですか。',a:'どちら',opts:['どちら','より','の方が','どれ'],h:'¿Cuál prefieres, la primavera o el otoño?',exp:'AとBとどちらが好きですか es la forma estándar para preguntar preferencia entre 2 opciones.'},
+    {q:'<ruby>音楽<rt>おんがく</rt></ruby>と<ruby>映画<rt>えいが</rt></ruby>と、___も<ruby>好<rt>す</rt></ruby>きです。',a:'どちら',opts:['どちら','より','の方が','どれ'],h:'Me gustan tanto la música como las películas.',exp:'どちらも = tanto...como. Indica que ambas opciones son igualmente apreciadas.'},
+    {q:'スマホとパソコンと、___が<ruby>便利<rt>べんり</rt></ruby>ですか。',a:'どちら',opts:['どちら','より','の方が','どれ'],h:'¿Cuál es más conveniente, el smartphone o la computadora?',exp:'AとBとどちらが [adj] ですか pregunta cuál de los dos es más [adj].'},
+    {q:'バナナとりんごと、___も<ruby>好<rt>す</rt></ruby>きです。',a:'どちら',opts:['どちら','より','の方が','どれ'],h:'Me gustan tanto los plátanos como las manzanas.',exp:'どちらも indica que las dos opciones son verdad. Se traduce como ambos / tanto...como.'}
 ];
 
 // ===== DOU (〜はどうですか) DATA =====
@@ -8816,26 +9309,353 @@ const omouReorderPool = [
 ];
 
 const omouFillPool = [
-    {q:'この<ruby>映画<rt>えいが</rt></ruby>はおもしろい___。',a:'と思います',opts:['と思います','と思いません','と思いますか','だと思います'],h:'Creo que esta película es interesante.',exp:'い形容詞 + と思います. い形容詞の後にはだ不要。「おもしろい + と思います」'},
-    {q:'<ruby>明日<rt>あした</rt></ruby>は<ruby>雨<rt>あめ</rt></ruby>が<ruby>降<rt>ふ</rt></ruby>る___。',a:'と思います',opts:['と思います','と思いません','だと思います','と思いますか'],h:'Creo que mañana lloverá.',exp:'動詞辞書形 + と思います. 動詞の普通体（辞書形）の後にはだ不要。'},
-    {q:'<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>来<rt>こ</rt></ruby>ない___。',a:'と思います',opts:['と思います','と思いません','だと思います','と思いますか'],h:'Creo que el señor Tanaka no vendrá.',exp:'ない形 + と思います. ない形の後にはだ不要。否定の推測。'},
-    {q:'あの<ruby>店<rt>みせ</rt></ruby>は<ruby>有名<rt>ゆうめい</rt></ruby>___と思います。',a:'だ',opts:['だ','な','で','に'],h:'Creo que aquella tienda es famosa.',exp:'な形容詞 + だ + と思います. な形容詞の後には必ずだが必要。'},
-    {q:'<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>学生<rt>がくせい</rt></ruby>___と思います。',a:'だ',opts:['だ','な','の','が'],h:'Creo que ella es estudiante.',exp:'名詞 + だ + と思います. 名詞の後にも必ずだが必要。'},
-    {q:'この<ruby>料理<rt>りょうり</rt></ruby>はおいしい___。',a:'と思います',opts:['と思います','だと思います','と思いません','と思いますか'],h:'Creo que esta comida es deliciosa.',exp:'い形容詞「おいしい」+ と思います. い形容詞はだ不要。'},
-    {q:'<ruby>日本語<rt>にほんご</rt></ruby>は<ruby>難<rt>むずか</rt></ruby>しい___。',a:'と思います',opts:['と思います','だと思います','と思いません','と思いますか'],h:'Creo que el japonés es difícil.',exp:'い形容詞「難しい」+ と思います. だは不要。一般的な意見を表す。'},
-    {q:'この<ruby>町<rt>まち</rt></ruby>は<ruby>静<rt>しず</rt></ruby>か___と思います。',a:'だ',opts:['だ','な','で','に'],h:'Creo que esta ciudad es tranquila.',exp:'な形容詞「静か」+ だ + と思います. な形容詞の後にはだが必要。'},
-    {q:'あの<ruby>人<rt>ひと</rt></ruby>は<ruby>先生<rt>せんせい</rt></ruby>___と思います。',a:'だ',opts:['だ','な','の','が'],h:'Creo que aquella persona es profesora.',exp:'名詞「先生」+ だ + と思います. 名詞の後にはだが必要。'},
-    {q:'<ruby>今日<rt>きょう</rt></ruby>は<ruby>行<rt>い</rt></ruby>かない___。',a:'と思います',opts:['と思います','だと思います','と思いません','と思いますか'],h:'Creo que hoy no iré.',exp:'ない形「行かない」+ と思います. ない形の後にはだ不要。'},
-    {q:'この<ruby>本<rt>ほん</rt></ruby>はおもしろくない___。',a:'と思います',opts:['と思います','だと思います','と思いません','と思いますか'],h:'Creo que este libro no es interesante.',exp:'い形容詞ない形「おもしろくない」+ と思います. い形容詞のない形もだ不要。'},
-    {q:'<ruby>彼<rt>かれ</rt></ruby>は<ruby>医者<rt>いしゃ</rt></ruby>___と思います。',a:'だ',opts:['だ','な','の','が'],h:'Creo que él es médico.',exp:'名詞「医者」+ だ + と思います. 名詞の後には必ずだ。'},
-    {q:'このレストランは<ruby>有名<rt>ゆうめい</rt></ruby>___と思います。',a:'だ',opts:['だ','な','で','に'],h:'Creo que este restaurante es famoso.',exp:'な形容詞「有名」+ だ + と思います. な形容詞はだが必要。'},
-    {q:'<ruby>明日<rt>あした</rt></ruby>は<ruby>晴<rt>は</rt></ruby>れる___。',a:'と思います',opts:['と思います','だと思います','と思いません','と思いますか'],h:'Creo que mañana estará despejado.',exp:'動詞辞書形「晴れる」+ と思います. 天気についての推測。'},
-    {q:'この<ruby>問題<rt>もんだい</rt></ruby>は<ruby>簡単<rt>かんたん</rt></ruby>___と思います。',a:'だ',opts:['だ','な','で','に'],h:'Creo que este problema es fácil.',exp:'な形容詞「簡単」+ だ + と思います. な形容詞の後にはだが必要。'},
-    {q:'<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>親切<rt>しんせつ</rt></ruby>___と思います。',a:'だ',opts:['だ','な','で','に'],h:'Creo que el señor Tanaka es amable.',exp:'な形容詞「親切」+ だ + と思います. 人の性格についての意見。'},
-    {q:'この<ruby>仕事<rt>しごと</rt></ruby>は<ruby>大切<rt>たいせつ</rt></ruby>___と思います。',a:'だ',opts:['だ','な','で','に'],h:'Creo que este trabajo es importante.',exp:'な形容詞「大切」+ だ + と思います. 重要性についての意見。'},
-    {q:'<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>分<rt>わ</rt></ruby>からない___。',a:'と思います',opts:['と思います','だと思います','と思いません','と思いますか'],h:'Creo que ella no entiende.',exp:'ない形「分からない」+ と思います. 他人についての否定推測。'},
-    {q:'あそこは<ruby>図書館<rt>としょかん</rt></ruby>___と思います。',a:'だ',opts:['だ','な','の','が'],h:'Creo que aquello es una biblioteca.',exp:'名詞「図書館」+ だ + と思います. 場所についての推測。'},
-    {q:'この<ruby>部屋<rt>へや</rt></ruby>は<ruby>広<rt>ひろ</rt></ruby>い___。',a:'と思います',opts:['と思います','だと思います','と思いません','と思いますか'],h:'Creo que esta habitación es amplia.',exp:'い形容詞「広い」+ と思います. だ不要。評価・印象を表す。'}
+    {q:'この<ruby>映画<rt>えいが</rt></ruby>はおもしろい___。',a:'と思います',opts:['と思います','と思いません','と思いますか','だと思います'],h:'Creo que esta película es interesante.',exp:'Adjetivo-い + と思います. Los adjetivos-い NO llevan だ antes de と思います.'},
+    {q:'<ruby>明日<rt>あした</rt></ruby>は<ruby>雨<rt>あめ</rt></ruby>が<ruby>降<rt>ふ</rt></ruby>る___。',a:'と思います',opts:['と思います','と思いません','だと思います','と思いますか'],h:'Creo que mañana lloverá.',exp:'Verbo (forma diccionario) + と思います. Los verbos NO llevan だ antes de と思います.'},
+    {q:'<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>来<rt>こ</rt></ruby>ない___。',a:'と思います',opts:['と思います','と思いません','だと思います','と思いますか'],h:'Creo que el señor Tanaka no vendrá.',exp:'Forma ない + と思います. La forma ない NO lleva だ. Expresa suposición negativa.'},
+    {q:'あの<ruby>店<rt>みせ</rt></ruby>は<ruby>有名<rt>ゆうめい</rt></ruby>___と思います。',a:'だ',opts:['だ','な','で','に'],h:'Creo que aquella tienda es famosa.',exp:'Adjetivo-な + だ + と思います. Después de adjetivos-な, だ es OBLIGATORIO antes de と思います.'},
+    {q:'<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>学生<rt>がくせい</rt></ruby>___と思います。',a:'だ',opts:['だ','な','の','が'],h:'Creo que ella es estudiante.',exp:'Sustantivo + だ + と思います. Después de sustantivos, だ también es OBLIGATORIO antes de と思います.'},
+    {q:'この<ruby>料理<rt>りょうり</rt></ruby>はおいしい___。',a:'と思います',opts:['と思います','だと思います','と思いません','と思いますか'],h:'Creo que esta comida es deliciosa.',exp:'Adjetivo-い「おいしい」+ と思います. Los adjetivos-い no necesitan だ.'},
+    {q:'<ruby>日本語<rt>にほんご</rt></ruby>は<ruby>難<rt>むずか</rt></ruby>しい___。',a:'と思います',opts:['と思います','だと思います','と思いません','と思いますか'],h:'Creo que el japonés es difícil.',exp:'Adjetivo-い「難しい」+ と思います. だ no es necesario. Expresa una opinión general.'},
+    {q:'この<ruby>町<rt>まち</rt></ruby>は<ruby>静<rt>しず</rt></ruby>か___と思います。',a:'だ',opts:['だ','な','で','に'],h:'Creo que esta ciudad es tranquila.',exp:'Adjetivo-な「静か」+ だ + と思います. Después de adjetivos-な, だ es obligatorio.'},
+    {q:'あの<ruby>人<rt>ひと</rt></ruby>は<ruby>先生<rt>せんせい</rt></ruby>___と思います。',a:'だ',opts:['だ','な','の','が'],h:'Creo que aquella persona es profesora.',exp:'Sustantivo「先生」+ だ + と思います. Después de sustantivos, だ es obligatorio.'},
+    {q:'<ruby>今日<rt>きょう</rt></ruby>は<ruby>行<rt>い</rt></ruby>かない___。',a:'と思います',opts:['と思います','だと思います','と思いません','と思いますか'],h:'Creo que hoy no iré.',exp:'Forma ない「行かない」+ と思います. La forma ない no lleva だ antes de と思います.'},
+    {q:'この<ruby>本<rt>ほん</rt></ruby>はおもしろくない___。',a:'と思います',opts:['と思います','だと思います','と思いません','と思いますか'],h:'Creo que este libro no es interesante.',exp:'Forma ない del adjetivo-い「おもしろくない」+ と思います. La forma ない del adjetivo-い tampoco lleva だ.'},
+    {q:'<ruby>彼<rt>かれ</rt></ruby>は<ruby>医者<rt>いしゃ</rt></ruby>___と思います。',a:'だ',opts:['だ','な','の','が'],h:'Creo que él es médico.',exp:'Sustantivo「医者」+ だ + と思います. Después de sustantivos, だ es siempre obligatorio.'},
+    {q:'このレストランは<ruby>有名<rt>ゆうめい</rt></ruby>___と思います。',a:'だ',opts:['だ','な','で','に'],h:'Creo que este restaurante es famoso.',exp:'Adjetivo-な「有名」+ だ + と思います. Los adjetivos-な siempre necesitan だ antes de と思います.'},
+    {q:'<ruby>明日<rt>あした</rt></ruby>は<ruby>晴<rt>は</rt></ruby>れる___。',a:'と思います',opts:['と思います','だと思います','と思いません','と思いますか'],h:'Creo que mañana estará despejado.',exp:'Verbo「晴れる」+ と思います. Suposición sobre el tiempo. Los verbos no llevan だ.'},
+    {q:'この<ruby>問題<rt>もんだい</rt></ruby>は<ruby>簡単<rt>かんたん</rt></ruby>___と思います。',a:'だ',opts:['だ','な','で','に'],h:'Creo que este problema es fácil.',exp:'Adjetivo-な「簡単」+ だ + と思います. Después de adjetivos-な, だ es obligatorio.'},
+    {q:'<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>親切<rt>しんせつ</rt></ruby>___と思います。',a:'だ',opts:['だ','な','で','に'],h:'Creo que el señor Tanaka es amable.',exp:'Adjetivo-な「親切」+ だ + と思います. Para expresar opinión sobre el carácter de alguien.'},
+    {q:'この<ruby>仕事<rt>しごと</rt></ruby>は<ruby>大切<rt>たいせつ</rt></ruby>___と思います。',a:'だ',opts:['だ','な','で','に'],h:'Creo que este trabajo es importante.',exp:'Adjetivo-な「大切」+ だ + と思います. Para expresar opinión sobre la importancia de algo.'},
+    {q:'<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>分<rt>わ</rt></ruby>からない___。',a:'と思います',opts:['と思います','だと思います','と思いません','と思いますか'],h:'Creo que ella no entiende.',exp:'Forma ない「分からない」+ と思います. Suposición negativa sobre otra persona. La forma ない no lleva だ.'},
+    {q:'あそこは<ruby>図書館<rt>としょかん</rt></ruby>___と思います。',a:'だ',opts:['だ','な','の','が'],h:'Creo que aquello es una biblioteca.',exp:'Sustantivo「図書館」+ だ + と思います. Suposición sobre un lugar. Los sustantivos siempre necesitan だ.'},
+    {q:'この<ruby>部屋<rt>へや</rt></ruby>は<ruby>広<rt>ひろ</rt></ruby>い___。',a:'と思います',opts:['と思います','だと思います','と思いません','と思いますか'],h:'Creo que esta habitación es amplia.',exp:'Adjetivo-い「広い」+ と思います. だ no es necesario. Para expresar una impresión o evaluación.'}
+];
+
+// ===== ICHIBAN (〜のなかで〜がいちばん〜) DATA =====
+const ichibanLesson = {
+    title: '〜のなかで〜がいちばん〜',
+    subtitle: 'El superlativo en japonés',
+    desc: `
+<div class="grammar-point">
+<p>📌 <strong>Estructura superlativa (afirmación):</strong></p>
+<p style="font-family:'Noto Sans JP';font-size:1.1rem;text-align:center;margin:0.6rem 0;">
+  [<span style="color:var(--night);font-weight:700;">rango</span>] <strong>のなかで</strong> [X] <strong>が<ruby>一番<rt>いちばん</rt></ruby></strong> [ADJ] です
+</p>
+<p style="text-align:center;color:#666;">→ <em>X es el/la más [ADJ] de [rango]</em></p>
+</div>
+<div class="grammar-point">
+<p>📌 <strong>Palabras interrogativas para superlativos:</strong></p>
+<table style="width:100%;text-align:center;font-size:0.92rem;margin-top:0.4rem;">
+  <tr style="background:#f0f0f0;"><th>Pregunta sobre</th><th>Interrogativa</th><th>Ejemplo</th></tr>
+  <tr><td>¿qué cosa? (general)</td><td style="font-family:'Noto Sans JP';"><strong><ruby>何<rt>なに</rt></ruby>が</strong></td><td style="font-family:'Noto Sans JP';font-size:0.85rem;">スポーツのなかで<ruby>何<rt>なに</rt></ruby>が<ruby>一番<rt>いちばん</rt></ruby><ruby>好<rt>す</rt></ruby>きですか</td></tr>
+  <tr><td>¿cuál de varios?</td><td style="font-family:'Noto Sans JP';"><strong>どれが</strong></td><td style="font-family:'Noto Sans JP';font-size:0.85rem;">この<ruby>中<rt>なか</rt></ruby>でどれが<ruby>一番<rt>いちばん</rt></ruby>いいですか</td></tr>
+  <tr><td>¿cuál + sustantivo?</td><td style="font-family:'Noto Sans JP';"><strong>どの[N]が</strong></td><td style="font-family:'Noto Sans JP';font-size:0.85rem;">どの<ruby>季節<rt>きせつ</rt></ruby>が<ruby>一番<rt>いちばん</rt></ruby><ruby>好<rt>す</rt></ruby>きですか</td></tr>
+  <tr><td>¿quién? (persona)</td><td style="font-family:'Noto Sans JP';"><strong>だれが</strong></td><td style="font-family:'Noto Sans JP';font-size:0.85rem;">クラスでだれが<ruby>一番<rt>いちばん</rt></ruby><ruby>背<rt>せ</rt></ruby>が<ruby>高<rt>たか</rt></ruby>いですか</td></tr>
+  <tr><td>¿dónde? (lugar)</td><td style="font-family:'Noto Sans JP';"><strong>どこが</strong></td><td style="font-family:'Noto Sans JP';font-size:0.85rem;"><ruby>世界<rt>せかい</rt></ruby>でどこが<ruby>一番<rt>いちばん</rt></ruby><ruby>広<rt>ひろ</rt></ruby>いですか</td></tr>
+</table>
+</div>
+<div class="grammar-point">
+<p>📌 <strong>のなかで vs で:</strong></p>
+<table style="width:100%;text-align:center;font-size:0.92rem;margin-top:0.4rem;">
+  <tr style="background:#f0f0f0;"><th>Forma japonesa</th><th>Significado</th><th>Uso</th></tr>
+  <tr><td style="font-family:'Noto Sans JP';"><ruby>果物<rt>くだもの</rt></ruby>のなかで</td><td><em>entre las frutas</em></td><td>Rango cerrado — grupo específico de cosas</td></tr>
+  <tr><td style="font-family:'Noto Sans JP';">クラスで</td><td><em>en la clase</em></td><td>Ámbito o lugar (forma abreviada, sin の中で)</td></tr>
+</table>
+</div>`,
+    examples: [
+        ['<ruby>果物<rt>くだもの</rt></ruby><strong style="color:var(--night)">のなかで</strong>りんご<strong style="color:var(--primary)">が<ruby>一番<rt>いちばん</rt></ruby></strong><ruby>好<rt>す</rt></ruby>きです。','kudamono no naka de ringo ga ichiban suki desu.','Entre las frutas, las manzanas son las que más me gustan.'],
+        ['<ruby>季節<rt>きせつ</rt></ruby><strong style="color:var(--night)">のなかで</strong><ruby>夏<rt>なつ</rt></ruby><strong style="color:var(--primary)">が<ruby>一番<rt>いちばん</rt></ruby></strong><ruby>暑<rt>あつ</rt></ruby>いです。','kisetsu no naka de natsu ga ichiban atsui desu.','De las estaciones, el verano es el más caluroso.'],
+        ['クラス<strong style="color:var(--night)">のなかで</strong><strong style="color:var(--accent)">だれが</strong><strong style="color:var(--primary)"><ruby>一番<rt>いちばん</rt></ruby></strong><ruby>背<rt>せ</rt></ruby>が<ruby>高<rt>たか</rt></ruby>いですか。','kurasu no naka de dare ga ichiban se ga takai desu ka.','¿Quién es el más alto de la clase?'],
+        ['この<ruby>中<rt>なか</rt></ruby>で<strong style="color:var(--accent)">どれが</strong><strong style="color:var(--primary)"><ruby>一番<rt>いちばん</rt></ruby></strong><ruby>安<rt>やす</rt></ruby>いですか。','kono naka de dore ga ichiban yasui desu ka.','¿Cuál de estos es el más barato?'],
+        ['<ruby>動物<rt>どうぶつ</rt></ruby><strong style="color:var(--night)">のなかで</strong><ruby>象<rt>ぞう</rt></ruby><strong style="color:var(--primary)">が<ruby>一番<rt>いちばん</rt></ruby></strong><ruby>大<rt>おお</rt></ruby>きいです。','doubutsu no naka de zou ga ichiban ookii desu.','Entre los animales, el elefante es el más grande.'],
+        ['<ruby>日本<rt>にほん</rt></ruby>の<ruby>山<rt>やま</rt></ruby><strong style="color:var(--night)">のなかで</strong><ruby>富士山<rt>ふじさん</rt></ruby><strong style="color:var(--primary)">が<ruby>一番<rt>いちばん</rt></ruby></strong><ruby>高<rt>たか</rt></ruby>いです。','nihon no yama no naka de fujisan ga ichiban takai desu.','De las montañas de Japón, el Monte Fuji es el más alto.'],
+        ['スポーツ<strong style="color:var(--night)">のなかで</strong>サッカー<strong style="color:var(--primary)">が<ruby>一番<rt>いちばん</rt></ruby></strong><ruby>好<rt>す</rt></ruby>きです。','supōtsu no naka de sakkā ga ichiban suki desu.','De los deportes, el fútbol es el que más me gusta.'],
+        ['<ruby>世界<rt>せかい</rt></ruby><strong style="color:var(--night)">のなかで</strong><strong style="color:var(--accent)">どこが</strong><strong style="color:var(--primary)"><ruby>一番<rt>いちばん</rt></ruby></strong><ruby>寒<rt>さむ</rt></ruby>いですか。','sekai no naka de doko ga ichiban samui desu ka.','¿Dónde es el lugar más frío del mundo?']
+    ]
+};
+
+const ichibanReorderPool = [
+    // ===== のなかで〜がいちばん〜 肯定文 (12問) =====
+    {words:['<ruby>果物<rt>くだもの</rt></ruby>のなかで','りんごが','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>好<rt>す</rt></ruby>きです'],answer:'<ruby>果物<rt>くだもの</rt></ruby>のなかでりんごが<ruby>一番<rt>いちばん</rt></ruby><ruby>好<rt>す</rt></ruby>きです',hint:'Entre las frutas, las manzanas son las que más me gustan.',explain:'[範囲]のなかで[X]が一番[ADJ/V]です. のなかで marca el rango de comparación.'},
+    {words:['<ruby>季節<rt>きせつ</rt></ruby>のなかで','<ruby>夏<rt>なつ</rt></ruby>が','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>暑<rt>あつ</rt></ruby>いです'],answer:'<ruby>季節<rt>きせつ</rt></ruby>のなかで<ruby>夏<rt>なつ</rt></ruby>が<ruby>一番<rt>いちばん</rt></ruby><ruby>暑<rt>あつ</rt></ruby>いです',hint:'De las estaciones, el verano es el más caluroso.',explain:'のなかで indica el grupo. が一番 antes del adjetivo es la clave del superlativo.'},
+    {words:['<ruby>動物<rt>どうぶつ</rt></ruby>のなかで','<ruby>象<rt>ぞう</rt></ruby>が','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>大<rt>おお</rt></ruby>きいです'],answer:'<ruby>動物<rt>どうぶつ</rt></ruby>のなかで<ruby>象<rt>ぞう</rt></ruby>が<ruby>一番<rt>いちばん</rt></ruby><ruby>大<rt>おお</rt></ruby>きいです',hint:'Entre los animales, el elefante es el más grande.',explain:'動物のなかで=entre los animales. 象が一番大きい.'},
+    {words:['<ruby>日本<rt>にほん</rt></ruby>の<ruby>山<rt>やま</rt></ruby>のなかで','<ruby>富士山<rt>ふじさん</rt></ruby>が','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>高<rt>たか</rt></ruby>いです'],answer:'<ruby>日本<rt>にほん</rt></ruby>の<ruby>山<rt>やま</rt></ruby>のなかで<ruby>富士山<rt>ふじさん</rt></ruby>が<ruby>一番<rt>いちばん</rt></ruby><ruby>高<rt>たか</rt></ruby>いです',hint:'De las montañas de Japón, el Monte Fuji es el más alto.',explain:'日本の山のなかで = entre las montañas de Japón. 富士山が一番高い.'},
+    {words:['スポーツのなかで','サッカーが','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>好<rt>す</rt></ruby>きです'],answer:'スポーツのなかでサッカーが<ruby>一番<rt>いちばん</rt></ruby><ruby>好<rt>す</rt></ruby>きです',hint:'De los deportes, el fútbol es el que más me gusta.',explain:'好き es adjetivo-な. のなかで + が一番 + 好きです expresa preferencia máxima.'},
+    {words:['<ruby>家族<rt>かぞく</rt></ruby>のなかで','<ruby>弟<rt>おとうと</rt></ruby>が','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>若<rt>わか</rt></ruby>いです'],answer:'<ruby>家族<rt>かぞく</rt></ruby>のなかで<ruby>弟<rt>おとうと</rt></ruby>が<ruby>一番<rt>いちばん</rt></ruby><ruby>若<rt>わか</rt></ruby>いです',hint:'En la familia, mi hermano menor es el más joven.',explain:'家族のなかで=en la familia. 弟が一番若い: el hermano menor es el más joven.'},
+    {words:['<ruby>飲<rt>の</rt></ruby>み<ruby>物<rt>もの</rt></ruby>のなかで','コーヒーが','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>好<rt>す</rt></ruby>きです'],answer:'<ruby>飲<rt>の</rt></ruby>み<ruby>物<rt>もの</rt></ruby>のなかでコーヒーが<ruby>一番<rt>いちばん</rt></ruby><ruby>好<rt>す</rt></ruby>きです',hint:'Entre las bebidas, el café es el que más me gusta.',explain:'飲み物のなかで marca el rango. コーヒーが一番好き expresa preferencia máxima.'},
+    {words:['<ruby>乗<rt>の</rt></ruby>り<ruby>物<rt>もの</rt></ruby>のなかで','<ruby>飛行機<rt>ひこうき</rt></ruby>が','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>速<rt>はや</rt></ruby>いです'],answer:'<ruby>乗<rt>の</rt></ruby>り<ruby>物<rt>もの</rt></ruby>のなかで<ruby>飛行機<rt>ひこうき</rt></ruby>が<ruby>一番<rt>いちばん</rt></ruby><ruby>速<rt>はや</rt></ruby>いです',hint:'Entre los transportes, el avión es el más rápido.',explain:'乗り物のなかで marca el grupo de comparación: los medios de transporte.'},
+    {words:['<ruby>科目<rt>かもく</rt></ruby>のなかで','<ruby>数学<rt>すうがく</rt></ruby>が','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>難<rt>むずか</rt></ruby>しいです'],answer:'<ruby>科目<rt>かもく</rt></ruby>のなかで<ruby>数学<rt>すうがく</rt></ruby>が<ruby>一番<rt>いちばん</rt></ruby><ruby>難<rt>むずか</rt></ruby>しいです',hint:'Entre las materias, las matemáticas son las más difíciles.',explain:'科目のなかで = entre las materias. 数学が一番難しい.'},
+    {words:['<ruby>季節<rt>きせつ</rt></ruby>のなかで','<ruby>秋<rt>あき</rt></ruby>が','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>涼<rt>すず</rt></ruby>しいです'],answer:'<ruby>季節<rt>きせつ</rt></ruby>のなかで<ruby>秋<rt>あき</rt></ruby>が<ruby>一番<rt>いちばん</rt></ruby><ruby>涼<rt>すず</rt></ruby>しいです',hint:'De las estaciones, el otoño es el más fresco.',explain:'涼しい = fresco (adjetivo-い). El rango es 季節 (las 4 estaciones).'},
+    {words:['<ruby>食<rt>た</rt></ruby>べ<ruby>物<rt>もの</rt></ruby>のなかで','<ruby>寿司<rt>すし</rt></ruby>が','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>好<rt>す</rt></ruby>きです'],answer:'<ruby>食<rt>た</rt></ruby>べ<ruby>物<rt>もの</rt></ruby>のなかで<ruby>寿司<rt>すし</rt></ruby>が<ruby>一番<rt>いちばん</rt></ruby><ruby>好<rt>す</rt></ruby>きです',hint:'Entre las comidas, el sushi es el que más me gusta.',explain:'食べ物のなかで = entre las comidas. 寿司が一番好き.'},
+    {words:['<ruby>日本<rt>にほん</rt></ruby>の<ruby>都市<rt>とし</rt></ruby>のなかで','<ruby>東京<rt>とうきょう</rt></ruby>が','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>大<rt>おお</rt></ruby>きいです'],answer:'<ruby>日本<rt>にほん</rt></ruby>の<ruby>都市<rt>とし</rt></ruby>のなかで<ruby>東京<rt>とうきょう</rt></ruby>が<ruby>一番<rt>いちばん</rt></ruby><ruby>大<rt>おお</rt></ruby>きいです',hint:'De las ciudades de Japón, Tokio es la más grande.',explain:'日本の都市のなかで = entre las ciudades de Japón. 東京が一番大きい.'},
+    // ===== のなかで〜がいちばん〜 疑問文 (8問) =====
+    {words:['クラスのなかで','だれが','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>背<rt>せ</rt></ruby>が<ruby>高<rt>たか</rt></ruby>いですか'],answer:'クラスのなかでだれが<ruby>一番<rt>いちばん</rt></ruby><ruby>背<rt>せ</rt></ruby>が<ruby>高<rt>たか</rt></ruby>いですか',hint:'¿Quién es el más alto de la clase?',explain:'だれが一番 pregunta quién es el superlativo dentro del grupo (clase).'},
+    {words:['この<ruby>中<rt>なか</rt></ruby>で','どれが','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>安<rt>やす</rt></ruby>いですか'],answer:'この<ruby>中<rt>なか</rt></ruby>でどれが<ruby>一番<rt>いちばん</rt></ruby><ruby>安<rt>やす</rt></ruby>いですか',hint:'¿Cuál de estos es el más barato?',explain:'どれが一番 pregunta cuál objeto es el superlativo. この中で = entre estos.'},
+    {words:['<ruby>季節<rt>きせつ</rt></ruby>のなかで','どれが','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>好<rt>す</rt></ruby>きですか'],answer:'<ruby>季節<rt>きせつ</rt></ruby>のなかでどれが<ruby>一番<rt>いちばん</rt></ruby><ruby>好<rt>す</rt></ruby>きですか',hint:'¿Cuál es tu estación favorita?',explain:'どれが一番好きですか = ¿Cuál del grupo te gusta más?'},
+    {words:['<ruby>世界<rt>せかい</rt></ruby>のなかで','どこが','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>寒<rt>さむ</rt></ruby>いですか'],answer:'<ruby>世界<rt>せかい</rt></ruby>のなかでどこが<ruby>一番<rt>いちばん</rt></ruby><ruby>寒<rt>さむ</rt></ruby>いですか',hint:'¿Dónde es el lugar más frío del mundo?',explain:'どこが一番 pregunta el lugar. 世界のなかで indica que el rango es el mundo entero.'},
+    {words:['<ruby>家族<rt>かぞく</rt></ruby>のなかで','だれが','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>料理<rt>りょうり</rt></ruby>が<ruby>上手<rt>じょうず</rt></ruby>ですか'],answer:'<ruby>家族<rt>かぞく</rt></ruby>のなかでだれが<ruby>一番<rt>いちばん</rt></ruby><ruby>料理<rt>りょうり</rt></ruby>が<ruby>上手<rt>じょうず</rt></ruby>ですか',hint:'¿Quién cocina mejor en tu familia?',explain:'だれが一番料理が上手ですか = ¿Quién es el mejor cocinero dentro del grupo 家族?'},
+    {words:['<ruby>果物<rt>くだもの</rt></ruby>のなかで','どれが','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>甘<rt>あま</rt></ruby>いですか'],answer:'<ruby>果物<rt>くだもの</rt></ruby>のなかでどれが<ruby>一番<rt>いちばん</rt></ruby><ruby>甘<rt>あま</rt></ruby>いですか',hint:'¿Cuál fruta es la más dulce?',explain:'どれが一番甘いですか = ¿Cuál es la más dulce? Dentro del grupo 果物.'},
+    {words:['このクラスのなかで','だれが','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>日本語<rt>にほんご</rt></ruby>が<ruby>上手<rt>じょうず</rt></ruby>ですか'],answer:'このクラスのなかでだれが<ruby>一番<rt>いちばん</rt></ruby><ruby>日本語<rt>にほんご</rt></ruby>が<ruby>上手<rt>じょうず</rt></ruby>ですか',hint:'¿Quién habla mejor japonés en esta clase?',explain:'だれが一番〜が上手ですか pregunta quién tiene la mayor habilidad dentro del grupo.'},
+    {words:['<ruby>飲<rt>の</rt></ruby>み<ruby>物<rt>もの</rt></ruby>のなかで','どれが','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>好<rt>す</rt></ruby>きですか'],answer:'<ruby>飲<rt>の</rt></ruby>み<ruby>物<rt>もの</rt></ruby>のなかでどれが<ruby>一番<rt>いちばん</rt></ruby><ruby>好<rt>す</rt></ruby>きですか',hint:'¿Cuál bebida es la que más te gusta?',explain:'どれが一番好きですか = ¿Cuál del grupo prefieres más?'},
+    // ===== 追加 肯定文 (20問) =====
+    {words:['野菜のなかで','にんじんが','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>好<rt>す</rt></ruby>きです'],answer:'野菜のなかでにんじんが<ruby>一番<rt>いちばん</rt></ruby><ruby>好<rt>す</rt></ruby>きです',hint:'Entre las verduras, las zanahorias son las que más me gustan.',explain:'野菜のなかで = entre las verduras. にんじんが一番好き = las zanahorias son las favoritas.'},
+    {words:['<ruby>友達<rt>ともだち</rt></ruby>のなかで','<ruby>田中<rt>たなか</rt></ruby>さんが','<ruby>一番<rt>いちばん</rt></ruby>','おもしろいです'],answer:'<ruby>友達<rt>ともだち</rt></ruby>のなかで<ruby>田中<rt>たなか</rt></ruby>さんが<ruby>一番<rt>いちばん</rt></ruby>おもしろいです',hint:'Entre mis amigos, Tanaka es el más divertido.',explain:'友達のなかで = entre los amigos. が一番 + adjetivo = superlativo.'},
+    {words:['クラスのなかで','<ruby>山田<rt>やまだ</rt></ruby>さんが','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>優<rt>やさ</rt></ruby>しいです'],answer:'クラスのなかで<ruby>山田<rt>やまだ</rt></ruby>さんが<ruby>一番<rt>いちばん</rt></ruby><ruby>優<rt>やさ</rt></ruby>しいです',hint:'En la clase, Yamada es la más amable.',explain:'クラスのなかで = en la clase. 優しい = amable (adjetivo-い). が一番 marca el superlativo.'},
+    {words:['<ruby>果物<rt>くだもの</rt></ruby>のなかで','スイカが','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>大<rt>おお</rt></ruby>きいです'],answer:'<ruby>果物<rt>くだもの</rt></ruby>のなかでスイカが<ruby>一番<rt>いちばん</rt></ruby><ruby>大<rt>おお</rt></ruby>きいです',hint:'Entre las frutas, la sandía es la más grande.',explain:'果物のなかで = entre las frutas. スイカ = sandía. が一番大きい.'},
+    {words:['この<ruby>店<rt>みせ</rt></ruby>のなかで','ラーメンが','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>安<rt>やす</rt></ruby>いです'],answer:'この<ruby>店<rt>みせ</rt></ruby>のなかでラーメンが<ruby>一番<rt>いちばん</rt></ruby><ruby>安<rt>やす</rt></ruby>いです',hint:'En esta tienda, el ramen es el más barato.',explain:'この店のなかで = en esta tienda. ラーメンが一番安い = el ramen es el más barato.'},
+    {words:['<ruby>週<rt>しゅう</rt></ruby>のなかで','<ruby>月曜日<rt>げつようび</rt></ruby>が','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>嫌<rt>きら</rt></ruby>いです'],answer:'<ruby>週<rt>しゅう</rt></ruby>のなかで<ruby>月曜日<rt>げつようび</rt></ruby>が<ruby>一番<rt>いちばん</rt></ruby><ruby>嫌<rt>きら</rt></ruby>いです',hint:'De los días de la semana, el lunes es el que menos me gusta.',explain:'週のなかで = entre los días de la semana. 嫌い = no me gusta (adjetivo-な). が一番嫌い.'},
+    {words:['<ruby>季節<rt>きせつ</rt></ruby>のなかで','<ruby>冬<rt>ふゆ</rt></ruby>が','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>寒<rt>さむ</rt></ruby>いです'],answer:'<ruby>季節<rt>きせつ</rt></ruby>のなかで<ruby>冬<rt>ふゆ</rt></ruby>が<ruby>一番<rt>いちばん</rt></ruby><ruby>寒<rt>さむ</rt></ruby>いです',hint:'De las estaciones, el invierno es el más frío.',explain:'季節のなかで = entre las estaciones. 冬が一番寒い = el invierno es el más frío.'},
+    {words:['スポーツのなかで','バスケットボールが','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>楽<rt>たの</rt></ruby>しいです'],answer:'スポーツのなかでバスケットボールが<ruby>一番<rt>いちばん</rt></ruby><ruby>楽<rt>たの</rt></ruby>しいです',hint:'Entre los deportes, el baloncesto es el más divertido.',explain:'スポーツのなかで = entre los deportes. 楽しい = divertido (adjetivo-い).'},
+    {words:['<ruby>乗<rt>の</rt></ruby>り<ruby>物<rt>もの</rt></ruby>のなかで','<ruby>電車<rt>でんしゃ</rt></ruby>が','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>便利<rt>べんり</rt></ruby>です'],answer:'<ruby>乗<rt>の</rt></ruby>り<ruby>物<rt>もの</rt></ruby>のなかで<ruby>電車<rt>でんしゃ</rt></ruby>が<ruby>一番<rt>いちばん</rt></ruby><ruby>便利<rt>べんり</rt></ruby>です',hint:'Entre los transportes, el tren es el más conveniente.',explain:'乗り物のなかで = entre los medios de transporte. 便利 = conveniente (adjetivo-な).'},
+    {words:['<ruby>音楽<rt>おんがく</rt></ruby>のなかで','ジャズが','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>好<rt>す</rt></ruby>きです'],answer:'<ruby>音楽<rt>おんがく</rt></ruby>のなかでジャズが<ruby>一番<rt>いちばん</rt></ruby><ruby>好<rt>す</rt></ruby>きです',hint:'De la música, el jazz es el que más me gusta.',explain:'音楽のなかで = entre los géneros musicales. ジャズ = jazz. が一番好き.'},
+    {words:['<ruby>三<rt>みっ</rt></ruby>つのなかで','これが','<ruby>一番<rt>いちばん</rt></ruby>','いいです'],answer:'<ruby>三<rt>みっ</rt></ruby>つのなかでこれが<ruby>一番<rt>いちばん</rt></ruby>いいです',hint:'De los tres, este es el mejor.',explain:'三つのなかで = entre los tres. これが一番いい = este es el mejor. いい = bueno (excepción).'},
+    {words:['<ruby>国<rt>くに</rt></ruby>のなかで','<ruby>日本<rt>にほん</rt></ruby>が','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>好<rt>す</rt></ruby>きです'],answer:'<ruby>国<rt>くに</rt></ruby>のなかで<ruby>日本<rt>にほん</rt></ruby>が<ruby>一番<rt>いちばん</rt></ruby><ruby>好<rt>す</rt></ruby>きです',hint:'De los países, Japón es el que más me gusta.',explain:'国のなかで = entre los países. が一番好きです = es el favorito.'},
+    {words:['<ruby>部屋<rt>へや</rt></ruby>のなかで','リビングが','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>広<rt>ひろ</rt></ruby>いです'],answer:'<ruby>部屋<rt>へや</rt></ruby>のなかでリビングが<ruby>一番<rt>いちばん</rt></ruby><ruby>広<rt>ひろ</rt></ruby>いです',hint:'De las habitaciones, el salón es el más amplio.',explain:'部屋のなかで = entre las habitaciones. リビング = salón. が一番広い.'},
+    {words:['<ruby>家族<rt>かぞく</rt></ruby>のなかで','<ruby>父<rt>ちち</rt></ruby>が','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>背<rt>せ</rt></ruby>が<ruby>高<rt>たか</rt></ruby>いです'],answer:'<ruby>家族<rt>かぞく</rt></ruby>のなかで<ruby>父<rt>ちち</rt></ruby>が<ruby>一番<rt>いちばん</rt></ruby><ruby>背<rt>せ</rt></ruby>が<ruby>高<rt>たか</rt></ruby>いです',hint:'En la familia, mi padre es el más alto.',explain:'家族のなかで = en la familia. 父が一番背が高い = mi padre es el más alto.'},
+    {words:['<ruby>日本<rt>にほん</rt></ruby>の<ruby>都市<rt>とし</rt></ruby>のなかで','<ruby>京都<rt>きょうと</rt></ruby>が','<ruby>一番<rt>いちばん</rt></ruby>','きれいです'],answer:'<ruby>日本<rt>にほん</rt></ruby>の<ruby>都市<rt>とし</rt></ruby>のなかで<ruby>京都<rt>きょうと</rt></ruby>が<ruby>一番<rt>いちばん</rt></ruby>きれいです',hint:'De las ciudades de Japón, Kioto es la más bonita.',explain:'日本の都市のなかで = entre las ciudades de Japón. きれい = bonito/bello (adjetivo-な).'},
+    {words:['<ruby>教科<rt>きょうか</rt></ruby>のなかで','<ruby>体育<rt>たいいく</rt></ruby>が','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>好<rt>す</rt></ruby>きです'],answer:'<ruby>教科<rt>きょうか</rt></ruby>のなかで<ruby>体育<rt>たいいく</rt></ruby>が<ruby>一番<rt>いちばん</rt></ruby><ruby>好<rt>す</rt></ruby>きです',hint:'De las asignaturas, la educación física es la que más me gusta.',explain:'教科のなかで = entre las asignaturas. 体育 = educación física. が一番好き.'},
+    {words:['<ruby>日本語<rt>にほんご</rt></ruby>のなかで','<ruby>漢字<rt>かんじ</rt></ruby>が','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>難<rt>むずか</rt></ruby>しいです'],answer:'<ruby>日本語<rt>にほんご</rt></ruby>のなかで<ruby>漢字<rt>かんじ</rt></ruby>が<ruby>一番<rt>いちばん</rt></ruby><ruby>難<rt>むずか</rt></ruby>しいです',hint:'Del japonés, los kanji son lo más difícil.',explain:'日本語のなかで = del japonés. 漢字が一番難しい = los kanji son lo más difícil.'},
+    {words:['<ruby>飲<rt>の</rt></ruby>み<ruby>物<rt>もの</rt></ruby>のなかで','ジュースが','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>甘<rt>あま</rt></ruby>いです'],answer:'<ruby>飲<rt>の</rt></ruby>み<ruby>物<rt>もの</rt></ruby>のなかでジュースが<ruby>一番<rt>いちばん</rt></ruby><ruby>甘<rt>あま</rt></ruby>いです',hint:'Entre las bebidas, el jugo es el más dulce.',explain:'飲み物のなかで = entre las bebidas. ジュースが一番甘い = el jugo es el más dulce.'},
+    {words:['<ruby>動物<rt>どうぶつ</rt></ruby>のなかで','チーターが','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>速<rt>はや</rt></ruby>いです'],answer:'<ruby>動物<rt>どうぶつ</rt></ruby>のなかでチーターが<ruby>一番<rt>いちばん</rt></ruby><ruby>速<rt>はや</rt></ruby>いです',hint:'Entre los animales, el guepardo es el más rápido.',explain:'動物のなかで = entre los animales. チーター = guepardo. が一番速い.'},
+    {words:['この<ruby>映画<rt>えいが</rt></ruby>のなかで','アクション<ruby>映画<rt>えいが</rt></ruby>が','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>好<rt>す</rt></ruby>きです'],answer:'この<ruby>映画<rt>えいが</rt></ruby>のなかでアクション<ruby>映画<rt>えいが</rt></ruby>が<ruby>一番<rt>いちばん</rt></ruby><ruby>好<rt>す</rt></ruby>きです',hint:'De estas películas, las de acción son las que más me gustan.',explain:'この映画のなかで = entre estas películas. アクション映画が一番好き.'},
+    // ===== 追加 疑問文 (20問) =====
+    {words:['<ruby>日本<rt>にほん</rt></ruby>のなかで','どこが','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>暑<rt>あつ</rt></ruby>いですか'],answer:'<ruby>日本<rt>にほん</rt></ruby>のなかでどこが<ruby>一番<rt>いちばん</rt></ruby><ruby>暑<rt>あつ</rt></ruby>いですか',hint:'¿Qué lugar de Japón es el más caluroso?',explain:'どこが一番暑い = ¿Qué lugar es el más caluroso? Para lugares usar どこ.'},
+    {words:['<ruby>食<rt>た</rt></ruby>べ<ruby>物<rt>もの</rt></ruby>のなかで','<ruby>何<rt>なに</rt></ruby>が','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>好<rt>す</rt></ruby>きですか'],answer:'<ruby>食<rt>た</rt></ruby>べ<ruby>物<rt>もの</rt></ruby>のなかで<ruby>何<rt>なに</rt></ruby>が<ruby>一番<rt>いちばん</rt></ruby><ruby>好<rt>す</rt></ruby>きですか',hint:'¿Qué comida te gusta más?',explain:'何が一番好きですか = ¿Qué te gusta más? 何 para preguntas abiertas sobre categorías generales.'},
+    {words:['<ruby>家族<rt>かぞく</rt></ruby>のなかで','だれが','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>若<rt>わか</rt></ruby>いですか'],answer:'<ruby>家族<rt>かぞく</rt></ruby>のなかでだれが<ruby>一番<rt>いちばん</rt></ruby><ruby>若<rt>わか</rt></ruby>いですか',hint:'¿Quién es el más joven de la familia?',explain:'だれが一番若い = ¿Quién es el más joven? Para personas usar だれ.'},
+    {words:['<ruby>学校<rt>がっこう</rt></ruby>のなかで','どこが','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>静<rt>しず</rt></ruby>かですか'],answer:'<ruby>学校<rt>がっこう</rt></ruby>のなかでどこが<ruby>一番<rt>いちばん</rt></ruby><ruby>静<rt>しず</rt></ruby>かですか',hint:'¿Qué lugar de la escuela es el más tranquilo?',explain:'どこが一番静か = ¿Qué lugar es el más tranquilo? Para lugares usar どこ.'},
+    {words:['<ruby>科目<rt>かもく</rt></ruby>のなかで','<ruby>何<rt>なに</rt></ruby>が','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>難<rt>むずか</rt></ruby>しいですか'],answer:'<ruby>科目<rt>かもく</rt></ruby>のなかで<ruby>何<rt>なに</rt></ruby>が<ruby>一番<rt>いちばん</rt></ruby><ruby>難<rt>むずか</rt></ruby>しいですか',hint:'¿Qué asignatura es la más difícil?',explain:'何が一番難しい = ¿Qué es lo más difícil? 何 para preguntas abiertas sobre categorías.'},
+    {words:['<ruby>友達<rt>ともだち</rt></ruby>のなかで','だれが','<ruby>一番<rt>いちばん</rt></ruby>','おもしろいですか'],answer:'<ruby>友達<rt>ともだち</rt></ruby>のなかでだれが<ruby>一番<rt>いちばん</rt></ruby>おもしろいですか',hint:'¿Quién es el más divertido entre tus amigos?',explain:'だれが一番おもしろい = ¿Quién es el más divertido? Para personas usar だれ.'},
+    {words:['この<ruby>三<rt>みっ</rt></ruby>つのなかで','どれが','<ruby>一番<rt>いちばん</rt></ruby>','いいですか'],answer:'この<ruby>三<rt>みっ</rt></ruby>つのなかでどれが<ruby>一番<rt>いちばん</rt></ruby>いいですか',hint:'¿Cuál de estos tres es el mejor?',explain:'どれが一番いい = ¿Cuál es el mejor? Para elegir de un conjunto visible usar どれ.'},
+    {words:['<ruby>動物<rt>どうぶつ</rt></ruby>のなかで','どれが','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>速<rt>はや</rt></ruby>いですか'],answer:'<ruby>動物<rt>どうぶつ</rt></ruby>のなかでどれが<ruby>一番<rt>いちばん</rt></ruby><ruby>速<rt>はや</rt></ruby>いですか',hint:'¿Cuál animal es el más rápido?',explain:'どれが一番速い = ¿Cuál es el más rápido? Para cosas o animales concretos usar どれ.'},
+    {words:['<ruby>音楽<rt>おんがく</rt></ruby>のなかで','<ruby>何<rt>なに</rt></ruby>が','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>好<rt>す</rt></ruby>きですか'],answer:'<ruby>音楽<rt>おんがく</rt></ruby>のなかで<ruby>何<rt>なに</rt></ruby>が<ruby>一番<rt>いちばん</rt></ruby><ruby>好<rt>す</rt></ruby>きですか',hint:'¿Qué género musical te gusta más?',explain:'何が一番好きですか = ¿Qué te gusta más? 何 para categorías abiertas como géneros musicales.'},
+    {words:['この<ruby>建物<rt>たてもの</rt></ruby>のなかで','どこが','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>広<rt>ひろ</rt></ruby>いですか'],answer:'この<ruby>建物<rt>たてもの</rt></ruby>のなかでどこが<ruby>一番<rt>いちばん</rt></ruby><ruby>広<rt>ひろ</rt></ruby>いですか',hint:'¿Qué parte de este edificio es la más amplia?',explain:'どこが一番広い = ¿Qué lugar es el más amplio? Para partes de un espacio usar どこ.'},
+    {words:['<ruby>先生<rt>せんせい</rt></ruby>のなかで','だれが','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>優<rt>やさ</rt></ruby>しいですか'],answer:'<ruby>先生<rt>せんせい</rt></ruby>のなかでだれが<ruby>一番<rt>いちばん</rt></ruby><ruby>優<rt>やさ</rt></ruby>しいですか',hint:'¿Cuál profesor es el más amable?',explain:'だれが一番優しい = ¿Quién es el más amable? Para personas usar だれ, no どれ.'},
+    {words:['<ruby>飲<rt>の</rt></ruby>み<ruby>物<rt>もの</rt></ruby>のなかで','<ruby>何<rt>なに</rt></ruby>が','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>体<rt>からだ</rt></ruby>にいいですか'],answer:'<ruby>飲<rt>の</rt></ruby>み<ruby>物<rt>もの</rt></ruby>のなかで<ruby>何<rt>なに</rt></ruby>が<ruby>一番<rt>いちばん</rt></ruby><ruby>体<rt>からだ</rt></ruby>にいいですか',hint:'¿Qué bebida es la más saludable?',explain:'何が一番体にいい = ¿Qué es lo mejor para el cuerpo? 何 para preguntas abiertas sobre categorías.'},
+    {words:['<ruby>果物<rt>くだもの</rt></ruby>のなかで','どれが','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>高<rt>たか</rt></ruby>いですか'],answer:'<ruby>果物<rt>くだもの</rt></ruby>のなかでどれが<ruby>一番<rt>いちばん</rt></ruby><ruby>高<rt>たか</rt></ruby>いですか',hint:'¿Cuál fruta es la más cara?',explain:'どれが一番高い = ¿Cuál es la más cara? Para frutas u objetos concretos usar どれ.'},
+    {words:['<ruby>日本<rt>にほん</rt></ruby>のなかで','どこが','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>寒<rt>さむ</rt></ruby>いですか'],answer:'<ruby>日本<rt>にほん</rt></ruby>のなかでどこが<ruby>一番<rt>いちばん</rt></ruby><ruby>寒<rt>さむ</rt></ruby>いですか',hint:'¿Qué lugar de Japón es el más frío?',explain:'どこが一番寒い = ¿Qué lugar es el más frío? Para preguntar por lugares usar どこ.'},
+    {words:['<ruby>食<rt>た</rt></ruby>べ<ruby>物<rt>もの</rt></ruby>のなかで','どれが','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>辛<rt>から</rt></ruby>いですか'],answer:'<ruby>食<rt>た</rt></ruby>べ<ruby>物<rt>もの</rt></ruby>のなかでどれが<ruby>一番<rt>いちばん</rt></ruby><ruby>辛<rt>から</rt></ruby>いですか',hint:'¿Cuál comida es la más picante?',explain:'どれが一番辛い = ¿Cuál es la más picante? Para seleccionar de un grupo específico usar どれ.'},
+    {words:['<ruby>家族<rt>かぞく</rt></ruby>のなかで','だれが','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>忙<rt>いそが</rt></ruby>しいですか'],answer:'<ruby>家族<rt>かぞく</rt></ruby>のなかでだれが<ruby>一番<rt>いちばん</rt></ruby><ruby>忙<rt>いそが</rt></ruby>しいですか',hint:'¿Quién es el más ocupado de la familia?',explain:'だれが一番忙しい = ¿Quién es el más ocupado? Para personas usar だれ.'},
+    {words:['<ruby>日本語<rt>にほんご</rt></ruby>のなかで','<ruby>何<rt>なに</rt></ruby>が','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>大切<rt>たいせつ</rt></ruby>ですか'],answer:'<ruby>日本語<rt>にほんご</rt></ruby>のなかで<ruby>何<rt>なに</rt></ruby>が<ruby>一番<rt>いちばん</rt></ruby><ruby>大切<rt>たいせつ</rt></ruby>ですか',hint:'¿Qué es lo más importante en el japonés?',explain:'何が一番大切 = ¿Qué es lo más importante? 何 para preguntas abiertas sobre conceptos.'},
+    {words:['この<ruby>部屋<rt>へや</rt></ruby>のなかで','どこが','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>明<rt>あか</rt></ruby>るいですか'],answer:'この<ruby>部屋<rt>へや</rt></ruby>のなかでどこが<ruby>一番<rt>いちばん</rt></ruby><ruby>明<rt>あか</rt></ruby>るいですか',hint:'¿Qué parte de esta habitación es la más luminosa?',explain:'どこが一番明るい = ¿Qué lugar es el más luminoso? Para partes de un espacio usar どこ.'},
+    {words:['<ruby>友達<rt>ともだち</rt></ruby>のなかで','だれが','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>背<rt>せ</rt></ruby>が<ruby>高<rt>たか</rt></ruby>いですか'],answer:'<ruby>友達<rt>ともだち</rt></ruby>のなかでだれが<ruby>一番<rt>いちばん</rt></ruby><ruby>背<rt>せ</rt></ruby>が<ruby>高<rt>たか</rt></ruby>いですか',hint:'¿Quién es el más alto entre tus amigos?',explain:'だれが一番背が高い = ¿Quién es el más alto? Para personas usar だれ.'},
+    {words:['スポーツのなかで','<ruby>何<rt>なに</rt></ruby>が','<ruby>一番<rt>いちばん</rt></ruby>','<ruby>有名<rt>ゆうめい</rt></ruby>ですか'],answer:'スポーツのなかで<ruby>何<rt>なに</rt></ruby>が<ruby>一番<rt>いちばん</rt></ruby><ruby>有名<rt>ゆうめい</rt></ruby>ですか',hint:'¿Qué deporte es el más famoso?',explain:'何が一番有名 = ¿Qué es lo más famoso? 何 para preguntas abiertas sobre categorías generales.'}
+];
+
+const ichibanFillPool = [
+    {q:'<ruby>果物<rt>くだもの</rt></ruby>___りんごが<ruby>一番<rt>いちばん</rt></ruby><ruby>好<rt>す</rt></ruby>きです。',a:'のなかで',opts:['のなかで','が一番','より','どれが'],h:'Entre las frutas, las manzanas son las que más me gustan.',exp:'[範囲]のなかで[X]が一番[ADJ]. のなかで indica el rango o grupo de comparación.'},
+    {q:'<ruby>動物<rt>どうぶつ</rt></ruby>のなかで<ruby>象<rt>ぞう</rt></ruby>___<ruby>大<rt>おお</rt></ruby>きいです。',a:'が一番',opts:['が一番','のなかで','より','どれが'],h:'Entre los animales, el elefante es el más grande.',exp:'[X]が一番[ADJ] = X es el más [ADJ]. が一番 va siempre antes del adjetivo.'},
+    {q:'クラスのなかで___が<ruby>一番<rt>いちばん</rt></ruby><ruby>背<rt>せ</rt></ruby>が<ruby>高<rt>たか</rt></ruby>いですか。',a:'だれ',opts:['だれ','どれ','どこ','なに'],h:'¿Quién es el más alto de la clase?',exp:'Para preguntar sobre personas en superlativos, usar だれ (¿quién?). どれ sería para objetos.'},
+    {q:'この<ruby>中<rt>なか</rt></ruby>で___が<ruby>一番<rt>いちばん</rt></ruby><ruby>安<rt>やす</rt></ruby>いですか。',a:'どれ',opts:['どれ','だれ','どこ','なに'],h:'¿Cuál de estos es el más barato?',exp:'Para preguntar sobre objetos en superlativos, usar どれ (¿cuál?). だれ sería para personas.'},
+    {q:'<ruby>世界<rt>せかい</rt></ruby>のなかで___が<ruby>一番<rt>いちばん</rt></ruby><ruby>大<rt>おお</rt></ruby>きい<ruby>国<rt>くに</rt></ruby>ですか。',a:'どこ',opts:['どこ','だれ','どれ','なに'],h:'¿Cuál es el país más grande del mundo?',exp:'Para preguntar sobre lugares, usar どこ (¿dónde?). Pregunta qué lugar es el más grande.'},
+    {q:'<ruby>季節<rt>きせつ</rt></ruby>___<ruby>夏<rt>なつ</rt></ruby>が<ruby>一番<rt>いちばん</rt></ruby><ruby>暑<rt>あつ</rt></ruby>いです。',a:'のなかで',opts:['のなかで','が一番','より','どれが'],h:'De las estaciones, el verano es el más caluroso.',exp:'[範囲]のなかで[X]が一番[ADJ]. のなかで va después del rango.'},
+    {q:'スポーツのなかでサッカー___<ruby>好<rt>す</rt></ruby>きです。',a:'が一番',opts:['が一番','のなかで','より','どちら'],h:'De los deportes, el fútbol es el que más me gusta.',exp:'が一番 va entre el sujeto (サッカー) y el adjetivo (好き). Indica el superlativo.'},
+    {q:'<ruby>家族<rt>かぞく</rt></ruby>のなかで<ruby>弟<rt>おとうと</rt></ruby>___<ruby>若<rt>わか</rt></ruby>いです。',a:'が一番',opts:['が一番','のなかで','より','どれが'],h:'En la familia, mi hermano menor es el más joven.',exp:'弟が一番若い. が一番 conecta el sujeto con el adjetivo para expresar superlativo.'},
+    {q:'<ruby>日本<rt>にほん</rt></ruby>の<ruby>山<rt>やま</rt></ruby>___<ruby>富士山<rt>ふじさん</rt></ruby>が<ruby>一番<rt>いちばん</rt></ruby><ruby>高<rt>たか</rt></ruby>いです。',a:'のなかで',opts:['のなかで','が一番','より','どれが'],h:'De las montañas de Japón, el Monte Fuji es el más alto.',exp:'日本の山のなかで = entre las montañas de Japón. のなかで va después del grupo.'},
+    {q:'<ruby>乗<rt>の</rt></ruby>り<ruby>物<rt>もの</rt></ruby>のなかで<ruby>飛行機<rt>ひこうき</rt></ruby>___<ruby>速<rt>はや</rt></ruby>いです。',a:'が一番',opts:['が一番','のなかで','より','どれが'],h:'Entre los transportes, el avión es el más rápido.',exp:'飛行機が一番速い. が一番 + adjetivo es la estructura fija del superlativo.'},
+    {q:'<ruby>科目<rt>かもく</rt></ruby>のなかで___が<ruby>一番<rt>いちばん</rt></ruby><ruby>好<rt>す</rt></ruby>きですか。',a:'どれ',opts:['どれ','だれ','どこ','なに'],h:'¿Cuál materia te gusta más?',exp:'どれが一番好きですか pregunta cuál del grupo te gusta más. Para materias usar どれ, no だれ.'},
+    {q:'<ruby>食<rt>た</rt></ruby>べ<ruby>物<rt>もの</rt></ruby>___<ruby>寿司<rt>すし</rt></ruby>が<ruby>一番<rt>いちばん</rt></ruby><ruby>好<rt>す</rt></ruby>きです。',a:'のなかで',opts:['のなかで','が一番','より','どちら'],h:'Entre las comidas, el sushi es el que más me gusta.',exp:'食べ物のなかで = entre las comidas. のなかで siempre va después del grupo.'},
+    {q:'<ruby>家族<rt>かぞく</rt></ruby>のなかで___が<ruby>一番<rt>いちばん</rt></ruby><ruby>料理<rt>りょうり</rt></ruby>が<ruby>上手<rt>じょうず</rt></ruby>ですか。',a:'だれ',opts:['だれ','どれ','どこ','なに'],h:'¿Quién cocina mejor en tu familia?',exp:'だれが一番〜ですか pregunta sobre personas. Usar だれ para gente, どれ para cosas.'},
+    {q:'このクラスのなかで<ruby>田中<rt>たなか</rt></ruby>さん___<ruby>日本語<rt>にほんご</rt></ruby>が<ruby>一番<rt>いちばん</rt></ruby><ruby>上手<rt>じょうず</rt></ruby>です。',a:'が',opts:['が','は','の','を'],h:'En esta clase, el sr. Tanaka es el mejor en japonés.',exp:'[X]が一番[ADJ]: が es la partícula sujeto del superlativo. No usar は (は sería tema, no sujeto).'},
+    {q:'<ruby>飲<rt>の</rt></ruby>み<ruby>物<rt>もの</rt></ruby>のなかで___が<ruby>一番<rt>いちばん</rt></ruby><ruby>好<rt>す</rt></ruby>きですか。',a:'どれ',opts:['どれ','だれ','どこ','なに'],h:'¿Cuál bebida es la que más te gusta?',exp:'どれが一番好きですか = ¿Cuál del grupo prefieres más? Para bebidas/objetos usar どれ, no だれ.'},
+    // のなかで × 2
+    {q:'<ruby>野菜<rt>やさい</rt></ruby>___にんじんが<ruby>一番<rt>いちばん</rt></ruby><ruby>好<rt>す</rt></ruby>きです。',a:'のなかで',opts:['のなかで','が一番','より','どれが'],h:'De las verduras, las zanahorias son las que más me gustan.',exp:'野菜のなかで = entre las verduras. のなかで va después del grupo para indicar el rango.'},
+    {q:'<ruby>音楽<rt>おんがく</rt></ruby>___ジャズが<ruby>一番<rt>いちばん</rt></ruby><ruby>好<rt>す</rt></ruby>きです。',a:'のなかで',opts:['のなかで','が一番','より','どちら'],h:'De los géneros musicales, el jazz es el que más me gusta.',exp:'音楽のなかで = entre los géneros musicales. のなかで delimita el grupo de comparación.'},
+    // が一番 × 2
+    {q:'<ruby>乗<rt>の</rt></ruby>り<ruby>物<rt>もの</rt></ruby>のなかで<ruby>電車<rt>でんしゃ</rt></ruby>___<ruby>便利<rt>べんり</rt></ruby>です。',a:'が一番',opts:['が一番','のなかで','より','どれが'],h:'Entre los transportes, el tren es el más conveniente.',exp:'電車が一番便利です. が一番 conecta el sujeto con el adjetivo para el superlativo.'},
+    {q:'<ruby>日本<rt>にほん</rt></ruby>の<ruby>都市<rt>とし</rt></ruby>のなかで<ruby>東京<rt>とうきょう</rt></ruby>___<ruby>有名<rt>ゆうめい</rt></ruby>です。',a:'が一番',opts:['が一番','のなかで','より','どちら'],h:'De las ciudades de Japón, Tokio es la más famosa.',exp:'東京が一番有名です. が一番 va entre el sujeto (東京) y el adjetivo (有名).'},
+    // だれ × 4
+    {q:'<ruby>家族<rt>かぞく</rt></ruby>のなかで___が<ruby>一番<rt>いちばん</rt></ruby><ruby>若<rt>わか</rt></ruby>いですか。',a:'だれ',opts:['だれ','どれ','どこ','なに'],h:'¿Quién es el más joven de la familia?',exp:'だれが一番〜ですか pregunta sobre personas. 家族 es un grupo de personas, por eso usar だれ.'},
+    {q:'<ruby>友達<rt>ともだち</rt></ruby>のなかで___が<ruby>一番<rt>いちばん</rt></ruby>おもしろいですか。',a:'だれ',opts:['だれ','どれ','どこ','なに'],h:'¿Quién es el más divertido entre tus amigos?',exp:'友達はグループの人. だれ pregunta sobre personas, どれ sería para objetos inanimados.'},
+    {q:'このクラスのなかで___が<ruby>一番<rt>いちばん</rt></ruby><ruby>早<rt>はや</rt></ruby>く<ruby>来<rt>き</rt></ruby>ますか。',a:'だれ',opts:['だれ','どれ','どこ','なに'],h:'¿Quién llega más temprano en esta clase?',exp:'だれが一番早く来ますか = ¿Quién llega más temprano? Preguntar por persona → だれ.'},
+    {q:'<ruby>先生<rt>せんせい</rt></ruby>のなかで___が<ruby>一番<rt>いちばん</rt></ruby><ruby>優<rt>やさ</rt></ruby>しいですか。',a:'だれ',opts:['だれ','どれ','どこ','なに'],h:'¿Quién es el profesor más amable?',exp:'先生 son personas, por eso usar だれ. どれ sería incorrecto porque se usa para objetos.'},
+    // どれ × 3
+    {q:'<ruby>動物<rt>どうぶつ</rt></ruby>のなかで___が<ruby>一番<rt>いちばん</rt></ruby><ruby>速<rt>はや</rt></ruby>いですか。',a:'どれ',opts:['どれ','だれ','どこ','なに'],h:'¿Cuál animal es el más rápido?',exp:'動物 = animales (cosas/seres). どれが一番速いですか pregunta cuál del grupo es el más rápido.'},
+    {q:'この<ruby>三<rt>みっ</rt></ruby>つのなかで___が<ruby>一番<rt>いちばん</rt></ruby>いいですか。',a:'どれ',opts:['どれ','だれ','どこ','なに'],h:'De estas tres cosas, ¿cuál es la mejor?',exp:'どれが一番いいですか = ¿Cuál es la mejor? どれ se usa cuando hay opciones concretas presentadas.'},
+    {q:'<ruby>果物<rt>くだもの</rt></ruby>のなかで___が<ruby>一番<rt>いちばん</rt></ruby><ruby>高<rt>たか</rt></ruby>いですか。',a:'どれ',opts:['どれ','だれ','どこ','なに'],h:'¿Cuál fruta es la más cara?',exp:'果物 son objetos, por eso usar どれ. だれ sería incorrecto porque se usa para personas.'},
+    // どこ × 5
+    {q:'<ruby>日本<rt>にほん</rt></ruby>のなかで___が<ruby>一番<rt>いちばん</rt></ruby><ruby>寒<rt>さむ</rt></ruby>いですか。',a:'どこ',opts:['どこ','だれ','どれ','なに'],h:'¿Qué lugar de Japón es el más frío?',exp:'どこが一番〜ですか pregunta sobre lugares. Preguntar qué parte de Japón es la más fría.'},
+    {q:'<ruby>学校<rt>がっこう</rt></ruby>のなかで___が<ruby>一番<rt>いちばん</rt></ruby><ruby>静<rt>しず</rt></ruby>かですか。',a:'どこ',opts:['どこ','だれ','どれ','なに'],h:'¿Qué parte de la escuela es la más tranquila?',exp:'どこが一番静かですか = ¿Qué lugar es el más tranquilo? どこ para preguntas de lugar.'},
+    {q:'<ruby>世界<rt>せかい</rt></ruby>のなかで___が<ruby>一番<rt>いちばん</rt></ruby><ruby>暑<rt>あつ</rt></ruby>いですか。',a:'どこ',opts:['どこ','だれ','どれ','なに'],h:'¿Qué lugar del mundo es el más caluroso?',exp:'どこが一番暑いですか = ¿Dónde hace más calor? どこ siempre para preguntas sobre lugares.'},
+    {q:'この<ruby>建物<rt>たてもの</rt></ruby>のなかで___が<ruby>一番<rt>いちばん</rt></ruby><ruby>広<rt>ひろ</rt></ruby>いですか。',a:'どこ',opts:['どこ','だれ','どれ','なに'],h:'¿Qué parte de este edificio es la más amplia?',exp:'どこが一番広いですか = ¿Qué lugar es el más amplio? Preguntar sobre partes de un lugar → どこ.'},
+    {q:'<ruby>日本<rt>にほん</rt></ruby>のなかで___が<ruby>一番<rt>いちばん</rt></ruby>きれいですか。',a:'どこ',opts:['どこ','だれ','どれ','なに'],h:'¿Qué lugar de Japón es el más bonito?',exp:'どこが一番きれいですか = ¿Cuál es el lugar más bonito? どこ para preguntar sobre lugares.'},
+    // なに × 5
+    {q:'<ruby>食<rt>た</rt></ruby>べ<ruby>物<rt>もの</rt></ruby>のなかで___が<ruby>一番<rt>いちばん</rt></ruby><ruby>好<rt>す</rt></ruby>きですか。',a:'なに',opts:['なに','だれ','どこ','どれ'],h:'¿Qué comida te gusta más?',exp:'なにが一番好きですか = ¿Qué es lo que más te gusta? なに para preguntas abiertas sobre objetos sin lista concreta.'},
+    {q:'<ruby>科目<rt>かもく</rt></ruby>のなかで___が<ruby>一番<rt>いちばん</rt></ruby><ruby>大切<rt>たいせつ</rt></ruby>ですか。',a:'なに',opts:['なに','だれ','どこ','どれ'],h:'¿Qué materia es la más importante?',exp:'なにが一番大切ですか = ¿Qué es lo más importante? なに para categorías abiertas sin número fijo de opciones.'},
+    {q:'<ruby>日本語<rt>にほんご</rt></ruby>のなかで___が<ruby>一番<rt>いちばん</rt></ruby><ruby>難<rt>むずか</rt></ruby>しいですか。',a:'なに',opts:['なに','だれ','どこ','どれ'],h:'¿Qué es lo más difícil del japonés?',exp:'なにが一番難しいですか = ¿Qué cosa es la más difícil? なに para aspectos o elementos sin lista específica.'},
+    {q:'スポーツのなかで___が<ruby>一番<rt>いちばん</rt></ruby><ruby>楽<rt>たの</rt></ruby>しいですか。',a:'なに',opts:['なに','だれ','どこ','どれ'],h:'¿Qué deporte es el más divertido?',exp:'なにが一番楽しいですか = ¿Qué cosa es la más divertida? Pregunta abierta sobre deportes en general → なに.'},
+    {q:'<ruby>飲<rt>の</rt></ruby>み<ruby>物<rt>もの</rt></ruby>のなかで___が<ruby>一番<rt>いちばん</rt></ruby><ruby>体<rt>からだ</rt></ruby>にいいですか。',a:'なに',opts:['なに','だれ','どこ','どれ'],h:'¿Qué bebida es la mejor para el cuerpo?',exp:'なにが一番体にいいですか = ¿Qué es lo mejor para el cuerpo? Pregunta abierta sin lista concreta → なに.'},
+    // が（助詞）× 4
+    {q:'<ruby>果物<rt>くだもの</rt></ruby>のなかでバナナ___<ruby>一番<rt>いちばん</rt></ruby><ruby>安<rt>やす</rt></ruby>いです。',a:'が',opts:['が','は','の','を'],h:'Entre las frutas, el plátano es el más barato.',exp:'バナナが一番安い: が marca el sujeto en el superlativo. は cambiaría el matiz; の y を son incorrectos aquí.'},
+    {q:'スポーツのなかで<ruby>水泳<rt>すいえい</rt></ruby>___<ruby>一番<rt>いちばん</rt></ruby><ruby>体<rt>からだ</rt></ruby>にいいです。',a:'が',opts:['が','は','の','を'],h:'De los deportes, la natación es la mejor para el cuerpo.',exp:'水泳が一番体にいい: が marca el sujeto (水泳) en la estructura [X]が一番[ADJ].'},
+    {q:'<ruby>家族<rt>かぞく</rt></ruby>のなかで<ruby>父<rt>ちち</rt></ruby>___<ruby>一番<rt>いちばん</rt></ruby><ruby>忙<rt>いそが</rt></ruby>しいです。',a:'が',opts:['が','は','の','を'],h:'En la familia, papá es el más ocupado.',exp:'父が一番忙しい: が es la partícula sujeto en superlativos. Siempre usar が, no は ni を.'},
+    {q:'このクラスのなかで<ruby>木村<rt>きむら</rt></ruby>さん___<ruby>歌<rt>うた</rt></ruby>が<ruby>一番<rt>いちばん</rt></ruby><ruby>上手<rt>じょうず</rt></ruby>です。',a:'が',opts:['が','は','の','を'],h:'En esta clase, la sra. Kimura es la mejor cantando.',exp:'木村さんが一番上手: が es la partícula sujeto. は marcaría tema (contraste), の y を no corresponden aquí.'}
+];
+
+// ===== NARU (〜になります/〜くなります) DATA =====
+const naruLesson = {
+    title: '〜になります／〜くなります',
+    subtitle: 'Expresar cambio o transformación',
+    desc: `
+<div class="grammar-point">
+<p>📌 <strong>Regla de transformación:</strong></p>
+<table style="width:100%;text-align:center;font-size:0.92rem;margin-top:0.4rem;">
+  <tr style="background:#f0f0f0;"><th>Tipo</th><th>Cómo conectar</th><th>Forma</th><th>Ejemplo</th></tr>
+  <tr><td>Adjetivo-い<br><small style="color:#666;">い形容詞</small></td><td><strong>quitar い → + く</strong></td><td style="font-family:'Noto Sans JP';">くなります</td><td style="font-family:'Noto Sans JP';font-size:0.85rem;"><ruby>暑<rt>あつ</rt></ruby>い → <ruby>暑<rt>あつ</rt></ruby>くなります</td></tr>
+  <tr><td>Adjetivo-な<br><small style="color:#666;">な形容詞</small></td><td><strong>+ に</strong></td><td style="font-family:'Noto Sans JP';">になります</td><td style="font-family:'Noto Sans JP';font-size:0.85rem;">きれい → きれいになります</td></tr>
+  <tr><td>Sustantivo<br><small style="color:#666;">名詞</small></td><td><strong>+ に</strong></td><td style="font-family:'Noto Sans JP';">になります</td><td style="font-family:'Noto Sans JP';font-size:0.85rem;"><ruby>先生<rt>せんせい</rt></ruby> → <ruby>先生<rt>せんせい</rt></ruby>になります</td></tr>
+</table>
+</div>
+<div class="grammar-point">
+<p>📌 <strong>Formas conjugadas:</strong></p>
+<table style="width:100%;text-align:center;font-size:0.92rem;margin-top:0.4rem;">
+  <tr style="background:#f0f0f0;"><th>Tiempo</th><th>い形容詞</th><th>な形容詞／名詞</th></tr>
+  <tr><td>Presente/Futuro</td><td style="font-family:'Noto Sans JP';"><ruby>暑<rt>あつ</rt></ruby>くなります</td><td style="font-family:'Noto Sans JP';">きれいになります</td></tr>
+  <tr><td>Pasado</td><td style="font-family:'Noto Sans JP';"><ruby>暑<rt>あつ</rt></ruby>くなりました</td><td style="font-family:'Noto Sans JP';">きれいになりました</td></tr>
+  <tr><td>Deseo (〜たい)</td><td style="font-family:'Noto Sans JP';"><ruby>暑<rt>あつ</rt></ruby>くなりたいです</td><td style="font-family:'Noto Sans JP';">きれいになりたいです</td></tr>
+</table>
+</div>`,
+    examples: [
+        ['<ruby>夏<rt>なつ</rt></ruby>は<ruby>暑<rt>あつ</rt></ruby><strong style="color:var(--primary)">くなります</strong>。','natsu wa atsuku narimasu.','En verano se vuelve caluroso.'],
+        ['<ruby>冬<rt>ふゆ</rt></ruby>は<ruby>寒<rt>さむ</rt></ruby><strong style="color:var(--primary)">くなりました</strong>。','fuyu wa samuku narimashita.','En invierno se puso frío.'],
+        ['<ruby>部屋<rt>へや</rt></ruby>がきれい<strong style="color:var(--primary)">になります</strong>。','heya ga kirei ni narimasu.','El cuarto se vuelve bonito.'],
+        ['<ruby>子<rt>こ</rt></ruby>どもが<ruby>元気<rt>げんき</rt></ruby><strong style="color:var(--primary)">になりました</strong>。','kodomo ga genki ni narimashita.','El niño se puso bien.'],
+        ['<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>先生<rt>せんせい</rt></ruby><strong style="color:var(--primary)">になります</strong>。','tanaka-san wa sensei ni narimasu.','El sr. Tanaka se convertirá en profesor.'],
+        ['<ruby>日本語<rt>にほんご</rt></ruby>が<ruby>上手<rt>じょうず</rt></ruby><strong style="color:var(--primary)">になりたいです</strong>。','nihongo ga jōzu ni naritai desu.','Quiero volverme bueno en japonés.'],
+        ['もうすぐ<ruby>春<rt>はる</rt></ruby><strong style="color:var(--primary)">になります</strong>。','mōsugu haru ni narimasu.','Pronto llegará la primavera.'],
+        ['<ruby>道<rt>みち</rt></ruby>が<ruby>広<rt>ひろ</rt></ruby><strong style="color:var(--primary)">くなりました</strong>。','michi ga hiroku narimashita.','La calle se amplió.']
+    ]
+};
+
+const naruReorderPool = [
+    // ===== Adjetivo-い くなります (20問) =====
+    {words:['<ruby>夏<rt>なつ</rt></ruby>は','<ruby>暑<rt>あつ</rt></ruby>く','なります'],answer:'<ruby>夏<rt>なつ</rt></ruby>は<ruby>暑<rt>あつ</rt></ruby>くなります',hint:'En verano se vuelve caluroso.',explain:'Adjetivo-い (暑い): quita い → añade く + なります. 暑い → 暑くなります.'},
+    {words:['<ruby>冬<rt>ふゆ</rt></ruby>は','<ruby>寒<rt>さむ</rt></ruby>く','なります'],answer:'<ruby>冬<rt>ふゆ</rt></ruby>は<ruby>寒<rt>さむ</rt></ruby>くなります',hint:'En invierno se vuelve frío.',explain:'Adjetivo-い (寒い): quita い → añade く + なります. 寒い → 寒くなります.'},
+    {words:['<ruby>子<rt>こ</rt></ruby>どもが','<ruby>大<rt>おお</rt></ruby>きく','なります'],answer:'<ruby>子<rt>こ</rt></ruby>どもが<ruby>大<rt>おお</rt></ruby>きくなります',hint:'El niño se hace grande.',explain:'Adjetivo-い (大きい): quita い → añade く + なります. 大きい → 大きくなります.'},
+    {words:['<ruby>値段<rt>ねだん</rt></ruby>が','<ruby>安<rt>やす</rt></ruby>く','なりました'],answer:'<ruby>値段<rt>ねだん</rt></ruby>が<ruby>安<rt>やす</rt></ruby>くなりました',hint:'Los precios se abarataron.',explain:'Adjetivo-い (安い): quita い → añade く + なりました (pasado). 安い → 安くなりました.'},
+    {words:['<ruby>部屋<rt>へや</rt></ruby>が','<ruby>明<rt>あか</rt></ruby>るく','なりました'],answer:'<ruby>部屋<rt>へや</rt></ruby>が<ruby>明<rt>あか</rt></ruby>るくなりました',hint:'El cuarto se iluminó.',explain:'Adjetivo-い (明るい): quita い → añade く + なりました. 明るい → 明るくなりました.'},
+    {words:['<ruby>道<rt>みち</rt></ruby>が','<ruby>広<rt>ひろ</rt></ruby>く','なりました'],answer:'<ruby>道<rt>みち</rt></ruby>が<ruby>広<rt>ひろ</rt></ruby>くなりました',hint:'La calle se amplió.',explain:'Adjetivo-い (広い): quita い → añade く + なりました. 広い → 広くなりました.'},
+    {words:['ラーメンが','<ruby>冷<rt>つめ</rt></ruby>たく','なりました'],answer:'ラーメンが<ruby>冷<rt>つめ</rt></ruby>たくなりました',hint:'El ramen se enfrió.',explain:'Adjetivo-い (冷たい): quita い → añade く + なりました. 冷たい → 冷たくなりました.'},
+    {words:['<ruby>最近<rt>さいきん</rt></ruby>','<ruby>忙<rt>いそが</rt></ruby>しく','なりました'],answer:'<ruby>最近<rt>さいきん</rt></ruby><ruby>忙<rt>いそが</rt></ruby>しくなりました',hint:'Últimamente me he puesto ocupado/a.',explain:'Adjetivo-い (忙しい): quita い → añade く + なりました. 忙しい → 忙しくなりました.'},
+    {words:['<ruby>空<rt>そら</rt></ruby>が','<ruby>暗<rt>くら</rt></ruby>く','なりました'],answer:'<ruby>空<rt>そら</rt></ruby>が<ruby>暗<rt>くら</rt></ruby>くなりました',hint:'El cielo se oscureció.',explain:'Adjetivo-い (暗い): quita い → añade く + なりました. 暗い → 暗くなりました.'},
+    {words:['<ruby>毎日<rt>まいにち</rt></ruby>','<ruby>楽<rt>たの</rt></ruby>しく','なります'],answer:'<ruby>毎日<rt>まいにち</rt></ruby><ruby>楽<rt>たの</rt></ruby>しくなります',hint:'Cada día se vuelve más divertido.',explain:'Adjetivo-い (楽しい): quita い → añade く + なります. 楽しい → 楽しくなります.'},
+    {words:['<ruby>天気<rt>てんき</rt></ruby>が','<ruby>悪<rt>わる</rt></ruby>く','なりました'],answer:'<ruby>天気<rt>てんき</rt></ruby>が<ruby>悪<rt>わる</rt></ruby>くなりました',hint:'El tiempo empeoró.',explain:'Adjetivo-い (悪い): quita い → añade く + なりました. 悪い → 悪くなりました.'},
+    {words:['<ruby>電車<rt>でんしゃ</rt></ruby>が','<ruby>速<rt>はや</rt></ruby>く','なりました'],answer:'<ruby>電車<rt>でんしゃ</rt></ruby>が<ruby>速<rt>はや</rt></ruby>くなりました',hint:'El tren se volvió más rápido.',explain:'Adjetivo-い (速い): quita い → añade く + なりました. 速い → 速くなりました.'},
+    {words:['<ruby>声<rt>こえ</rt></ruby>が','<ruby>大<rt>おお</rt></ruby>きく','なりました'],answer:'<ruby>声<rt>こえ</rt></ruby>が<ruby>大<rt>おお</rt></ruby>きくなりました',hint:'La voz se volvió más fuerte.',explain:'Adjetivo-い (大きい): quita い → añade く + なりました. 大きい → 大きくなりました.'},
+    {words:['<ruby>髪<rt>かみ</rt></ruby>が','<ruby>長<rt>なが</rt></ruby>く','なりました'],answer:'<ruby>髪<rt>かみ</rt></ruby>が<ruby>長<rt>なが</rt></ruby>くなりました',hint:'El cabello se puso largo.',explain:'Adjetivo-い (長い): quita い → añade く + なりました. 長い → 長くなりました.'},
+    {words:['<ruby>荷物<rt>にもつ</rt></ruby>が','<ruby>重<rt>おも</rt></ruby>く','なりました'],answer:'<ruby>荷物<rt>にもつ</rt></ruby>が<ruby>重<rt>おも</rt></ruby>くなりました',hint:'El equipaje se volvió pesado.',explain:'Adjetivo-い (重い): quita い → añade く + なりました. 重い → 重くなりました.'},
+    {words:['<ruby>気温<rt>きおん</rt></ruby>が','<ruby>低<rt>ひく</rt></ruby>く','なりました'],answer:'<ruby>気温<rt>きおん</rt></ruby>が<ruby>低<rt>ひく</rt></ruby>くなりました',hint:'La temperatura bajó.',explain:'Adjetivo-い (低い): quita い → añade く + なりました. 低い → 低くなりました.'},
+    {words:['スープが','<ruby>辛<rt>から</rt></ruby>く','なりました'],answer:'スープが<ruby>辛<rt>から</rt></ruby>くなりました',hint:'La sopa se puso picante.',explain:'Adjetivo-い (辛い): quita い → añade く + なりました. 辛い → 辛くなりました.'},
+    {words:['<ruby>授業<rt>じゅぎょう</rt></ruby>が','<ruby>難<rt>むずか</rt></ruby>しく','なりました'],answer:'<ruby>授業<rt>じゅぎょう</rt></ruby>が<ruby>難<rt>むずか</rt></ruby>しくなりました',hint:'La clase se volvió difícil.',explain:'Adjetivo-い (難しい): quita い → añade く + なりました. 難しい → 難しくなりました.'},
+    {words:['コーヒーが','<ruby>熱<rt>あつ</rt></ruby>く','なりました'],answer:'コーヒーが<ruby>熱<rt>あつ</rt></ruby>くなりました',hint:'El café se calentó.',explain:'Adjetivo-い (熱い): quita い → añade く + なりました. 熱い = caliente (líquido). 熱い → 熱くなりました.'},
+    {words:['バスが','<ruby>遅<rt>おそ</rt></ruby>く','なりました'],answer:'バスが<ruby>遅<rt>おそ</rt></ruby>くなりました',hint:'El autobús se volvió lento.',explain:'Adjetivo-い (遅い): quita い → añade く + なりました. 遅い → 遅くなりました.'},
+    // ===== Adjetivo-な になります (20問) =====
+    {words:['<ruby>部屋<rt>へや</rt></ruby>が','きれいに','なります'],answer:'<ruby>部屋<rt>へや</rt></ruby>がきれいになります',hint:'El cuarto se vuelve bonito.',explain:'Adjetivo-な (きれい): añade に + なります. No se quita nada: きれい + になります.'},
+    {words:['<ruby>子<rt>こ</rt></ruby>どもが','<ruby>元気<rt>げんき</rt></ruby>に','なりました'],answer:'<ruby>子<rt>こ</rt></ruby>どもが<ruby>元気<rt>げんき</rt></ruby>になりました',hint:'El niño se puso bien.',explain:'Adjetivo-な (元気): añade に + なりました (pasado). 元気 + になりました.'},
+    {words:['<ruby>駅<rt>えき</rt></ruby>が','<ruby>便利<rt>べんり</rt></ruby>に','なります'],answer:'<ruby>駅<rt>えき</rt></ruby>が<ruby>便利<rt>べんり</rt></ruby>になります',hint:'La estación se vuelve conveniente.',explain:'Adjetivo-な (便利): añade に + なります. 便利 + になります.'},
+    {words:['<ruby>山田<rt>やまだ</rt></ruby>さんは','<ruby>有名<rt>ゆうめい</rt></ruby>に','なりました'],answer:'<ruby>山田<rt>やまだ</rt></ruby>さんは<ruby>有名<rt>ゆうめい</rt></ruby>になりました',hint:'El sr. Yamada se hizo famoso.',explain:'Adjetivo-な (有名): añade に + なりました. 有名 + になりました.'},
+    {words:['<ruby>日本語<rt>にほんご</rt></ruby>が','<ruby>上手<rt>じょうず</rt></ruby>に','なりたいです'],answer:'<ruby>日本語<rt>にほんご</rt></ruby>が<ruby>上手<rt>じょうず</rt></ruby>になりたいです',hint:'Quiero volverme bueno/a en japonés.',explain:'Adjetivo-な (上手): añade に + なりたいです (deseo). 上手 + になりたいです.'},
+    {words:['<ruby>街<rt>まち</rt></ruby>が','<ruby>静<rt>しず</rt></ruby>かに','なりました'],answer:'<ruby>街<rt>まち</rt></ruby>が<ruby>静<rt>しず</rt></ruby>かになりました',hint:'La ciudad se quedó tranquila.',explain:'Adjetivo-な (静か): añade に + なりました. 静か + になりました.'},
+    {words:['<ruby>日本語<rt>にほんご</rt></ruby>が','<ruby>好<rt>す</rt></ruby>きに','なりました'],answer:'<ruby>日本語<rt>にほんご</rt></ruby>が<ruby>好<rt>す</rt></ruby>きになりました',hint:'Me empezó a gustar el japonés.',explain:'Adjetivo-な (好き): añade に + なりました. 好き + になりました.'},
+    {words:['<ruby>試験<rt>しけん</rt></ruby>が','<ruby>簡単<rt>かんたん</rt></ruby>に','なりました'],answer:'<ruby>試験<rt>しけん</rt></ruby>が<ruby>簡単<rt>かんたん</rt></ruby>になりました',hint:'El examen se volvió fácil.',explain:'Adjetivo-な (簡単): añade に + なりました. 簡単 + になりました.'},
+    {words:['<ruby>生活<rt>せいかつ</rt></ruby>が','<ruby>便利<rt>べんり</rt></ruby>に','なりました'],answer:'<ruby>生活<rt>せいかつ</rt></ruby>が<ruby>便利<rt>べんり</rt></ruby>になりました',hint:'La vida se volvió conveniente.',explain:'Adjetivo-な (便利): añade に + なりました. 生活 = vida cotidiana.'},
+    {words:['<ruby>料理<rt>りょうり</rt></ruby>が','<ruby>上手<rt>じょうず</rt></ruby>に','なりたいです'],answer:'<ruby>料理<rt>りょうり</rt></ruby>が<ruby>上手<rt>じょうず</rt></ruby>になりたいです',hint:'Quiero volverme bueno/a en cocina.',explain:'Adjetivo-な (上手): añade に + なりたいです. 上手 + になりたいです.'},
+    {words:['<ruby>山田<rt>やまだ</rt></ruby>さんは','<ruby>親切<rt>しんせつ</rt></ruby>に','なりました'],answer:'<ruby>山田<rt>やまだ</rt></ruby>さんは<ruby>親切<rt>しんせつ</rt></ruby>になりました',hint:'El sr. Yamada se volvió amable.',explain:'Adjetivo-な (親切): añade に + なりました. 親切 + になりました.'},
+    {words:['<ruby>週末<rt>しゅうまつ</rt></ruby>が','<ruby>暇<rt>ひま</rt></ruby>に','なりました'],answer:'<ruby>週末<rt>しゅうまつ</rt></ruby>が<ruby>暇<rt>ひま</rt></ruby>になりました',hint:'El fin de semana quedó libre.',explain:'Adjetivo-な (暇): añade に + なりました. 暇 + になりました.'},
+    {words:['この<ruby>映画<rt>えいが</rt></ruby>が','<ruby>有名<rt>ゆうめい</rt></ruby>に','なりました'],answer:'この<ruby>映画<rt>えいが</rt></ruby>が<ruby>有名<rt>ゆうめい</rt></ruby>になりました',hint:'Esta película se hizo famosa.',explain:'Adjetivo-な (有名): añade に + なりました. 映画 = película.'},
+    {words:['<ruby>先生<rt>せんせい</rt></ruby>が','<ruby>丁寧<rt>ていねい</rt></ruby>に','なりました'],answer:'<ruby>先生<rt>せんせい</rt></ruby>が<ruby>丁寧<rt>ていねい</rt></ruby>になりました',hint:'El profesor se volvió más educado.',explain:'Adjetivo-な (丁寧): añade に + なりました. 丁寧 + になりました.'},
+    {words:['スポーツが','<ruby>好<rt>す</rt></ruby>きに','なりました'],answer:'スポーツが<ruby>好<rt>す</rt></ruby>きになりました',hint:'Me empezaron a gustar los deportes.',explain:'Adjetivo-な (好き): añade に + なりました. 好き + になりました.'},
+    {words:['<ruby>彼女<rt>かのじょ</rt></ruby>は','<ruby>元気<rt>げんき</rt></ruby>に','なりたいです'],answer:'<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>元気<rt>げんき</rt></ruby>になりたいです',hint:'Ella quiere ponerse bien.',explain:'Adjetivo-な (元気): añade に + なりたいです. 元気 + になりたいです.'},
+    {words:['<ruby>健康<rt>けんこう</rt></ruby>が','<ruby>大切<rt>たいせつ</rt></ruby>に','なりました'],answer:'<ruby>健康<rt>けんこう</rt></ruby>が<ruby>大切<rt>たいせつ</rt></ruby>になりました',hint:'La salud se volvió importante.',explain:'Adjetivo-な (大切): añade に + なりました. 大切 + になりました.'},
+    {words:['<ruby>仕事<rt>しごと</rt></ruby>が','<ruby>大変<rt>たいへん</rt></ruby>に','なりました'],answer:'<ruby>仕事<rt>しごと</rt></ruby>が<ruby>大変<rt>たいへん</rt></ruby>になりました',hint:'El trabajo se puso duro.',explain:'Adjetivo-な (大変): añade に + なりました. 大変 = difícil/duro.'},
+    {words:['<ruby>生徒<rt>せいと</rt></ruby>が','<ruby>丁寧<rt>ていねい</rt></ruby>に','なりました'],answer:'<ruby>生徒<rt>せいと</rt></ruby>が<ruby>丁寧<rt>ていねい</rt></ruby>になりました',hint:'Los estudiantes se volvieron más educados.',explain:'Adjetivo-な (丁寧): añade に + なりました. 生徒 = alumnos.'},
+    {words:['この<ruby>歌<rt>うた</rt></ruby>が','<ruby>有名<rt>ゆうめい</rt></ruby>に','なりました'],answer:'この<ruby>歌<rt>うた</rt></ruby>が<ruby>有名<rt>ゆうめい</rt></ruby>になりました',hint:'Esta canción se hizo famosa.',explain:'Adjetivo-な (有名): añade に + なりました. 歌 = canción.'},
+    // ===== Sustantivo になります (20問) =====
+    {words:['<ruby>田中<rt>たなか</rt></ruby>さんは','<ruby>先生<rt>せんせい</rt></ruby>に','なります'],answer:'<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>先生<rt>せんせい</rt></ruby>になります',hint:'El sr. Tanaka se convertirá en profesor.',explain:'Sustantivo (先生): añade に + なります. 先生 + になります.'},
+    {words:['もうすぐ','<ruby>春<rt>はる</rt></ruby>に','なります'],answer:'もうすぐ<ruby>春<rt>はる</rt></ruby>になります',hint:'Pronto llegará la primavera.',explain:'Sustantivo (春): añade に + なります. もうすぐ = pronto. 春 + になります.'},
+    {words:['<ruby>私<rt>わたし</rt></ruby>は','<ruby>大人<rt>おとな</rt></ruby>に','なりました'],answer:'<ruby>私<rt>わたし</rt></ruby>は<ruby>大人<rt>おとな</rt></ruby>になりました',hint:'Me convertí en adulto/a.',explain:'Sustantivo (大人): añade に + なりました. 大人 + になりました.'},
+    {words:['<ruby>鈴木<rt>すずき</rt></ruby>さんは','<ruby>医者<rt>いしゃ</rt></ruby>に','なりたいです'],answer:'<ruby>鈴木<rt>すずき</rt></ruby>さんは<ruby>医者<rt>いしゃ</rt></ruby>になりたいです',hint:'El sr. Suzuki quiere ser médico.',explain:'Sustantivo (医者): añade に + なりたいです (deseo). 医者 + になりたいです.'},
+    {words:['<ruby>二人<rt>ふたり</rt></ruby>は','<ruby>友達<rt>ともだち</rt></ruby>に','なりました'],answer:'<ruby>二人<rt>ふたり</rt></ruby>は<ruby>友達<rt>ともだち</rt></ruby>になりました',hint:'Los dos se hicieron amigos.',explain:'Sustantivo (友達): añade に + なりました. 二人 = los dos.'},
+    {words:['もうすぐ','<ruby>夏<rt>なつ</rt></ruby>に','なります'],answer:'もうすぐ<ruby>夏<rt>なつ</rt></ruby>になります',hint:'Pronto llegará el verano.',explain:'Sustantivo (夏): añade に + なります. もうすぐ = pronto. 夏 + になります.'},
+    {words:['<ruby>弟<rt>おとうと</rt></ruby>は','<ruby>学生<rt>がくせい</rt></ruby>に','なりました'],answer:'<ruby>弟<rt>おとうと</rt></ruby>は<ruby>学生<rt>がくせい</rt></ruby>になりました',hint:'Mi hermano menor se convirtió en estudiante.',explain:'Sustantivo (学生): añade に + なりました. 弟 = hermano menor.'},
+    {words:['<ruby>彼<rt>かれ</rt></ruby>は','<ruby>有名人<rt>ゆうめいじん</rt></ruby>に','なりました'],answer:'<ruby>彼<rt>かれ</rt></ruby>は<ruby>有名人<rt>ゆうめいじん</rt></ruby>になりました',hint:'Él se hizo famoso.',explain:'Sustantivo (有名人): añade に + なりました. 有名人 = persona famosa.'},
+    {words:['もうすぐ','<ruby>秋<rt>あき</rt></ruby>に','なります'],answer:'もうすぐ<ruby>秋<rt>あき</rt></ruby>になります',hint:'Pronto llegará el otoño.',explain:'Sustantivo (秋): añade に + なります. もうすぐ = pronto. 秋 + になります.'},
+    {words:['<ruby>山田<rt>やまだ</rt></ruby>さんは','エンジニアに','なりたいです'],answer:'<ruby>山田<rt>やまだ</rt></ruby>さんはエンジニアになりたいです',hint:'El sr. Yamada quiere ser ingeniero.',explain:'Sustantivo (エンジニア): añade に + なりたいです. エンジニア + になりたいです.'},
+    {words:['<ruby>私<rt>わたし</rt></ruby>は','<ruby>料理人<rt>りょうりにん</rt></ruby>に','なりたいです'],answer:'<ruby>私<rt>わたし</rt></ruby>は<ruby>料理人<rt>りょうりにん</rt></ruby>になりたいです',hint:'Quiero ser cocinero/a.',explain:'Sustantivo (料理人): añade に + なりたいです. 料理人 = cocinero.'},
+    {words:['<ruby>田中<rt>たなか</rt></ruby>さんは','<ruby>看護師<rt>かんごし</rt></ruby>に','なりました'],answer:'<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>看護師<rt>かんごし</rt></ruby>になりました',hint:'El sr. Tanaka se convirtió en enfermero/a.',explain:'Sustantivo (看護師): añade に + なりました. 看護師 = enfermero/a.'},
+    {words:['<ruby>彼女<rt>かのじょ</rt></ruby>は','<ruby>俳優<rt>はいゆう</rt></ruby>に','なりました'],answer:'<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>俳優<rt>はいゆう</rt></ruby>になりました',hint:'Ella se convirtió en actriz.',explain:'Sustantivo (俳優): añade に + なりました. 俳優 = actor/actriz.'},
+    {words:['<ruby>私<rt>わたし</rt></ruby>たちは','チームに','なりました'],answer:'<ruby>私<rt>わたし</rt></ruby>たちはチームになりました',hint:'Nos convertimos en equipo.',explain:'Sustantivo (チーム): añade に + なりました. チーム + になりました.'},
+    {words:['もうすぐ','<ruby>冬<rt>ふゆ</rt></ruby>に','なります'],answer:'もうすぐ<ruby>冬<rt>ふゆ</rt></ruby>になります',hint:'Pronto llegará el invierno.',explain:'Sustantivo (冬): añade に + なります. もうすぐ = pronto. 冬 + になります.'},
+    {words:['<ruby>山田<rt>やまだ</rt></ruby>さんは','<ruby>社長<rt>しゃちょう</rt></ruby>に','なりました'],answer:'<ruby>山田<rt>やまだ</rt></ruby>さんは<ruby>社長<rt>しゃちょう</rt></ruby>になりました',hint:'El sr. Yamada se convirtió en director.',explain:'Sustantivo (社長): añade に + なりました. 社長 = director/presidente de empresa.'},
+    {words:['<ruby>子<rt>こ</rt></ruby>どもは','<ruby>一年生<rt>いちねんせい</rt></ruby>に','なりました'],answer:'<ruby>子<rt>こ</rt></ruby>どもは<ruby>一年生<rt>いちねんせい</rt></ruby>になりました',hint:'El niño pasó a primer grado.',explain:'Sustantivo (一年生): añade に + なりました. 一年生 = primer grado.'},
+    {words:['<ruby>鈴木<rt>すずき</rt></ruby>さんは','<ruby>選手<rt>せんしゅ</rt></ruby>に','なりたいです'],answer:'<ruby>鈴木<rt>すずき</rt></ruby>さんは<ruby>選手<rt>せんしゅ</rt></ruby>になりたいです',hint:'El sr. Suzuki quiere ser atleta.',explain:'Sustantivo (選手): añade に + なりたいです. 選手 = deportista/atleta.'},
+    {words:['このビルは','<ruby>学校<rt>がっこう</rt></ruby>に','なりました'],answer:'このビルは<ruby>学校<rt>がっこう</rt></ruby>になりました',hint:'Este edificio se convirtió en escuela.',explain:'Sustantivo (学校): añade に + なりました. ビル = edificio.'},
+    {words:['<ruby>日本語<rt>にほんご</rt></ruby>が','<ruby>趣味<rt>しゅみ</rt></ruby>に','なりました'],answer:'<ruby>日本語<rt>にほんご</rt></ruby>が<ruby>趣味<rt>しゅみ</rt></ruby>になりました',hint:'El japonés se convirtió en mi hobby.',explain:'Sustantivo (趣味): añade に + なりました. 趣味 = hobby/afición.'}
+];
+
+const naruFillPool = [
+    // い形容詞 → く (20問)
+    {q:'<ruby>夏<rt>なつ</rt></ruby>は<ruby>暑<rt>あつ</rt></ruby>___なります。',a:'く',opts:['く','に','で','が'],h:'En verano se vuelve caluroso.',exp:'暑い es adjetivo-い. Se elimina い y se añade く: 暑くなります.'},
+    {q:'<ruby>冬<rt>ふゆ</rt></ruby>は<ruby>寒<rt>さむ</rt></ruby>___なりました。',a:'く',opts:['く','に','で','を'],h:'En invierno se puso frío.',exp:'寒い es adjetivo-い. La regla es い→く: 寒くなりました.'},
+    {q:'<ruby>子<rt>こ</rt></ruby>どもが<ruby>大<rt>おお</rt></ruby>き___なります。',a:'く',opts:['く','に','で','は'],h:'El niño se hace grande.',exp:'大きい es adjetivo-い. Se cambia い→く: 大きくなります.'},
+    {q:'<ruby>日本語<rt>にほんご</rt></ruby>が<ruby>難<rt>むずか</rt></ruby>し___なります。',a:'く',opts:['く','に','で','を'],h:'El japonés se vuelve difícil.',exp:'難しい es adjetivo-い. Se elimina い y se añade く: 難しくなります.'},
+    {q:'<ruby>部屋<rt>へや</rt></ruby>が<ruby>明<rt>あか</rt></ruby>る___なりました。',a:'く',opts:['く','に','で','が'],h:'El cuarto se iluminó.',exp:'明るい es adjetivo-い. La forma de conexión es い→く: 明るくなりました.'},
+    {q:'<ruby>毎日<rt>まいにち</rt></ruby><ruby>楽<rt>たの</rt></ruby>し___なります。',a:'く',opts:['く','に','で','を'],h:'Cada día se vuelve más divertido.',exp:'楽しい es adjetivo-い. Se usa く para conectar con なります.'},
+    {q:'<ruby>値段<rt>ねだん</rt></ruby>が<ruby>安<rt>やす</rt></ruby>___なりました。',a:'く',opts:['く','に','が','を'],h:'Los precios se abarataron.',exp:'安い es adjetivo-い. い→く: 安くなりました.'},
+    {q:'<ruby>空<rt>そら</rt></ruby>が<ruby>暗<rt>くら</rt></ruby>___なりました。',a:'く',opts:['く','に','で','は'],h:'El cielo se oscureció.',exp:'暗い es adjetivo-い. Se cambia い→く: 暗くなりました.'},
+    {q:'<ruby>天気<rt>てんき</rt></ruby>が<ruby>悪<rt>わる</rt></ruby>___なりました。',a:'く',opts:['く','に','で','が'],h:'El tiempo empeoró.',exp:'悪い es adjetivo-い. La regla い→く da: 悪くなりました.'},
+    {q:'<ruby>電車<rt>でんしゃ</rt></ruby>が<ruby>速<rt>はや</rt></ruby>___なりました。',a:'く',opts:['く','に','で','を'],h:'El tren se volvió más rápido.',exp:'速い es adjetivo-い. Se elimina い y se añade く: 速くなりました.'},
+    {q:'<ruby>声<rt>こえ</rt></ruby>が<ruby>大<rt>おお</rt></ruby>き___なりました。',a:'く',opts:['く','に','が','は'],h:'La voz se volvió más fuerte.',exp:'大きい es adjetivo-い. い→く: 大きくなりました.'},
+    {q:'<ruby>髪<rt>かみ</rt></ruby>が<ruby>長<rt>なが</rt></ruby>___なりました。',a:'く',opts:['く','に','で','を'],h:'El cabello se puso largo.',exp:'長い es adjetivo-い. Se cambia い→く: 長くなりました.'},
+    {q:'<ruby>荷物<rt>にもつ</rt></ruby>が<ruby>重<rt>おも</rt></ruby>___なりました。',a:'く',opts:['く','に','で','が'],h:'El equipaje se volvió pesado.',exp:'重い es adjetivo-い. い→く: 重くなりました.'},
+    {q:'<ruby>気温<rt>きおん</rt></ruby>が<ruby>低<rt>ひく</rt></ruby>___なりました。',a:'く',opts:['く','に','が','は'],h:'La temperatura bajó.',exp:'低い es adjetivo-い. Se elimina い y se añade く: 低くなりました.'},
+    {q:'<ruby>料理<rt>りょうり</rt></ruby>が<ruby>辛<rt>から</rt></ruby>___なりました。',a:'く',opts:['く','に','で','を'],h:'La comida se puso picante.',exp:'辛い es adjetivo-い. La regla い→く da: 辛くなりました.'},
+    {q:'<ruby>授業<rt>じゅぎょう</rt></ruby>が<ruby>難<rt>むずか</rt></ruby>し___なりました。',a:'く',opts:['く','に','で','が'],h:'Las clases se pusieron difíciles.',exp:'難しい es adjetivo-い. い→く: 難しくなりました.'},
+    {q:'<ruby>お茶<rt>おちゃ</rt></ruby>が<ruby>熱<rt>あつ</rt></ruby>___なりました。',a:'く',opts:['く','に','が','は'],h:'El té se puso muy caliente.',exp:'熱い es adjetivo-い. Se cambia い→く: 熱くなりました.'},
+    {q:'<ruby>バスが<rt>ばすが</rt></ruby><ruby>遅<rt>おそ</rt></ruby>___なりました。',a:'く',opts:['く','に','で','を'],h:'El autobús se volvió lento.',exp:'遅い es adjetivo-い. い→く: 遅くなりました.'},
+    {q:'このケーキが<ruby>甘<rt>あま</rt></ruby>___なりました。',a:'く',opts:['く','に','で','が'],h:'Este pastel se puso más dulce.',exp:'甘い es adjetivo-い. い→く: 甘くなりました.'},
+    {q:'<ruby>荷物<rt>にもつ</rt></ruby>が<ruby>軽<rt>かる</rt></ruby>___なりました。',a:'く',opts:['く','に','が','は'],h:'El equipaje se volvió ligero.',exp:'軽い es adjetivo-い. Se elimina い y se añade く: 軽くなりました.'},
+    // な形容詞 → に (20問)
+    {q:'<ruby>部屋<rt>へや</rt></ruby>がきれい___なります。',a:'に',opts:['に','く','で','が'],h:'El cuarto se vuelve bonito.',exp:'きれい es adjetivo-な. Los adjetivos-な y los sustantivos usan に: きれいになります.'},
+    {q:'<ruby>子<rt>こ</rt></ruby>どもが<ruby>元気<rt>げんき</rt></ruby>___なりました。',a:'に',opts:['に','く','で','を'],h:'El niño se puso bien.',exp:'元気 es adjetivo-な. Se conecta directamente con に: 元気になりました.'},
+    {q:'<ruby>山田<rt>やまだ</rt></ruby>さんは<ruby>有名<rt>ゆうめい</rt></ruby>___なりました。',a:'に',opts:['に','く','が','を'],h:'El sr. Yamada se hizo famoso.',exp:'有名 es adjetivo-な. La partícula de cambio es に: 有名になりました.'},
+    {q:'<ruby>日本語<rt>にほんご</rt></ruby>が<ruby>上手<rt>じょうず</rt></ruby>___なりたいです。',a:'に',opts:['に','く','で','は'],h:'Quiero volverme bueno/a en japonés.',exp:'上手 es adjetivo-な. Se usa に: 上手になりたいです.'},
+    {q:'<ruby>街<rt>まち</rt></ruby>が<ruby>静<rt>しず</rt></ruby>か___なりました。',a:'に',opts:['に','く','で','が'],h:'La ciudad se tranquilizó.',exp:'静か es adjetivo-な. Los adjetivos-な usan に para conectar con なります.'},
+    {q:'この<ruby>問題<rt>もんだい</rt></ruby>は<ruby>簡単<rt>かんたん</rt></ruby>___なりました。',a:'に',opts:['に','く','が','を'],h:'Este problema se volvió fácil.',exp:'簡単 es adjetivo-な. Se conecta con に: 簡単になりました.'},
+    {q:'<ruby>駅<rt>えき</rt></ruby>が<ruby>便利<rt>べんり</rt></ruby>___なりました。',a:'に',opts:['に','く','で','は'],h:'La estación se volvió conveniente.',exp:'便利 es adjetivo-な. La regla es sustantivo/な形→に: 便利になりました.'},
+    {q:'<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>料理<rt>りょうり</rt></ruby>が<ruby>上手<rt>じょうず</rt></ruby>___なりました。',a:'に',opts:['に','く','が','を'],h:'Ella se volvió buena cocinando.',exp:'上手 es adjetivo-な. い→くではなく に: 上手になりました.'},
+    {q:'<ruby>先生<rt>せんせい</rt></ruby>が<ruby>親切<rt>しんせつ</rt></ruby>___なりました。',a:'に',opts:['に','く','で','が'],h:'El/La profesor/a se volvió más amable.',exp:'親切 es adjetivo-な. Se usa に: 親切になりました.'},
+    {q:'<ruby>週末<rt>しゅうまつ</rt></ruby>が<ruby>暇<rt>ひま</rt></ruby>___なりました。',a:'に',opts:['に','く','を','は'],h:'El fin de semana quedó libre.',exp:'暇 es adjetivo-な. La partícula de transformación es に: 暇になりました.'},
+    {q:'<ruby>映画<rt>えいが</rt></ruby>が<ruby>有名<rt>ゆうめい</rt></ruby>___なりました。',a:'に',opts:['に','く','で','が'],h:'La película se hizo famosa.',exp:'有名 es adjetivo-な. Se conecta con に: 有名になりました.'},
+    {q:'<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>丁寧<rt>ていねい</rt></ruby>___なりました。',a:'に',opts:['に','く','が','を'],h:'El sr. Tanaka se volvió más educado.',exp:'丁寧 es adjetivo-な. Los adjetivos-な usan に: 丁寧になりました.'},
+    {q:'<ruby>彼<rt>かれ</rt></ruby>はサッカーが<ruby>好<rt>す</rt></ruby>き___なりました。',a:'に',opts:['に','く','で','は'],h:'A él le empezó a gustar el fútbol.',exp:'好き es adjetivo-な. Se usa に: 好きになりました.'},
+    {q:'<ruby>祖母<rt>そぼ</rt></ruby>が<ruby>元気<rt>げんき</rt></ruby>___なりました。',a:'に',opts:['に','く','が','を'],h:'Mi abuela se recuperó.',exp:'元気 es adjetivo-な. La partícula es に: 元気になりました.'},
+    {q:'<ruby>大切<rt>たいせつ</rt></ruby>なことが<ruby>大切<rt>たいせつ</rt></ruby>___なりました。',a:'に',opts:['に','く','で','が'],h:'Lo importante se volvió aún más valioso.',exp:'大切 es adjetivo-な. Se conecta con に: 大切になりました.'},
+    {q:'<ruby>仕事<rt>しごと</rt></ruby>が<ruby>大変<rt>たいへん</rt></ruby>___なりました。',a:'に',opts:['に','く','が','は'],h:'El trabajo se volvió difícil.',exp:'大変 es adjetivo-な. Los adjetivos-な usan に: 大変になりました.'},
+    {q:'<ruby>教室<rt>きょうしつ</rt></ruby>が<ruby>静<rt>しず</rt></ruby>か___なりました。',a:'に',opts:['に','く','で','を'],h:'El aula se puso tranquila.',exp:'静か es adjetivo-な. Se conecta con に: 静かになりました.'},
+    {q:'あの<ruby>歌<rt>うた</rt></ruby>が<ruby>有名<rt>ゆうめい</rt></ruby>___なりました。',a:'に',opts:['に','く','が','で'],h:'Esa canción se hizo famosa.',exp:'有名 es adjetivo-な. La partícula de cambio es に: 有名になりました.'},
+    {q:'<ruby>生徒<rt>せいと</rt></ruby>が<ruby>丁寧<rt>ていねい</rt></ruby>___なりました。',a:'に',opts:['に','く','を','は'],h:'Los alumnos se volvieron más educados.',exp:'丁寧 es adjetivo-な. Se usa に: 丁寧になりました.'},
+    {q:'<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>スポーツ<rt>すぽーつ</rt></ruby>が<ruby>好<rt>す</rt></ruby>き___なりました。',a:'に',opts:['に','く','で','が'],h:'A ella le empezaron a gustar los deportes.',exp:'好き es adjetivo-な. い→くではなく に: 好きになりました.'},
+    // 名詞 → に (20問)
+    {q:'<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>先生<rt>せんせい</rt></ruby>___なります。',a:'に',opts:['に','く','が','で'],h:'El sr. Tanaka se convertirá en profesor.',exp:'先生 es sustantivo. Los sustantivos usan に: 先生になります.'},
+    {q:'<ruby>私<rt>わたし</rt></ruby>は<ruby>大人<rt>おとな</rt></ruby>___なりました。',a:'に',opts:['に','く','を','が'],h:'Me convertí en adulto/a.',exp:'大人 es sustantivo. La partícula de cambio para sustantivos es に: 大人になりました.'},
+    {q:'<ruby>鈴木<rt>すずき</rt></ruby>さんは<ruby>医者<rt>いしゃ</rt></ruby>___なりたいです。',a:'に',opts:['に','く','で','は'],h:'El sr. Suzuki quiere ser médico.',exp:'医者 es sustantivo. Se usa に: 医者になりたいです.'},
+    {q:'もうすぐ<ruby>夏<rt>なつ</rt></ruby>___なります。',a:'に',opts:['に','く','が','を'],h:'Pronto será verano.',exp:'夏 es sustantivo. Los sustantivos se conectan con に: 夏になります.'},
+    {q:'<ruby>弟<rt>おとうと</rt></ruby>は<ruby>学生<rt>がくせい</rt></ruby>___なりました。',a:'に',opts:['に','く','で','が'],h:'Mi hermano menor se convirtió en estudiante.',exp:'学生 es sustantivo. Se conecta con に: 学生になりました.'},
+    {q:'<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>有名人<rt>ゆうめいじん</rt></ruby>___なりました。',a:'に',opts:['に','く','を','は'],h:'Ella se convirtió en una persona famosa.',exp:'有名人 es sustantivo. La partícula es に: 有名人になりました.'},
+    {q:'もうすぐ<ruby>秋<rt>あき</rt></ruby>___なります。',a:'に',opts:['に','く','が','で'],h:'Pronto será otoño.',exp:'秋 es sustantivo. Se usa に: 秋になります.'},
+    {q:'<ruby>彼<rt>かれ</rt></ruby>はエンジニア___なりたいです。',a:'に',opts:['に','く','を','が'],h:'Él quiere ser ingeniero.',exp:'エンジニア es sustantivo. Los sustantivos usan に: エンジニアになりたいです.'},
+    {q:'<ruby>父<rt>ちち</rt></ruby>は<ruby>料理人<rt>りょうりにん</rt></ruby>___なりました。',a:'に',opts:['に','く','で','は'],h:'Mi padre se convirtió en cocinero.',exp:'料理人 es sustantivo. Se conecta con に: 料理人になりました.'},
+    {q:'<ruby>姉<rt>あね</rt></ruby>は<ruby>看護師<rt>かんごし</rt></ruby>___なりました。',a:'に',opts:['に','く','が','を'],h:'Mi hermana mayor se convirtió en enfermera.',exp:'看護師 es sustantivo. La partícula de cambio es に: 看護師になりました.'},
+    {q:'<ruby>木村<rt>きむら</rt></ruby>さんは<ruby>俳優<rt>はいゆう</rt></ruby>___なりました。',a:'に',opts:['に','く','で','が'],h:'El sr. Kimura se convirtió en actor.',exp:'俳優 es sustantivo. Se usa に: 俳優になりました.'},
+    {q:'このチームは<ruby>一番<rt>いちばん</rt></ruby>___なりたいです。',a:'に',opts:['に','く','を','は'],h:'Este equipo quiere ser el número uno.',exp:'一番 es sustantivo/adverbio. Se conecta con に: 一番になりたいです.'},
+    {q:'もうすぐ<ruby>冬<rt>ふゆ</rt></ruby>___なります。',a:'に',opts:['に','く','が','で'],h:'Pronto será invierno.',exp:'冬 es sustantivo. Los sustantivos usan に: 冬になります.'},
+    {q:'<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>社長<rt>しゃちょう</rt></ruby>___なりました。',a:'に',opts:['に','く','を','が'],h:'Ella se convirtió en directora.',exp:'社長 es sustantivo. La partícula es に: 社長になりました.'},
+    {q:'<ruby>来年<rt>らいねん</rt></ruby><ruby>一年生<rt>いちねんせい</rt></ruby>___なります。',a:'に',opts:['に','く','で','は'],h:'El año que viene seré de primer año.',exp:'一年生 es sustantivo. Se usa に: 一年生になります.'},
+    {q:'<ruby>山田<rt>やまだ</rt></ruby>さんは<ruby>選手<rt>せんしゅ</rt></ruby>___なりました。',a:'に',opts:['に','く','が','を'],h:'El sr. Yamada se convirtió en atleta.',exp:'選手 es sustantivo. Se conecta con に: 選手になりました.'},
+    {q:'この<ruby>建物<rt>たてもの</rt></ruby>は<ruby>学校<rt>がっこう</rt></ruby>___なりました。',a:'に',opts:['に','く','で','が'],h:'Este edificio se convirtió en escuela.',exp:'学校 es sustantivo. La partícula de cambio es に: 学校になりました.'},
+    {q:'<ruby>絵<rt>え</rt></ruby>をかくことが<ruby>趣味<rt>しゅみ</rt></ruby>___なりました。',a:'に',opts:['に','く','を','は'],h:'Dibujar se convirtió en mi pasatiempo.',exp:'趣味 es sustantivo. Se usa に: 趣味になりました.'},
+    {q:'<ruby>二人<rt>ふたり</rt></ruby>はカップル___なりました。',a:'に',opts:['に','く','が','で'],h:'Los dos se hicieron pareja.',exp:'カップル es sustantivo. Los sustantivos usan に: カップルになりました.'},
+    {q:'<ruby>彼<rt>かれ</rt></ruby>はボランティア___なりたいです。',a:'に',opts:['に','く','を','が'],h:'Él quiere ser voluntario.',exp:'ボランティア es sustantivo. Se conecta con に: ボランティアになりたいです.'}
 ];
 
 // ===== KUTE (〜くて・で) DATA =====
