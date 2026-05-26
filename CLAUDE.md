@@ -1,15 +1,30 @@
-# CLAUDE.md - Academia Chizu
+# CLAUDE.md - Academia Chizu / NihongoMap
 
 ## プロジェクト概要
 スペイン語話者向けの日本語学習アプリ（N5レベル）。ボリビアの学習者を対象とした単一HTMLファイルのWebアプリ。UIテキストはスペイン語、学習対象は日本語。
+- アプリ名: **NihongoMap**（内部コード名 academia-chizu のまま）
+- リポジトリ: `C:\Users\LENOVO\Desktop\academia-chizu\`
 
 ## 技術スタック
 - **Vanilla HTML / CSS / JavaScript** — フレームワーク・ビルドツールなし
-- **単一ファイル**: `index.html`（約8,600行以上、CSS・JS・データすべて内包）
-- 永続化: `localStorage`（学習済み文字・クイズスコア `chizu_scores`）
+- **単一ファイル**: `index.html`（約14,000行超、CSS・JS・データすべて内包）
+- 永続化: `localStorage`（`chizu_scores` / `learnedChars` / `nm_*` キー群）
 - 認証: **Firebase Authentication**（メール/パスワード・Google 有効済み）
 - 外部依存: Google Fonts + Firebase CDN（10.12.0 compat版）
 - デプロイ: GitHub Pages `https://kenchisaka1991.github.io/academia-chizu/`
+
+## ローカル動作確認
+`file://` URL は Firebase Auth がブロックするため **必ずローカルサーバ経由**で確認する。
+```bash
+cd C:\Users\LENOVO\Desktop\academia-chizu
+python -m http.server 8080
+# → http://localhost:8080 でアクセス
+```
+ブラウザコンソールでログインをバイパスして確認：
+```javascript
+document.getElementById('login-screen').classList.add('hidden');
+showSection('roadmap', document.getElementById('nav-roadmap'));
+```
 
 ## Firebase設定
 ```js
@@ -26,54 +41,216 @@ const firebaseConfig = {
 
 ---
 
-## アーキテクチャ
-3つのトップレベル `<section>`：`#moji`（文字）/ `#grammar`（文法）/ `#vocab`（語彙）
+## モデル使い分けルール（厳守）
+| モデル | 担当 |
+|---|---|
+| **Sonnet** | 関数ロジック・アーキテクチャ・UI実装（メイン作業） |
+| **Opus** | データ・コンテンツ生成（Can-doシナリオJSON・練習問題・VOICEVOXバッチ） |
+| **Haiku** | 軽微なデータ修正・文言調整 |
 
-### 文法モジュール一覧
+---
+
+## アーキテクチャ（Phase 1 実装後）
+
+### セクション構成（`<section>` 一覧）
+```
+#roadmap   — ホーム（ロードマップ）。初期表示 class="section active"
+#unit      — ユニット詳細（Can-doカード一覧）
+#scenario  — シナリオ学習フロー（Escena→Gramática→[Trazar]→Práctica→Reto）
+#jlpt      — JLPT N5模擬試験（Premium・プレースホルダー）
+#profile   — ユーザープロフィール（XP・ストリーク・プラン）
+#moji      — 文字（ひらがな・カタカナ・漢字）
+#grammar   — 文法（22タブ）
+#vocab     — 語彙（20カテゴリ）
+```
+
+### ボトムナビ（2026-05-25 Task #9 実装）
+```html
+<nav class="bottom-nav" role="navigation">
+  <button class="nav-btn active" id="nav-roadmap" onclick="showSection('roadmap',this)">🗺️<span>Mapa</span></button>
+  <button class="nav-btn" id="nav-grammar" onclick="showSection('grammar',this)">📖<span>Práctica</span></button>
+  <button class="nav-btn" id="nav-jlpt" onclick="showSection('jlpt',this)">🎯<span>Examen</span></button>
+  <button class="nav-btn" id="nav-profile" onclick="showSection('profile',this)">👤<span>Perfil</span></button>
+</nav>
+```
+- モバイル: `position:fixed; bottom:0; height:60px`（`body` に `padding-bottom:60px`）
+- PC (768px+): `position:fixed; left:0; width:200px; height:100vh`（`.header/.hud/.main` に `margin-left:200px`）
+- JS互換: `querySelectorAll('.nav-btn')` はそのまま動作
+
+### NihongoMap Phase 1 — localStorage キー
+| キー | 型 | 用途 |
+|---|---|---|
+| `chizu_scores` | object | **既存**: 練習タブごとのスコア（0〜100） |
+| `learnedChars` | array | **既存**: 学習済み文字 |
+| `chizu_placement` | object | **既存**: 配置テスト結果 |
+| `nm_cando_progress` | object | Can-do別進捗（status/stars/practiceScore/…） |
+| `nm_xp` | object | `{total, today, lastUpdate}` |
+| `nm_streak` | object | `{current, longest, lastActiveDate}` |
+| `nm_daily` | object | 日次カウンター（`{date, practiceCount, …}`） |
+| `nm_plan` | object | プランフラグ（`{tier, expiresAt, source}`） |
+| `nm_challenge_quota` | object | 会話チャレンジ無料枠 |
+
+### NihongoMap Phase 1 — 主要関数
+| 関数 | 役割 |
+|---|---|
+| `rolloverDailyIfNeeded()` | 日次リセット・ストリーク判定（起動時呼び出し） |
+| `getTodayString()` | `sv-SE` ロケールでタイムゾーン対応の日付文字列 |
+| `nmGetDaily/Streak/XP/Progress/Plan()` | nm_* 読み出しユーティリティ |
+| `grantXP(amount)` | XP加算・ストリーク更新・HUD再描画 |
+| `isPremium()` | nm_plan の tier/expiresAt をチェック |
+| `canUse(feature, ctx)` | FEATURE_GATES で機能制限チェック |
+| `consume(feature)` | 日次カウンタを消費 |
+| `updateHUD()` | `#hud-xp` / `#hud-streak` / `#hud-daily` を更新 |
+| `renderUnit(unitId)` | Can-doカード一覧を `#unit-content` に描画 |
+| `openCanDo(canDoId)` | シナリオ画面へ遷移・ステップ初期化 |
+| `setScenarioStep(step)` | `['scenario','explain','trazar','practice','challenge']` |
+| `updateStepVisibility(hasTraza)` | traceChars有無でトレースステップ表示切替・番号更新 |
+| `renderScenarioView(cd)` | Escena（会話）表示 |
+| `toggleHint(lineId)` | 0→1(romaji)→2(romaji+es)→0 のヒント3段階 |
+| `openExplainView()` | Gramática説明表示（Siguiente→Trazar or Práctica） |
+| `openTrazarView()` | なぞり書き画面（Unit 1・2 のみ） |
+| `showCanDoTrazarChar()` | `#scenario-content` に既存Trazar UIを描画 |
+| `openPracticeView()` | 練習問題開始（mc/fill/reorder 対応） |
+| `renderPracticeItem()` | 問題1問描画（displayOptions でフリガナ対応） |
+| `checkPracticeAnswer(idx)` | 4択採点（インデックスベース） |
+| `practiceReorderTap(btn)` | 並び替えチップ選択 |
+| `checkPracticeReorder()` | 並び替え採点 |
+| `showPracticeResult()` | passRate 0.8判定・+20XP |
+| `openChallengeView()` | Reto（Phase 1: プレースホルダー） |
+| `completeCandoDone()` | Can-do完了・+50XP・ロードマップへ |
+| `playScenarioAudio(path, text, btn)` | MP3優先→Web Speech APIフォールバック |
+| `speakFallback(text, btn)` | Web Speech API TTS（ja-JP、0.85倍速） |
+| `renderProfile()` | `#profile-content` にXP・ストリーク・プラン表示 |
+| `renderJlpt()` | `#jlpt-content` にPremiumプレースホルダー表示 |
+
+### Can-do データ構造
+```javascript
+window.canDoData.push({
+  id: "u3_c1",        // "u{unit}_{index}"
+  unit: 3,            // ユニット番号
+  index: 1,
+  es: "Presentarse en japonés",
+  jaGoal: "はじめまして。〜です。どうぞよろしく。",
+  grammarTabs: ["desu"],
+  traceChars: [{c:"あ",r:"a"}, ...],   // Unit 1・2のみ。なければ省略
+  scenario: {
+    title: "...",
+    contextEs: "...",
+    lines: [{speaker, ja, jaPlain, romaji, es, audio, highlight}]
+  },
+  explain: {
+    summaryEs: "...",
+    blocks: [{type:"rule"|"pattern"|"note", es:"..."}]
+  },
+  practice: {
+    passRate: 0.8,
+    items: [
+      {type:"mc", prompt:"...", ja:"...", options:[...], answer:0},
+      {type:"fill", prompt:"...", prefix:"...", answer:"...", options:[...]},
+      {type:"reorder", prompt:"...", answer:[...], displayOptions:[...]}  // displayOptionsでruby対応
+    ]
+  }
+});
+```
+- `displayOptions`: reorder問題のチップ表示用（rubyタグ含むHTML）。省略時は `answer` をそのまま使用
+
+### Can-do 実装済み一覧
+| id | unit | テーマ | traceChars |
+|---|---|---|---|
+| u1_c1 | 1 | ひらがな母音（あいうえお） | あいうえお |
+| u1_c2 | 1 | ひらがな単語読み | えきあめて |
+| u1_c3 | 1 | 長い単語・あいさつ | なし |
+| u2_c1 | 2 | カタカナ母音（アイウエオ） | アイウエオ |
+| u2_c2 | 2 | カタカナ単語（コンビニ等） | コケキスミ |
+| u2_c3 | 2 | カタカナ外来語（マリアカルロス） | マリアカルス |
+| u3_c1 | 3 | 自己紹介（です・ます） | なし |
+
+### showSection() の動作
+```javascript
+function showSection(id, btn) {
+    // 全section非表示 → 対象section表示
+    // 全nav-btn非アクティブ → 対象btnアクティブ
+    if(id === 'roadmap') renderRoadmap();
+    if(id === 'profile') renderProfile();
+    if(id === 'jlpt')    renderJlpt();
+    updateHUD();
+}
+```
+
+### 音声再生
+```javascript
+playScenarioAudio("audio/u3_c1_l1_A.mp3", "これはあです。", btnEl)
+// → Audio.load() → onerror → speakFallback() にフォールバック
+```
+MP3ファイルを `audio/` フォルダに配置するだけで自動切替。VOICEVOX生成前はWeb Speech APIで動作。
+
+---
+
+## 文法モジュール一覧（22タブ）
+
 **renderGrammar の if-else 分岐順:**
 ```
-desu → katsu → keiyo → masu → aru → mashou → tai → maeni → niiku → te → ta → nai → kute → gimon → shiji → yori → dou → omou → ichiban → naru → setsuzoku → joshi（else）
+desu → katsu → keiyo → masu → aru → mashou → tai → maeni → niiku → te → ta → nai → kute → gimon → shiji → yori → dou → omou → ichiban → naru → setsuzoku → kazoku → joshi（else）
 ```
 **⚠️ 新タブ追加時は必ず3箇所に追記：** ① タブボタンHTML ② if-else分岐（joshi elseの直前） ③ render関数本体
 
-| key | タブ名 | 主なデータ | Practicar形式 |
-|---|---|---|---|
-| `desu` | です | `desuLesson`, `desuQuizPool` | 並び替え |
-| `katsu` | です活用 | `katsuLesson`, `katsuQuizPool` | 4択 |
-| `shiji` | 指示語 | `kosoAdoTable`(4行), `shijiQuizPool`(40問) | 4択穴埋め |
-| `gimon` | 疑問詞 | `gimonData`(11語), `gimonFillPool`(15問), `gimonReorderPool`(10問) | 4択 / 並び替え |
-| `masu` | ます | `masuLesson`, `masuQuizPool` | 4択 |
-| `aru` | あります/います | `aruQuizPool`(45問), `aruReorderPool`(45問) | 4択 / 並び替え |
-| `keiyo` | 形容詞 | `keiyoIData`(46語), `keiyoNaData`(18語) + Meishiデータ | Conjugación / Uso |
-| `yori` | より〜の方が | `yoriLesson`, `yoriReorderPool`(60問), `yoriFillPool`(60問) | 並び替え / 4択 |
-| `kute` | 〜くて・で | `kuteIData`(20語), `kuteNaData`(15語), `kuteReorderPool`(50問) | 4択 / 並び替え |
-| `mashou` | ましょう | `mashouLesson`(15語), `mashouQuizPool`(12問) | 並び替え |
-| `tai` | 〜たい | `taiData`(15語), `taiQuizPool`, `taiReorderPool`(12問) | 4択 / 並び替え |
-| `maeni` | 〜前に・後で | `maeniLesson`(8語), `maeniQuizPool`(10問) | 並び替え |
-| `niiku` | 〜に行く・来る | `niikuLesson`, `niikuQuizPool`(10問) | 並び替え |
-| `te` | て形 | `teVerbPool`(38語), `teReorderPool`(30問, `use:'kara'`含む) | Conjugación / Orden / てから |
-| `ta` | た形 | `taVerbPool`(38語), `taReorderPool`(30問, `use:'tari'`含む) | Conjugación / Orden / たり |
-| `nai` | ない形 | `naiVerbPool`(38語), `naiReorderPool`(50問) | Conjugación / Orden |
-| `dou` | 〜はどうですか | `douLesson`, `douReorderPool`(60問), `douFillPool`(60問) | 並び替え / 4択 |
-| `omou` | 〜と思います | `omouLesson`, `omouReorderPool`(40問), `omouFillPool`(40問) | 並び替え / 4択 |
-| `ichiban` | 〜のなかで〜がいちばん〜 | `ichibanLesson`, `ichibanReorderPool`(60問), `ichibanFillPool`(60問) | 並び替え / 4択 |
-| `naru` | 〜になります/〜くなります | `naruLesson`, `naruReorderPool`(60問), `naruFillPool`(60問) | 並び替え / 4択 |
-| `setsuzoku` | 接続詞 | `setsuzokuLesson`, `setsuzokuReorderPool`(30問), `setsuzokuFillPool`(30問) | 並び替え / 4択 |
-| `joshi` | 助詞 | `joshiData`(11グループ、各グループ10問) | 並び替え / 穴埋め |
-
-**て形・た形・ない形 Expresiones（応用表現）サブタブ:**
-- て形: てください・ています・てもいいですか・てはいけません・**てから**
-- た形: たことがある・たほうがいい・たあとで・たから・普通体過去・**たり〜たりします**
-- ない形: ないでください・なくてもいいです・なければなりません・ないほうがいい
+| key | タブ名 | Practicar形式 |
+|---|---|---|
+| `desu` | です | 並び替え |
+| `katsu` | です活用 | 4択 |
+| `shiji` | 指示語 | 4択穴埋め |
+| `gimon` | 疑問詞 | 4択 / 並び替え |
+| `masu` | ます | 4択 |
+| `aru` | あります/います | 4択 / 並び替え |
+| `keiyo` | 形容詞 | Conjugación / Uso |
+| `yori` | より〜の方が | 並び替え / 4択 |
+| `kute` | 〜くて・で | 4択 / 並び替え |
+| `mashou` | ましょう | 並び替え |
+| `tai` | 〜たい | 4択 / 並び替え |
+| `maeni` | 〜前に・後で | 並び替え |
+| `niiku` | 〜に行く・来る | 並び替え |
+| `te` | て形 | Conjugación / Orden / てから |
+| `ta` | た形 | Conjugación / Orden / たり |
+| `nai` | ない形 | Conjugación / Orden |
+| `dou` | 〜はどうですか | 並び替え / 4択 |
+| `omou` | 〜と思います | 並び替え / 4択 |
+| `ichiban` | 〜のなかで〜がいちばん〜 | 並び替え / 4択 |
+| `naru` | 〜になります/〜くなります | 並び替え / 4択 |
+| `setsuzoku` | 接続詞 | 並び替え / 4択 |
+| `kazoku` | 家族の紹介 | 並び替え / 4択 |
+| `joshi` | 助詞（11グループ） | 並び替え / 穴埋め |
 
 **助詞グループ（index 0〜10）:**
 は/が(0) · を(1) · に/で/へ(2) · と/も/の(3) · 時間に/から/まで(4) · よ/ね/か(5) · も包含(6) · から/まで範囲(7) · から理由(8) · が逆接(9) · や/など例示(10)
 **⚠️ Repaso は `joshiGroup === 11` で判定**
 
 ### 語彙モジュール
-20カテゴリ（index 0〜19）+ Repaso（index 20）。5グループのタブUI。
+20カテゴリ（index 0〜19）+ Repaso（index 20）。vocabData[2] = '家族'（27語）。
 **⚠️ Repaso は `vocabCategory === vocabData.length`（=20）で判定**
-各カテゴリ構造: `{ name, es, words:[{w, r, m}] }` / タブ表示は `c.es`
+
+---
+
+## 学習ロードマップ（10ユニット）
+
+| # | テーマ | section/tab | scoreKeys | kanjiKey |
+|---|---|---|---|---|
+| 1 | Hiragana | moji/hiragana | kana_hiragana | null |
+| 2 | Katakana | moji/katakana | kana_katakana | null |
+| 3 | Autopresentación | grammar/desu | desu/katsu/masu | desu |
+| 4 | Números, tiempo | grammar/gimon | gimon/shiji | gimon |
+| 5 | Lugares y direcciones | grammar/aru | aru/joshi | aru |
+| 6 | Compras y comida | grammar/keiyo | keiyo/dou/yori/ichiban | keiyo |
+| 7 | Acciones cotidianas | grammar/mashou | mashou/tai/niiku/maeni | mashou |
+| 8 | Describir con adjetivos | grammar/kute | kute/naru/omou | kute |
+| 9 | Familia y personas | grammar/kazoku | kazoku | kazoku |
+| 10 | Horario diario | grammar/te | te/ta/nai/setsuzoku | null |
+
+ロードマップ関数: `renderRoadmap()` / `getUnitScore(keys)` / `getKanjiProgress(chars)` / `navigateToUnit(section, tab)`
+
+配置テスト判定:
+- 12〜15問正解 → Pre-intermedio → Unit 9推奨
+- 8〜11問正解 → Básico-intermedio → Unit 5推奨
+- 0〜7問正解 → Básico → Unit 1推奨
 
 ---
 
@@ -82,56 +259,125 @@ desu → katsu → keiyo → masu → aru → mashou → tai → maeni → niiku
 - イベント処理は `onclick="..."` をHTML属性に直接記述
 - 描画は `innerHTML = \`...\`` テンプレートリテラルで一括置換
 - `stripRuby(html)` でルビタグ除去してから採点比較・チップ表示
-- 並び替えPistaボタン: `.word-romaji` スパン（デフォルト `display:none`）をトグル
 - 4択でrubyHTMLを含む場合は**インデックスベース採点**（`checkXxxAnswer(idx)`）
-- **作業分担**: Haiku → データ・コンテンツ変更 / Sonnet → 関数ロジック・アーキテクチャ
+- **UIラベル・説明はスペイン語**、**学習テキストは日本語（`<ruby>`タグ）**。英語は使わない
 
 ## デザイン規則
 - カラー: `--primary:#E63946`（赤）/ `--ocean:#2A9D8F`（緑）/ `--accent:#F4A261`（オレンジ）/ `--night:#1D3557`（紺）/ `--cream:#FDFBF7`（背景）
 - フォント: 日本語 = `Noto Sans JP` / `Zen Maru Gothic`、欧文 = `DM Sans` / `Outfit`
 - 角丸: `--radius-sm/md/lg/xl` (12/20/28/40px)
-- **UIラベル・説明はスペイン語**、**学習テキストは日本語（`<ruby>`タグ）**。英語は使わない
+- ボタンクラス: `.btn.btn-primary`（赤）/ `.btn.btn-secondary`（緑）
 
 ## 要注意箇所
-- `renderGrammar()` に新タブ追加時は**必ず3箇所**に追記（上記参照）
-- 助詞 Repaso: `joshiGroup === 11` / 語彙 Repaso: `vocabCategory === vocabData.length`（=20）
+- `renderGrammar()` に新タブ追加時は**必ず3箇所**に追記
 - `taReorderPool` の `use:'hou'` エントリが2重（軽微な既知バグ）
-- ビルド・テスト・lint なし。動作確認はブラウザで `index.html` を直接開く
+- ビルド・テスト・lint なし。動作確認は `python -m http.server 8080`
 - 実装完了後は必ず未実装リストを `✅完了` に更新すること
 
 ---
 
-## 未実装リスト
+## NihongoMap Phase 1 — 実装進捗
 
-### 🟡 文法補完（すべて完了）
-| 項目 | 備考 |
-|---|---|
-| ✅完了 〜のなかで〜がいちばん〜（最上級比較） | `ichiban`タブとして独立実装（2026-05-08） |
-| ✅完了 〜になります/〜くなります（変化） | `naru`タブとして独立実装（2026-05-08） |
-| ✅完了 助詞：や/など（例示） | joshiタブ group 10 として追加（2026-05-08） |
-| ✅完了 〜と思います（意見表現） | `omou`タブとして独立実装（2026-05-03） |
-| ✅完了 接続詞：でも/しかし/だから/そして | `setsuzoku`タブとして独立実装（2026-05-08） |
-
-### 🟡 UI・コンテンツ改善
-| 優先 | 項目 | 規模 | 備考 |
-|---|---|---|---|
-| A | ✅完了 カタカナ Practicar統一 | — | Trazar機能：KanjiVG由来SVGパス76文字（2026-05-10） |
-| B | ✅完了 漢字 Practicar をひらがなと同じ機能・見た目に統一 | 中 | kanjiStrokes（125字KanjiVG）+ Trazar UI実装（2026-05-24） |
-| C | ✅完了 全文法の並び替え問題プールを増量 | 中 | yori/dou/omou/setsuzoku/aru/joshi各グループ増量（2026-05-25） |
-| H | ✅完了 音声：語彙カード・文字モーダル（ひらがな・カタカナ・漢字） | — | speak() / .btn-speak 実装（2026-05-08） |
-| ✅完了 音声：文法セクションの例文に🔊ボタン追加 | — | desu/yori/dou/omou/ichiban/naru/setsuzoku/te(Expresiones)/ta(Expresiones)/nai(Expresiones)/aru/gimon/joshi/tai/kuteの例文に追加（2026-05-23） |
-
-### 🟢 バックエンド
-| 優先 | 項目 | 規模 |
+### ✅ 完了タスク（Task #1〜#9）
+| # | 内容 | 完了日 |
 |---|---|---|
-| D | Googleログインボタン | 中 |
-| E | パスワードリセット | 小 |
-| F | Firestore進捗保存 | 大 |
-| G | 利用規約・プライバシーポリシー | 中 |
+| 1 | `nm_*` localStorage キー設計 / `rolloverDailyIfNeeded()` | 2026-05-25 |
+| 2 | `FEATURE_GATES` / `canUse()` / `consume()` 共通関数 | 2026-05-25 |
+| 3 | `<section id="unit">` / `<section id="scenario">` HTML枠追加 | 2026-05-25 |
+| 4 | Unit 3 Can-do 1（u3_c1）データ実装 | 2026-05-25 |
+| 5 | シナリオUI（ヒント3段階・🔊・対話表示） | 2026-05-25 |
+| 6 | Práctica UI・80%判定・displayOptions対応 | 2026-05-25 |
+| 7 | ロードマップ → Can-doカード接続（`renderUnit()` / `openCanDo()`） | 2026-05-25 |
+| 8 | XP/ストリーク/HUD（`grantXP()` / `updateHUD()`） | 2026-05-25 |
+| 9 | ボトムナビ整備 / `#profile` / `#jlpt` セクション / `renderProfile()` | 2026-05-25 |
+| — | Unit 1（ひらがな）・Unit 2（カタカナ）Can-doデータ（各3本） | 2026-05-25 |
+| — | Trazar（なぞり書き）ステップをUnit 1・2フローに統合 | 2026-05-25 |
 
-### 🔵 コンテンツ拡張（フェーズ3〜5）
-| フェーズ | 項目 | 規模 | 備考 |
-|---|---|---|---|
-| 3 | 読解（Comprensión lectora） | 大 | スクリプト・問題はユーザーが用意 |
-| 4 | 聴解（Comprensión auditiva） | 大 | 事前生成MP3 → 外部ストレージ。スクリプト準備中 |
-| 5 | 学習ロードマップ＋配置テスト | 大 | 全コンテンツ完成後に設計・実装 |
+### 🔜 残タスク（優先順）
+| # | 内容 | 担当モデル |
+|---|---|---|
+| 10 | VOICEVOXバッチスクリプト（Unit 1〜3 MP3生成） | Opus |
+| 11 | admin.html + Claude API シナリオ自動生成 | Sonnet |
+| 12 | Unit 1〜3 全Can-do（残り5本）公開 | Opus |
+| 13 | Lemon Squeezy 連携・`nm_plan` サーバ検証 | Sonnet |
+| 14 | OpenAI Realtime PoC（Unit 3 c1 の Reto） | Sonnet |
+
+### 🟢 バックエンド（後回し）
+| 項目 | 規模 |
+|---|---|
+| Googleログインボタン（Firebase Google Auth） | 中 |
+| パスワードリセット | 小 |
+| Firestore進捗保存（nm_cando_progress 同期） | 大 |
+| 利用規約・プライバシーポリシー | 中 |
+
+---
+
+## index.html 行番号インデックス（約14,230行）
+
+### HTML構造
+| 行 | 内容 |
+|---|---|
+| 1〜1308 | `<style>` CSS 全体 |
+| 124 | `.bottom-nav {` モバイルCSS |
+| 162 | `@media (min-width: 768px)` PC左サイドバーCSS |
+| 1393 | `<nav class="bottom-nav">` 4ボタン |
+| 1401 | `<div class="hud" id="hud">` |
+| 1409 | `<section id="roadmap">` |
+| 1414 | `<section id="unit">` |
+| 1423 | `<section id="scenario">` |
+| 1442 | `<section id="jlpt">` |
+| 1447 | `<section id="profile">` |
+| 1452 | `<section id="moji">` |
+| 1516 | `<section id="grammar">` |
+| 1525 | `<section id="vocab">` |
+| 1619 | `<script>` JS開始 |
+
+### データ定義
+| 行 | 内容 |
+|---|---|
+| 2181 | `const unitKanji` |
+| 2191 | `const roadmapUnits` 10ユニット |
+| 2213 | `let trazarScript, trazarList, ...` |
+| 13736 | `window.canDoData = window.canDoData \|\| []` |
+| 13739〜13997 | `window.canDoData.push(...)` × 7本（u1_c1〜u3_c1） |
+
+### 既存ロードマップ関数
+| 行 | 関数 |
+|---|---|
+| 11984 | `showSection(id, btn)` |
+| 12017 | `updateStats()` |
+| 12036 | `navigateToUnit(section, tab)` |
+| 12047 | `buildPlacementQuestions()` |
+| 12165 | `renderRoadmap()` |
+
+### NihongoMap Phase 1 関数ブロック（13002行〜）
+| 行 | 関数 |
+|---|---|
+| 13002 | Phase 1 ブロック開始コメント |
+| 13010 | `rolloverDailyIfNeeded()` |
+| 13038 | `getTodayString()` |
+| 13045 | `nmGetDaily/Streak/XP/Progress/Plan()` |
+| 13085 | `grantXP(amount)` |
+| 13113 | `isPremium()` |
+| 13132 | `FEATURE_GATES` |
+| 13151 | `canUse(feature, ctx)` |
+| 13169 | `consume(feature)` |
+| 13224 | `updateHUD()` |
+| 13246 | `saveCanDoProgress(canDoId, patch)` |
+| 13264 | `getCanDoProgress(canDoId)` |
+| 13284 | `renderUnit(unitId)` |
+| 13331 | `let currentCanDoId = null` |
+| 13337 | `openCanDo(canDoId)` |
+| 13352 | `setScenarioStep(step)` |
+| 13360 | `updateStepVisibility(hasTraza)` |
+| 13374 | `renderScenarioView(cd)` |
+| 13419 | `openExplainView()` |
+| 13445 | `openTrazarView()` |
+| 13525 | `openPracticeView()` |
+| 13662 | `openChallengeView()` |
+| 13673 | `completeCandoDone()` |
+| 13696 | `playScenarioAudio(path, text, btn)` |
+| 13715 | `speakFallback(text, btn)` |
+| 14144 | `renderProfile()` |
+| 14218 | `renderJlpt()` |
+| 14230 | 起動時: `rolloverDailyIfNeeded(); updateHUD();` |
