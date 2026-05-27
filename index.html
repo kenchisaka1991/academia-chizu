@@ -1349,6 +1349,15 @@
         .word-chip--selected{background:var(--ocean)}
         .learned-badge{font-size:0.7rem;background:var(--ocean);color:#fff;border-radius:99px;padding:0.1rem 0.5rem;margin-left:0.3rem;vertical-align:middle;white-space:nowrap}
         .word-known{font-size:0.75rem;margin-left:0.2rem;vertical-align:middle;opacity:0.8;cursor:default}
+        /* ===== conv（会話応答）問題 ===== */
+        .conv-bubble-wrap{margin-bottom:0.2rem}
+        .conv-bubble{display:flex;align-items:flex-start;gap:0.6rem;background:var(--night);color:#fff;border-radius:var(--radius-md);padding:0.9rem 1rem;margin:0.3rem 0 0}
+        .conv-bubble-text{flex:1}
+        .conv-bubble-text .conv-ja{font-family:'Noto Sans JP',sans-serif;font-size:1.05rem;font-weight:600;margin:0;line-height:1.7}
+        .conv-bubble-text .conv-hint{font-size:0.78rem;opacity:0.65;margin:0.25rem 0 0;font-family:'DM Sans',sans-serif}
+        .conv-audio-btn{flex-shrink:0;background:rgba(255,255,255,0.12);border:none;border-radius:99px;width:36px;height:36px;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;align-self:center}
+        .conv-audio-btn:hover{background:rgba(255,255,255,0.22)}
+        .conv-respond-label{font:600 0.88rem 'DM Sans',sans-serif;color:#888;margin:0.9rem 0 0.5rem}
     </style>
 </head>
 <body>
@@ -13414,7 +13423,24 @@ function renderUnit(unitId) {
       </article>`;
   }).join('');
 
-  document.getElementById('unit-content').innerHTML = `<div class="cando-list">${cards}</div>`;
+  // Unit 1・2 は Moji セクション（ひらがな/カタカナ練習）へのリンクを表示
+  let mojiLinkHtml = '';
+  if (unitId === 1 || unitId === 2) {
+    const script = unitId === 1 ? 'hiragana' : 'katakana';
+    const scriptLabel = unitId === 1 ? 'Hiragana' : 'Katakana';
+    const scriptJp = unitId === 1 ? 'ひらがな' : 'カタカナ';
+    mojiLinkHtml = `
+      <div style="margin-top:1.2rem;padding:0.9rem 1rem;background:rgba(42,157,143,0.07);border-radius:var(--radius-md);border:1px dashed rgba(42,157,143,0.3);display:flex;align-items:center;justify-content:space-between;gap:0.75rem">
+        <div>
+          <p style="margin:0;font:700 0.9rem 'DM Sans',sans-serif;color:var(--night)">${scriptJp} ${scriptLabel}</p>
+          <p style="margin:0.15rem 0 0;font-size:0.78rem;color:#888">Tarjetas · Quiz · Trazar · 🔊 Escuchar</p>
+        </div>
+        <button class="btn btn-secondary" style="flex-shrink:0;font-size:0.85rem;padding:0.45rem 1rem"
+          onclick="navigateToUnit('moji','${script}')">Practicar →</button>
+      </div>`;
+  }
+
+  document.getElementById('unit-content').innerHTML = `<div class="cando-list">${cards}</div>${mojiLinkHtml}`;
 }
 
 // ------------------------------------------------------------
@@ -13748,6 +13774,12 @@ let _practiceIdx   = 0;
 let _practiceScore = 0;
 let _reorderSelected = [];   // reorder 問題の選択済みトークン
 
+// Escuchar (Part 2) state
+let _escucharItems   = [];
+let _escucharIdx     = 0;
+let _escucharScore   = 0;
+let _escucharFreeOpts = [];  // 無料ユーザー向け dictado → audio_mc 変換時の選択肢
+
 function openPracticeView() {
   const cd = (window.canDoData || []).find(c => c.id === currentCanDoId);
   if (!cd) return;
@@ -13784,6 +13816,26 @@ function renderPracticeItem() {
       <div class="reorder-answer" id="prac-reorder-ans"></div>
       <div class="reorder-bank"  id="prac-reorder-bank">${chips}</div>
       <button class="btn btn-primary" style="margin-top:1rem" onclick="checkPracticeReorder()">Comprobar</button>`;
+  } else if (item.type === 'conv') {
+    const safePrompt = (item.prompt || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    const audioFn = item.audio
+      ? `playScenarioAudio('${item.audio}','${safePrompt}',this)`
+      : `speakFallback('${safePrompt}',this)`;
+    const opts = item.options.map((o, i) =>
+      `<button class="placement-opt" onclick="checkPracticeAnswer(${i})">${o}</button>`
+    ).join('');
+    bodyHtml = `
+      <div class="conv-bubble-wrap">
+        <div class="conv-bubble">
+          <div class="conv-bubble-text">
+            <p class="conv-ja" lang="ja">${item.prompt}</p>
+            ${item.promptHint ? `<p class="conv-hint">${item.promptHint}</p>` : ''}
+          </div>
+          <button class="conv-audio-btn" onclick="${audioFn}">🔊</button>
+        </div>
+      </div>
+      <p class="conv-respond-label">¿Qué respondes?</p>
+      <div class="placement-opts">${opts}</div>`;
   }
 
   const jaDisplay = item.ja ? `<p class="prac-ja" lang="ja">${item.ja}</p>` : '';
@@ -13869,17 +13921,26 @@ function advancePractice() {
 }
 
 function showPracticeResult() {
+  const cd      = (window.canDoData || []).find(c => c.id === currentCanDoId);
   const total   = _practiceItems.length;
-  const pct     = _practiceScore / total;
-  const passed  = pct >= (((window.canDoData || []).find(c => c.id === currentCanDoId) || {}).practice || {}).passRate || 0.8;
-  const pctDisp = Math.round(pct * 100);
+  const pct      = _practiceScore / total;
+  const passRate = (cd && cd.practice && cd.practice.passRate) || 0.8;
+  const passed   = pct >= passRate;
+  const pctDisp  = Math.round(pct * 100);
+  const hasEscuchar = passed && cd && cd.escuchar && (cd.escuchar.items || []).length > 0;
 
   saveCanDoProgress(currentCanDoId, {
     practiceScore: pct,
-    status: passed ? 'inprogress' : 'inprogress',
+    status: 'inprogress',
     attempts: (getCanDoProgress(currentCanDoId).attempts || 0) + 1
   });
   if (passed) grantXP(20);
+
+  const nextBtn = passed
+    ? (hasEscuchar
+        ? `<button class="btn btn-primary" onclick="startEscucharPart()">🔊 Continuar con Escuchar →</button>`
+        : `<button class="btn btn-primary" onclick="openChallengeView()">Siguiente: Reto →</button>`)
+    : `<button class="btn btn-primary" onclick="openPracticeView()">Reintentar</button>`;
 
   document.getElementById('scenario-content').innerHTML = `
     <div style="text-align:center;padding:2.5rem 1rem">
@@ -13888,9 +13949,188 @@ function showPracticeResult() {
       <p style="font-family:'DM Sans',sans-serif;color:var(--night);margin-bottom:1.5rem">
         ${passed ? '¡Aprobado! +20 XP' : `${_practiceScore}/${total} correctas — ¡Inténtalo de nuevo!`}
       </p>
+      ${nextBtn}
+    </div>`;
+}
+
+// ------------------------------------------------------------
+// Part 2: Escuchar（聴解練習）
+// canDoData に escuchar プロパティがある Can-do にのみ表示
+// ------------------------------------------------------------
+
+function startEscucharPart() {
+  const cd = (window.canDoData || []).find(c => c.id === currentCanDoId);
+  if (!cd || !cd.escuchar) { openChallengeView(); return; }
+  _escucharItems = [...cd.escuchar.items];
+  _escucharIdx   = 0;
+  _escucharScore = 0;
+  renderEscucharItem();
+}
+
+function renderEscucharItem() {
+  const item  = _escucharItems[_escucharIdx];
+  const total = _escucharItems.length;
+  const prog  = `${_escucharIdx + 1} / ${total}`;
+  const pct   = Math.round((_escucharIdx / total) * 100);
+
+  let bodyHtml = '';
+  if (item.type === 'audio_mc') {
+    const opts = item.options.map((o, i) =>
+      `<button class="placement-opt" onclick="checkEscucharAnswer(${i})">${o}</button>`
+    ).join('');
+    bodyHtml = `<div class="placement-opts">${opts}</div>`;
+  } else if (item.type === 'audio_fill') {
+    if (isPremium()) {
+      bodyHtml = `
+        <div style="margin-top:1rem">
+          <input id="esc-dictado-input" type="text"
+            placeholder="Escribe en japonés (teclado japonés requerido)"
+            style="width:100%;padding:0.75rem;font-size:1.1rem;border:2px solid var(--ocean);border-radius:var(--radius-sm);text-align:center;font-family:'Noto Sans JP',sans-serif;box-sizing:border-box"
+            onkeydown="if(event.key==='Enter')checkEscucharDictation()">
+          <button class="btn btn-primary" style="margin-top:0.75rem;width:100%" onclick="checkEscucharDictation()">Comprobar</button>
+        </div>`;
+    } else {
+      _escucharFreeOpts = _buildDictadoFreeOpts(item);
+      const opts = _escucharFreeOpts.map((o, i) =>
+        `<button class="placement-opt" onclick="checkEscucharFreeAnswer(${i})">${o}</button>`
+      ).join('');
+      bodyHtml = `
+        <div style="margin-bottom:0.5rem;font-size:0.72rem;color:#999;text-align:center">🔒 Modo dictado disponible en Premium</div>
+        <div class="placement-opts">${opts}</div>`;
+    }
+  } else if (item.type === 'audio_meaning') {
+    // 日本語文を聞いてスペイン語訳を選ぶ（意味理解）
+    const opts = item.options.map((o, i) =>
+      `<button class="placement-opt" onclick="checkEscucharAnswer(${i})">${o}</button>`
+    ).join('');
+    bodyHtml = `
+      <p style="font-size:0.75rem;color:#888;text-align:center;margin:0.25rem 0 0.5rem">¿Cuál es la traducción correcta?</p>
+      <div class="placement-opts">${opts}</div>`;
+  } else if (item.type === 'audio_match') {
+    // 聞いた内容に合う記述を選ぶ（内容一致）
+    const opts = item.options.map((o, i) =>
+      `<button class="placement-opt" onclick="checkEscucharAnswer(${i})">${o}</button>`
+    ).join('');
+    bodyHtml = `
+      <p style="font-size:0.75rem;color:#888;text-align:center;margin:0.25rem 0 0.5rem">¿Qué afirmación corresponde a lo que escuchas?</p>
+      <div class="placement-opts">${opts}</div>`;
+  }
+
+  document.getElementById('scenario-content').innerHTML = `
+    <div class="prac-header">
+      <div style="display:flex;align-items:center;gap:0.5rem">
+        <span style="font-size:0.72rem;font-weight:700;color:var(--ocean);text-transform:uppercase;letter-spacing:0.05em">🔊 Escuchar — Parte 2</span>
+        <span class="prac-prog">${prog}</span>
+      </div>
+      <div class="prac-bar-bg"><div class="prac-bar" style="width:${pct}%;background:var(--ocean)"></div></div>
+    </div>
+    <div class="prac-card">
+      <p class="prac-prompt">${item.promptEs}</p>
+      <div style="text-align:center;margin:0.75rem 0">
+        <button class="btn-speak" onclick="speakEscucharItem(this)">🔊 Escuchar</button>
+      </div>
+      ${bodyHtml}
+    </div>`;
+
+  // 描画後に自動再生
+  speakEscucharItem(document.querySelector('.btn-speak'));
+}
+
+function speakEscucharItem(btnEl) {
+  const item = _escucharItems[_escucharIdx];
+  if (!item) return;
+  speakFallback(item.text, btnEl);
+}
+
+function _buildDictadoFreeOpts(item) {
+  const cd = (window.canDoData || []).find(c => c.id === currentCanDoId);
+  const pool = (cd && cd.escuchar && cd.escuchar.items || [])
+    .filter(it => it !== item)
+    .map(it => it.type === 'audio_fill' ? it.answer : (it.options && it.options[it.answer]))
+    .filter(a => a && a !== item.answer);
+  shuffle(pool);
+  const dummies = pool.slice(0, 3);
+  while (dummies.length < 3) dummies.push(pool[0] || 'わかりません');
+  const opts = [item.answer, ...dummies];
+  shuffle(opts);
+  return opts;
+}
+
+function checkEscucharAnswer(idx) {
+  const item = _escucharItems[_escucharIdx];
+  const correct = idx === item.answer;
+  if (correct) _escucharScore++;
+  document.querySelectorAll('.placement-opt').forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === item.answer) btn.classList.add('correct');
+    else if (i === idx)    btn.classList.add('wrong');
+  });
+  _showEscucharExplain(correct, item.explainEs);
+}
+
+function checkEscucharFreeAnswer(idx) {
+  const item = _escucharItems[_escucharIdx];
+  const correct = _escucharFreeOpts[idx] === item.answer;
+  if (correct) _escucharScore++;
+  document.querySelectorAll('.placement-opt').forEach((btn, i) => {
+    btn.disabled = true;
+    if (_escucharFreeOpts[i] === item.answer) btn.classList.add('correct');
+    else if (i === idx)                        btn.classList.add('wrong');
+  });
+  _showEscucharExplain(correct, `Respuesta: ${item.answer}`);
+}
+
+function checkEscucharDictation() {
+  const item  = _escucharItems[_escucharIdx];
+  const input = document.getElementById('esc-dictado-input');
+  if (!input) return;
+  const userVal = input.value.normalize('NFKC').trim();
+  const correct = userVal === item.answer.normalize('NFKC').trim();
+  if (correct) _escucharScore++;
+  input.disabled = true;
+  input.style.borderColor = correct ? 'var(--ocean)' : 'var(--primary)';
+  const confirmBtn = document.querySelector('#esc-dictado-input + button, #esc-dictado-input ~ button');
+  if (confirmBtn) confirmBtn.disabled = true;
+  _showEscucharExplain(correct, correct ? null : `Respuesta: ${item.answer}`);
+}
+
+function _showEscucharExplain(correct, msg) {
+  const exp = document.createElement('div');
+  exp.className = 'placement-exp';
+  exp.innerHTML = (correct ? '✅ ' : '❌ ') + (msg || (correct ? '¡Correcto!' : ''));
+  document.querySelector('.prac-card').appendChild(exp);
+  setTimeout(advanceEscuchar, 1800);
+}
+
+function advanceEscuchar() {
+  _escucharIdx++;
+  if (_escucharIdx < _escucharItems.length) {
+    renderEscucharItem();
+  } else {
+    showEscucharResult();
+  }
+}
+
+function showEscucharResult() {
+  const cd       = (window.canDoData || []).find(c => c.id === currentCanDoId);
+  const total    = _escucharItems.length;
+  const pct      = _escucharScore / total;
+  const passRate = (cd && cd.escuchar && cd.escuchar.passRate) || 0.7;
+  const passed   = pct >= passRate;
+  const pctDisp  = Math.round(pct * 100);
+
+  if (passed) grantXP(15);
+
+  document.getElementById('scenario-content').innerHTML = `
+    <div style="text-align:center;padding:2.5rem 1rem">
+      <p style="font-size:3rem;margin:0">${passed ? '🎧' : '🔁'}</p>
+      <p style="font:700 2.5rem 'Zen Maru Gothic',sans-serif;color:var(--${passed ? 'ocean' : 'primary'});margin:0.3rem 0">${pctDisp}%</p>
+      <p style="font-family:'DM Sans',sans-serif;color:var(--night);margin-bottom:1.5rem">
+        ${passed ? '¡Escuchar aprobado! +15 XP' : `${_escucharScore}/${total} correctas — ¡Inténtalo de nuevo!`}
+      </p>
       ${passed
         ? `<button class="btn btn-primary" onclick="openChallengeView()">Siguiente: Reto →</button>`
-        : `<button class="btn btn-primary" onclick="openPracticeView()">Reintentar</button>`
+        : `<button class="btn btn-primary" onclick="startEscucharPart()">Reintentar Escuchar</button>`
       }
     </div>`;
 }
@@ -14672,6 +14912,24 @@ window.canDoData.push({
       { id:"u1_c10_q10", type:"fill", promptEs:"Completa: にほん___ (japonés)", ja:"にほん___", options:["こ","ご","か","が"], answer:1, explainEs:"にほんご = idioma japonés" }
     ]
   },
+  escuchar: {
+    passRate: 0.7,
+    items: [
+      // 単語4択 × 5
+      { type:"audio_mc", promptEs:"Escucha y elige la palabra correcta", text:"あめ",     options:["いえ","あめ","うみ","えき"],           answer:1, explainEs:"あめ = lluvia" },
+      { type:"audio_mc", promptEs:"Escucha y elige la palabra correcta", text:"ねこ",     options:["ねこ","いぬ","とり","さかな"],         answer:0, explainEs:"ねこ = gato" },
+      { type:"audio_mc", promptEs:"Escucha y elige la palabra correcta", text:"さくら",   options:["たべる","みんな","さくら","なまえ"],   answer:2, explainEs:"さくら = cerezo" },
+      { type:"audio_mc", promptEs:"Escucha y elige la palabra correcta", text:"ともだち", options:["せんせい","ともだち","がくせい","かいしゃ"], answer:1, explainEs:"ともだち = amigo" },
+      { type:"audio_mc", promptEs:"Escucha y elige la palabra correcta", text:"おはよう", options:["ありがとう","さようなら","こんにちは","おはよう"], answer:3, explainEs:"おはよう = buenos días" },
+      // 文章4択 × 3
+      { type:"audio_mc", promptEs:"Escucha y elige la oración correcta", text:"ありがとう ございます。", options:["ありがとう ございます。","おはよう ございます。","よろしく おねがいします。","すみません。"], answer:0, explainEs:"ありがとう ございます = muchas gracias" },
+      { type:"audio_mc", promptEs:"Escucha y elige la oración correcta", text:"にほんご が すき です。", options:["にほんご が じょうず です。","にほんご を べんきょう します。","にほんご が すき です。","にほんご は むずかしい です。"], answer:2, explainEs:"にほんご が すき です = me gusta el japonés" },
+      { type:"audio_mc", promptEs:"Escucha y elige la oración correcta", text:"せんせい、おはよう ございます。", options:["せんせい、こんにちは。","せんせい、ありがとう。","せんせい、さようなら。","せんせい、おはよう ございます。"], answer:3, explainEs:"せんせい、おはよう ございます = Buenos días, profesora" },
+      // ディクテーション × 2（Premium: audio_fill / 無料: audio_mc に自動変換）
+      { type:"audio_fill", promptEs:"Escucha y escribe lo que oyes", text:"さようなら", answer:"さようなら" },
+      { type:"audio_fill", promptEs:"Escucha y escribe lo que oyes", text:"ともだち",   answer:"ともだち" }
+    ]
+  },
   challenge: {
     personaEs: "Eres Carlos al final de tu primer mes en Japón. Saluda a tu profesora, agradece y despídete usando solo hiragana.",
     openingJa: "カルロスさん、いちかげつ かんそう を おしえて ください。",
@@ -15160,6 +15418,24 @@ window.canDoData.push({
       { id:"u2_c10_q8", type:"fill", promptEs:"Completa: アメ___カ (América)", ja:"アメ___カ", options:["ラ","リ","ル","レ"], answer:1, explainEs:"アメリカ = América" },
       { id:"u2_c10_q9", type:"fill", promptEs:"Completa: コン___ューター (computadora)", ja:"コン___ューター", options:["パ","ピ","プ","ポ"], answer:1, explainEs:"コンピューター = computadora" },
       { id:"u2_c10_q10", type:"fill", promptEs:"Completa: アイス___リーム (helado)", ja:"アイス___リーム", options:["カ","ク","コ","キ"], answer:1, explainEs:"アイスクリーム = helado" }
+    ]
+  },
+  escuchar: {
+    passRate: 0.7,
+    items: [
+      // 単語4択 × 5
+      { type:"audio_mc", promptEs:"Escucha y elige la palabra correcta", text:"テレビ",       options:["テレビ","ラジオ","カメラ","スマホ"],              answer:0, explainEs:"テレビ = televisión" },
+      { type:"audio_mc", promptEs:"Escucha y elige la palabra correcta", text:"アイスクリーム", options:["コーヒー","アイスクリーム","ハンバーガー","チョコレート"], answer:1, explainEs:"アイスクリーム = helado" },
+      { type:"audio_mc", promptEs:"Escucha y elige la palabra correcta", text:"ボリビア",      options:["スペイン","アメリカ","ボリビア","フランス"],        answer:2, explainEs:"ボリビア = Bolivia" },
+      { type:"audio_mc", promptEs:"Escucha y elige la palabra correcta", text:"コンピューター", options:["インターネット","スマートフォン","コンピューター","テレビ"], answer:2, explainEs:"コンピューター = computadora" },
+      { type:"audio_mc", promptEs:"Escucha y elige la palabra correcta", text:"スペイン",      options:["ドイツ","フランス","アメリカ","スペイン"],          answer:3, explainEs:"スペイン = España" },
+      // 文章4択 × 3
+      { type:"audio_mc", promptEs:"Escucha y elige la oración correcta", text:"テレビ を みます。", options:["テレビ を みます。","ラジオ を ききます。","スマホ を つかいます。","ゲーム を します。"], answer:0, explainEs:"テレビ を みます = veo televisión" },
+      { type:"audio_mc", promptEs:"Escucha y elige la oración correcta", text:"ハンバーガー と アイスクリーム が すき です。", options:["コーヒー と ケーキ が すき です。","ハンバーガー と アイスクリーム が すき です。","スパゲッティ と ピザ が すき です。","チョコレート と アイスクリーム が すき です。"], answer:1, explainEs:"hamburguesa y helado me gustan" },
+      { type:"audio_mc", promptEs:"Escucha y elige la oración correcta", text:"わたし は ボリビアじん です。", options:["わたし は アメリカじん です。","わたし は スペインじん です。","わたし は フランスじん です。","わたし は ボリビアじん です。"], answer:3, explainEs:"わたし は ボリビアじん です = soy boliviano/a" },
+      // ディクテーション × 2（Premium: audio_fill / 無料: audio_mc に自動変換）
+      { type:"audio_fill", promptEs:"Escucha y escribe lo que oyes", text:"テレビ",   answer:"テレビ" },
+      { type:"audio_fill", promptEs:"Escucha y escribe lo que oyes", text:"ボリビア", answer:"ボリビア" }
     ]
   },
   challenge: {
@@ -15787,6 +16063,78 @@ window.canDoData.push({
     mustUse: ["sai","desu","nansai"],
     minTurns: 3, maxTurns: 5,
     bannedTopics: ["política","religión","violencia"]
+  },
+
+  escuchar: {
+    passRate: 0.7,
+    items: [
+      // --- audio_meaning × 4（単文 → スペイン語訳4択）---
+      {
+        type: 'audio_meaning',
+        text: 'わたしははたちです。',
+        promptEs: '¿Qué dice la persona?',
+        options: ['Tengo 20 años.', 'Tengo 30 años.', 'Tengo 12 años.', 'Tengo 25 años.'],
+        answer: 0,
+        explainEs: '「はたち」= 20 años (lectura especial).'
+      },
+      {
+        type: 'audio_meaning',
+        text: 'マリアさんはなんさいですか。',
+        promptEs: '¿Qué dice la persona?',
+        options: ['¿Cuántos años tiene María?', '¿De dónde es María?', '¿Cómo se llama María?', '¿Qué estudia María?'],
+        answer: 0,
+        explainEs: '「なんさいですか」= ¿Cuántos años tienes/tiene?'
+      },
+      {
+        type: 'audio_meaning',
+        text: 'わたしはにじゅうごさいです。',
+        promptEs: '¿Qué dice la persona?',
+        options: ['Tengo 25 años.', 'Tengo 15 años.', 'Tengo 52 años.', 'Tengo 35 años.'],
+        answer: 0,
+        explainEs: '「にじゅうご」= 25.'
+      },
+      {
+        type: 'audio_meaning',
+        text: 'せんせいじゃありません。がくせいです。',
+        promptEs: '¿Qué dice la persona?',
+        options: ['No soy profesor. Soy estudiante.', 'Soy profesor y estudiante.', 'No soy estudiante. Soy profesor.', 'No soy médico. Soy profesor.'],
+        answer: 0,
+        explainEs: '「じゃありません」= negación. 「がくせい」= estudiante.'
+      },
+      // --- audio_match × 4（2文前後 → 内容一致4択）---
+      {
+        type: 'audio_match',
+        text: 'わたしはにじゅうさんさいです。だいがくせいです。',
+        promptEs: '¿Qué afirmación es correcta?',
+        options: ['Tiene 23 años y es universitario.', 'Tiene 32 años y es profesor.', 'Tiene 23 años y es médico.', 'Tiene 13 años y es estudiante de secundaria.'],
+        answer: 0,
+        explainEs: '「にじゅうさん」= 23, 「だいがくせい」= universitario.'
+      },
+      {
+        type: 'audio_match',
+        text: 'ケンジさんはさんじゅうさいです。いしゃです。',
+        promptEs: '¿Qué afirmación es correcta?',
+        options: ['Kenji tiene 30 años y es médico.', 'Kenji tiene 13 años y es estudiante.', 'Kenji tiene 30 años y es ingeniero.', 'Kenji tiene 3 años y es médico.'],
+        answer: 0,
+        explainEs: '「さんじゅう」= 30, 「いしゃ」= médico.'
+      },
+      {
+        type: 'audio_match',
+        text: 'カルロスさんはがくせいじゃありません。かいしゃいんです。にじゅうはっさいです。',
+        promptEs: '¿Qué afirmación es correcta?',
+        options: ['Carlos no es estudiante. Es empleado de empresa y tiene 28 años.', 'Carlos es estudiante y tiene 28 años.', 'Carlos no es empleado. Es estudiante y tiene 18 años.', 'Carlos es profesor y tiene 38 años.'],
+        answer: 0,
+        explainEs: '「じゃありません」= no es, 「かいしゃいん」= empleado, 「にじゅうはっさい」= 28 años.'
+      },
+      {
+        type: 'audio_match',
+        text: 'たなかせんせいはよんじゅうごさいです。にほんごのせんせいです。',
+        promptEs: '¿Qué afirmación es correcta?',
+        options: ['La profesora Tanaka tiene 45 años y enseña japonés.', 'La profesora Tanaka tiene 54 años y enseña español.', 'La profesora Tanaka tiene 45 años y es doctora.', 'La profesora Tanaka tiene 40 años y enseña japonés.'],
+        answer: 0,
+        explainEs: '「よんじゅうご」= 45, 「にほんごのせんせい」= profesora de japonés.'
+      }
+    ]
   }
 });
 
@@ -16224,6 +16572,3826 @@ window.canDoData.push({
     personaEs: "Eres Tanaka-sensei, profesora japonesa en una escuela de idiomas de Tokio. Es el primer día de clase y pides al usuario boliviano que se presente completamente: nombre, nacionalidad, edad, profesión y pasatiempo. Reacciona con frases cortas y anima al estudiante.",
     openingJa: "みなさん、こんにちは。では、<ruby>自己紹介<rt>じこしょうかい</rt></ruby>をおねがいします。",
     mustUse: ["hajimemashite","desu","jin","sai","yoroshiku"],
+    minTurns: 3, maxTurns: 5,
+    bannedTopics: ["política","religión","violencia"]
+  },
+
+  escuchar: {
+    passRate: 0.7,
+    items: [
+      // --- audio_meaning × 4（シナリオ文ベース → スペイン語訳4択）---
+      {
+        type: 'audio_meaning',
+        text: 'はじめまして。カルロス・ロペスです。',
+        promptEs: '¿Qué dice la persona?',
+        options: ['Mucho gusto. Soy Carlos López.', 'Adiós. Soy Carlos López.', 'Mucho gusto. Soy María López.', 'Buenos días. Me llamo Tanaka.'],
+        answer: 0,
+        explainEs: '「はじめまして」= mucho gusto, 「〜です」= soy ~.'
+      },
+      {
+        type: 'audio_meaning',
+        text: 'ボリビアじんです。ラパスからきました。',
+        promptEs: '¿Qué dice la persona?',
+        options: ['Soy boliviano. Vengo de La Paz.', 'Soy japonés. Vengo de Tokio.', 'Soy boliviano. Voy a La Paz.', 'Soy peruano. Vengo de Lima.'],
+        answer: 0,
+        explainEs: '「ボリビアじん」= boliviano, 「ラパスからきました」= vine de La Paz.'
+      },
+      {
+        type: 'audio_meaning',
+        text: 'まいにちにほんごをべんきょうします。',
+        promptEs: '¿Qué dice la persona?',
+        options: ['Todos los días estudio japonés.', 'Los lunes estudio español.', 'Todos los días trabajo en japonés.', 'Todos los días hablo japonés.'],
+        answer: 0,
+        explainEs: '「まいにち」= todos los días, 「べんきょうします」= estudio.'
+      },
+      {
+        type: 'audio_meaning',
+        text: 'どうぞよろしくおねがいします。',
+        promptEs: '¿Qué dice la persona?',
+        options: ['Encantado de conocerle.', 'Hasta luego.', 'Muchas gracias.', 'Lo siento mucho.'],
+        answer: 0,
+        explainEs: '「どうぞよろしくおねがいします」= frase de cierre cortés al presentarse.'
+      },
+      // --- audio_match × 4（2〜3文パッセージ → 内容一致4択）---
+      {
+        type: 'audio_match',
+        text: 'はじめまして。マリアです。ボリビアじんです。にじゅうさいです。',
+        promptEs: '¿Qué afirmación es correcta?',
+        options: ['María es boliviana y tiene 20 años.', 'María es japonesa y tiene 20 años.', 'María es boliviana y tiene 12 años.', 'María es peruana y tiene 30 años.'],
+        answer: 0,
+        explainEs: '「ボリビアじん」= boliviana, 「にじゅうさい」= 20 años.'
+      },
+      {
+        type: 'audio_match',
+        text: 'にじゅうごさいです。かいしゃいんです。エンジニアです。',
+        promptEs: '¿Qué afirmación es correcta?',
+        options: ['Tiene 25 años. Es empleado de empresa e ingeniero.', 'Tiene 25 años. Es estudiante de ingeniería.', 'Tiene 52 años. Es empleado y médico.', 'Tiene 25 años. Es profesor de ingeniería.'],
+        answer: 0,
+        explainEs: '「かいしゃいん」= empleado de empresa, 「エンジニア」= ingeniero.'
+      },
+      {
+        type: 'audio_match',
+        text: 'わたしはたなかです。にほんじんです。せんせいです。まいにちにほんごをおしえます。',
+        promptEs: '¿Qué afirmación es correcta?',
+        options: ['Tanaka es japonés, profesor, y enseña japonés todos los días.', 'Tanaka es boliviano, profesor, y estudia japonés todos los días.', 'Tanaka es japonés, estudiante, y aprende japonés todos los días.', 'Tanaka es japonés, profesor, y enseña español todos los días.'],
+        answer: 0,
+        explainEs: '「にほんじん」= japonés, 「せんせい」= profesor, 「おしえます」= enseña.'
+      },
+      {
+        type: 'audio_match',
+        text: 'カルロスです。がくせいじゃありません。かいしゃいんです。しゅみはサッカーです。',
+        promptEs: '¿Qué afirmación es correcta?',
+        options: ['Carlos no es estudiante, es empleado. Su hobby es el fútbol.', 'Carlos es estudiante. Su hobby es el fútbol.', 'Carlos no es empleado, es estudiante. Su hobby es el béisbol.', 'Carlos es empleado. No tiene hobbies.'],
+        answer: 0,
+        explainEs: '「じゃありません」= no es, 「しゅみ」= hobby/pasatiempo.'
+      }
+    ]
+  }
+});
+
+// ----- Unit 4: Números, tiempo y fechas -----
+
+window.canDoData.push({
+  id: "u4_c1",
+  unit: 4,
+  index: 1,
+  es: "Contar del 1 al 10 y pedir cosas en una tienda",
+  jaGoal: "いち〜じゅう。〜をXつください。いくつですか。",
+  grammarTabs: ["gimon"],
+  traceChars: [],
+  source: "ai", status: "published", version: 1,
+  updatedAt: "2026-05-27T00:00:00Z",
+  vocab: ["いち","に","さん","よん","ご","ろく","なな","はち","きゅう","じゅう","ひとつ","ふたつ","みっつ","いくつ","ください"],
+  kanji: ["一","二","三","四","五","六","七","八","九","十"],
+
+  scenario: {
+    title: "Pidiendo en el café de la escuela",
+    contextEs: "Carlos y María están en la cafetería de la escuela de japonés en Tokio. Usan números para pedir bebidas y dulces.",
+    lines: [
+      {
+        speaker: "A",
+        ja: "いらっしゃいませ。",
+        jaPlain: "いらっしゃいませ。",
+        romaji: "Irasshaimase.",
+        es: "¡Bienvenidos!",
+        audio: "audio/u4_c1_l1_A.mp3",
+        highlight: []
+      },
+      {
+        speaker: "B",
+        ja: "コーヒーを<ruby>二<rt>ふた</rt></ruby>つ ください。",
+        jaPlain: "コーヒーをふたつください。",
+        romaji: "Kōhī o futatsu kudasai.",
+        es: "Dos cafés, por favor.",
+        audio: "audio/u4_c1_l2_B.mp3",
+        highlight: ["gimon"]
+      },
+      {
+        speaker: "A",
+        ja: "<ruby>二<rt>ふた</rt></ruby>つ ですね。ケーキも いかがですか。",
+        jaPlain: "ふたつですね。ケーキもいかがですか。",
+        romaji: "Futatsu desu ne. Kēki mo ikaga desu ka.",
+        es: "Dos, ¿verdad? ¿Quieren pastel también?",
+        audio: "audio/u4_c1_l3_A.mp3",
+        highlight: []
+      },
+      {
+        speaker: "B",
+        ja: "はい、ケーキを<ruby>三<rt>みっ</rt></ruby>つ おねがいします。",
+        jaPlain: "はい、ケーキをみっつおねがいします。",
+        romaji: "Hai, kēki o mittsu onegaishimasu.",
+        es: "Sí, tres pasteles, por favor.",
+        audio: "audio/u4_c1_l4_B.mp3",
+        highlight: ["gimon"]
+      },
+      {
+        speaker: "A",
+        ja: "コーヒー<ruby>二<rt>ふた</rt></ruby>つ と ケーキ<ruby>三<rt>みっ</rt></ruby>つ ですね。",
+        jaPlain: "コーヒーふたつとケーキみっつですね。",
+        romaji: "Kōhī futatsu to kēki mittsu desu ne.",
+        es: "Dos cafés y tres pasteles, ¿verdad?",
+        audio: "audio/u4_c1_l5_A.mp3",
+        highlight: ["gimon"]
+      }
+    ]
+  },
+
+  explain: {
+    summaryEs: "Los números 1-10 tienen dos lecturas: sino-japonesa (いち, に, さん…) y nativa (ひとつ, ふたつ…). Para contar cosas se usa ～つ.",
+    blocks: [
+      { type: "rule", es: "Números sino-japoneses: いち(1), に(2), さん(3), し/よん(4), ご(5), ろく(6), しち/なな(7), はち(8), く/きゅう(9), じゅう(10)." },
+      { type: "pattern", es: "Contador つ: ひとつ(1), ふたつ(2), みっつ(3), よっつ(4), いつつ(5), むっつ(6), ななつ(7), やっつ(8), ここのつ(9), とお(10). Pregunta: いくつ？" },
+      { type: "note", es: "Para pedir: [cosa] を [número]つ ください / おねがいします。Ej: コーヒーをふたつください。" },
+      { type: "examples", labelEs: "Ejemplos", items: [
+        { ja: "りんごを<ruby>三<rt>みっ</rt></ruby>つください。", romaji: "Ringo o mittsu kudasai.", es: "Tres manzanas, por favor." },
+        { ja: "<ruby>卵<rt>たまご</rt></ruby>はいくつですか。", romaji: "Tamago wa ikutsu desu ka.", es: "¿Cuántos huevos?" },
+        { ja: "コーヒーを<ruby>一<rt>ひと</rt></ruby>つおねがいします。", romaji: "Kōhī o hitotsu onegaishimasu.", es: "Un café, por favor." },
+        { ja: "ペンを<ruby>五<rt>いつ</rt></ruby>つください。", romaji: "Pen o itsutsu kudasai.", es: "Cinco bolígrafos, por favor." }
+      ]},
+      { type: "contrast", labelEs: "Números con dos lecturas", headers: ["Número", "Lectura A", "Lectura B"], rows: [
+        { ja: "4", es: "し (shi)", note: "よん (yon) — más común" },
+        { ja: "7", es: "しち (shichi)", note: "なな (nana) — más común" },
+        { ja: "9", es: "く (ku)", note: "きゅう (kyū) — más común" }
+      ]},
+      { type: "pitfall", labelEs: "Errores frecuentes", cases: [
+        { wrong: "コーヒーをにください。", right: "コーヒーをふたつください。", es: "Para cosas use ～つ (lectura nativa), no el número solo." },
+        { wrong: "にーつ", right: "ふたつ", es: "El contador つ siempre usa la lectura nativa. にーつ no existe." },
+        { wrong: "じゅういっつ (para 11)", right: "じゅういっこ (u otro contador)", es: "～つ solo va del 1 al 10. Desde 11 se usan otros contadores." }
+      ]},
+      { type: "mnemonic", es: "💡 ひとつ, ふたつ, みっつ… — todos terminan en 'tsu' (つ). Piensa en 'tsunami' de cosas contadas." }
+    ]
+  },
+
+  practice: {
+    passRate: 0.8,
+    items: [
+      {
+        id: "u4_c1_q1", type: "mc",
+        promptEs: "¿Cómo se dice '3' en japonés?",
+        ja: "", options: ["に","さん","ご","し"],
+        answer: 1, explainEs: "さん = 3.", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c1_q2", type: "mc",
+        promptEs: "¿Cuál es la lectura MÁS COMÚN del número 7?",
+        ja: "", options: ["ろく","はち","なな","く"],
+        answer: 2, explainEs: "なな = 7 (también しち, pero なな es más común).", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c1_q3", type: "mc",
+        promptEs: "¿Qué significa 「いくつですか」?",
+        ja: "いくつですか",
+        options: ["¿Cuántos?","¿Cuánto cuesta?","¿Qué hora es?","¿Dónde está?"],
+        answer: 0, explainEs: "いくつ = cuántos (para contar objetos).", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c1_q4", type: "mc",
+        promptEs: "¿Cómo se dice 'dos' con el contador つ?",
+        ja: "",
+        options: ["ひとつ","ふたつ","みっつ","よっつ"],
+        answer: 1, explainEs: "ふたつ = 2 (contador genérico).", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c1_q5", type: "reorder",
+        promptEs: "Ordena: 'Tres cafés, por favor.'",
+        ja: "", options: ["コーヒー","を","みっつ","ください"],
+        displayOptions: ["コーヒー","を","みっつ","ください"],
+        answer: "コーヒーをみっつください",
+        explainEs: "[cosa] を [número]つ ください。", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c1_q6", type: "reorder",
+        promptEs: "Ordena: '¿Cuántas manzanas?'",
+        ja: "", options: ["りんご","は","いくつ","ですか"],
+        displayOptions: ["りんご","は","いくつ","ですか"],
+        answer: "りんごはいくつですか",
+        explainEs: "[cosa] は いくつ ですか。", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c1_q7", type: "reorder",
+        promptEs: "Ordena: 'Un pastel, por favor.'",
+        ja: "", options: ["ケーキ","を","ひとつ","おねがいします"],
+        displayOptions: ["ケーキ","を","ひとつ","おねがいします"],
+        answer: "ケーキをひとつおねがいします",
+        explainEs: "[cosa] を ひとつ おねがいします。", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c1_q8", type: "fill",
+        promptEs: "Completa: いち、に、___、し、ご",
+        ja: "いち、に、___、し、ご",
+        options: ["さん","ろく","なな","く"],
+        answer: 0, explainEs: "1, 2, 3, 4, 5 → さん = 3.", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c1_q9", type: "fill",
+        promptEs: "Completa: '5 (cosas), por favor.' → ___ ください。",
+        ja: "___ ください。",
+        options: ["いつつ","みっつ","やっつ","ここのつ"],
+        answer: 0, explainEs: "いつつ = 5 con contador つ.", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c1_q10", type: "fill",
+        promptEs: "Completa: ろく、___、はち、きゅう、じゅう",
+        ja: "ろく、___、はち、きゅう、じゅう",
+        options: ["ご","なな","さん","し"],
+        answer: 1, explainEs: "6, 7, 8, 9, 10 → なな = 7.", jlptForm: "n5-grammar"
+      }
+    ]
+  },
+
+  challenge: {
+    personaEs: "Eres el camarero de un café en Tokio. El usuario es un cliente boliviano. Pregunta cuántos de cada cosa quiere. Usa números del 1 al 10 y el contador つ.",
+    openingJa: "いらっしゃいませ。なにをおねがいしますか。",
+    mustUse: ["つ","ください","いくつ"],
+    minTurns: 3, maxTurns: 5,
+    bannedTopics: ["política","religión","violencia"]
+  }
+});
+
+window.canDoData.push({
+  id: "u4_c2",
+  unit: 4,
+  index: 2,
+  es: "Usar números grandes, preguntar precios y dar mi teléfono",
+  jaGoal: "じゅういち〜ひゃく。いくらですか。〜えんです。でんわばんごう。",
+  grammarTabs: ["gimon"],
+  traceChars: [],
+  source: "ai", status: "published", version: 1,
+  updatedAt: "2026-05-27T00:00:00Z",
+  vocab: ["じゅういち","にじゅう","さんじゅう","ひゃく","えん","いくら","でんわばんごう","ぜろ"],
+  kanji: ["百","千","万"],
+
+  scenario: {
+    title: "De compras en el konbini",
+    contextEs: "Carlos entra en un konbini (tienda de conveniencia) en Tokio para comprar bebidas y comida.",
+    lines: [
+      {
+        speaker: "A",
+        ja: "いらっしゃいませ。",
+        jaPlain: "いらっしゃいませ。",
+        romaji: "Irasshaimase.",
+        es: "¡Bienvenido!",
+        audio: "audio/u4_c2_l1_A.mp3",
+        highlight: []
+      },
+      {
+        speaker: "B",
+        ja: "すみません、おちゃはいくらですか。",
+        jaPlain: "すみません、おちゃはいくらですか。",
+        romaji: "Sumimasen, ocha wa ikura desu ka.",
+        es: "Disculpe, ¿cuánto cuesta el té?",
+        audio: "audio/u4_c2_l2_B.mp3",
+        highlight: ["gimon"]
+      },
+      {
+        speaker: "A",
+        ja: "<ruby>百<rt>ひゃく</rt></ruby>にじゅうえんです。",
+        jaPlain: "ひゃくにじゅうえんです。",
+        romaji: "Hyaku nijū en desu.",
+        es: "Cuesta 120 yenes.",
+        audio: "audio/u4_c2_l3_A.mp3",
+        highlight: ["gimon"]
+      },
+      {
+        speaker: "B",
+        ja: "おにぎりはいくらですか。",
+        jaPlain: "おにぎりはいくらですか。",
+        romaji: "Onigiri wa ikura desu ka.",
+        es: "¿Cuánto cuesta el onigiri?",
+        audio: "audio/u4_c2_l4_B.mp3",
+        highlight: ["gimon"]
+      },
+      {
+        speaker: "A",
+        ja: "<ruby>百<rt>ひゃく</rt></ruby>ごじゅうえんです。",
+        jaPlain: "ひゃくごじゅうえんです。",
+        romaji: "Hyaku gojū en desu.",
+        es: "Cuesta 150 yenes.",
+        audio: "audio/u4_c2_l5_A.mp3",
+        highlight: ["gimon"]
+      }
+    ]
+  },
+
+  explain: {
+    summaryEs: "Los números del 11 al 99 se forman combinando じゅう con unidades. 100 = ひゃく. Para preguntar precios: いくらですか。",
+    blocks: [
+      { type: "rule", es: "11-19: じゅう + unidad → じゅういち(11), じゅうに(12)… じゅうきゅう(19). 20-90: decena + じゅう → にじゅう(20), さんじゅう(30)… きゅうじゅう(90)." },
+      { type: "pattern", es: "Preguntar precio: 〜はいくらですか = '¿Cuánto cuesta ~?' / Respuesta: 〜えんです = 'Cuesta ~ yenes.'" },
+      { type: "note", es: "Teléfono: los dígitos se leen uno a uno. 080-1234-5678 = ぜろはちぜろ の いちにさんよん の ごろくななはち." },
+      { type: "examples", labelEs: "Ejemplos de precios", items: [
+        { ja: "おちゃは<ruby>百<rt>ひゃく</rt></ruby>にじゅうえんです。", romaji: "Ocha wa hyaku nijū en desu.", es: "El té cuesta 120 yenes." },
+        { ja: "おにぎりは<ruby>百<rt>ひゃく</rt></ruby>ごじゅうえんです。", romaji: "Onigiri wa hyaku gojū en desu.", es: "El onigiri cuesta 150 yenes." },
+        { ja: "コーヒーはさん<ruby>百<rt>びゃく</rt></ruby>えんです。", romaji: "Kōhī wa sanbyaku en desu.", es: "El café cuesta 300 yenes." },
+        { ja: "ノートはに<ruby>百<rt>ひゃく</rt></ruby>えんです。", romaji: "Nōto wa nihyaku en desu.", es: "El cuaderno cuesta 200 yenes." }
+      ]},
+      { type: "contrast", labelEs: "百 (ひゃく) の変化", headers: ["Número", "Lectura", "Nota"], rows: [
+        { ja: "100", es: "ひゃく", note: "基本" },
+        { ja: "300", es: "さんびゃく", note: "b に変化" },
+        { ja: "600", es: "ろっぴゃく", note: "pp に変化" },
+        { ja: "800", es: "はっぴゃく", note: "pp に変化" }
+      ]},
+      { type: "pitfall", labelEs: "Errores frecuentes", cases: [
+        { wrong: "さんひゃくえん", right: "さんびゃくえん", es: "300は さんびゃく (b音に変化)。さんひゃく ではない。" },
+        { wrong: "ろくひゃくえん", right: "ろっぴゃくえん", es: "600は ろっぴゃく (pp音に変化)。" },
+        { wrong: "なんえんですか。", right: "いくらですか。", es: "Para preguntar el precio se usa いくら, no なんえん。" }
+      ]},
+      { type: "mnemonic", es: "💡 いくら = ¿cuánto? (precio). En un restaurante japonés, 'ikura' también es 'huevas de salmón' 🍣 — ¡no confundir!" }
+    ]
+  },
+
+  practice: {
+    passRate: 0.8,
+    items: [
+      {
+        id: "u4_c2_q1", type: "mc",
+        promptEs: "¿Cómo se dice '15' en japonés?",
+        ja: "", options: ["じゅうご","ごじゅう","じゅうに","にじゅうご"],
+        answer: 0, explainEs: "じゅうご = 15 (10+5).", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c2_q2", type: "mc",
+        promptEs: "¿Qué número es 「さんじゅうに」?",
+        ja: "さんじゅうに", options: ["23","32","302","320"],
+        answer: 1, explainEs: "さんじゅうに = 30+2 = 32.", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c2_q3", type: "mc",
+        promptEs: "¿Qué significa 「いくらですか」?",
+        ja: "いくらですか",
+        options: ["¿Cuántos?","¿Cuánto cuesta?","¿Qué hora es?","¿Qué es?"],
+        answer: 1, explainEs: "いくら = cuánto (precio).", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c2_q4", type: "mc",
+        promptEs: "¿Cómo se lee 300えん?",
+        ja: "300えん", options: ["さんひゃくえん","さんびゃくえん","さんぴゃくえん","さんばくえん"],
+        answer: 1, explainEs: "300 = さんびゃく (b音に変化).", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c2_q5", type: "reorder",
+        promptEs: "Ordena: '¿Cuánto cuesta el té?'",
+        ja: "", options: ["おちゃ","は","いくら","ですか"],
+        displayOptions: ["おちゃ","は","いくら","ですか"],
+        answer: "おちゃはいくらですか",
+        explainEs: "[cosa] は いくら ですか。", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c2_q6", type: "reorder",
+        promptEs: "Ordena: 'Cuesta 250 yenes.'",
+        ja: "", options: ["にひゃく","ごじゅう","えん","です"],
+        displayOptions: ["にひゃく","ごじゅう","えん","です"],
+        answer: "にひゃくごじゅうえんです",
+        explainEs: "[数字]えんです。", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c2_q7", type: "reorder",
+        promptEs: "Ordena el número de teléfono: 090-1234",
+        ja: "", options: ["ぜろきゅうぜろ","の","いちにさんよん"],
+        displayOptions: ["ぜろきゅうぜろ","の","いちにさんよん"],
+        answer: "ぜろきゅうぜろのいちにさんよん",
+        explainEs: "Teléfono: dígitos + の + dígitos.", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c2_q8", type: "fill",
+        promptEs: "Completa: '¿Cuánto cuesta?' → ___ですか。",
+        ja: "___ですか。",
+        options: ["いくら","いくつ","いつ","どこ"],
+        answer: 0, explainEs: "いくら = cuánto (precio).", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c2_q9", type: "fill",
+        promptEs: "Completa: 'Cuesta 80 yenes.' → ___えんです。",
+        ja: "___えんです。",
+        options: ["はちじゅう","じゅうはち","はっぴゃく","やっつ"],
+        answer: 0, explainEs: "はちじゅう = 80.", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c2_q10", type: "fill",
+        promptEs: "¿Cuánto es にじゅう + さんじゅう?",
+        ja: "にじゅう + さんじゅう = ___",
+        options: ["ごじゅう","よんじゅう","ろくじゅう","にじゅうさん"],
+        answer: 0, explainEs: "20 + 30 = 50 = ごじゅう.", jlptForm: "n5-grammar"
+      }
+    ]
+  },
+
+  challenge: {
+    personaEs: "Eres el dependiente de un konbini en Tokio. El usuario es Carlos, un boliviano que quiere comprar bebidas y comida. Dile los precios en yenes (usa números del 11 al 500).",
+    openingJa: "いらっしゃいませ。きょうはおちゃがひゃくえんです。",
+    mustUse: ["えん","いくら"],
+    minTurns: 3, maxTurns: 5,
+    bannedTopics: ["política","religión","violencia"]
+  }
+});
+
+window.canDoData.push({
+  id: "u4_c3",
+  unit: 4,
+  index: 3,
+  es: "Preguntar y decir la hora",
+  jaGoal: "いまなんじですか。〜じ〜ふんです。ごぜん／ごご。",
+  grammarTabs: ["gimon"],
+  traceChars: [],
+  source: "ai", status: "published", version: 1,
+  updatedAt: "2026-05-27T00:00:00Z",
+  vocab: ["いま","なんじ","じ","ふん","ぷん","はん","ごぜん","ごご"],
+  kanji: ["時","分"],
+
+  scenario: {
+    title: "¿A qué hora es la clase?",
+    contextEs: "María pregunta a Kenji sobre el horario de las clases en la escuela de japonés.",
+    lines: [
+      {
+        speaker: "B",
+        ja: "ケンジさん、いま<ruby>何時<rt>なんじ</rt></ruby>ですか。",
+        jaPlain: "ケンジさん、いまなんじですか。",
+        romaji: "Kenji-san, ima nanji desu ka.",
+        es: "Kenji, ¿qué hora es ahora?",
+        audio: "audio/u4_c3_l1_B.mp3",
+        highlight: ["gimon"]
+      },
+      {
+        speaker: "A",
+        ja: "いま<ruby>九<rt>く</rt></ruby><ruby>時<rt>じ</rt></ruby><ruby>半<rt>はん</rt></ruby>です。",
+        jaPlain: "いまくじはんです。",
+        romaji: "Ima kuji han desu.",
+        es: "Ahora son las 9:30.",
+        audio: "audio/u4_c3_l2_A.mp3",
+        highlight: ["gimon"]
+      },
+      {
+        speaker: "B",
+        ja: "じゅぎょうは<ruby>何時<rt>なんじ</rt></ruby>からですか。",
+        jaPlain: "じゅぎょうはなんじからですか。",
+        romaji: "Jugyō wa nanji kara desu ka.",
+        es: "¿A qué hora empieza la clase?",
+        audio: "audio/u4_c3_l3_B.mp3",
+        highlight: ["gimon"]
+      },
+      {
+        speaker: "A",
+        ja: "<ruby>十<rt>じゅう</rt></ruby><ruby>時<rt>じ</rt></ruby>からです。",
+        jaPlain: "じゅうじからです。",
+        romaji: "Jūji kara desu.",
+        es: "Desde las 10.",
+        audio: "audio/u4_c3_l4_A.mp3",
+        highlight: ["gimon"]
+      },
+      {
+        speaker: "B",
+        ja: "<ruby>十<rt>じゅう</rt></ruby><ruby>時<rt>じ</rt></ruby>ですね。ありがとうございます。",
+        jaPlain: "じゅうじですね。ありがとうございます。",
+        romaji: "Jūji desu ne. Arigatō gozaimasu.",
+        es: "A las 10, ¿verdad? Gracias.",
+        audio: "audio/u4_c3_l5_B.mp3",
+        highlight: []
+      }
+    ]
+  },
+
+  explain: {
+    summaryEs: "La hora se dice con 〜じ (hora) y 〜ふん/ぷん (minutos). はん = media hora. Para preguntar: いまなんじですか。",
+    blocks: [
+      { type: "rule", es: "Horas: [número]じ → いちじ(1:00), にじ(2:00)… じゅうにじ(12:00). Excepciones: よじ(4:00), しちじ(7:00), くじ(9:00)." },
+      { type: "pattern", es: "Minutos: [número]ふん/ぷん → ごふん(5min), じゅっぷん(10min), にじゅうごふん(25min). はん = 30 minutos. AM/PM: ごぜん / ごご." },
+      { type: "note", es: "Pregunta: いまなんじですか = '¿Qué hora es?' / Respuesta: [hora]じ [minutos]ふん です。" },
+      { type: "examples", labelEs: "Ejemplos", items: [
+        { ja: "いま<ruby>三<rt>さん</rt></ruby><ruby>時<rt>じ</rt></ruby>です。", romaji: "Ima sanji desu.", es: "Ahora son las 3:00." },
+        { ja: "ごご<ruby>四<rt>よ</rt></ruby><ruby>時<rt>じ</rt></ruby><ruby>十五<rt>じゅうご</rt></ruby><ruby>分<rt>ふん</rt></ruby>です。", romaji: "Gogo yoji jūgofun desu.", es: "Son las 4:15 PM." },
+        { ja: "ごぜん<ruby>七<rt>しち</rt></ruby><ruby>時<rt>じ</rt></ruby><ruby>半<rt>はん</rt></ruby>です。", romaji: "Gozen shichiji han desu.", es: "Son las 7:30 AM." },
+        { ja: "じゅぎょうは<ruby>九<rt>く</rt></ruby><ruby>時<rt>じ</rt></ruby>からです。", romaji: "Jugyō wa kuji kara desu.", es: "La clase empieza a las 9:00." }
+      ]},
+      { type: "contrast", labelEs: "Horas con lectura irregular", headers: ["Hora", "Lectura correcta", "Error común"], rows: [
+        { ja: "4:00", es: "よじ (yoji)", note: "× しじ / よんじ" },
+        { ja: "7:00", es: "しちじ (shichiji)", note: "× ななじ" },
+        { ja: "9:00", es: "くじ (kuji)", note: "× きゅうじ" }
+      ]},
+      { type: "pitfall", labelEs: "Errores frecuentes", cases: [
+        { wrong: "よんじです。", right: "よじです。", es: "4:00 se lee よじ, no よんじ." },
+        { wrong: "ななじです。", right: "しちじです。", es: "7:00 se lee しちじ, no ななじ." },
+        { wrong: "いまなんふんですか。", right: "いまなんじですか。", es: "Para preguntar la hora completa: なんじ. なんぷん pregunta solo los minutos." }
+      ]},
+      { type: "mnemonic", es: "💡 Irregulares: 4→よじ, 7→しちじ, 9→くじ. Truco: 'YO-SHICHI-KU' — imagina un reloj que dice ¡YO! a las 4, SHICHI a las 7 y KU a las 9." }
+    ]
+  },
+
+  practice: {
+    passRate: 0.8,
+    items: [
+      {
+        id: "u4_c3_q1", type: "mc",
+        promptEs: "¿Cómo se dice '3:00' en japonés?",
+        ja: "", options: ["さんじ","さんふん","みっつじ","さんぷん"],
+        answer: 0, explainEs: "さんじ = 3:00.", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c3_q2", type: "mc",
+        promptEs: "¿Cuál es la lectura correcta de 4:00?",
+        ja: "4:00", options: ["しじ","よんじ","よじ","しいじ"],
+        answer: 2, explainEs: "4:00 = よじ (lectura irregular).", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c3_q3", type: "mc",
+        promptEs: "¿Qué significa 「いまなんじですか」?",
+        ja: "いまなんじですか",
+        options: ["¿Qué hora es ahora?","¿Cuántos años tienes?","¿Cuánto cuesta?","¿Qué día es?"],
+        answer: 0, explainEs: "いま = ahora, なんじ = qué hora.", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c3_q4", type: "mc",
+        promptEs: "¿Cómo se dice '9:30'?",
+        ja: "9:30", options: ["きゅうじはん","くじはん","ここのつじはん","くじさんじゅっぷん"],
+        answer: 1, explainEs: "9:00 = くじ (irregular) + はん = 9:30.", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c3_q5", type: "reorder",
+        promptEs: "Ordena: '¿Qué hora es ahora?'",
+        ja: "", options: ["いま","なんじ","ですか"],
+        displayOptions: ["いま","<ruby>何時<rt>なんじ</rt></ruby>","ですか"],
+        answer: "いまなんじですか",
+        explainEs: "いま + なんじ + ですか。", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c3_q6", type: "reorder",
+        promptEs: "Ordena: 'La clase empieza a las 10.'",
+        ja: "", options: ["じゅぎょうは","じゅうじ","からです"],
+        displayOptions: ["じゅぎょうは","<ruby>十時<rt>じゅうじ</rt></ruby>","からです"],
+        answer: "じゅぎょうはじゅうじからです",
+        explainEs: "[evento] は [hora]じ から です。", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c3_q7", type: "reorder",
+        promptEs: "Ordena: 'Son las 8:30 AM.'",
+        ja: "", options: ["ごぜん","はちじ","はん","です"],
+        displayOptions: ["ごぜん","<ruby>八時<rt>はちじ</rt></ruby>","<ruby>半<rt>はん</rt></ruby>","です"],
+        answer: "ごぜんはちじはんです",
+        explainEs: "ごぜん/ごご + [hora]じ + はん + です。", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c3_q8", type: "fill",
+        promptEs: "Completa: 'Son las 7:00.' → ___じです。",
+        ja: "___じです。",
+        options: ["なな","しち","しっち","なの"],
+        answer: 1, explainEs: "7:00 = しちじ (irregular).", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c3_q9", type: "fill",
+        promptEs: "Completa: 'Son las 12:30.' → じゅうにじ___です。",
+        ja: "じゅうにじ___です。",
+        options: ["はん","さんじゅっぷん","はんぶん","なかば"],
+        answer: 0, explainEs: "はん = :30 (media hora).", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c3_q10", type: "fill",
+        promptEs: "Completa: 'Son las 4:15 PM.' → ごご___じじゅうごふんです。",
+        ja: "ごご___じじゅうごふんです。",
+        options: ["よ","し","よん","く"],
+        answer: 0, explainEs: "4:00 = よじ (irregular).", jlptForm: "n5-grammar"
+      }
+    ]
+  },
+
+  challenge: {
+    personaEs: "Eres Kenji, un compañero de clase japonés. María te pregunta sobre el horario de la escuela. Responde con horas y minutos. Usa ごぜん/ごご para AM/PM.",
+    openingJa: "マリアさん、きょうのじゅぎょうのことですか。",
+    mustUse: ["じ","なんじ","はん"],
+    minTurns: 3, maxTurns: 5,
+    bannedTopics: ["política","religión","violencia"]
+  },
+
+  escuchar: {
+    passRate: 0.7,
+    items: [
+      {
+        type: 'audio_meaning',
+        text: 'いまさんじです。',
+        promptEs: '¿Qué dice la persona?',
+        options: ['Ahora son las 3:00.', 'Ahora son las 7:00.', 'Son 3 piezas.', 'Tengo 3 años.'],
+        answer: 0,
+        explainEs: '「さんじ」= 3:00. 「じ」= hora.'
+      },
+      {
+        type: 'audio_meaning',
+        text: 'ごぜんくじはんです。',
+        promptEs: '¿Qué dice la persona?',
+        options: ['Son las 9:30 AM.', 'Son las 9:30 PM.', 'Son las 7:30 AM.', 'Son las 9:00 AM.'],
+        answer: 0,
+        explainEs: '「ごぜん」= AM, 「くじ」= 9:00, 「はん」= :30.'
+      },
+      {
+        type: 'audio_meaning',
+        text: 'いまじゅうにじです。おひるです。',
+        promptEs: '¿Qué dice la persona?',
+        options: ['Son las 12:00. Es mediodía.', 'Son las 2:00. Es la tarde.', 'Son las 12:00. Es medianoche.', 'Son las 10:00. Es la mañana.'],
+        answer: 0,
+        explainEs: '「じゅうにじ」= 12:00, 「おひる」= mediodía.'
+      },
+      {
+        type: 'audio_meaning',
+        text: 'しちじにおきます。',
+        promptEs: '¿Qué dice la persona?',
+        options: ['Me levanto a las 7:00.', 'Me levanto a las 4:00.', 'Me acuesto a las 7:00.', 'Llego a las 7:00.'],
+        answer: 0,
+        explainEs: '「しちじ」= 7:00, 「おきます」= levantarse.'
+      },
+      {
+        type: 'audio_meaning',
+        text: 'ごごよじじゅうごふんです。',
+        promptEs: '¿Qué dice la persona?',
+        options: ['Son las 4:15 PM.', 'Son las 4:50 PM.', 'Son las 7:15 PM.', 'Son las 4:15 AM.'],
+        answer: 0,
+        explainEs: '「ごご」= PM, 「よじ」= 4:00, 「じゅうごふん」= 15 min.'
+      },
+      {
+        type: 'audio_meaning',
+        text: 'がっこうはごぜんはちじからです。',
+        promptEs: '¿Qué dice la persona?',
+        options: ['La escuela empieza a las 8:00 AM.', 'La escuela termina a las 8:00 AM.', 'La escuela empieza a las 8:00 PM.', 'La escuela empieza a las 3:00 AM.'],
+        answer: 0,
+        explainEs: '「がっこう」= escuela, 「はちじ」= 8:00, 「から」= desde.'
+      },
+      {
+        type: 'audio_match',
+        text: 'いまなんじですか。— くじはんです。',
+        promptEs: '¿Qué afirmación es correcta?',
+        options: ['Ahora son las 9:30.', 'Ahora son las 7:30.', 'Ahora son las 9:00.', 'Ahora son las 3:30.'],
+        answer: 0,
+        explainEs: '「くじ」= 9:00, 「はん」= :30. → 9:30.'
+      },
+      {
+        type: 'audio_match',
+        text: 'じゅぎょうはなんじからですか。— ごぜんじゅうじからです。',
+        promptEs: '¿Qué afirmación es correcta?',
+        options: ['La clase empieza a las 10:00 AM.', 'La clase empieza a las 10:00 PM.', 'La clase termina a las 10:00 AM.', 'La clase empieza a las 12:00 AM.'],
+        answer: 0,
+        explainEs: '「じゅぎょう」= clase, 「ごぜんじゅうじ」= 10:00 AM, 「から」= desde.'
+      }
+    ]
+  }
+});
+
+window.canDoData.push({
+  id: "u4_c4",
+  unit: 4,
+  index: 4,
+  es: "Señalar objetos con esto/eso/aquello y preguntar '¿Qué es?'",
+  jaGoal: "これ/それ/あれ はなんですか。この/その/あの〜は〜です。",
+  grammarTabs: ["shiji"],
+  traceChars: [],
+  source: "ai", status: "published", version: 1,
+  updatedAt: "2026-05-27T00:00:00Z",
+  vocab: ["これ","それ","あれ","この","その","あの","どれ","どの","なん"],
+  kanji: [],
+
+  scenario: {
+    title: "En la tienda de recuerdos",
+    contextEs: "Carlos está en una tienda de recuerdos en Tokio. Pregunta sobre varios productos señalándolos.",
+    lines: [
+      {
+        speaker: "B",
+        ja: "すみません、これはなんですか。",
+        jaPlain: "すみません、これはなんですか。",
+        romaji: "Sumimasen, kore wa nan desu ka.",
+        es: "Disculpe, ¿qué es esto?",
+        audio: "audio/u4_c4_l1_B.mp3",
+        highlight: ["shiji"]
+      },
+      {
+        speaker: "A",
+        ja: "それは<ruby>扇子<rt>せんす</rt></ruby>です。<ruby>日本<rt>にほん</rt></ruby>のせんすです。",
+        jaPlain: "それはせんすです。にほんのせんすです。",
+        romaji: "Sore wa sensu desu. Nihon no sensu desu.",
+        es: "Eso es un abanico. Es un abanico japonés.",
+        audio: "audio/u4_c4_l2_A.mp3",
+        highlight: ["shiji"]
+      },
+      {
+        speaker: "B",
+        ja: "いいですね。あれはなんですか。",
+        jaPlain: "いいですね。あれはなんですか。",
+        romaji: "Ii desu ne. Are wa nan desu ka.",
+        es: "Qué bonito. ¿Y aquello qué es?",
+        audio: "audio/u4_c4_l3_B.mp3",
+        highlight: ["shiji"]
+      },
+      {
+        speaker: "A",
+        ja: "あれは<ruby>風鈴<rt>ふうりん</rt></ruby>です。",
+        jaPlain: "あれはふうりんです。",
+        romaji: "Are wa fūrin desu.",
+        es: "Aquello es una campanilla de viento.",
+        audio: "audio/u4_c4_l4_A.mp3",
+        highlight: ["shiji"]
+      },
+      {
+        speaker: "B",
+        ja: "じゃ、このせんすをください。",
+        jaPlain: "じゃ、このせんすをください。",
+        romaji: "Ja, kono sensu o kudasai.",
+        es: "Entonces, este abanico, por favor.",
+        audio: "audio/u4_c4_l5_B.mp3",
+        highlight: ["shiji"]
+      }
+    ]
+  },
+
+  explain: {
+    summaryEs: "これ/それ/あれ señalan cosas: cerca de mí / cerca de ti / lejos de ambos. この/その/あの van antes de un sustantivo.",
+    blocks: [
+      { type: "rule", es: "Demostrativos solos: これ(esto) / それ(eso) / あれ(aquello) / どれ(¿cuál?). Se usan SIN sustantivo después." },
+      { type: "pattern", es: "Demostrativos + sustantivo: この〜(este ~) / その〜(ese ~) / あの〜(aquel ~) / どの〜(¿cuál ~?). Siempre van antes del nombre." },
+      { type: "note", es: "Distancia: こ = cerca del hablante, そ = cerca del oyente, あ = lejos de ambos, ど = pregunta." },
+      { type: "examples", labelEs: "Ejemplos", items: [
+        { ja: "これはなんですか。", romaji: "Kore wa nan desu ka.", es: "¿Qué es esto?" },
+        { ja: "それはペンです。", romaji: "Sore wa pen desu.", es: "Eso es un bolígrafo." },
+        { ja: "あの<ruby>本<rt>ほん</rt></ruby>はにほんごの<ruby>本<rt>ほん</rt></ruby>です。", romaji: "Ano hon wa nihongo no hon desu.", es: "Aquel libro es un libro de japonés." },
+        { ja: "どれがいいですか。", romaji: "Dore ga ii desu ka.", es: "¿Cuál es bueno?" }
+      ]},
+      { type: "contrast", labelEs: "これ vs この — ¿cuándo usar cuál?", headers: ["Forma", "Uso", "Ejemplo"], rows: [
+        { ja: "これ", es: "Solo (sin sustantivo)", note: "これはペンです。" },
+        { ja: "この", es: "Antes de sustantivo", note: "このペンは200えんです。" },
+        { ja: "それ", es: "Solo (sin sustantivo)", note: "それはなんですか。" },
+        { ja: "その", es: "Antes de sustantivo", note: "そのかばんはだれのですか。" }
+      ]},
+      { type: "pitfall", labelEs: "Errores frecuentes", cases: [
+        { wrong: "このはペンです。", right: "これはペンです。 o このペンは〜です。", es: "この siempre va pegado a un sustantivo. Solo: これ." },
+        { wrong: "これペンです。", right: "これはペンです。", es: "No olvides la partícula は después de これ/それ/あれ." },
+        { wrong: "これはなにですか。", right: "これはなんですか。", es: "Antes de です, なに cambia a なん." }
+      ]},
+      { type: "mnemonic", es: "💡 こそあど: KO(cerca mío) SO(cerca tuyo) A(lejos) DO(pregunta). ¡Memoriza este orden!" }
+    ]
+  },
+
+  practice: {
+    passRate: 0.8,
+    items: [
+      {
+        id: "u4_c4_q1", type: "mc",
+        promptEs: "¿Cuál señala algo cerca del HABLANTE?",
+        ja: "", options: ["これ","それ","あれ","どれ"],
+        answer: 0, explainEs: "これ = esto (cerca de mí).", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c4_q2", type: "mc",
+        promptEs: "¿Qué significa 「あれはなんですか」?",
+        ja: "あれはなんですか",
+        options: ["¿Qué es aquello?","¿Qué es esto?","¿Cuál es eso?","¿Dónde está?"],
+        answer: 0, explainEs: "あれ = aquello (lejos de ambos), なん = qué.", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c4_q3", type: "mc",
+        promptEs: "¿Cuál es correcta? 'Este bolígrafo es de Carlos.'",
+        ja: "",
+        options: ["このペンはカルロスさんのです。","これペンはカルロスさんのです。","このはペンカルロスさんのです。","これのペンはカルロスさんのです。"],
+        answer: 0, explainEs: "この + sustantivo: このペン = este bolígrafo.", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c4_q4", type: "mc",
+        promptEs: "Señalas algo lejos de ambos. ¿Qué palabra usas?",
+        ja: "", options: ["これ","それ","あれ","どれ"],
+        answer: 2, explainEs: "あれ = aquello (lejos de ambas personas).", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c4_q5", type: "reorder",
+        promptEs: "Ordena: '¿Qué es esto?'",
+        ja: "", options: ["これ","は","なん","ですか"],
+        displayOptions: ["これ","は","なん","ですか"],
+        answer: "これはなんですか",
+        explainEs: "これ + は + なん + ですか。", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c4_q6", type: "reorder",
+        promptEs: "Ordena: 'Eso es un abanico.'",
+        ja: "", options: ["それ","は","せんす","です"],
+        displayOptions: ["それ","は","せんす","です"],
+        answer: "それはせんすです",
+        explainEs: "それ + は + [cosa] + です。", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c4_q7", type: "reorder",
+        promptEs: "Ordena: 'Este abanico, por favor.'",
+        ja: "", options: ["この","せんす","を","ください"],
+        displayOptions: ["この","せんす","を","ください"],
+        answer: "このせんすをください",
+        explainEs: "この + [sustantivo] + を + ください。", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c4_q8", type: "fill",
+        promptEs: "Completa: '¿Qué es eso?' → ___はなんですか。",
+        ja: "___はなんですか。",
+        options: ["これ","それ","あれ","どれ"],
+        answer: 1, explainEs: "それ = eso (cerca del oyente).", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c4_q9", type: "fill",
+        promptEs: "Completa: 'Este libro es un libro de japonés.' → ___ほんはにほんごのほんです。",
+        ja: "___ほんはにほんごのほんです。",
+        options: ["この","これ","それ","あの"],
+        answer: 0, explainEs: "この + sustantivo: このほん = este libro.", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c4_q10", type: "fill",
+        promptEs: "Completa: '¿Cuál es bueno?' → ___がいいですか。",
+        ja: "___がいいですか。",
+        options: ["どれ","なに","だれ","どこ"],
+        answer: 0, explainEs: "どれ = cuál (de varias opciones).", jlptForm: "n5-grammar"
+      }
+    ]
+  },
+
+  challenge: {
+    personaEs: "Eres el dependiente de una tienda de recuerdos en Tokio. Carlos, un turista boliviano, te señala productos y pregunta qué son. Responde usando それ/あれ y da el precio.",
+    openingJa: "いらっしゃいませ。なにかおさがしですか。",
+    mustUse: ["それ","これ","なん"],
+    minTurns: 3, maxTurns: 5,
+    bannedTopics: ["política","religión","violencia"]
+  }
+});
+
+window.canDoData.push({
+  id: "u4_c5",
+  unit: 4,
+  index: 5,
+  es: "Hacer preguntas con いつ・どこ・だれ・なに y hablar de los días de la semana",
+  jaGoal: "いつ/どこ/だれ/なに〜ですか。〜ようびに〜します。",
+  grammarTabs: ["gimon","shiji"],
+  traceChars: [],
+  source: "ai", status: "published", version: 1,
+  updatedAt: "2026-05-27T00:00:00Z",
+  vocab: ["いつ","どこ","だれ","なに","なん","げつようび","かようび","すいようび","もくようび","きんようび","どようび","にちようび","なんようび"],
+  kanji: ["曜","月","年"],
+
+  scenario: {
+    title: "Haciendo planes para el fin de semana",
+    contextEs: "Carlos invita a María a una fiesta en la escuela. Ella pregunta los detalles.",
+    lines: [
+      {
+        speaker: "A",
+        ja: "マリアさん、パーティーにいきますか。",
+        jaPlain: "マリアさん、パーティーにいきますか。",
+        romaji: "Maria-san, pātī ni ikimasu ka.",
+        es: "María, ¿vas a la fiesta?",
+        audio: "audio/u4_c5_l1_A.mp3",
+        highlight: []
+      },
+      {
+        speaker: "B",
+        ja: "はい。いつですか。",
+        jaPlain: "はい。いつですか。",
+        romaji: "Hai. Itsu desu ka.",
+        es: "Sí. ¿Cuándo es?",
+        audio: "audio/u4_c5_l2_B.mp3",
+        highlight: ["gimon"]
+      },
+      {
+        speaker: "A",
+        ja: "<ruby>土曜日<rt>どようび</rt></ruby>です。ごご<ruby>三<rt>さん</rt></ruby><ruby>時<rt>じ</rt></ruby>からです。",
+        jaPlain: "どようびです。ごごさんじからです。",
+        romaji: "Doyōbi desu. Gogo sanji kara desu.",
+        es: "El sábado. Desde las 3 PM.",
+        audio: "audio/u4_c5_l3_A.mp3",
+        highlight: ["gimon"]
+      },
+      {
+        speaker: "B",
+        ja: "どこですか。",
+        jaPlain: "どこですか。",
+        romaji: "Doko desu ka.",
+        es: "¿Dónde es?",
+        audio: "audio/u4_c5_l4_B.mp3",
+        highlight: ["gimon"]
+      },
+      {
+        speaker: "A",
+        ja: "がっこうです。ケンジさんと<ruby>田中<rt>たなか</rt></ruby><ruby>先生<rt>せんせい</rt></ruby>もきます。",
+        jaPlain: "がっこうです。ケンジさんとたなかせんせいもきます。",
+        romaji: "Gakkō desu. Kenji-san to Tanaka-sensei mo kimasu.",
+        es: "En la escuela. Kenji y la profesora Tanaka también vienen.",
+        audio: "audio/u4_c5_l5_A.mp3",
+        highlight: []
+      }
+    ]
+  },
+
+  explain: {
+    summaryEs: "Las palabras interrogativas (いつ, どこ, だれ, なに) sirven para preguntar cuándo, dónde, quién y qué. Los días de la semana terminan en ～ようび.",
+    blocks: [
+      { type: "rule", es: "Palabras interrogativas: いつ(¿cuándo?), どこ(¿dónde?), だれ(¿quién?), なに/なん(¿qué?), どれ(¿cuál?), いくら(¿cuánto?), いくつ(¿cuántos?)." },
+      { type: "pattern", es: "Días: げつようび(lun), かようび(mar), すいようび(mié), もくようび(jue), きんようび(vie), どようび(sáb), にちようび(dom). Pregunta: なんようびですか。" },
+      { type: "note", es: "El patrón común: [tema] は + [疑問詞] + ですか。→ パーティーはいつですか = '¿Cuándo es la fiesta?'" },
+      { type: "examples", labelEs: "Ejemplos", items: [
+        { ja: "しけんはいつですか。", romaji: "Shiken wa itsu desu ka.", es: "¿Cuándo es el examen?" },
+        { ja: "えきはどこですか。", romaji: "Eki wa doko desu ka.", es: "¿Dónde está la estación?" },
+        { ja: "あのひとはだれですか。", romaji: "Ano hito wa dare desu ka.", es: "¿Quién es aquella persona?" },
+        { ja: "<ruby>金曜日<rt>きんようび</rt></ruby>にカラオケにいきます。", romaji: "Kinyōbi ni karaoke ni ikimasu.", es: "El viernes voy al karaoke." }
+      ]},
+      { type: "contrast", labelEs: "Los 7 días de la semana", headers: ["Día", "日本語", "Lectura"], rows: [
+        { ja: "Lunes", es: "<ruby>月曜日<rt>げつようび</rt></ruby>", note: "getsu-yōbi" },
+        { ja: "Martes", es: "<ruby>火曜日<rt>かようび</rt></ruby>", note: "ka-yōbi" },
+        { ja: "Miércoles", es: "<ruby>水曜日<rt>すいようび</rt></ruby>", note: "sui-yōbi" },
+        { ja: "Jueves", es: "<ruby>木曜日<rt>もくようび</rt></ruby>", note: "moku-yōbi" },
+        { ja: "Viernes", es: "<ruby>金曜日<rt>きんようび</rt></ruby>", note: "kin-yōbi" },
+        { ja: "Sábado", es: "<ruby>土曜日<rt>どようび</rt></ruby>", note: "do-yōbi" },
+        { ja: "Domingo", es: "<ruby>日曜日<rt>にちようび</rt></ruby>", note: "nichi-yōbi" }
+      ]},
+      { type: "pitfall", labelEs: "Errores frecuentes", cases: [
+        { wrong: "なにですか（antes de です）", right: "なんですか", es: "Antes de です, なに cambia a なん: これはなんですか。" },
+        { wrong: "どこはパーティーですか。", right: "パーティーはどこですか。", es: "El tema va primero: [tema] は [pregunta] ですか。" },
+        { wrong: "げつようびでべんきょうします。", right: "<ruby>月曜日<rt>げつようび</rt></ruby>にべんきょうします。", es: "Para el día se usa la partícula に, no で." }
+      ]},
+      { type: "mnemonic", es: "💡 Los días usan elementos naturales: 月(luna)月曜, 火(fuego)火曜, 水(agua)水曜, 木(árbol)木曜, 金(oro)金曜, 土(tierra)土曜, 日(sol)日曜. ¡Como los planetas!" }
+    ]
+  },
+
+  practice: {
+    passRate: 0.8,
+    items: [
+      {
+        id: "u4_c5_q1", type: "mc",
+        promptEs: "¿Qué significa 「いつですか」?",
+        ja: "いつですか",
+        options: ["¿Cuándo?","¿Dónde?","¿Quién?","¿Qué?"],
+        answer: 0, explainEs: "いつ = cuándo.", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c5_q2", type: "mc",
+        promptEs: "¿Cuál es 'miércoles' en japonés?",
+        ja: "", options: ["かようび","すいようび","もくようび","きんようび"],
+        answer: 1, explainEs: "すいようび = miércoles (水 = agua).", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c5_q3", type: "mc",
+        promptEs: "¿Qué palabra interrogativa usas para preguntar '¿quién?'",
+        ja: "", options: ["なに","どこ","だれ","いつ"],
+        answer: 2, explainEs: "だれ = quién.", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c5_q4", type: "mc",
+        promptEs: "¿Qué significa 「えきはどこですか」?",
+        ja: "えきはどこですか",
+        options: ["¿Dónde está la estación?","¿Qué es la estación?","¿Cuándo abre la estación?","¿Quién está en la estación?"],
+        answer: 0, explainEs: "えき = estación, どこ = dónde.", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c5_q5", type: "reorder",
+        promptEs: "Ordena: '¿Cuándo es el examen?'",
+        ja: "", options: ["しけん","は","いつ","ですか"],
+        displayOptions: ["しけん","は","いつ","ですか"],
+        answer: "しけんはいつですか",
+        explainEs: "[tema] は いつ ですか。", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c5_q6", type: "reorder",
+        promptEs: "Ordena: 'El viernes voy al karaoke.'",
+        ja: "", options: ["きんようびに","カラオケに","いきます"],
+        displayOptions: ["<ruby>金曜日<rt>きんようび</rt></ruby>に","カラオケに","いきます"],
+        answer: "きんようびにカラオケにいきます",
+        explainEs: "[día]に + [場所]に + いきます。", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c5_q7", type: "reorder",
+        promptEs: "Ordena: '¿Quién es aquella persona?'",
+        ja: "", options: ["あのひと","は","だれ","ですか"],
+        displayOptions: ["あのひと","は","だれ","ですか"],
+        answer: "あのひとはだれですか",
+        explainEs: "あの + [人] は だれ ですか。", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c5_q8", type: "fill",
+        promptEs: "Completa: '¿Qué día es hoy?' → きょうは___ですか。",
+        ja: "きょうは___ですか。",
+        options: ["なんようび","なんじ","いくら","だれ"],
+        answer: 0, explainEs: "なんようび = qué día de la semana.", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c5_q9", type: "fill",
+        promptEs: "Completa: 'El examen es el jueves.' → しけんは___です。",
+        ja: "しけんは___です。",
+        options: ["もくようび","すいようび","きんようび","かようび"],
+        answer: 0, explainEs: "もくようび = jueves (木 = árbol).", jlptForm: "n5-grammar"
+      },
+      {
+        id: "u4_c5_q10", type: "fill",
+        promptEs: "Completa: '¿Dónde está la estación?' → えきは___ですか。",
+        ja: "えきは___ですか。",
+        options: ["どこ","だれ","いつ","なん"],
+        answer: 0, explainEs: "どこ = dónde.", jlptForm: "n5-grammar"
+      }
+    ]
+  },
+
+  challenge: {
+    personaEs: "Eres Kenji, un amigo japonés de Carlos. Están en un café planeando la semana. Pregunta y responde usando いつ/どこ/だれ/なに y días de la semana.",
+    openingJa: "カルロスさん、こんしゅうはなにをしますか。",
+    mustUse: ["ようび","いつ","どこ"],
+    minTurns: 3, maxTurns: 5,
+    bannedTopics: ["política","religión","violencia"]
+  },
+
+  escuchar: {
+    passRate: 0.7,
+    items: [
+      {
+        type: 'audio_meaning',
+        text: 'あしたはなんようびですか。',
+        promptEs: '¿Qué dice la persona?',
+        options: ['¿Qué día es mañana?', '¿Qué hora es mañana?', '¿Dónde es mañana?', '¿Quién viene mañana?'],
+        answer: 0,
+        explainEs: '「あした」= mañana, 「なんようび」= qué día de la semana.'
+      },
+      {
+        type: 'audio_meaning',
+        text: 'にちようびにサッカーをします。',
+        promptEs: '¿Qué dice la persona?',
+        options: ['Juego fútbol el domingo.', 'Juego fútbol el sábado.', 'Veo fútbol el domingo.', 'Juego fútbol el lunes.'],
+        answer: 0,
+        explainEs: '「にちようび」= domingo, 「サッカーをします」= juego fútbol.'
+      },
+      {
+        type: 'audio_meaning',
+        text: 'あのひとはだれですか。',
+        promptEs: '¿Qué dice la persona?',
+        options: ['¿Quién es aquella persona?', '¿Qué es aquello?', '¿Dónde está aquella persona?', '¿Cuándo viene aquella persona?'],
+        answer: 0,
+        explainEs: '「あのひと」= aquella persona, 「だれ」= quién.'
+      },
+      {
+        type: 'audio_meaning',
+        text: 'えきはどこですか。',
+        promptEs: '¿Qué dice la persona?',
+        options: ['¿Dónde está la estación?', '¿Qué es la estación?', '¿Cuánto cuesta la estación?', '¿Cuándo abre la estación?'],
+        answer: 0,
+        explainEs: '「えき」= estación, 「どこ」= dónde.'
+      },
+      {
+        type: 'audio_match',
+        text: 'しけんはいつですか。— きんようびです。',
+        promptEs: '¿Qué afirmación es correcta?',
+        options: ['El examen es el viernes.', 'El examen es el lunes.', 'La fiesta es el viernes.', 'El examen es el sábado.'],
+        answer: 0,
+        explainEs: '「しけん」= examen, 「きんようび」= viernes.'
+      },
+      {
+        type: 'audio_match',
+        text: 'パーティーはどこですか。— がっこうです。',
+        promptEs: '¿Qué afirmación es correcta?',
+        options: ['La fiesta es en la escuela.', 'La fiesta es en la estación.', 'La fiesta es en el café.', 'La clase es en la escuela.'],
+        answer: 0,
+        explainEs: '「パーティー」= fiesta, 「がっこう」= escuela.'
+      },
+      {
+        type: 'audio_match',
+        text: 'あのひとはだれですか。— たなかせんせいです。',
+        promptEs: '¿Qué afirmación es correcta?',
+        options: ['Aquella persona es la profesora Tanaka.', 'Aquella persona es Carlos.', 'Aquella persona es María.', 'Aquella persona es un estudiante.'],
+        answer: 0,
+        explainEs: '「あのひと」= aquella persona, 「たなかせんせい」= profesora Tanaka.'
+      },
+      {
+        type: 'audio_match',
+        text: 'どようびになにをしますか。— カラオケにいきます。',
+        promptEs: '¿Qué afirmación es correcta?',
+        options: ['El sábado va al karaoke.', 'El domingo va al karaoke.', 'El sábado va a la escuela.', 'El sábado estudia japonés.'],
+        answer: 0,
+        explainEs: '「どようび」= sábado, 「カラオケにいきます」= voy al karaoke.'
+      }
+    ]
+  }
+});
+
+// ----- Unit 5: Lugares y direcciones -----
+
+window.canDoData.push({
+  id: "u5_c1",
+  unit: 5,
+  index: 1,
+  es: "Preguntar y decir dónde está algo usando 〜にあります",
+  jaGoal: "〜はどこですか。〜にあります。",
+  grammarTabs: ["aru","joshi"],
+  traceChars: [],
+  source: "ai", status: "published", version: 1,
+  updatedAt: "2026-05-27T00:00:00Z",
+  vocab: ["ぎんこう","えき","びょういん","ゆうびんきょく","ホテル","コンビニ","スーパー","まえ","うしろ","よこ","となり","ちかく","どこ","あります"],
+  kanji: ["銀","行","駅","前","病","院"],
+
+  scenario: {
+    title: "Buscando el banco en la estación",
+    contextEs: "Sofía está en la estación y necesita encontrar el banco.",
+    lines: [
+      {
+        speaker: "Sofía",
+        ja: "すみません、<ruby>銀行<rt>ぎんこう</rt></ruby>はどこですか。",
+        jaPlain: "すみません、ぎんこうはどこですか。",
+        romaji: "Sumimasen, ginkō wa doko desu ka.",
+        es: "Disculpe, ¿dónde está el banco?",
+        audio: "audio/u5_c1_l1_S.mp3",
+        highlight: ["ぎんこう","どこ"]
+      },
+      {
+        speaker: "駅員",
+        ja: "<ruby>駅<rt>えき</rt></ruby>の<ruby>前<rt>まえ</rt></ruby>にあります。",
+        jaPlain: "えきのまえにあります。",
+        romaji: "Eki no mae ni arimasu.",
+        es: "Está delante de la estación.",
+        audio: "audio/u5_c1_l2_E.mp3",
+        highlight: ["まえ","に","あります"]
+      },
+      {
+        speaker: "Sofía",
+        ja: "ありがとうございます。",
+        jaPlain: "ありがとうございます。",
+        romaji: "Arigatō gozaimasu.",
+        es: "Muchas gracias.",
+        audio: "audio/u5_c1_l3_S.mp3",
+        highlight: []
+      },
+      {
+        speaker: "駅員",
+        ja: "どうぞ。",
+        jaPlain: "どうぞ。",
+        romaji: "Dōzo.",
+        es: "De nada. / Adelante.",
+        audio: "audio/u5_c1_l4_E.mp3",
+        highlight: []
+      }
+    ]
+  },
+
+  explain: {
+    summaryEs: "Para decir dónde está algo se usa 「〜に あります」. Para preguntar la ubicación se usa 「〜は どこですか」.",
+    blocks: [
+      { type: "rule", es: "La partícula に indica el lugar donde algo existe. あります se usa para cosas inanimadas (edificios, objetos, plantas)." },
+      { type: "pattern", es: "[もの] は [場所] に あります → 'El [objeto] está en [lugar]'. / [場所] に [もの] が あります → 'En [lugar] hay [objeto]'." },
+      { type: "examples", labelEs: "Ejemplos", items: [
+        { ja: "<ruby>銀行<rt>ぎんこう</rt></ruby>はどこですか。", romaji: "Ginkō wa doko desu ka.", es: "¿Dónde está el banco?" },
+        { ja: "<ruby>駅<rt>えき</rt></ruby>の<ruby>前<rt>まえ</rt></ruby>にあります。", romaji: "Eki no mae ni arimasu.", es: "Está delante de la estación." },
+        { ja: "コンビニは<ruby>病院<rt>びょういん</rt></ruby>のよこにあります。", romaji: "Konbini wa byōin no yoko ni arimasu.", es: "El konbini está al lado del hospital." },
+        { ja: "ホテルはえきのちかくにあります。", romaji: "Hoteru wa eki no chikaku ni arimasu.", es: "El hotel está cerca de la estación." }
+      ]},
+      { type: "note", es: "どこ = dónde. Se combina con は y ですか para preguntar: [cosa] はどこですか。La respuesta usa に + あります." },
+      { type: "pitfall", labelEs: "Errores frecuentes", cases: [
+        { wrong: "ぎんこうはどこにありますか。", right: "ぎんこうはどこですか。", es: "Ambas formas son correctas, pero どこですか es más natural y común." },
+        { wrong: "えきのまえであります。", right: "えきのまえにあります。", es: "Para indicar existencia se usa に, no で." }
+      ]}
+    ]
+  },
+
+  practice: {
+    passRate: 0.8,
+    items: [
+      {
+        id: "u5_c1_q1", type: "conv",
+        promptEs: "Alguien te pregunta:",
+        prompt: "すみません、えきはどこですか。",
+        promptHint: "Disculpe, ¿dónde está la estación?",
+        options: ["あそこにあります。","えきにいます。","えきです。","はい、えきです。"],
+        answer: 0,
+        explainEs: "あそこにあります = Está allí. Se responde con [場所]にあります.",
+        audio: null
+      },
+      {
+        id: "u5_c1_q2", type: "conv",
+        promptEs: "Alguien te pregunta:",
+        prompt: "ゆうびんきょくはどこですか。",
+        promptHint: "¿Dónde está la oficina de correos?",
+        options: ["びょういんのよこにあります。","びょういんにいます。","ゆうびんきょくです。","はい、あります。"],
+        answer: 0,
+        explainEs: "びょういんのよこにあります = Está al lado del hospital.",
+        audio: null
+      },
+      {
+        id: "u5_c1_q3", type: "conv",
+        promptEs: "Alguien te pregunta:",
+        prompt: "すみません、ホテルはちかくにありますか。",
+        promptHint: "Disculpe, ¿hay un hotel cerca?",
+        options: ["はい、えきのまえにあります。","はい、ホテルにいます。","いいえ、ホテルです。","はい、ホテルがいます。"],
+        answer: 0,
+        explainEs: "えきのまえにあります = Está delante de la estación.",
+        audio: null
+      },
+      {
+        id: "u5_c1_q4", type: "conv",
+        promptEs: "Alguien te pregunta:",
+        prompt: "コンビニはどこですか。",
+        promptHint: "¿Dónde está el konbini?",
+        options: ["がっこうのとなりにあります。","がっこうにいます。","コンビニです。","はい、コンビニがいます。"],
+        answer: 0,
+        explainEs: "がっこうのとなりにあります = Está al lado de la escuela.",
+        audio: null
+      },
+      {
+        id: "u5_c1_q5", type: "mc",
+        promptEs: "Elige la respuesta correcta: <ruby>駅<rt>えき</rt></ruby>の___に<ruby>銀行<rt>ぎんこう</rt></ruby>があります。",
+        ja: "<ruby>駅<rt>えき</rt></ruby>の___に<ruby>銀行<rt>ぎんこう</rt></ruby>があります。",
+        options: ["まえ","なか","です","か"],
+        answer: 0,
+        explainEs: "えきのまえに = delante de la estación. まえ = delante.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c1_q6", type: "mc",
+        promptEs: "¿Qué palabra usas para preguntar '¿dónde?'",
+        ja: "<ruby>銀行<rt>ぎんこう</rt></ruby>は___ですか。",
+        options: ["どこ","なに","だれ","いつ"],
+        answer: 0,
+        explainEs: "どこ = dónde. Se usa para preguntar la ubicación.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c1_q7", type: "mc",
+        promptEs: "¿Qué significa「ぎんこうはえきのまえにあります」?",
+        ja: "<ruby>銀行<rt>ぎんこう</rt></ruby>は<ruby>駅<rt>えき</rt></ruby>の<ruby>前<rt>まえ</rt></ruby>にあります。",
+        options: ["El banco está delante de la estación.","El banco está detrás de la estación.","El banco está al lado de la estación.","El banco está lejos de la estación."],
+        answer: 0,
+        explainEs: "まえ = delante. えきのまえにあります = está delante de la estación.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c1_q8", type: "mc",
+        promptEs: "Elige la partícula correcta: こうえんのちかく___レストランがあります。",
+        ja: "こうえんのちかく___レストランがあります。",
+        options: ["に","を","は","で"],
+        answer: 0,
+        explainEs: "に marca el lugar de existencia: ちかくにあります = hay [algo] cerca.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c1_q9", type: "fill",
+        promptEs: "Completa: 'Está delante de la estación.' → えきのまえに___。",
+        ja: "えきのまえに___。",
+        options: ["あります","います","ありません","いません"],
+        answer: 0,
+        explainEs: "あります se usa para cosas inanimadas. El banco es un edificio.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c1_q10", type: "fill",
+        promptEs: "Completa: '¿Dónde está el hospital?' → ___はどこですか。",
+        ja: "___はどこですか。",
+        options: ["びょういん","うえ","あります","に"],
+        answer: 0,
+        explainEs: "びょういん = hospital. [cosa]はどこですか = ¿Dónde está [cosa]?",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c1_q11", type: "fill",
+        promptEs: "Completa: 'El supermercado está al lado del parque.' → スーパーはこうえんの___にあります。",
+        ja: "スーパーはこうえんの___にあります。",
+        options: ["となり","ぎんこう","えき","がっこう"],
+        answer: 0,
+        explainEs: "となり = al lado. こうえんのとなり = al lado del parque.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c1_q12", type: "fill",
+        promptEs: "Completa: 'El konbini está al lado de la estación.' → コンビニは___のよこにあります。",
+        ja: "コンビニは___のよこにあります。",
+        options: ["えき","どこ","あります","です"],
+        answer: 0,
+        explainEs: "えきのよこ = al lado de la estación.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c1_q13", type: "reorder",
+        promptEs: "Ordena: '¿Dónde está el banco?'",
+        ja: "",
+        options: ["ぎんこうは","どこ","ですか"],
+        displayOptions: ["<ruby>銀行<rt>ぎんこう</rt></ruby>は","どこ","ですか"],
+        answer: "ぎんこうはどこですか",
+        explainEs: "[cosa]は + どこ + ですか。",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c1_q14", type: "reorder",
+        promptEs: "Ordena: 'Está delante de la estación.'",
+        ja: "",
+        options: ["えきの","まえに","あります"],
+        displayOptions: ["<ruby>駅<rt>えき</rt></ruby>の","<ruby>前<rt>まえ</rt></ruby>に","あります"],
+        answer: "えきのまえにあります",
+        explainEs: "[lugar]の + [位置]に + あります。",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c1_q15", type: "reorder",
+        promptEs: "Ordena: 'El supermercado está al lado del hospital.'",
+        ja: "",
+        options: ["スーパーは","びょういんの","よこに","あります"],
+        displayOptions: ["スーパーは","<ruby>病院<rt>びょういん</rt></ruby>の","よこに","あります"],
+        answer: "スーパーはびょういんのよこにあります",
+        explainEs: "[cosa]は + [lugar]の + [位置]に + あります。",
+        jlptForm: "n5-grammar"
+      }
+    ]
+  },
+
+  challenge: {
+    personaEs: "Eres un empleado de la estación. Un turista te pregunta dónde están varios lugares. Responde usando 〜にあります y palabras de posición (まえ、よこ、ちかく…).",
+    openingJa: "すみません、ぎんこうはどこですか。",
+    mustUse: ["にあります","まえ","どこ"],
+    minTurns: 3, maxTurns: 5,
+    bannedTopics: ["política","religión","violencia"]
+  }
+});
+
+window.canDoData.push({
+  id: "u5_c2",
+  unit: 5,
+  index: 2,
+  es: "Distinguir あります y います para objetos y personas/animales",
+  jaGoal: "〜があります。〜がいます。",
+  grammarTabs: ["aru"],
+  traceChars: [],
+  source: "ai", status: "published", version: 1,
+  updatedAt: "2026-05-27T00:00:00Z",
+  vocab: ["こうえん","こども","ねこ","いぬ","ベンチ","き","あります","います","テーブル","いす","ほん","ノート"],
+  kanji: ["公","園","子","犬","猫"],
+
+  scenario: {
+    title: "En el parque: ¿qué hay aquí?",
+    contextEs: "Carlos y María están en el parque y observan lo que hay alrededor.",
+    lines: [
+      {
+        speaker: "Carlos",
+        ja: "<ruby>公園<rt>こうえん</rt></ruby>に<ruby>子<rt>こ</rt></ruby>どもがいます。",
+        jaPlain: "こうえんにこどもがいます。",
+        romaji: "Kōen ni kodomo ga imasu.",
+        es: "Hay niños en el parque.",
+        audio: "audio/u5_c2_l1_C.mp3",
+        highlight: ["います","こども"]
+      },
+      {
+        speaker: "María",
+        ja: "<ruby>猫<rt>ねこ</rt></ruby>もいますね。",
+        jaPlain: "ねこもいますね。",
+        romaji: "Neko mo imasu ne.",
+        es: "También hay un gato, ¿verdad?",
+        audio: "audio/u5_c2_l2_M.mp3",
+        highlight: ["います","ねこ"]
+      },
+      {
+        speaker: "Carlos",
+        ja: "あ、あそこにベンチがあります。",
+        jaPlain: "あ、あそこにベンチがあります。",
+        romaji: "A, asoko ni benchi ga arimasu.",
+        es: "Ah, allí hay un banco (de sentarse).",
+        audio: "audio/u5_c2_l3_C.mp3",
+        highlight: ["あります","ベンチ"]
+      },
+      {
+        speaker: "María",
+        ja: "きれいな<ruby>公園<rt>こうえん</rt></ruby>ですね。",
+        jaPlain: "きれいなこうえんですね。",
+        romaji: "Kirei na kōen desu ne.",
+        es: "Es un parque bonito, ¿verdad?",
+        audio: "audio/u5_c2_l4_M.mp3",
+        highlight: []
+      }
+    ]
+  },
+
+  explain: {
+    summaryEs: "あります se usa para objetos inanimados (cosas, edificios, plantas). います se usa para seres vivos que se mueven (personas, animales).",
+    blocks: [
+      { type: "rule", es: "あります → objetos, edificios, plantas (cosas que no se mueven solas). います → personas, animales (seres que se mueven)." },
+      { type: "contrast", labelEs: "あります vs います", headers: ["Sustantivo","Verbo","Español"], rows: [
+        { ja: "ほん（libro）", es: "あります", note: "Hay un libro." },
+        { ja: "テーブル（mesa）", es: "あります", note: "Hay una mesa." },
+        { ja: "き（árbol）", es: "あります", note: "Hay un árbol." },
+        { ja: "こども（niño）", es: "います", note: "Hay un niño." },
+        { ja: "ねこ（gato）", es: "います", note: "Hay un gato." },
+        { ja: "いぬ（perro）", es: "います", note: "Hay un perro." }
+      ]},
+      { type: "pitfall", labelEs: "Errores frecuentes", cases: [
+        { wrong: "ねこがあります。", right: "ねこがいます。", es: "Los animales usan います, no あります." },
+        { wrong: "テーブルがいます。", right: "テーブルがあります。", es: "Los objetos inanimados usan あります, no います." }
+      ]},
+      { type: "examples", labelEs: "Ejemplos", items: [
+        { ja: "<ruby>公園<rt>こうえん</rt></ruby>に<ruby>子<rt>こ</rt></ruby>どもがいます。", romaji: "Kōen ni kodomo ga imasu.", es: "Hay niños en el parque." },
+        { ja: "あそこにベンチがあります。", romaji: "Asoko ni benchi ga arimasu.", es: "Allí hay un banco." },
+        { ja: "つくえの<ruby>上<rt>うえ</rt></ruby>に<ruby>猫<rt>ねこ</rt></ruby>がいます。", romaji: "Tsukue no ue ni neko ga imasu.", es: "Hay un gato encima del escritorio." },
+        { ja: "つくえの<ruby>上<rt>うえ</rt></ruby>に<ruby>本<rt>ほん</rt></ruby>があります。", romaji: "Tsukue no ue ni hon ga arimasu.", es: "Hay un libro encima del escritorio." }
+      ]},
+      { type: "minipair", labelEs: "Comparar: mismo lugar, diferente verbo",
+        a: { ja: "テーブルの<ruby>上<rt>うえ</rt></ruby>に<ruby>本<rt>ほん</rt></ruby>があります。", es: "Hay un libro encima de la mesa. (objeto → あります)" },
+        b: { ja: "テーブルの<ruby>上<rt>うえ</rt></ruby>に<ruby>猫<rt>ねこ</rt></ruby>がいます。", es: "Hay un gato encima de la mesa. (animal → います)" }
+      }
+    ]
+  },
+
+  practice: {
+    passRate: 0.8,
+    items: [
+      {
+        id: "u5_c2_q1", type: "conv",
+        promptEs: "Alguien te pregunta:",
+        prompt: "こうえんになにがありますか。",
+        promptHint: "¿Qué hay en el parque?",
+        options: ["ベンチときがあります。","こどもがあります。","いぬがあります。","ねこがあります。"],
+        answer: 0,
+        explainEs: "ベンチ(banco) y き(árbol) son objetos → あります. Los demás son seres vivos.",
+        audio: null
+      },
+      {
+        id: "u5_c2_q2", type: "conv",
+        promptEs: "Alguien te pregunta:",
+        prompt: "あそこにだれがいますか。",
+        promptHint: "¿Quién está allí?",
+        options: ["せんせいがいます。","つくえがいます。","ほんがいます。","ベンチがいます。"],
+        answer: 0,
+        explainEs: "せんせい(profesor) es una persona → います. Los demás son objetos.",
+        audio: null
+      },
+      {
+        id: "u5_c2_q3", type: "conv",
+        promptEs: "Alguien te pregunta:",
+        prompt: "へやになにがありますか。",
+        promptHint: "¿Qué hay en la habitación?",
+        options: ["テーブルといすがあります。","ねこがあります。","こどもがあります。","いぬがあります。"],
+        answer: 0,
+        explainEs: "テーブル(mesa) e いす(silla) son objetos → あります.",
+        audio: null
+      },
+      {
+        id: "u5_c2_q4", type: "conv",
+        promptEs: "Alguien te pregunta:",
+        prompt: "こうえんにいぬがいますか。",
+        promptHint: "¿Hay un perro en el parque?",
+        options: ["はい、います。","はい、あります。","いいえ、いぬがあります。","はい、いぬです。"],
+        answer: 0,
+        explainEs: "いぬ(perro) es un animal → います. Se responde con います.",
+        audio: null
+      },
+      {
+        id: "u5_c2_q5", type: "mc",
+        promptEs: "Elige la respuesta correcta: こうえんにこどもが___。",
+        ja: "<ruby>公園<rt>こうえん</rt></ruby>に<ruby>子<rt>こ</rt></ruby>どもが___。",
+        options: ["います","あります","ありません","いました"],
+        answer: 0,
+        explainEs: "こども(niño) es una persona → います.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c2_q6", type: "mc",
+        promptEs: "Elige la respuesta correcta: つくえのうえにほんが___。",
+        ja: "つくえの<ruby>上<rt>うえ</rt></ruby>に<ruby>本<rt>ほん</rt></ruby>が___。",
+        options: ["あります","います","いません","ありました"],
+        answer: 0,
+        explainEs: "ほん(libro) es un objeto → あります.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c2_q7", type: "mc",
+        promptEs: "Elige la respuesta correcta: あそこにねこが___。",
+        ja: "あそこに<ruby>猫<rt>ねこ</rt></ruby>が___。",
+        options: ["います","あります","ありません","いました"],
+        answer: 0,
+        explainEs: "ねこ(gato) es un animal → います.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c2_q8", type: "mc",
+        promptEs: "Elige la respuesta correcta: へやにテレビが___。",
+        ja: "へやにテレビが___。",
+        options: ["あります","います","いません","ありました"],
+        answer: 0,
+        explainEs: "テレビ(televisor) es un objeto → あります.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c2_q9", type: "fill",
+        promptEs: "Completa: 'Hay niños en el parque.' → こうえんに___がいます。",
+        ja: "こうえんに___がいます。",
+        options: ["こども","ほん","ベンチ","テーブル"],
+        answer: 0,
+        explainEs: "こども(niño) es un ser vivo → います.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c2_q10", type: "fill",
+        promptEs: "Completa: 'Hay un cuaderno encima del escritorio.' → つくえのうえに___があります。",
+        ja: "つくえの<ruby>上<rt>うえ</rt></ruby>に___があります。",
+        options: ["ノート","ねこ","いぬ","せんせい"],
+        answer: 0,
+        explainEs: "ノート(cuaderno) es un objeto → あります.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c2_q11", type: "fill",
+        promptEs: "Completa: 'Hay un perro allí.' → あそこに___がいます。",
+        ja: "あそこに___がいます。",
+        options: ["いぬ","くるま","ベンチ","はな"],
+        answer: 0,
+        explainEs: "いぬ(perro) es un animal → います.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c2_q12", type: "fill",
+        promptEs: "Completa: 'Hay sillas en el aula.' → きょうしつに___があります。",
+        ja: "きょうしつに___があります。",
+        options: ["いす","せんせい","がくせい","こども"],
+        answer: 0,
+        explainEs: "いす(silla) es un objeto → あります.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c2_q13", type: "reorder",
+        promptEs: "Ordena: 'Hay niños en el parque.'",
+        ja: "",
+        options: ["こうえんに","こどもが","います"],
+        displayOptions: ["<ruby>公園<rt>こうえん</rt></ruby>に","<ruby>子<rt>こ</rt></ruby>どもが","います"],
+        answer: "こうえんにこどもがいます",
+        explainEs: "[場所]に + [ser vivo]が + います。",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c2_q14", type: "reorder",
+        promptEs: "Ordena: 'Hay un libro encima del escritorio.'",
+        ja: "",
+        options: ["つくえのうえに","ほんが","あります"],
+        displayOptions: ["つくえの<ruby>上<rt>うえ</rt></ruby>に","<ruby>本<rt>ほん</rt></ruby>が","あります"],
+        answer: "つくえのうえにほんがあります",
+        explainEs: "[lugar]の[位置]に + [objeto]が + あります。",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c2_q15", type: "reorder",
+        promptEs: "Ordena: 'Hay un gato allí.'",
+        ja: "",
+        options: ["あそこに","ねこが","います"],
+        displayOptions: ["あそこに","<ruby>猫<rt>ねこ</rt></ruby>が","います"],
+        answer: "あそこにねこがいます",
+        explainEs: "[場所]に + [animal]が + います。",
+        jlptForm: "n5-grammar"
+      }
+    ]
+  },
+
+  challenge: {
+    personaEs: "Eres María. Estás en el parque con Carlos. Describan juntos lo que ven usando あります e います correctamente.",
+    openingJa: "カルロスさん、こうえんになにがいますか。",
+    mustUse: ["います","あります","が"],
+    minTurns: 3, maxTurns: 5,
+    bannedTopics: ["política","religión","violencia"]
+  }
+});
+
+window.canDoData.push({
+  id: "u5_c3",
+  unit: 5,
+  index: 3,
+  es: "Describir la ubicación usando 〜のうえ/した/まえ/うしろ/なか/そと/よこ/ちかく/あいだ",
+  jaGoal: "〜のうえ/した/まえ/うしろ/なか/そと/よこ/ちかく/あいだ にあります。",
+  grammarTabs: ["aru","joshi"],
+  traceChars: [],
+  source: "ai", status: "published", version: 1,
+  updatedAt: "2026-05-27T00:00:00Z",
+  vocab: ["うえ","した","まえ","うしろ","なか","そと","よこ","ちかく","あいだ","となり","つくえ","いす","かばん","ノート","はこ"],
+  kanji: ["上","下","前","後","中","外","近"],
+
+  scenario: {
+    title: "Buscando cosas en el aula",
+    contextEs: "Ana no puede encontrar sus cosas en el aula. Le pregunta al profesor.",
+    lines: [
+      {
+        speaker: "Ana",
+        ja: "せんせい、かばんはどこですか。",
+        jaPlain: "せんせい、かばんはどこですか。",
+        romaji: "Sensei, kaban wa doko desu ka.",
+        es: "Profesor, ¿dónde está mi mochila?",
+        audio: "audio/u5_c3_l1_A.mp3",
+        highlight: ["どこ"]
+      },
+      {
+        speaker: "先生",
+        ja: "つくえの<ruby>下<rt>した</rt></ruby>にあります。",
+        jaPlain: "つくえのしたにあります。",
+        romaji: "Tsukue no shita ni arimasu.",
+        es: "Está debajo del escritorio.",
+        audio: "audio/u5_c3_l2_T.mp3",
+        highlight: ["した","にあります"]
+      },
+      {
+        speaker: "Ana",
+        ja: "ノートは？",
+        jaPlain: "ノートは？",
+        romaji: "Nōto wa?",
+        es: "¿Y el cuaderno?",
+        audio: "audio/u5_c3_l3_A.mp3",
+        highlight: []
+      },
+      {
+        speaker: "先生",
+        ja: "いすの<ruby>上<rt>うえ</rt></ruby>にあります。",
+        jaPlain: "いすのうえにあります。",
+        romaji: "Isu no ue ni arimasu.",
+        es: "Está encima de la silla.",
+        audio: "audio/u5_c3_l4_T.mp3",
+        highlight: ["うえ","にあります"]
+      },
+      {
+        speaker: "Ana",
+        ja: "ありがとうございます！",
+        jaPlain: "ありがとうございます！",
+        romaji: "Arigatō gozaimasu!",
+        es: "¡Muchas gracias!",
+        audio: "audio/u5_c3_l5_A.mp3",
+        highlight: []
+      }
+    ]
+  },
+
+  explain: {
+    summaryEs: "Las palabras de posición (うえ, した, まえ…) se colocan después de の para describir dónde está algo: [referencia]の[posición]にあります/います.",
+    blocks: [
+      { type: "rule", es: "Estructura: [referencia]の[posición]に あります/います. La posición siempre va después de の." },
+      { type: "pattern", es: "9 palabras de posición + となり:\nうえ(encima) · した(debajo) · まえ(delante) · うしろ(detrás) · なか(dentro) · そと(fuera) · よこ(al lado) · ちかく(cerca) · あいだ(entre) · となり(junto a)" },
+      { type: "examples", labelEs: "Ejemplos con cada posición", items: [
+        { ja: "つくえの<ruby>上<rt>うえ</rt></ruby>にあります。", romaji: "Tsukue no ue ni arimasu.", es: "Está encima del escritorio." },
+        { ja: "つくえの<ruby>下<rt>した</rt></ruby>にあります。", romaji: "Tsukue no shita ni arimasu.", es: "Está debajo del escritorio." },
+        { ja: "<ruby>駅<rt>えき</rt></ruby>の<ruby>前<rt>まえ</rt></ruby>にあります。", romaji: "Eki no mae ni arimasu.", es: "Está delante de la estación." },
+        { ja: "ビルの<ruby>後<rt>うし</rt></ruby>ろにあります。", romaji: "Biru no ushiro ni arimasu.", es: "Está detrás del edificio." },
+        { ja: "はこの<ruby>中<rt>なか</rt></ruby>にいます。", romaji: "Hako no naka ni imasu.", es: "Está dentro de la caja." },
+        { ja: "いえの<ruby>外<rt>そと</rt></ruby>にあります。", romaji: "Ie no soto ni arimasu.", es: "Está fuera de la casa." },
+        { ja: "<ruby>病院<rt>びょういん</rt></ruby>のよこにあります。", romaji: "Byōin no yoko ni arimasu.", es: "Está al lado del hospital." },
+        { ja: "<ruby>駅<rt>えき</rt></ruby>の<ruby>近<rt>ちか</rt></ruby>くにあります。", romaji: "Eki no chikaku ni arimasu.", es: "Está cerca de la estación." },
+        { ja: "<ruby>銀行<rt>ぎんこう</rt></ruby>と<ruby>病院<rt>びょういん</rt></ruby>のあいだにあります。", romaji: "Ginkō to byōin no aida ni arimasu.", es: "Está entre el banco y el hospital." }
+      ]},
+      { type: "pitfall", labelEs: "Errores frecuentes", cases: [
+        { wrong: "うえのつくえにあります。", right: "つくえの<ruby>上<rt>うえ</rt></ruby>にあります。", es: "El objeto de referencia va PRIMERO: [referencia]の[posición]." },
+        { wrong: "ぎんこうのあいだにあります。", right: "<ruby>銀行<rt>ぎんこう</rt></ruby>と<ruby>病院<rt>びょういん</rt></ruby>のあいだにあります。", es: "あいだ(entre) necesita dos referencias: AとBのあいだ." }
+      ]},
+      { type: "note", es: "となり se usa para cosas del mismo tipo (edificio al lado de edificio). よこ es más general (cualquier cosa al lado de otra)." }
+    ]
+  },
+
+  practice: {
+    passRate: 0.8,
+    items: [
+      {
+        id: "u5_c3_q1", type: "conv",
+        promptEs: "Alguien te pregunta:",
+        prompt: "かばんはどこですか。",
+        promptHint: "¿Dónde está la mochila?",
+        options: ["つくえのしたにあります。","つくえがあります。","かばんです。","はい、かばんです。"],
+        answer: 0,
+        explainEs: "つくえのした = debajo del escritorio. にあります = está en.",
+        audio: null
+      },
+      {
+        id: "u5_c3_q2", type: "conv",
+        promptEs: "Alguien te pregunta:",
+        prompt: "ねこはどこにいますか。",
+        promptHint: "¿Dónde está el gato?",
+        options: ["いすのうえにいます。","いすがあります。","ねこがいます。","いすです。"],
+        answer: 0,
+        explainEs: "いすのうえ = encima de la silla. にいます = está (ser vivo).",
+        audio: null
+      },
+      {
+        id: "u5_c3_q3", type: "conv",
+        promptEs: "Alguien te pregunta:",
+        prompt: "ほんはどこですか。",
+        promptHint: "¿Dónde está el libro?",
+        options: ["かばんのなかにあります。","かばんにいます。","ほんです。","ほんがいます。"],
+        answer: 0,
+        explainEs: "かばんのなか = dentro de la mochila. にあります = está (objeto).",
+        audio: null
+      },
+      {
+        id: "u5_c3_q4", type: "conv",
+        promptEs: "Alguien te pregunta:",
+        prompt: "えきはどこにありますか。",
+        promptHint: "¿Dónde está la estación?",
+        options: ["こうえんのまえにあります。","こうえんがいます。","えきです。","はい、えきにいます。"],
+        answer: 0,
+        explainEs: "こうえんのまえ = delante del parque. にあります = está.",
+        audio: null
+      },
+      {
+        id: "u5_c3_q5", type: "conv",
+        promptEs: "Alguien te pregunta:",
+        prompt: "コンビニはびょういんのちかくにありますか。",
+        promptHint: "¿Está el konbini cerca del hospital?",
+        options: ["はい、びょういんのよこにあります。","はい、びょういんにいます。","いいえ、コンビニです。","はい、びょういんがあります。"],
+        answer: 0,
+        explainEs: "びょういんのよこ = al lado del hospital. にあります = está.",
+        audio: null
+      },
+      {
+        id: "u5_c3_q6", type: "mc",
+        promptEs: "Elige la respuesta correcta: かばんはつくえの___にあります。",
+        ja: "かばんはつくえの___にあります。",
+        options: ["した","そら","あさ","よる"],
+        answer: 0,
+        explainEs: "した = debajo. つくえのした = debajo del escritorio.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c3_q7", type: "mc",
+        promptEs: "Elige la respuesta correcta: ねこはいすの___にいます。",
+        ja: "<ruby>猫<rt>ねこ</rt></ruby>はいすの___にいます。",
+        options: ["うえ","あした","きのう","けさ"],
+        answer: 0,
+        explainEs: "うえ = encima. いすのうえ = encima de la silla.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c3_q8", type: "mc",
+        promptEs: "Elige la respuesta correcta: ぎんこうとゆうびんきょくの___にこうえんがあります。",
+        ja: "<ruby>銀行<rt>ぎんこう</rt></ruby>とゆうびんきょくの___にこうえんがあります。",
+        options: ["あいだ","うえ","した","そと"],
+        answer: 0,
+        explainEs: "あいだ = entre. AとBのあいだ = entre A y B.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c3_q9", type: "fill",
+        promptEs: "Completa: 'Está encima de la silla.' → ノートはいすの___にあります。",
+        ja: "ノートはいすの___にあります。",
+        options: ["うえ","ぎんこう","こうえん","えき"],
+        answer: 0,
+        explainEs: "うえ = encima. いすのうえ = encima de la silla.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c3_q10", type: "fill",
+        promptEs: "Completa: 'El gato está dentro de la caja.' → ねこははこの___にいます。",
+        ja: "<ruby>猫<rt>ねこ</rt></ruby>ははこの___にいます。",
+        options: ["なか","えき","がっこう","ぎんこう"],
+        answer: 0,
+        explainEs: "なか = dentro. はこのなか = dentro de la caja.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c3_q11", type: "fill",
+        promptEs: "Completa: 'El coche está detrás del edificio.' → くるまはビルの___にあります。",
+        ja: "くるまはビルの___にあります。",
+        options: ["うしろ","いす","つくえ","ほん"],
+        answer: 0,
+        explainEs: "うしろ = detrás. ビルのうしろ = detrás del edificio.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c3_q12", type: "fill",
+        promptEs: "Completa: 'Hay un parque delante de la escuela.' → がっこうのまえにこうえんが___。",
+        ja: "がっこうの<ruby>前<rt>まえ</rt></ruby>にこうえんが___。",
+        options: ["あります","います","ありません","いません"],
+        answer: 0,
+        explainEs: "こうえん(parque) es un lugar/cosa → あります.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c3_q13", type: "reorder",
+        promptEs: "Ordena: 'La mochila está debajo del escritorio.'",
+        ja: "",
+        options: ["かばんは","つくえの","したに","あります"],
+        displayOptions: ["かばんは","つくえの","<ruby>下<rt>した</rt></ruby>に","あります"],
+        answer: "かばんはつくえのしたにあります",
+        explainEs: "[cosa]は + [referencia]の + [posición]に + あります。",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c3_q14", type: "reorder",
+        promptEs: "Ordena: 'El cuaderno está encima de la silla.'",
+        ja: "",
+        options: ["ノートは","いすの","うえに","あります"],
+        displayOptions: ["ノートは","いすの","<ruby>上<rt>うえ</rt></ruby>に","あります"],
+        answer: "ノートはいすのうえにあります",
+        explainEs: "[cosa]は + [referencia]の + [posición]に + あります。",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c3_q15", type: "reorder",
+        promptEs: "Ordena: 'El gato está dentro de la caja.'",
+        ja: "",
+        options: ["ねこは","はこの","なかに","います"],
+        displayOptions: ["<ruby>猫<rt>ねこ</rt></ruby>は","はこの","<ruby>中<rt>なか</rt></ruby>に","います"],
+        answer: "ねこははこのなかにいます",
+        explainEs: "[ser vivo]は + [referencia]の + [posición]に + います。",
+        jlptForm: "n5-grammar"
+      }
+    ]
+  },
+
+  challenge: {
+    personaEs: "Eres el profesor de Ana. Ella te pregunta dónde están varias cosas del aula. Responde usando las palabras de posición (うえ, した, まえ, なか, etc.).",
+    openingJa: "せんせい、わたしのかばんはどこですか。",
+    mustUse: ["うえ","した","にあります"],
+    minTurns: 3, maxTurns: 5,
+    bannedTopics: ["política","religión","violencia"]
+  },
+
+  escuchar: {
+    passRate: 0.7,
+    items: [
+      {
+        type: 'audio_meaning',
+        text: 'かばんはつくえのしたにあります。',
+        promptEs: '¿Qué significa esta frase?',
+        options: ['La mochila está debajo del escritorio.','La mochila está encima del escritorio.','El libro está debajo de la silla.','La mochila está dentro de la caja.'],
+        answer: 0,
+        explainEs: '「した」= debajo. つくえのしたにあります = está debajo del escritorio.'
+      },
+      {
+        type: 'audio_meaning',
+        text: 'ノートはいすのうえにあります。',
+        promptEs: '¿Qué significa esta frase?',
+        options: ['El cuaderno está encima de la silla.','El cuaderno está debajo de la silla.','El libro está encima de la mesa.','El cuaderno está dentro de la mochila.'],
+        answer: 0,
+        explainEs: '「うえ」= encima. いすのうえにあります = está encima de la silla.'
+      },
+      {
+        type: 'audio_meaning',
+        text: 'ねこははこのなかにいます。',
+        promptEs: '¿Qué significa esta frase?',
+        options: ['El gato está dentro de la caja.','El gato está fuera de la caja.','El perro está dentro de la caja.','El gato está encima de la caja.'],
+        answer: 0,
+        explainEs: '「なか」= dentro. はこのなかにいます = está dentro de la caja.'
+      },
+      {
+        type: 'audio_meaning',
+        text: 'くるまはビルのうしろにあります。',
+        promptEs: '¿Qué significa esta frase?',
+        options: ['El coche está detrás del edificio.','El coche está delante del edificio.','El coche está al lado del edificio.','El coche está dentro del edificio.'],
+        answer: 0,
+        explainEs: '「うしろ」= detrás. ビルのうしろにあります = está detrás del edificio.'
+      },
+      {
+        type: 'audio_match',
+        text: 'ほんはつくえのうえにあります。',
+        promptEs: '¿Qué afirmación es correcta?',
+        options: ['El libro está encima del escritorio.','El libro está debajo del escritorio.','El cuaderno está encima del escritorio.','El libro está dentro del escritorio.'],
+        answer: 0,
+        explainEs: '「つくえのうえ」= encima del escritorio.'
+      },
+      {
+        type: 'audio_match',
+        text: 'いぬはいすのしたにいます。',
+        promptEs: '¿Qué afirmación es correcta?',
+        options: ['El perro está debajo de la silla.','El perro está encima de la silla.','El gato está debajo de la silla.','El perro está fuera de la casa.'],
+        answer: 0,
+        explainEs: '「いすのした」= debajo de la silla. いぬ = perro → います.'
+      },
+      {
+        type: 'audio_match',
+        text: 'こうえんはえきのまえにあります。',
+        promptEs: '¿Qué afirmación es correcta?',
+        options: ['El parque está delante de la estación.','El parque está detrás de la estación.','La estación está delante del parque.','El parque está lejos de la estación.'],
+        answer: 0,
+        explainEs: '「えきのまえ」= delante de la estación.'
+      },
+      {
+        type: 'audio_match',
+        text: 'ぎんこうはびょういんのよこにあります。',
+        promptEs: '¿Qué afirmación es correcta?',
+        options: ['El banco está al lado del hospital.','El banco está detrás del hospital.','El hospital está dentro del banco.','El banco está lejos del hospital.'],
+        answer: 0,
+        explainEs: '「びょういんのよこ」= al lado del hospital.'
+      }
+    ]
+  }
+});
+
+window.canDoData.push({
+  id: "u5_c4",
+  unit: 5,
+  index: 4,
+  es: "Usar で（lugar de acción）y へ（dirección）correctamente",
+  jaGoal: "〜でたべます。〜へいきます。",
+  grammarTabs: ["joshi"],
+  traceChars: [],
+  source: "ai", status: "published", version: 1,
+  updatedAt: "2026-05-27T00:00:00Z",
+  vocab: ["コンビニ","がっこう","としょかん","レストラン","こうえん","スーパー","ひるごはん","たべます","いきます","よみます","べんきょうします","かいます","で","へ"],
+  kanji: ["学","校","食","行"],
+
+  scenario: {
+    title: "Hablando de los planes del día",
+    contextEs: "Tomás habla con su amigo sobre sus planes del día.",
+    lines: [
+      {
+        speaker: "Tomás",
+        ja: "どこで<ruby>昼<rt>ひる</rt></ruby>ごはんを<ruby>食<rt>た</rt></ruby>べますか。",
+        jaPlain: "どこでひるごはんをたべますか。",
+        romaji: "Doko de hiru-gohan o tabemasu ka.",
+        es: "¿Dónde almuerzas?",
+        audio: "audio/u5_c4_l1_T.mp3",
+        highlight: ["で","どこ"]
+      },
+      {
+        speaker: "友人",
+        ja: "コンビニで<ruby>食<rt>た</rt></ruby>べます。",
+        jaPlain: "コンビニでたべます。",
+        romaji: "Konbini de tabemasu.",
+        es: "Como en el konbini.",
+        audio: "audio/u5_c4_l2_F.mp3",
+        highlight: ["で"]
+      },
+      {
+        speaker: "Tomás",
+        ja: "そのあと、どこへ<ruby>行<rt>い</rt></ruby>きますか。",
+        jaPlain: "そのあと、どこへいきますか。",
+        romaji: "Sono ato, doko e ikimasu ka.",
+        es: "Después, ¿a dónde vas?",
+        audio: "audio/u5_c4_l3_T.mp3",
+        highlight: ["へ","どこ"]
+      },
+      {
+        speaker: "友人",
+        ja: "<ruby>学校<rt>がっこう</rt></ruby>へ<ruby>行<rt>い</rt></ruby>きます。",
+        jaPlain: "がっこうへいきます。",
+        romaji: "Gakkō e ikimasu.",
+        es: "Voy a la escuela.",
+        audio: "audio/u5_c4_l4_F.mp3",
+        highlight: ["へ","いきます"]
+      },
+      {
+        speaker: "Tomás",
+        ja: "そうですか。",
+        jaPlain: "そうですか。",
+        romaji: "Sō desu ka.",
+        es: "Ah, ya veo.",
+        audio: "audio/u5_c4_l5_T.mp3",
+        highlight: []
+      }
+    ]
+  },
+
+  explain: {
+    summaryEs: "La partícula で indica el lugar donde ocurre una acción. La partícula へ indica la dirección de un movimiento.",
+    blocks: [
+      { type: "rule", es: "で = lugar de la acción (comer, estudiar, comprar…). へ = dirección del movimiento (ir, venir, volver…). に también puede indicar destino con verbos de movimiento." },
+      { type: "contrast", labelEs: "で vs へ vs に", headers: ["Partícula","Uso","Ejemplo"], rows: [
+        { ja: "で", es: "Lugar de acción", note: "レストランで<ruby>食<rt>た</rt></ruby>べます (como en el restaurante)" },
+        { ja: "へ", es: "Dirección", note: "<ruby>学校<rt>がっこう</rt></ruby>へ<ruby>行<rt>い</rt></ruby>きます (voy a la escuela)" },
+        { ja: "に", es: "Destino / existencia", note: "<ruby>学校<rt>がっこう</rt></ruby>に<ruby>行<rt>い</rt></ruby>きます (voy a la escuela) / えきにあります (está en la estación)" }
+      ]},
+      { type: "minipair", labelEs: "Comparar: で vs へ",
+        a: { ja: "<ruby>学校<rt>がっこう</rt></ruby>で<ruby>勉強<rt>べんきょう</rt></ruby>します。", es: "Estudio EN la escuela. (acción en un lugar)" },
+        b: { ja: "<ruby>学校<rt>がっこう</rt></ruby>へ<ruby>行<rt>い</rt></ruby>きます。", es: "Voy A la escuela. (dirección de movimiento)" }
+      },
+      { type: "pitfall", labelEs: "Errores frecuentes", cases: [
+        { wrong: "がっこうでいきます。", right: "<ruby>学校<rt>がっこう</rt></ruby>へいきます。", es: "いきます es verbo de movimiento → se usa へ (o に), no で." },
+        { wrong: "レストランへたべます。", right: "レストランでたべます。", es: "たべます es acción → se usa で, no へ." }
+      ]},
+      { type: "examples", labelEs: "Más ejemplos", items: [
+        { ja: "コンビニでおべんとうを<ruby>買<rt>か</rt></ruby>います。", romaji: "Konbini de o-bentō o kaimasu.", es: "Compro un bentō en el konbini." },
+        { ja: "<ruby>図書館<rt>としょかん</rt></ruby>で<ruby>本<rt>ほん</rt></ruby>を<ruby>読<rt>よ</rt></ruby>みます。", romaji: "Toshokan de hon o yomimasu.", es: "Leo libros en la biblioteca." },
+        { ja: "スーパーへ<ruby>買<rt>か</rt></ruby>いものに<ruby>行<rt>い</rt></ruby>きます。", romaji: "Sūpā e kaimono ni ikimasu.", es: "Voy de compras al supermercado." },
+        { ja: "<ruby>公園<rt>こうえん</rt></ruby>へさんぽに<ruby>行<rt>い</rt></ruby>きます。", romaji: "Kōen e sanpo ni ikimasu.", es: "Voy a pasear al parque." }
+      ]}
+    ]
+  },
+
+  practice: {
+    passRate: 0.8,
+    items: [
+      {
+        id: "u5_c4_q1", type: "conv",
+        promptEs: "Alguien te pregunta:",
+        prompt: "どこでひるごはんをたべますか。",
+        promptHint: "¿Dónde almuerzas?",
+        options: ["レストランでたべます。","レストランへたべます。","レストランにたべます。","レストランをたべます。"],
+        answer: 0,
+        explainEs: "たべます = comer (acción) → se usa で para el lugar.",
+        audio: null
+      },
+      {
+        id: "u5_c4_q2", type: "conv",
+        promptEs: "Alguien te pregunta:",
+        prompt: "きょう、どこへいきますか。",
+        promptHint: "Hoy, ¿a dónde vas?",
+        options: ["としょかんへいきます。","としょかんでいきます。","としょかんをいきます。","としょかんがいきます。"],
+        answer: 0,
+        explainEs: "いきます = ir (movimiento) → se usa へ para la dirección.",
+        audio: null
+      },
+      {
+        id: "u5_c4_q3", type: "conv",
+        promptEs: "Alguien te pregunta:",
+        prompt: "どこでべんきょうしますか。",
+        promptHint: "¿Dónde estudias?",
+        options: ["がっこうでべんきょうします。","がっこうへべんきょうします。","がっこうにべんきょうします。","がっこうをべんきょうします。"],
+        answer: 0,
+        explainEs: "べんきょうします = estudiar (acción) → se usa で para el lugar.",
+        audio: null
+      },
+      {
+        id: "u5_c4_q4", type: "conv",
+        promptEs: "Alguien te pregunta:",
+        prompt: "あした、どこへいきますか。",
+        promptHint: "Mañana, ¿a dónde vas?",
+        options: ["こうえんへいきます。","こうえんでいきます。","こうえんをいきます。","こうえんがいきます。"],
+        answer: 0,
+        explainEs: "いきます = ir (movimiento) → se usa へ.",
+        audio: null
+      },
+      {
+        id: "u5_c4_q5", type: "mc",
+        promptEs: "Elige la partícula correcta: レストラン___ひるごはんをたべます。",
+        ja: "レストラン___<ruby>昼<rt>ひる</rt></ruby>ごはんを<ruby>食<rt>た</rt></ruby>べます。",
+        options: ["で","へ","を","が"],
+        answer: 0,
+        explainEs: "たべます es acción → で indica el lugar de la acción.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c4_q6", type: "mc",
+        promptEs: "Elige la partícula correcta: がっこう___いきます。",
+        ja: "<ruby>学校<rt>がっこう</rt></ruby>___<ruby>行<rt>い</rt></ruby>きます。",
+        options: ["へ","で","を","が"],
+        answer: 0,
+        explainEs: "いきます es verbo de movimiento → へ indica la dirección.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c4_q7", type: "mc",
+        promptEs: "Elige la partícula correcta: としょかん___ほんをよみます。",
+        ja: "<ruby>図書館<rt>としょかん</rt></ruby>___<ruby>本<rt>ほん</rt></ruby>を<ruby>読<rt>よ</rt></ruby>みます。",
+        options: ["で","へ","を","が"],
+        answer: 0,
+        explainEs: "よみます = leer (acción) → で indica el lugar de la acción.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c4_q8", type: "mc",
+        promptEs: "Elige la partícula correcta: スーパー___かいものにいきます。",
+        ja: "スーパー___<ruby>買<rt>か</rt></ruby>いものに<ruby>行<rt>い</rt></ruby>きます。",
+        options: ["へ","で","を","が"],
+        answer: 0,
+        explainEs: "いきます es verbo de movimiento → へ indica la dirección.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c4_q9", type: "fill",
+        promptEs: "Completa: 'Compro un bentō en el konbini.' → コンビニ___おべんとうをかいます。",
+        ja: "コンビニ___おべんとうを<ruby>買<rt>か</rt></ruby>います。",
+        options: ["で","へ","を","に"],
+        answer: 0,
+        explainEs: "かいます = comprar (acción) → で indica el lugar.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c4_q10", type: "fill",
+        promptEs: "Completa: 'Voy a la estación.' → えき___いきます。",
+        ja: "<ruby>駅<rt>えき</rt></ruby>___<ruby>行<rt>い</rt></ruby>きます。",
+        options: ["へ","で","を","に"],
+        answer: 0,
+        explainEs: "いきます = ir (movimiento) → へ indica la dirección.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c4_q11", type: "fill",
+        promptEs: "Completa: 'Estudio en la biblioteca.' → としょかん___べんきょうします。",
+        ja: "<ruby>図書館<rt>としょかん</rt></ruby>___<ruby>勉強<rt>べんきょう</rt></ruby>します。",
+        options: ["で","へ","を","に"],
+        answer: 0,
+        explainEs: "べんきょうします = estudiar (acción) → で indica el lugar.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c4_q12", type: "fill",
+        promptEs: "Completa: 'Voy a pasear al parque.' → こうえん___さんぽにいきます。",
+        ja: "<ruby>公園<rt>こうえん</rt></ruby>___さんぽに<ruby>行<rt>い</rt></ruby>きます。",
+        options: ["へ","で","を","に"],
+        answer: 0,
+        explainEs: "いきます = ir (movimiento) → へ indica la dirección.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c4_q13", type: "reorder",
+        promptEs: "Ordena: 'Como en el konbini.'",
+        ja: "",
+        options: ["コンビニで","ひるごはんを","たべます"],
+        displayOptions: ["コンビニで","<ruby>昼<rt>ひる</rt></ruby>ごはんを","<ruby>食<rt>た</rt></ruby>べます"],
+        answer: "コンビニでひるごはんをたべます",
+        explainEs: "[lugar]で + [objeto]を + [acción]。",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c4_q14", type: "reorder",
+        promptEs: "Ordena: 'Hoy voy a la escuela.'",
+        ja: "",
+        options: ["きょう","がっこうへ","いきます"],
+        displayOptions: ["きょう","<ruby>学校<rt>がっこう</rt></ruby>へ","<ruby>行<rt>い</rt></ruby>きます"],
+        answer: "きょうがっこうへいきます",
+        explainEs: "[tiempo] + [lugar]へ + [verbo de movimiento]。",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c4_q15", type: "reorder",
+        promptEs: "Ordena: 'Leo libros en la biblioteca.'",
+        ja: "",
+        options: ["としょかんで","ほんを","よみます"],
+        displayOptions: ["<ruby>図書館<rt>としょかん</rt></ruby>で","<ruby>本<rt>ほん</rt></ruby>を","<ruby>読<rt>よ</rt></ruby>みます"],
+        answer: "としょかんでほんをよみます",
+        explainEs: "[lugar]で + [objeto]を + [acción]。",
+        jlptForm: "n5-grammar"
+      }
+    ]
+  },
+
+  challenge: {
+    personaEs: "Eres el amigo de Tomás. Cuéntale dónde haces tus actividades diarias (comer, estudiar, comprar) y a dónde vas usando で y へ correctamente.",
+    openingJa: "きょう、どこへいきますか。",
+    mustUse: ["で","へ","いきます"],
+    minTurns: 3, maxTurns: 5,
+    bannedTopics: ["política","religión","violencia"]
+  }
+});
+
+window.canDoData.push({
+  id: "u5_c5",
+  unit: 5,
+  index: 5,
+  es: "Dar indicaciones completas en la calle combinando todo lo aprendido",
+  jaGoal: "〜のとなりにあります。バスでいけます。",
+  grammarTabs: ["aru","joshi"],
+  traceChars: [],
+  source: "ai", status: "published", version: 1,
+  updatedAt: "2026-05-27T00:00:00Z",
+  vocab: ["としょかん","ぎんこう","びょういん","こうえん","えき","バス","となり","ちかく","とおい","いけます","まっすぐ","みぎ","ひだり"],
+  kanji: ["図","書","館","銀","行","駅","近","遠"],
+
+  scenario: {
+    title: "Pidiendo indicaciones en la calle",
+    contextEs: "Lía necesita encontrar la biblioteca en una ciudad nueva.",
+    lines: [
+      {
+        speaker: "Lía",
+        ja: "すみません、<ruby>図書館<rt>としょかん</rt></ruby>はどこですか。",
+        jaPlain: "すみません、としょかんはどこですか。",
+        romaji: "Sumimasen, toshokan wa doko desu ka.",
+        es: "Disculpe, ¿dónde está la biblioteca?",
+        audio: "audio/u5_c5_l1_L.mp3",
+        highlight: ["どこ","としょかん"]
+      },
+      {
+        speaker: "男性",
+        ja: "<ruby>銀行<rt>ぎんこう</rt></ruby>のとなりにあります。",
+        jaPlain: "ぎんこうのとなりにあります。",
+        romaji: "Ginkō no tonari ni arimasu.",
+        es: "Está junto al banco.",
+        audio: "audio/u5_c5_l2_O.mp3",
+        highlight: ["となり","にあります"]
+      },
+      {
+        speaker: "Lía",
+        ja: "ここから<ruby>遠<rt>とお</rt></ruby>いですか。",
+        jaPlain: "ここからとおいですか。",
+        romaji: "Koko kara tōi desu ka.",
+        es: "¿Está lejos de aquí?",
+        audio: "audio/u5_c5_l3_L.mp3",
+        highlight: ["とおい","から"]
+      },
+      {
+        speaker: "男性",
+        ja: "いいえ、<ruby>近<rt>ちか</rt></ruby>くにあります。バスで<ruby>行<rt>い</rt></ruby>けますよ。",
+        jaPlain: "いいえ、ちかくにあります。バスでいけますよ。",
+        romaji: "Iie, chikaku ni arimasu. Basu de ikemasu yo.",
+        es: "No, está cerca. Puedes ir en autobús.",
+        audio: "audio/u5_c5_l4_O.mp3",
+        highlight: ["ちかく","で","いけます"]
+      },
+      {
+        speaker: "Lía",
+        ja: "ありがとうございます。",
+        jaPlain: "ありがとうございます。",
+        romaji: "Arigatō gozaimasu.",
+        es: "Muchas gracias.",
+        audio: "audio/u5_c5_l5_L.mp3",
+        highlight: []
+      }
+    ]
+  },
+
+  explain: {
+    summaryEs: "En esta lección combinamos todo lo aprendido en Unit 5: preguntar ubicación (どこですか), indicar posición (〜の[posición]にあります), distinguir あります/います, y usar で/へ.",
+    blocks: [
+      { type: "rule", es: "Resumen de Unit 5: (1) どこですか para preguntar ubicación. (2) [referencia]の[posición]にあります para indicar posición. (3) あります para cosas, います para seres vivos. (4) で para lugar de acción, へ para dirección." },
+      { type: "examples", labelEs: "Frases útiles para pedir indicaciones", items: [
+        { ja: "すみません、<ruby>図書館<rt>としょかん</rt></ruby>はどこですか。", romaji: "Sumimasen, toshokan wa doko desu ka.", es: "Disculpe, ¿dónde está la biblioteca?" },
+        { ja: "<ruby>銀行<rt>ぎんこう</rt></ruby>のとなりにあります。", romaji: "Ginkō no tonari ni arimasu.", es: "Está junto al banco." },
+        { ja: "ここから<ruby>遠<rt>とお</rt></ruby>いですか。", romaji: "Koko kara tōi desu ka.", es: "¿Está lejos de aquí?" },
+        { ja: "<ruby>近<rt>ちか</rt></ruby>くにあります。", romaji: "Chikaku ni arimasu.", es: "Está cerca." },
+        { ja: "バスで<ruby>行<rt>い</rt></ruby>けますよ。", romaji: "Basu de ikemasu yo.", es: "Puedes ir en autobús." },
+        { ja: "<ruby>病院<rt>びょういん</rt></ruby>は<ruby>公園<rt>こうえん</rt></ruby>の<ruby>近<rt>ちか</rt></ruby>くにあります。", romaji: "Byōin wa kōen no chikaku ni arimasu.", es: "El hospital está cerca del parque." }
+      ]},
+      { type: "note", es: "¡Buen trabajo! Ya puedes preguntar y dar indicaciones en japonés. En la siguiente unidad (Unit 6) aprenderás a hacer compras y hablar sobre comida." }
+    ]
+  },
+
+  practice: {
+    passRate: 0.8,
+    items: [
+      {
+        id: "u5_c5_q1", type: "conv",
+        promptEs: "Alguien te pregunta:",
+        prompt: "すみません、としょかんはどこですか。",
+        promptHint: "Disculpe, ¿dónde está la biblioteca?",
+        options: ["ぎんこうのとなりにあります。","ぎんこうにいます。","としょかんです。","はい、としょかんです。"],
+        answer: 0,
+        explainEs: "ぎんこうのとなりにあります = Está junto al banco.",
+        audio: null
+      },
+      {
+        id: "u5_c5_q2", type: "conv",
+        promptEs: "Alguien te pregunta:",
+        prompt: "びょういんはここからとおいですか。",
+        promptHint: "¿Está lejos el hospital de aquí?",
+        options: ["いいえ、ちかくにあります。","はい、びょういんにいます。","いいえ、びょういんです。","はい、とおくにいます。"],
+        answer: 0,
+        explainEs: "ちかくにあります = Está cerca.",
+        audio: null
+      },
+      {
+        id: "u5_c5_q3", type: "conv",
+        promptEs: "Alguien te pregunta:",
+        prompt: "えきはどこにありますか。",
+        promptHint: "¿Dónde está la estación?",
+        options: ["こうえんのまえにあります。","えきにいます。","えきです。","はい、えきがいます。"],
+        answer: 0,
+        explainEs: "こうえんのまえにあります = Está delante del parque.",
+        audio: null
+      },
+      {
+        id: "u5_c5_q4", type: "conv",
+        promptEs: "Alguien te pregunta:",
+        prompt: "すみません、レストランはちかくにありますか。",
+        promptHint: "Disculpe, ¿hay un restaurante cerca?",
+        options: ["はい、えきのよこにあります。","はい、えきにいます。","いいえ、レストランです。","はい、レストランがいます。"],
+        answer: 0,
+        explainEs: "えきのよこにあります = Está al lado de la estación.",
+        audio: null
+      },
+      {
+        id: "u5_c5_q5", type: "conv",
+        promptEs: "Alguien te pregunta:",
+        prompt: "ホテルへはバスでいけますか。",
+        promptHint: "¿Se puede ir al hotel en autobús?",
+        options: ["はい、バスでいけますよ。","はい、バスにいます。","いいえ、バスがあります。","はい、バスです。"],
+        answer: 0,
+        explainEs: "バスでいけます = Puedes ir en autobús. で = medio de transporte.",
+        audio: null
+      },
+      {
+        id: "u5_c5_q6", type: "mc",
+        promptEs: "¿Qué significa「としょかんはぎんこうのとなりにあります」?",
+        ja: "<ruby>図書館<rt>としょかん</rt></ruby>は<ruby>銀行<rt>ぎんこう</rt></ruby>のとなりにあります。",
+        options: ["La biblioteca está junto al banco.","La biblioteca está lejos del banco.","El banco está dentro de la biblioteca.","La biblioteca está detrás del banco."],
+        answer: 0,
+        explainEs: "となり = junto a / al lado. ぎんこうのとなり = junto al banco.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c5_q7", type: "mc",
+        promptEs: "¿Qué significa「ここからとおいですか」?",
+        ja: "ここから<ruby>遠<rt>とお</rt></ruby>いですか。",
+        options: ["¿Está lejos de aquí?","¿Está cerca de aquí?","¿Hay algo aquí?","¿Vienes de aquí?"],
+        answer: 0,
+        explainEs: "とおい = lejos. ここから = desde aquí.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c5_q8", type: "mc",
+        promptEs: "Elige la partícula correcta: バス___いけますよ。",
+        ja: "バス___<ruby>行<rt>い</rt></ruby>けますよ。",
+        options: ["で","へ","に","を"],
+        answer: 0,
+        explainEs: "で indica el medio de transporte: バスで = en autobús.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c5_q9", type: "fill",
+        promptEs: "Completa: 'El parque está cerca de la escuela.' → こうえんはがっこうの___にあります。",
+        ja: "こうえんは<ruby>学校<rt>がっこう</rt></ruby>の___にあります。",
+        options: ["ちかく","いす","つくえ","ほん"],
+        answer: 0,
+        explainEs: "ちかく = cerca. がっこうのちかく = cerca de la escuela.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c5_q10", type: "fill",
+        promptEs: "Completa: 'El banco está delante de la estación.' → ぎんこうはえきの___にあります。",
+        ja: "<ruby>銀行<rt>ぎんこう</rt></ruby>は<ruby>駅<rt>えき</rt></ruby>の___にあります。",
+        options: ["まえ","ねこ","こども","いぬ"],
+        answer: 0,
+        explainEs: "まえ = delante. えきのまえ = delante de la estación.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c5_q11", type: "fill",
+        promptEs: "Completa: 'El hospital está al lado del parque.' → びょういんはこうえんの___にあります。",
+        ja: "<ruby>病院<rt>びょういん</rt></ruby>は<ruby>公園<rt>こうえん</rt></ruby>の___にあります。",
+        options: ["よこ","いす","つくえ","ほん"],
+        answer: 0,
+        explainEs: "よこ = al lado. こうえんのよこ = al lado del parque.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c5_q12", type: "fill",
+        promptEs: "Completa: 'Puedes ir en autobús.' → ホテルへは___でいけます。",
+        ja: "ホテルへは___で<ruby>行<rt>い</rt></ruby>けます。",
+        options: ["バス","うえ","した","なか"],
+        answer: 0,
+        explainEs: "バスで = en autobús. で indica el medio de transporte.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c5_q13", type: "reorder",
+        promptEs: "Ordena: 'La biblioteca está junto al banco.'",
+        ja: "",
+        options: ["としょかんは","ぎんこうの","となりに","あります"],
+        displayOptions: ["<ruby>図書館<rt>としょかん</rt></ruby>は","<ruby>銀行<rt>ぎんこう</rt></ruby>の","となりに","あります"],
+        answer: "としょかんはぎんこうのとなりにあります",
+        explainEs: "[cosa]は + [referencia]の + [posición]に + あります。",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c5_q14", type: "reorder",
+        promptEs: "Ordena: 'Puedes ir en autobús desde la estación.'",
+        ja: "",
+        options: ["えきから","バスで","いけます"],
+        displayOptions: ["<ruby>駅<rt>えき</rt></ruby>から","バスで","<ruby>行<rt>い</rt></ruby>けます"],
+        answer: "えきからバスでいけます",
+        explainEs: "[origen]から + [medio]で + [verbo]。",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u5_c5_q15", type: "reorder",
+        promptEs: "Ordena: 'El hospital está cerca del parque.'",
+        ja: "",
+        options: ["びょういんは","こうえんの","ちかくに","あります"],
+        displayOptions: ["<ruby>病院<rt>びょういん</rt></ruby>は","<ruby>公園<rt>こうえん</rt></ruby>の","<ruby>近<rt>ちか</rt></ruby>くに","あります"],
+        answer: "びょういんはこうえんのちかくにあります",
+        explainEs: "[cosa]は + [referencia]の + [posición]に + あります。",
+        jlptForm: "n5-grammar"
+      }
+    ]
+  },
+
+  challenge: {
+    personaEs: "Eres un vecino amable. Lía te pregunta cómo llegar a varios lugares en la ciudad. Responde usando todo lo aprendido en Unit 5: posición, あります/います, で/へ.",
+    openingJa: "すみません、としょかんはどこですか。",
+    mustUse: ["にあります","で","ちかく"],
+    minTurns: 3, maxTurns: 5,
+    bannedTopics: ["política","religión","violencia"]
+  },
+
+  escuchar: {
+    passRate: 0.7,
+    items: [
+      {
+        type: 'audio_meaning',
+        text: 'としょかんはぎんこうのとなりにあります。',
+        promptEs: '¿Qué significa esta frase?',
+        options: ['La biblioteca está junto al banco.','La biblioteca está lejos del banco.','El banco está dentro de la biblioteca.','La biblioteca está detrás del banco.'],
+        answer: 0,
+        explainEs: '「となり」= junto a. ぎんこうのとなりにあります = está junto al banco.'
+      },
+      {
+        type: 'audio_meaning',
+        text: 'えきからバスでいけます。',
+        promptEs: '¿Qué significa esta frase?',
+        options: ['Puedes ir en autobús desde la estación.','Puedes ir a pie desde la estación.','El autobús está en la estación.','La estación tiene autobuses.'],
+        answer: 0,
+        explainEs: '「えきから」= desde la estación, 「バスで」= en autobús, 「いけます」= puedes ir.'
+      },
+      {
+        type: 'audio_meaning',
+        text: 'びょういんはこうえんのちかくにあります。',
+        promptEs: '¿Qué significa esta frase?',
+        options: ['El hospital está cerca del parque.','El hospital está lejos del parque.','El parque está dentro del hospital.','El hospital está detrás del parque.'],
+        answer: 0,
+        explainEs: '「ちかく」= cerca. こうえんのちかくにあります = está cerca del parque.'
+      },
+      {
+        type: 'audio_meaning',
+        text: 'スーパーはえきのまえにあります。',
+        promptEs: '¿Qué significa esta frase?',
+        options: ['El supermercado está delante de la estación.','El supermercado está detrás de la estación.','La estación está delante del supermercado.','El supermercado está dentro de la estación.'],
+        answer: 0,
+        explainEs: '「えきのまえ」= delante de la estación.'
+      },
+      {
+        type: 'audio_match',
+        text: 'としょかんはどこですか。— ぎんこうのとなりにあります。',
+        promptEs: '¿Qué afirmación es correcta?',
+        options: ['La biblioteca está junto al banco.','La biblioteca está lejos del banco.','La biblioteca está detrás de la escuela.','La biblioteca está dentro del banco.'],
+        answer: 0,
+        explainEs: '「ぎんこうのとなり」= junto al banco.'
+      },
+      {
+        type: 'audio_match',
+        text: 'ホテルはとおいですか。— いいえ、ちかくにあります。',
+        promptEs: '¿Qué afirmación es correcta?',
+        options: ['El hotel está cerca.','El hotel está lejos.','El hotel está cerrado.','No hay hotel.'],
+        answer: 0,
+        explainEs: '「ちかくにあります」= está cerca.'
+      },
+      {
+        type: 'audio_match',
+        text: 'えきへはバスでいけますか。— はい、いけますよ。',
+        promptEs: '¿Qué afirmación es correcta?',
+        options: ['Se puede ir a la estación en autobús.','No se puede ir a la estación en autobús.','La estación no tiene autobuses.','El autobús no funciona.'],
+        answer: 0,
+        explainEs: '「はい、いけますよ」= Sí, puedes ir.'
+      },
+      {
+        type: 'audio_match',
+        text: 'レストランはどこですか。— こうえんのまえにあります。',
+        promptEs: '¿Qué afirmación es correcta?',
+        options: ['El restaurante está delante del parque.','El restaurante está detrás del parque.','El parque está dentro del restaurante.','El restaurante está lejos del parque.'],
+        answer: 0,
+        explainEs: '「こうえんのまえ」= delante del parque.'
+      }
+    ]
+  }
+});
+
+// ----- Unit 6: Compras y comida -----
+
+window.canDoData.push({
+  id: "u6_c1",
+  unit: 6,
+  index: 1,
+  es: "Describir productos con adjetivos い (caro, barato, grande, pequeño, delicioso).",
+  jaGoal: "このりんごはたかいです。あのパンはやすくておいしいです。",
+  grammarTabs: ["keiyo"],
+  traceChars: [],
+  source: "ai", status: "published", version: 1,
+  updatedAt: "2026-05-27T00:00:00Z",
+  vocab: ["たかい","やすい","おおきい","ちいさい","おいしい","あたらしい","つめたい","あつい","りんご","パン","ケーキ","スーパー","ねだん","いくら"],
+  kanji: ["高","安","大","小","新","古","円","物"],
+
+  scenario: {
+    title: "En el supermercado",
+    contextEs: "Ana está en el supermercado de Santa Cruz y le pregunta al empleado sobre los precios y la calidad de los productos.",
+    lines: [
+      {
+        speaker: "Ana",
+        ja: "すみません、この<ruby>赤<rt>あか</rt></ruby>いりんごは<ruby>高<rt>たか</rt></ruby>いですか。",
+        jaPlain: "すみません、このあかいりんごはたかいですか。",
+        romaji: "Sumimasen, kono akai ringo wa takai desu ka.",
+        es: "Disculpe, ¿estas manzanas rojas son caras?",
+        audio: "audio/u6_c1_l1_A.mp3",
+        highlight: ["たかい","りんご"]
+      },
+      {
+        speaker: "店員",
+        ja: "いいえ、<ruby>安<rt>やす</rt></ruby>いですよ。<ruby>一<rt>ひと</rt></ruby>つ<ruby>五<rt>ご</rt></ruby><ruby>円<rt>えん</rt></ruby>です。",
+        jaPlain: "いいえ、やすいですよ。ひとつごえんです。",
+        romaji: "Iie, yasui desu yo. Hitotsu go-en desu.",
+        es: "No, son baratas. Cinco bolivianos cada una.",
+        audio: "audio/u6_c1_l2_T.mp3",
+        highlight: ["やすい","ごえん"]
+      },
+      {
+        speaker: "Ana",
+        ja: "わあ、<ruby>大<rt>おお</rt></ruby>きくておいしそうですね。あのパンは<ruby>新<rt>あたら</rt></ruby>しいですか。",
+        jaPlain: "わあ、おおきくておいしそうですね。あのパンはあたらしいですか。",
+        romaji: "Waa, ookikute oishisou desu ne. Ano pan wa atarashii desu ka.",
+        es: "¡Wow, son grandes y se ven deliciosas! ¿Aquel pan es nuevo (fresco)?",
+        audio: "audio/u6_c1_l3_A.mp3",
+        highlight: ["おおきい","おいしい","あたらしい"]
+      },
+      {
+        speaker: "店員",
+        ja: "はい、<ruby>今日<rt>きょう</rt></ruby>のパンです。とてもおいしいですよ。",
+        jaPlain: "はい、きょうのパンです。とてもおいしいですよ。",
+        romaji: "Hai, kyou no pan desu. Totemo oishii desu yo.",
+        es: "Sí, es el pan de hoy. Está muy delicioso.",
+        audio: "audio/u6_c1_l4_T.mp3",
+        highlight: ["きょう","おいしい"]
+      },
+      {
+        speaker: "Ana",
+        ja: "じゃあ、りんごを<ruby>三<rt>みっ</rt></ruby>つとパンを<ruby>一<rt>ひと</rt></ruby>つください。",
+        jaPlain: "じゃあ、りんごをみっつとパンをひとつください。",
+        romaji: "Jaa, ringo o mittsu to pan o hitotsu kudasai.",
+        es: "Entonces, deme tres manzanas y un pan por favor.",
+        audio: "audio/u6_c1_l5_A.mp3",
+        highlight: ["みっつ","ひとつ","ください"]
+      }
+    ]
+  },
+
+  explain: {
+    summaryEs: "Los adjetivos い describen cosas. Terminan en い y van directamente antes del sustantivo o al final de la oración con です.",
+    blocks: [
+      { type: "rule", es: "Los adjetivos い (i-adjetivos) terminan en い: たかい (caro), やすい (barato), おおきい (grande), ちいさい (pequeño), おいしい (delicioso), あたらしい (nuevo)." },
+      { type: "pattern", es: "[Sustantivo] は [adjetivo-い] です。 / [adjetivo-い] + [sustantivo]" },
+      { type: "examples", labelEs: "Ejemplos", items: [
+        { ja: "このケーキはおいしいです。", romaji: "Kono keeki wa oishii desu.", es: "Este pastel está delicioso." },
+        { ja: "あのスーパーはおおきいです。", romaji: "Ano suupaa wa ookii desu.", es: "Aquel supermercado es grande." },
+        { ja: "つめたいジュースをください。", romaji: "Tsumetai juusu o kudasai.", es: "Deme un jugo frío por favor." },
+        { ja: "このパンはあたらしくておいしいです。", romaji: "Kono pan wa atarashikute oishii desu.", es: "Este pan es fresco y delicioso." }
+      ]},
+      { type: "note", es: "Para unir dos adjetivos い, se cambia い por くて: たかい → たかくて, おいしい → おいしくて." },
+      { type: "pitfall", labelEs: "Errores frecuentes", cases: [
+        { wrong: "このりんごはたかくです。", right: "このりんごはたかいです。", es: "Los adjetivos い NO llevan く antes de です en forma afirmativa. Se dice たかいです, no たかくです." },
+        { wrong: "このりんごはたかいない。", right: "このりんごはたかくないです。（正解）", es: "La negación de い形容詞 es 〜くない. たかい→たかくない, やすい→やすくない. (Se verá en Unit 8)" }
+      ]}
+    ]
+  },
+
+  practice: {
+    passRate: 0.8,
+    items: [
+      {
+        id: "u6_c1_q1", type: "conv",
+        promptEs: "El empleado te pregunta:",
+        prompt: "このりんごはいかがですか。",
+        promptHint: "¿Qué tal estas manzanas?",
+        options: ["はい、おいしいです。","はい、おいしくです。","はい、おいしいない。","はい、おいしくないい。"],
+        answer: 0,
+        explainEs: "おいしい + です = おいしいです (forma correcta).",
+        audio: null
+      },
+      {
+        id: "u6_c1_q2", type: "conv",
+        promptEs: "Alguien te pregunta:",
+        prompt: "このパンはたかいですか。",
+        promptHint: "¿Es caro este pan?",
+        options: ["いいえ、やすいです。","いいえ、やすくです。","いいえ、やすいくないです。","いいえ、たかくです。"],
+        answer: 0,
+        explainEs: "やすい = barato. Forma afirmativa: やすいです.",
+        audio: null
+      },
+      {
+        id: "u6_c1_q3", type: "conv",
+        promptEs: "En el supermercado preguntan:",
+        prompt: "なにがほしいですか。",
+        promptHint: "¿Qué desea?",
+        options: ["つめたいジュースをください。","つめたくジュースをください。","ジュースつめたいください。","つめたいのジュースください。"],
+        answer: 0,
+        explainEs: "つめたい (frío) + ジュース = つめたいジュース. El adjetivo va antes del sustantivo.",
+        audio: null
+      },
+      {
+        id: "u6_c1_q4", type: "conv",
+        promptEs: "Le preguntan en el mercado:",
+        prompt: "このケーキはどんなケーキですか。",
+        promptHint: "¿Qué tipo de pastel es este?",
+        options: ["おおきくておいしいケーキです。","おおきいておいしいケーキです。","おおきくおいしいケーキです。","おおきいでおいしいケーキです。"],
+        answer: 0,
+        explainEs: "Para unir dos adjetivos い: おおきい→おおきくて, luego + おいしい.",
+        audio: null
+      },
+      {
+        id: "u6_c1_q5", type: "mc",
+        promptEs: "¿Cuál es el significado de 「おいしい」?",
+        ja: "このケーキは<ruby>美味<rt>おい</rt></ruby>しいです。",
+        options: ["delicioso","caro","frío","pequeño"],
+        answer: 0,
+        explainEs: "おいしい = delicioso/a.",
+        jlptForm: "n5-vocab"
+      },
+      {
+        id: "u6_c1_q6", type: "mc",
+        promptEs: "¿Cuál es el significado de 「やすい」?",
+        ja: "このパンは<ruby>安<rt>やす</rt></ruby>いです。",
+        options: ["barato","caro","grande","nuevo"],
+        answer: 0,
+        explainEs: "やすい = barato/a.",
+        jlptForm: "n5-vocab"
+      },
+      {
+        id: "u6_c1_q7", type: "mc",
+        promptEs: "¿Cuál es el significado de 「あたらしい」?",
+        ja: "あのレストランは<ruby>新<rt>あたら</rt></ruby>しいです。",
+        options: ["nuevo","viejo","caro","pequeño"],
+        answer: 0,
+        explainEs: "あたらしい = nuevo/a.",
+        jlptForm: "n5-vocab"
+      },
+      {
+        id: "u6_c1_q8", type: "mc",
+        promptEs: "¿Cuál es el significado de 「つめたい」?",
+        ja: "この<ruby>水<rt>みず</rt></ruby>は<ruby>冷<rt>つめ</rt></ruby>たいです。",
+        options: ["frío","caliente","delicioso","grande"],
+        answer: 0,
+        explainEs: "つめたい = frío/a (para bebidas y cosas).",
+        jlptForm: "n5-vocab"
+      },
+      {
+        id: "u6_c1_q9", type: "fill",
+        promptEs: "Completa: 'Esta manzana es pequeña.' → このりんごは___です。",
+        ja: "このりんごは___です。",
+        options: ["ちいさい","おおきい","たかい","あたらしい"],
+        answer: 0,
+        explainEs: "ちいさい = pequeño/a.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c1_q10", type: "fill",
+        promptEs: "Completa: 'Este café está caliente.' → このコーヒーは___です。",
+        ja: "このコーヒーは___です。",
+        options: ["あつい","つめたい","やすい","ちいさい"],
+        answer: 0,
+        explainEs: "あつい = caliente (para bebidas/objetos).",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c1_q11", type: "fill",
+        promptEs: "Completa: 'Aquel supermercado es grande.' → あのスーパーは___です。",
+        ja: "あのスーパーは___です。",
+        options: ["おおきい","ちいさい","つめたい","やすい"],
+        answer: 0,
+        explainEs: "おおきい = grande.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c1_q12", type: "fill",
+        promptEs: "Completa: 'Este pan es caro.' → このパンは___です。",
+        ja: "このパンは___です。",
+        options: ["たかい","やすい","ちいさい","つめたい"],
+        answer: 0,
+        explainEs: "たかい = caro/alto.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c1_q13", type: "reorder",
+        promptEs: "Ordena: 'Este pan es grande y delicioso.'",
+        ja: "",
+        options: ["このパンは","おおきくて","おいしいです"],
+        displayOptions: ["このパンは","<ruby>大<rt>おお</rt></ruby>きくて","おいしいです"],
+        answer: "このパンはおおきくておいしいです",
+        explainEs: "おおきい→おおきくて para unir con おいしい.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c1_q14", type: "reorder",
+        promptEs: "Ordena: 'Aquella manzana roja es barata.'",
+        ja: "",
+        options: ["あの","あかいりんごは","やすいです"],
+        displayOptions: ["あの","<ruby>赤<rt>あか</rt></ruby>いりんごは","<ruby>安<rt>やす</rt></ruby>いです"],
+        answer: "あのあかいりんごはやすいです",
+        explainEs: "Estructura: [あの] + [adj+sustantivo] + [は] + [adj] + です.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c1_q15", type: "reorder",
+        promptEs: "Ordena: 'Deme un jugo frío por favor.'",
+        ja: "",
+        options: ["つめたい","ジュースを","ください"],
+        displayOptions: ["<ruby>冷<rt>つめ</rt></ruby>たい","ジュースを","ください"],
+        answer: "つめたいジュースをください",
+        explainEs: "El adjetivo い va directamente antes del sustantivo: つめたい+ジュース.",
+        jlptForm: "n5-grammar"
+      }
+    ]
+  },
+
+  challenge: {
+    personaEs: "Eres un cliente en un supermercado japonés. Pregunta al empleado sobre los precios y describe los productos usando adjetivos い (たかい, やすい, おおきい, おいしい).",
+    openingJa: "いらっしゃいませ。なにをさがしていますか。",
+    mustUse: ["たかい","やすい","おいしい","ください"],
+    minTurns: 3, maxTurns: 5,
+    bannedTopics: ["política","religión","violencia"]
+  }
+});
+
+window.canDoData.push({
+  id: "u6_c2",
+  unit: 6,
+  index: 2,
+  es: "Describir lugares y cosas con adjetivos な (bonito, gustar, animado, tranquilo, conveniente).",
+  jaGoal: "このスーパーはきれいでべんりです。やさいがすきです。",
+  grammarTabs: ["keiyo"],
+  traceChars: [],
+  source: "ai", status: "published", version: 1,
+  updatedAt: "2026-05-27T00:00:00Z",
+  vocab: ["きれい","すき","にぎやか","しずか","べんり","ゆうめい","たいせつ","きらい","やさい","にく","さかな","スーパー","レストラン","カフェ"],
+  kanji: ["好","便","利","有","名","野","菜","肉","魚"],
+
+  scenario: {
+    title: "En la sección de alimentos",
+    contextEs: "Tomás y María están en la sección de alimentos del supermercado y conversan sobre el lugar y lo que les gusta.",
+    lines: [
+      {
+        speaker: "Tomás",
+        ja: "このスーパーは<ruby>綺麗<rt>きれい</rt></ruby>でべんりですね。",
+        jaPlain: "このスーパーはきれいでべんりですね。",
+        romaji: "Kono suupaa wa kirei de benri desu ne.",
+        es: "Este supermercado es bonito y conveniente, ¿verdad?",
+        audio: "audio/u6_c2_l1_T.mp3",
+        highlight: ["きれい","べんり"]
+      },
+      {
+        speaker: "María",
+        ja: "はい、それに<ruby>有名<rt>ゆうめい</rt></ruby>なスーパーです。<ruby>野菜<rt>やさい</rt></ruby>が<ruby>好<rt>す</rt></ruby>きですか。",
+        jaPlain: "はい、それにゆうめいなスーパーです。やさいがすきですか。",
+        romaji: "Hai, sore ni yuumei na suupaa desu. Yasai ga suki desu ka.",
+        es: "Sí, además es un supermercado famoso. ¿Te gustan las verduras?",
+        audio: "audio/u6_c2_l2_M.mp3",
+        highlight: ["ゆうめい","やさい","すき"]
+      },
+      {
+        speaker: "Tomás",
+        ja: "やさいは<ruby>好<rt>す</rt></ruby>きですが、<ruby>魚<rt>さかな</rt></ruby>はちょっと<ruby>嫌<rt>きら</rt></ruby>いです。",
+        jaPlain: "やさいはすきですが、さかなはちょっときらいです。",
+        romaji: "Yasai wa suki desu ga, sakana wa chotto kirai desu.",
+        es: "Me gustan las verduras, pero el pescado no me gusta mucho.",
+        audio: "audio/u6_c2_l3_T.mp3",
+        highlight: ["すき","きらい","さかな"]
+      },
+      {
+        speaker: "María",
+        ja: "そうですか。あのカフェは<ruby>静<rt>しず</rt></ruby>かできれいです。<ruby>後<rt>あと</rt></ruby>でいきましょう。",
+        jaPlain: "そうですか。あのカフェはしずかできれいです。あとでいきましょう。",
+        romaji: "Sou desu ka. Ano kafe wa shizuka de kirei desu. Ato de ikimashou.",
+        es: "Ah, ya veo. Ese café es tranquilo y bonito. Vamos después.",
+        audio: "audio/u6_c2_l4_M.mp3",
+        highlight: ["しずか","きれい"]
+      },
+      {
+        speaker: "Tomás",
+        ja: "いいですね。<ruby>大切<rt>たいせつ</rt></ruby>なじかんですね。",
+        jaPlain: "いいですね。たいせつなじかんですね。",
+        romaji: "Ii desu ne. Taisetsu na jikan desu ne.",
+        es: "Qué bien. Es un tiempo importante (precioso).",
+        audio: "audio/u6_c2_l5_T.mp3",
+        highlight: ["たいせつ","じかん"]
+      }
+    ]
+  },
+
+  explain: {
+    summaryEs: "Los adjetivos な necesitan な antes de un sustantivo, y で para unir dos adjetivos な.",
+    blocks: [
+      { type: "rule", es: "Los adjetivos な (na-adjetivos) NO terminan en い: きれい (bonito), すき (gustar), にぎやか (animado), しずか (tranquilo), べんり (conveniente), ゆうめい (famoso)." },
+      { type: "pattern", es: "[adjetivo-な] + な + [sustantivo] / [Sustantivo] は [adjetivo-な] です。 / Para unir dos: [adj-な] + で + [adj]." },
+      { type: "examples", labelEs: "Ejemplos", items: [
+        { ja: "このカフェはきれいです。", romaji: "Kono kafe wa kirei desu.", es: "Este café es bonito." },
+        { ja: "ゆうめいなレストランです。", romaji: "Yuumei na resutoran desu.", es: "Es un restaurante famoso." },
+        { ja: "このスーパーはきれいでべんりです。", romaji: "Kono suupaa wa kirei de benri desu.", es: "Este supermercado es bonito y conveniente." },
+        { ja: "やさいがすきです。", romaji: "Yasai ga suki desu.", es: "Me gustan las verduras." }
+      ]},
+      { type: "note", es: "Aunque きれい termina en い, es un adjetivo な (no se conjuga como い). Lo mismo pasa con ゆうめい." },
+      { type: "pitfall", labelEs: "Errores frecuentes", cases: [
+        { wrong: "このカフェはきれいくないです。", right: "このカフェはきれいじゃないです。", es: "La negación de な形容詞 es 〜じゃない, NO 〜くない. きれい→きれいじゃない." },
+        { wrong: "ゆうめいレストランです。", right: "ゆうめいなレストランです。", es: "Los adjetivos な necesitan な antes del sustantivo." }
+      ]}
+    ]
+  },
+
+  practice: {
+    passRate: 0.8,
+    items: [
+      {
+        id: "u6_c2_q1", type: "conv",
+        promptEs: "Te preguntan:",
+        prompt: "なにがすきですか。",
+        promptHint: "¿Qué te gusta?",
+        options: ["やさいがすきです。","やさいをすきです。","やさいはすきいです。","やさいがすきいです。"],
+        answer: 0,
+        explainEs: "Con すき se usa が: [cosa]がすきです.",
+        audio: null
+      },
+      {
+        id: "u6_c2_q2", type: "conv",
+        promptEs: "Alguien te pregunta:",
+        prompt: "このレストランはどうですか。",
+        promptHint: "¿Qué tal este restaurante?",
+        options: ["しずかできれいです。","しずかくてきれいです。","しずかいできれいです。","しずかとてきれいです。"],
+        answer: 0,
+        explainEs: "Para unir dos adjetivos な se usa で: しずか+で+きれい.",
+        audio: null
+      },
+      {
+        id: "u6_c2_q3", type: "conv",
+        promptEs: "Te preguntan en el supermercado:",
+        prompt: "このスーパーはゆうめいですか。",
+        promptHint: "¿Este supermercado es famoso?",
+        options: ["はい、ゆうめいなスーパーです。","はい、ゆうめいスーパーです。","はい、ゆうめいいスーパーです。","はい、ゆうめいでスーパーです。"],
+        answer: 0,
+        explainEs: "Adjetivo な + な + sustantivo: ゆうめい+な+スーパー.",
+        audio: null
+      },
+      {
+        id: "u6_c2_q4", type: "conv",
+        promptEs: "Alguien te pregunta:",
+        prompt: "さかながすきですか。",
+        promptHint: "¿Te gusta el pescado?",
+        options: ["いいえ、きらいです。","いいえ、きらいくないです。","いいえ、きらいいです。","いいえ、すきくないです。"],
+        answer: 0,
+        explainEs: "きらい = no me gusta (opuesto de すき). Es un adjetivo な.",
+        audio: null
+      },
+      {
+        id: "u6_c2_q5", type: "mc",
+        promptEs: "¿Cuál es el significado de 「きれい」?",
+        ja: "このカフェは<ruby>綺麗<rt>きれい</rt></ruby>です。",
+        options: ["bonito/limpio","tranquilo","animado","famoso"],
+        answer: 0,
+        explainEs: "きれい = bonito/limpio (adjetivo な).",
+        jlptForm: "n5-vocab"
+      },
+      {
+        id: "u6_c2_q6", type: "mc",
+        promptEs: "¿Cuál es el significado de 「べんり」?",
+        ja: "このスーパーは<ruby>便利<rt>べんり</rt></ruby>です。",
+        options: ["conveniente","tranquilo","famoso","importante"],
+        answer: 0,
+        explainEs: "べんり = conveniente.",
+        jlptForm: "n5-vocab"
+      },
+      {
+        id: "u6_c2_q7", type: "mc",
+        promptEs: "¿Cuál es el significado de 「にぎやか」?",
+        ja: "この<ruby>町<rt>まち</rt></ruby>はにぎやかです。",
+        options: ["animado","tranquilo","bonito","grande"],
+        answer: 0,
+        explainEs: "にぎやか = animado/concurrido.",
+        jlptForm: "n5-vocab"
+      },
+      {
+        id: "u6_c2_q8", type: "mc",
+        promptEs: "¿Cuál es el significado de 「たいせつ」?",
+        ja: "<ruby>家族<rt>かぞく</rt></ruby>は<ruby>大切<rt>たいせつ</rt></ruby>です。",
+        options: ["importante","famoso","conveniente","tranquilo"],
+        answer: 0,
+        explainEs: "たいせつ = importante/precioso.",
+        jlptForm: "n5-vocab"
+      },
+      {
+        id: "u6_c2_q9", type: "fill",
+        promptEs: "Completa: 'Este café es tranquilo.' → このカフェは___です。",
+        ja: "このカフェは___です。",
+        options: ["しずか","にぎやか","おおきい","たかい"],
+        answer: 0,
+        explainEs: "しずか = tranquilo.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c2_q10", type: "fill",
+        promptEs: "Completa: 'Es un restaurante famoso.' → ___レストランです。",
+        ja: "___レストランです。",
+        options: ["ゆうめいな","ゆうめい","ゆうめいの","ゆうめいで"],
+        answer: 0,
+        explainEs: "Adjetivo な + な + sustantivo: ゆうめいなレストラン.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c2_q11", type: "fill",
+        promptEs: "Completa: 'Me gusta la carne.' → にく___すきです。",
+        ja: "にく___すきです。",
+        options: ["が","を","は","で"],
+        answer: 0,
+        explainEs: "Con すき se usa が: にくがすきです.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c2_q12", type: "fill",
+        promptEs: "Completa: 'Este supermercado es bonito y conveniente.' → このスーパーはきれい___べんりです。",
+        ja: "このスーパーはきれい___べんりです。",
+        options: ["で","くて","と","に"],
+        answer: 0,
+        explainEs: "Para unir dos adjetivos な se usa で.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c2_q13", type: "reorder",
+        promptEs: "Ordena: 'Este café es tranquilo y bonito.'",
+        ja: "",
+        options: ["このカフェは","しずかで","きれいです"],
+        displayOptions: ["このカフェは","<ruby>静<rt>しず</rt></ruby>かで","<ruby>綺麗<rt>きれい</rt></ruby>です"],
+        answer: "このカフェはしずかできれいです",
+        explainEs: "Dos adjetivos な se unen con で: しずか+で+きれい.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c2_q14", type: "reorder",
+        promptEs: "Ordena: 'Es un restaurante famoso.'",
+        ja: "",
+        options: ["ゆうめいな","レストラン","です"],
+        displayOptions: ["<ruby>有名<rt>ゆうめい</rt></ruby>な","レストラン","です"],
+        answer: "ゆうめいなレストランです",
+        explainEs: "Adjetivo な + な + sustantivo + です.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c2_q15", type: "reorder",
+        promptEs: "Ordena: 'Me gustan las verduras.'",
+        ja: "",
+        options: ["やさいが","すき","です"],
+        displayOptions: ["<ruby>野菜<rt>やさい</rt></ruby>が","<ruby>好<rt>す</rt></ruby>き","です"],
+        answer: "やさいがすきです",
+        explainEs: "Estructura: [cosa] + が + すき + です.",
+        jlptForm: "n5-grammar"
+      }
+    ]
+  },
+
+  challenge: {
+    personaEs: "Estás con un amigo japonés en la sección de alimentos. Describe el lugar y dile qué comidas te gustan y cuáles no, usando adjetivos な (きれい, べんり, すき, きらい).",
+    openingJa: "このスーパーはどうですか。",
+    mustUse: ["きれい","べんり","すき","きらい"],
+    minTurns: 3, maxTurns: 5,
+    bannedTopics: ["política","religión","violencia"]
+  }
+});
+
+window.canDoData.push({
+  id: "u6_c3",
+  unit: 6,
+  index: 3,
+  es: "Preguntar y dar opiniones sobre la comida con 〜はどうですか.",
+  jaGoal: "このりょうりはどうですか。とてもおいしいです。",
+  grammarTabs: ["dou","keiyo"],
+  traceChars: [],
+  source: "ai", status: "published", version: 1,
+  updatedAt: "2026-05-27T00:00:00Z",
+  vocab: ["どう","とても","ちょっと","あまり","りょうり","すし","ラーメン","ケーキ","コーヒー","おいしい","からい","あまい","つめたい"],
+  kanji: ["料","理","味","熱","冷","甘","辛"],
+
+  scenario: {
+    title: "En el restaurante",
+    contextEs: "Sofía está cenando en un restaurante japonés con una amiga y conversan sobre los platos.",
+    lines: [
+      {
+        speaker: "Sofía",
+        ja: "この<ruby>料理<rt>りょうり</rt></ruby>はどうですか。",
+        jaPlain: "このりょうりはどうですか。",
+        romaji: "Kono ryouri wa dou desu ka.",
+        es: "¿Qué tal este plato?",
+        audio: "audio/u6_c3_l1_S.mp3",
+        highlight: ["りょうり","どう"]
+      },
+      {
+        speaker: "友人",
+        ja: "とてもおいしいです。すしはどうですか。",
+        jaPlain: "とてもおいしいです。すしはどうですか。",
+        romaji: "Totemo oishii desu. Sushi wa dou desu ka.",
+        es: "Está muy delicioso. ¿Y el sushi qué tal?",
+        audio: "audio/u6_c3_l2_F.mp3",
+        highlight: ["とても","おいしい","すし"]
+      },
+      {
+        speaker: "Sofía",
+        ja: "すしもおいしいです。でも、ちょっと<ruby>辛<rt>から</rt></ruby>いです。",
+        jaPlain: "すしもおいしいです。でも、ちょっとからいです。",
+        romaji: "Sushi mo oishii desu. Demo, chotto karai desu.",
+        es: "El sushi también está delicioso. Pero está un poco picante.",
+        audio: "audio/u6_c3_l3_S.mp3",
+        highlight: ["ちょっと","からい"]
+      },
+      {
+        speaker: "友人",
+        ja: "そうですか。じゃあ、このコーヒーはどうですか。",
+        jaPlain: "そうですか。じゃあ、このコーヒーはどうですか。",
+        romaji: "Sou desu ka. Jaa, kono koohii wa dou desu ka.",
+        es: "¿Ah sí? Entonces, ¿qué tal este café?",
+        audio: "audio/u6_c3_l4_F.mp3",
+        highlight: ["コーヒー","どう"]
+      },
+      {
+        speaker: "Sofía",
+        ja: "コーヒーはあまりおいしくないです。ちょっと<ruby>冷<rt>つめ</rt></ruby>たいです。",
+        jaPlain: "コーヒーはあまりおいしくないです。ちょっとつめたいです。",
+        romaji: "Koohii wa amari oishikunai desu. Chotto tsumetai desu.",
+        es: "El café no está muy delicioso. Está un poco frío.",
+        audio: "audio/u6_c3_l5_S.mp3",
+        highlight: ["あまり","つめたい"]
+      },
+      {
+        speaker: "友人",
+        ja: "じゃあ、デザートはどうですか。<ruby>甘<rt>あま</rt></ruby>いケーキがありますよ。",
+        jaPlain: "じゃあ、デザートはどうですか。あまいケーキがありますよ。",
+        romaji: "Jaa, dezaato wa dou desu ka. Amai keeki ga arimasu yo.",
+        es: "Entonces, ¿qué tal el postre? Hay un pastel dulce.",
+        audio: "audio/u6_c3_l6_F.mp3",
+        highlight: ["デザート","あまい","ケーキ"]
+      }
+    ]
+  },
+
+  explain: {
+    summaryEs: "〜はどうですか se usa para pedir la opinión sobre algo. Se responde con adjetivos junto con adverbios como とても, ちょっと, あまり.",
+    blocks: [
+      { type: "rule", es: "[Cosa] + は + どうですか = ¿Qué tal [cosa]? / ¿Cómo está [cosa]?" },
+      { type: "pattern", es: "Adverbios útiles: とても (muy) + adj+です / ちょっと (un poco) + adj+です / あまり (no muy) + adj+くない です." },
+      { type: "examples", labelEs: "Ejemplos", items: [
+        { ja: "このすしはどうですか。", romaji: "Kono sushi wa dou desu ka.", es: "¿Qué tal este sushi?" },
+        { ja: "とてもおいしいです。", romaji: "Totemo oishii desu.", es: "Está muy delicioso." },
+        { ja: "ちょっとからいです。", romaji: "Chotto karai desu.", es: "Está un poco picante." },
+        { ja: "あまりおいしくないです。", romaji: "Amari oishikunai desu.", es: "No está muy delicioso." }
+      ]},
+      { type: "note", es: "あまり siempre se usa con la forma negativa (〜くないです / 〜じゃないです)." },
+      { type: "pitfall", labelEs: "Errores frecuentes", cases: [
+        { wrong: "あまりおいしいです。", right: "あまりおいしくないです。", es: "あまり SIEMPRE va con negación. Para decir 'muy delicioso' usa とても." },
+        { wrong: "このすしはどうしますか。", right: "このすしはどうですか。", es: "どうしますか = ¿qué haces? / どうですか = ¿qué tal?" }
+      ]}
+    ]
+  },
+
+  practice: {
+    passRate: 0.8,
+    items: [
+      {
+        id: "u6_c3_q1", type: "conv",
+        promptEs: "Te preguntan:",
+        prompt: "このりょうりはどうですか。",
+        promptHint: "¿Qué tal este plato?",
+        options: ["とてもおいしいです。","とてもおいしくないです。","あまりおいしいです。","おいしいくです。"],
+        answer: 0,
+        explainEs: "とても = muy. Forma afirmativa: とてもおいしいです.",
+        audio: null
+      },
+      {
+        id: "u6_c3_q2", type: "conv",
+        promptEs: "Te preguntan:",
+        prompt: "このコーヒーはどうですか。",
+        promptHint: "¿Qué tal este café?",
+        options: ["ちょっとつめたいです。","ちょっとつめたいくないです。","あまりつめたいです。","つめたいくです。"],
+        answer: 0,
+        explainEs: "ちょっと = un poco. Va con la forma afirmativa.",
+        audio: null
+      },
+      {
+        id: "u6_c3_q3", type: "conv",
+        promptEs: "Te preguntan:",
+        prompt: "このケーキはどうですか。",
+        promptHint: "¿Qué tal este pastel?",
+        options: ["あまりおいしくないです。","あまりおいしいです。","とてもおいしくないです。","おいしいないです。"],
+        answer: 0,
+        explainEs: "あまり SIEMPRE va con la forma negativa: あまり〜くないです.",
+        audio: null
+      },
+      {
+        id: "u6_c3_q4", type: "conv",
+        promptEs: "Te preguntan:",
+        prompt: "このすしはどうですか。",
+        promptHint: "¿Qué tal este sushi?",
+        options: ["ちょっとからいですが、おいしいです。","ちょっとからいくて、おいしいです。","あまりからいです。","からいくおいしいです。"],
+        answer: 0,
+        explainEs: "が = pero. Une dos oraciones con sentido contrario.",
+        audio: null
+      },
+      {
+        id: "u6_c3_q5", type: "conv",
+        promptEs: "Te preguntan:",
+        prompt: "このおちゃはどうですか。",
+        promptHint: "¿Qué tal este té?",
+        options: ["とてもあついです。","とてもあついくです。","あまりあついです。","あついくないです。"],
+        answer: 0,
+        explainEs: "あつい = caliente. Afirmativo: あついです.",
+        audio: null
+      },
+      {
+        id: "u6_c3_q6", type: "mc",
+        promptEs: "¿Cuál es el significado de 「とても」?",
+        ja: "このケーキはとても<ruby>美味<rt>おい</rt></ruby>しいです。",
+        options: ["muy","un poco","no muy","tampoco"],
+        answer: 0,
+        explainEs: "とても = muy (con adjetivos afirmativos).",
+        jlptForm: "n5-vocab"
+      },
+      {
+        id: "u6_c3_q7", type: "mc",
+        promptEs: "¿Cuál es el significado de 「ちょっと」?",
+        ja: "このすしはちょっと<ruby>辛<rt>から</rt></ruby>いです。",
+        options: ["un poco","muy","no muy","mucho"],
+        answer: 0,
+        explainEs: "ちょっと = un poco.",
+        jlptForm: "n5-vocab"
+      },
+      {
+        id: "u6_c3_q8", type: "mc",
+        promptEs: "¿Cuál es el significado de 「あまい」?",
+        ja: "このケーキは<ruby>甘<rt>あま</rt></ruby>いです。",
+        options: ["dulce","picante","amargo","salado"],
+        answer: 0,
+        explainEs: "あまい = dulce.",
+        jlptForm: "n5-vocab"
+      },
+      {
+        id: "u6_c3_q9", type: "fill",
+        promptEs: "Completa: 'No está muy delicioso.' → ___おいしくないです。",
+        ja: "___おいしくないです。",
+        options: ["あまり","とても","ちょっと","すこし"],
+        answer: 0,
+        explainEs: "あまり + forma negativa = no muy ~.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c3_q10", type: "fill",
+        promptEs: "Completa: 'Esta sopa está muy caliente.' → このスープは___あついです。",
+        ja: "このスープは___あついです。",
+        options: ["とても","あまり","じゃ","で"],
+        answer: 0,
+        explainEs: "とても = muy (afirmativo).",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c3_q11", type: "fill",
+        promptEs: "Completa: '¿Qué tal este plato?' → このりょうりは___ですか。",
+        ja: "このりょうりは___ですか。",
+        options: ["どう","なに","どこ","だれ"],
+        answer: 0,
+        explainEs: "どうですか = ¿qué tal? / ¿cómo está?",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c3_q12", type: "fill",
+        promptEs: "Completa: 'Está un poco picante.' → ___からいです。",
+        ja: "___からいです。",
+        options: ["ちょっと","あまり","ぜんぜん","とくに"],
+        answer: 0,
+        explainEs: "ちょっと = un poco (con afirmativo).",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c3_q13", type: "reorder",
+        promptEs: "Ordena: '¿Qué tal este sushi?'",
+        ja: "",
+        options: ["この","すしは","どうですか"],
+        displayOptions: ["この","すしは","どうですか"],
+        answer: "このすしはどうですか",
+        explainEs: "Estructura: [この] + [sustantivo] + は + どうですか.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c3_q14", type: "reorder",
+        promptEs: "Ordena: 'Este café no está muy delicioso.'",
+        ja: "",
+        options: ["このコーヒーは","あまり","おいしくないです"],
+        displayOptions: ["このコーヒーは","あまり","おいしくないです"],
+        answer: "このコーヒーはあまりおいしくないです",
+        explainEs: "あまり + forma negativa.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c3_q15", type: "reorder",
+        promptEs: "Ordena: 'Este pastel está muy dulce.'",
+        ja: "",
+        options: ["このケーキは","とても","あまいです"],
+        displayOptions: ["このケーキは","とても","<ruby>甘<rt>あま</rt></ruby>いです"],
+        answer: "このケーキはとてもあまいです",
+        explainEs: "とても + adj + です (afirmativo).",
+        jlptForm: "n5-grammar"
+      }
+    ]
+  },
+
+  escuchar: {
+    passRate: 0.7,
+    items: [
+      {
+        type: 'audio_meaning',
+        text: 'このすしはとてもおいしいです。',
+        promptEs: '¿Qué significa esta frase?',
+        options: ['Este sushi está muy delicioso.','Este sushi está caro.','Este sushi es pequeño.','Este sushi está frío.'],
+        answer: 0,
+        explainEs: 'とても = muy, おいしい = delicioso.'
+      },
+      {
+        type: 'audio_meaning',
+        text: 'このコーヒーはちょっとつめたいです。',
+        promptEs: '¿Qué significa esta frase?',
+        options: ['Este café está un poco frío.','Este café está muy caliente.','Este café está delicioso.','Este café es nuevo.'],
+        answer: 0,
+        explainEs: 'ちょっと = un poco, つめたい = frío.'
+      },
+      {
+        type: 'audio_meaning',
+        text: 'このケーキはあまりあまくないです。',
+        promptEs: '¿Qué significa esta frase?',
+        options: ['Este pastel no está muy dulce.','Este pastel está muy dulce.','Este pastel está delicioso.','Este pastel es grande.'],
+        answer: 0,
+        explainEs: 'あまり + negativo = no muy ~.'
+      },
+      {
+        type: 'audio_meaning',
+        text: 'このりょうりはからいですが、おいしいです。',
+        promptEs: '¿Qué significa esta frase?',
+        options: ['El plato está picante pero delicioso.','El plato está dulce y delicioso.','El plato está frío.','El plato no está bueno.'],
+        answer: 0,
+        explainEs: 'が = pero. からい = picante.'
+      },
+      {
+        type: 'audio_match',
+        text: 'このりょうりはどうですか。— とてもおいしいです。',
+        promptEs: '¿Qué afirmación es correcta?',
+        options: ['El plato está muy delicioso.','El plato está un poco picante.','El plato no está bueno.','El plato está frío.'],
+        answer: 0,
+        explainEs: 'とてもおいしいです = muy delicioso.'
+      },
+      {
+        type: 'audio_match',
+        text: 'このコーヒーはどうですか。— あまりおいしくないです。',
+        promptEs: '¿Qué afirmación es correcta?',
+        options: ['El café no está muy delicioso.','El café está muy delicioso.','El café está frío.','El café está caliente.'],
+        answer: 0,
+        explainEs: 'あまりおいしくないです = no muy delicioso.'
+      },
+      {
+        type: 'audio_match',
+        text: 'このすしはどうですか。— ちょっとからいです。',
+        promptEs: '¿Qué afirmación es correcta?',
+        options: ['El sushi está un poco picante.','El sushi está muy dulce.','El sushi está frío.','El sushi es famoso.'],
+        answer: 0,
+        explainEs: 'ちょっとからい = un poco picante.'
+      },
+      {
+        type: 'audio_match',
+        text: 'このケーキはどうですか。— とてもあまいです。',
+        promptEs: '¿Qué afirmación es correcta?',
+        options: ['El pastel está muy dulce.','El pastel está un poco picante.','El pastel no está dulce.','El pastel está frío.'],
+        answer: 0,
+        explainEs: 'とてもあまい = muy dulce.'
+      }
+    ]
+  },
+
+  challenge: {
+    personaEs: "Estás cenando con un amigo en un restaurante japonés. Pregúntale qué tal está cada plato usando 〜はどうですか y responde con とても / ちょっと / あまり.",
+    openingJa: "このりょうりはどうですか。",
+    mustUse: ["どうですか","とても","ちょっと","おいしい"],
+    minTurns: 3, maxTurns: 5,
+    bannedTopics: ["política","religión","violencia"]
+  }
+});
+
+window.canDoData.push({
+  id: "u6_c4",
+  unit: 6,
+  index: 4,
+  es: "Comparar dos cosas con 〜より〜のほうが〜です.",
+  jaGoal: "りんごよりオレンジのほうがやすいです。",
+  grammarTabs: ["yori","keiyo"],
+  traceChars: [],
+  source: "ai", status: "published", version: 1,
+  updatedAt: "2026-05-27T00:00:00Z",
+  vocab: ["より","ほう","りんご","オレンジ","バナナ","やさい","にく","さかな","たかい","やすい","おおきい","ちいさい","おいしい"],
+  kanji: ["方","高","安","大","小","果","物"],
+
+  scenario: {
+    title: "Comparando frutas",
+    contextEs: "María y Carlos están en la sección de frutas del supermercado y comparan los precios y tamaños de las frutas.",
+    lines: [
+      {
+        speaker: "María",
+        ja: "カルロス、りんごとオレンジ、どちらが<ruby>安<rt>やす</rt></ruby>いですか。",
+        jaPlain: "カルロス、りんごとオレンジ、どちらがやすいですか。",
+        romaji: "Carlos, ringo to orenji, dochira ga yasui desu ka.",
+        es: "Carlos, ¿qué es más barato, las manzanas o las naranjas?",
+        audio: "audio/u6_c4_l1_M.mp3",
+        highlight: ["どちら","やすい"]
+      },
+      {
+        speaker: "Carlos",
+        ja: "りんごよりオレンジの<ruby>方<rt>ほう</rt></ruby>が<ruby>安<rt>やす</rt></ruby>いです。",
+        jaPlain: "りんごよりオレンジのほうがやすいです。",
+        romaji: "Ringo yori orenji no hou ga yasui desu.",
+        es: "Las naranjas son más baratas que las manzanas.",
+        audio: "audio/u6_c4_l2_C.mp3",
+        highlight: ["より","ほう","やすい"]
+      },
+      {
+        speaker: "María",
+        ja: "そうですか。じゃあ、バナナとりんごでは、どちらが<ruby>大<rt>おお</rt></ruby>きいですか。",
+        jaPlain: "そうですか。じゃあ、バナナとりんごでは、どちらがおおきいですか。",
+        romaji: "Sou desu ka. Jaa, banana to ringo de wa, dochira ga ookii desu ka.",
+        es: "Ya veo. Entonces, entre la banana y la manzana, ¿cuál es más grande?",
+        audio: "audio/u6_c4_l3_M.mp3",
+        highlight: ["バナナ","おおきい"]
+      },
+      {
+        speaker: "Carlos",
+        ja: "りんごよりバナナの<ruby>方<rt>ほう</rt></ruby>が<ruby>大<rt>おお</rt></ruby>きいです。",
+        jaPlain: "りんごよりバナナのほうがおおきいです。",
+        romaji: "Ringo yori banana no hou ga ookii desu.",
+        es: "La banana es más grande que la manzana.",
+        audio: "audio/u6_c4_l4_C.mp3",
+        highlight: ["より","ほう","おおきい"]
+      },
+      {
+        speaker: "María",
+        ja: "でも、わたしはりんごの<ruby>方<rt>ほう</rt></ruby>が<ruby>好<rt>す</rt></ruby>きです。",
+        jaPlain: "でも、わたしはりんごのほうがすきです。",
+        romaji: "Demo, watashi wa ringo no hou ga suki desu.",
+        es: "Pero a mí me gustan más las manzanas.",
+        audio: "audio/u6_c4_l5_M.mp3",
+        highlight: ["ほう","すき"]
+      }
+    ]
+  },
+
+  explain: {
+    summaryEs: "Para comparar dos cosas se usa 〜より〜のほうが〜です = '~ es más ~ que ~'.",
+    blocks: [
+      { type: "rule", es: "Estructura: [A] より [B] のほうが [adjetivo] です = B es más [adj] que A." },
+      { type: "pattern", es: "Pregunta: [A] と [B] と、どちらが [adjetivo] ですか = Entre A y B, ¿cuál es más [adj]?" },
+      { type: "examples", labelEs: "Ejemplos", items: [
+        { ja: "りんごよりオレンジのほうがやすいです。", romaji: "Ringo yori orenji no hou ga yasui desu.", es: "Las naranjas son más baratas que las manzanas." },
+        { ja: "にくよりさかなのほうがおいしいです。", romaji: "Niku yori sakana no hou ga oishii desu.", es: "El pescado es más delicioso que la carne." },
+        { ja: "コーヒーとおちゃと、どちらがすきですか。", romaji: "Koohii to ocha to, dochira ga suki desu ka.", es: "¿Cuál te gusta más, el café o el té?" },
+        { ja: "おちゃのほうがすきです。", romaji: "Ocha no hou ga suki desu.", es: "Me gusta más el té." }
+      ]},
+      { type: "note", es: "どちら = '¿cuál (de dos)?'. Para responder se puede omitir 〜より si el contexto está claro: [B]のほうが〜です." },
+      { type: "pitfall", labelEs: "Errores frecuentes", cases: [
+        { wrong: "りんごはオレンジよりやすいです。", right: "りんごよりオレンジのほうがやすいです。", es: "El orden estándar es [A] より [B] のほうが. No olvidar のほうが para enfatizar B." },
+        { wrong: "りんごとオレンジ、なにがやすいですか。", right: "りんごとオレンジ、どちらがやすいですか。", es: "Para comparar 2 cosas se usa どちら, NO なに." }
+      ]}
+    ]
+  },
+
+  practice: {
+    passRate: 0.8,
+    items: [
+      {
+        id: "u6_c4_q1", type: "conv",
+        promptEs: "Te preguntan:",
+        prompt: "りんごとオレンジ、どちらがやすいですか。",
+        promptHint: "¿Cuál es más barato, las manzanas o las naranjas?",
+        options: ["りんごよりオレンジのほうがやすいです。","りんごとオレンジのほうがやすいです。","りんごはオレンジのほうがやすいです。","りんごよりオレンジがやすいほうです。"],
+        answer: 0,
+        explainEs: "Estructura: [A]より[B]のほうが[adj]です.",
+        audio: null
+      },
+      {
+        id: "u6_c4_q2", type: "conv",
+        promptEs: "Te preguntan:",
+        prompt: "コーヒーとおちゃ、どちらがすきですか。",
+        promptHint: "¿Cuál te gusta más, café o té?",
+        options: ["おちゃのほうがすきです。","おちゃがほうすきです。","おちゃよりほうがすきです。","おちゃはほうすきです。"],
+        answer: 0,
+        explainEs: "Se puede omitir 〜より si el contexto está claro: [B]のほうがすきです.",
+        audio: null
+      },
+      {
+        id: "u6_c4_q3", type: "conv",
+        promptEs: "Te preguntan:",
+        prompt: "にくとさかな、どちらがおいしいですか。",
+        promptHint: "¿Cuál es más delicioso, carne o pescado?",
+        options: ["にくよりさかなのほうがおいしいです。","にくとさかなのほうがおいしいです。","にくはさかながおいしいです。","にくよりさかなほうがおいしいです。"],
+        answer: 0,
+        explainEs: "[A]より[B]のほうが[adj]です.",
+        audio: null
+      },
+      {
+        id: "u6_c4_q4", type: "conv",
+        promptEs: "Te preguntan:",
+        prompt: "このスーパーとあのスーパー、どちらがおおきいですか。",
+        promptHint: "¿Cuál es más grande, este supermercado o aquel?",
+        options: ["このスーパーよりあのスーパーのほうがおおきいです。","このスーパーとあのスーパーがおおきいです。","あのスーパーはおおきいほうです。","あのスーパーよりこのほうおおきいです。"],
+        answer: 0,
+        explainEs: "[A]より[B]のほうが[adj]です.",
+        audio: null
+      },
+      {
+        id: "u6_c4_q5", type: "mc",
+        promptEs: "¿Cuál es el significado de 「より」?",
+        ja: "りんごより<ruby>安<rt>やす</rt></ruby>いです。",
+        options: ["que (comparación)","y","pero","con"],
+        answer: 0,
+        explainEs: "より = 'que' en comparaciones.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c4_q6", type: "mc",
+        promptEs: "¿Cuál es el significado de 「ほう」?",
+        ja: "オレンジの<ruby>方<rt>ほう</rt></ruby>が<ruby>安<rt>やす</rt></ruby>いです。",
+        options: ["el lado/opción","camino","método","tiempo"],
+        answer: 0,
+        explainEs: "ほう = 'el lado/la opción'. のほうが se usa para destacar una opción en comparación.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c4_q7", type: "mc",
+        promptEs: "¿Cuál es el significado de 「どちら」?",
+        ja: "りんごとオレンジ、どちらが<ruby>安<rt>やす</rt></ruby>いですか。",
+        options: ["¿cuál (de dos)?","¿qué?","¿dónde?","¿cuándo?"],
+        answer: 0,
+        explainEs: "どちら = ¿cuál (entre dos opciones)?",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c4_q8", type: "mc",
+        promptEs: "Selecciona la traducción de: 'Las bananas son más baratas que las manzanas.'",
+        ja: "りんごよりバナナの<ruby>方<rt>ほう</rt></ruby>が<ruby>安<rt>やす</rt></ruby>いです。",
+        options: ["Las bananas son más baratas que las manzanas.","Las manzanas son más baratas que las bananas.","Las manzanas y bananas son baratas.","Las bananas no son baratas."],
+        answer: 0,
+        explainEs: "[A]より[B]のほうが = B es más ~ que A. A=りんご, B=バナナ.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c4_q9", type: "fill",
+        promptEs: "Completa: 'La naranja es más barata que la manzana.' → りんご___オレンジのほうがやすいです。",
+        ja: "りんご___オレンジのほうがやすいです。",
+        options: ["より","と","は","で"],
+        answer: 0,
+        explainEs: "より = que (en comparaciones).",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c4_q10", type: "fill",
+        promptEs: "Completa: 'El pescado es más delicioso.' → さかな___ほうがおいしいです。",
+        ja: "さかな___ほうがおいしいです。",
+        options: ["の","を","が","に"],
+        answer: 0,
+        explainEs: "のほうが = 'es más ~'. Necesita の.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c4_q11", type: "fill",
+        promptEs: "Completa: '¿Cuál es más grande, banana o manzana?' → バナナとりんご、___がおおきいですか。",
+        ja: "バナナとりんご、___がおおきいですか。",
+        options: ["どちら","どれ","なに","どこ"],
+        answer: 0,
+        explainEs: "どちら = ¿cuál (entre 2 cosas)?",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c4_q12", type: "fill",
+        promptEs: "Completa: 'Me gusta más el té.' → おちゃのほう___すきです。",
+        ja: "おちゃのほう___すきです。",
+        options: ["が","を","は","で"],
+        answer: 0,
+        explainEs: "のほうが + adj + です.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c4_q13", type: "reorder",
+        promptEs: "Ordena: 'Las naranjas son más baratas que las manzanas.'",
+        ja: "",
+        options: ["りんごより","オレンジのほうが","やすいです"],
+        displayOptions: ["りんごより","オレンジのほうが","<ruby>安<rt>やす</rt></ruby>いです"],
+        answer: "りんごよりオレンジのほうがやすいです",
+        explainEs: "[A]より[B]のほうが[adj]です.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c4_q14", type: "reorder",
+        promptEs: "Ordena: 'El pescado es más delicioso que la carne.'",
+        ja: "",
+        options: ["にくより","さかなのほうが","おいしいです"],
+        displayOptions: ["<ruby>肉<rt>にく</rt></ruby>より","<ruby>魚<rt>さかな</rt></ruby>のほうが","おいしいです"],
+        answer: "にくよりさかなのほうがおいしいです",
+        explainEs: "[A]より[B]のほうが[adj]です.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c4_q15", type: "reorder",
+        promptEs: "Ordena: 'Entre el café y el té, ¿cuál te gusta más?'",
+        ja: "",
+        options: ["コーヒーとおちゃ、","どちらが","すきですか"],
+        displayOptions: ["コーヒーとおちゃ、","どちらが","<ruby>好<rt>す</rt></ruby>きですか"],
+        answer: "コーヒーとおちゃ、どちらがすきですか",
+        explainEs: "[A]と[B]、どちらが[adj]ですか.",
+        jlptForm: "n5-grammar"
+      }
+    ]
+  },
+
+  challenge: {
+    personaEs: "Estás con un amigo en el supermercado comparando frutas y comidas. Pregúntale qué prefiere y compara dos cosas usando 〜より〜のほうが〜です.",
+    openingJa: "りんごとオレンジ、どちらがすきですか。",
+    mustUse: ["より","ほうが","どちら","すき"],
+    minTurns: 3, maxTurns: 5,
+    bannedTopics: ["política","religión","violencia"]
+  }
+});
+
+window.canDoData.push({
+  id: "u6_c5",
+  unit: 6,
+  index: 5,
+  es: "Expresar el superlativo con 〜のなかで〜がいちばん〜です (resumen Unit 6).",
+  jaGoal: "くだもののなかでりんごがいちばんすきです。",
+  grammarTabs: ["ichiban","yori"],
+  traceChars: [],
+  source: "ai", status: "published", version: 1,
+  updatedAt: "2026-05-27T00:00:00Z",
+  vocab: ["なか","いちばん","くだもの","のみもの","たべもの","すし","ラーメン","てんぷら","りんご","バナナ","オレンジ","おいしい","すき"],
+  kanji: ["中","一","番","果","物","飲","食"],
+
+  scenario: {
+    title: "Mi comida favorita",
+    contextEs: "Lía está con sus amigos en una cafetería hablando de sus comidas favoritas.",
+    lines: [
+      {
+        speaker: "Lía",
+        ja: "<ruby>日本<rt>にほん</rt></ruby>の<ruby>食<rt>た</rt></ruby>べ<ruby>物<rt>もの</rt></ruby>のなかで、なにがいちばん<ruby>好<rt>す</rt></ruby>きですか。",
+        jaPlain: "にほんのたべもののなかで、なにがいちばんすきですか。",
+        romaji: "Nihon no tabemono no naka de, nani ga ichiban suki desu ka.",
+        es: "Entre las comidas japonesas, ¿cuál te gusta más?",
+        audio: "audio/u6_c5_l1_L.mp3",
+        highlight: ["なか","いちばん","すき"]
+      },
+      {
+        speaker: "友人",
+        ja: "わたしはすしがいちばん<ruby>好<rt>す</rt></ruby>きです。リアさんは？",
+        jaPlain: "わたしはすしがいちばんすきです。リアさんは？",
+        romaji: "Watashi wa sushi ga ichiban suki desu. Lia-san wa?",
+        es: "A mí lo que más me gusta es el sushi. ¿Y tú, Lía?",
+        audio: "audio/u6_c5_l2_F.mp3",
+        highlight: ["すし","いちばん"]
+      },
+      {
+        speaker: "Lía",
+        ja: "わたしはラーメンがいちばんおいしいとおもいます。",
+        jaPlain: "わたしはラーメンがいちばんおいしいとおもいます。",
+        romaji: "Watashi wa raamen ga ichiban oishii to omoimasu.",
+        es: "Yo creo que el ramen es lo más delicioso.",
+        audio: "audio/u6_c5_l3_L.mp3",
+        highlight: ["ラーメン","いちばん","おいしい"]
+      },
+      {
+        speaker: "友人",
+        ja: "じゃあ、<ruby>果物<rt>くだもの</rt></ruby>のなかでは？",
+        jaPlain: "じゃあ、くだもののなかでは？",
+        romaji: "Jaa, kudamono no naka de wa?",
+        es: "Entonces, ¿y entre las frutas?",
+        audio: "audio/u6_c5_l4_F.mp3",
+        highlight: ["くだもの","なか"]
+      },
+      {
+        speaker: "Lía",
+        ja: "りんごがいちばん<ruby>好<rt>す</rt></ruby>きです。やすくておいしいです。",
+        jaPlain: "りんごがいちばんすきです。やすくておいしいです。",
+        romaji: "Ringo ga ichiban suki desu. Yasukute oishii desu.",
+        es: "Las manzanas son las que más me gustan. Son baratas y deliciosas.",
+        audio: "audio/u6_c5_l5_L.mp3",
+        highlight: ["りんご","いちばん","やすい","おいしい"]
+      },
+      {
+        speaker: "友人",
+        ja: "そうですね。りんごはとてもべんりなくだものですね。",
+        jaPlain: "そうですね。りんごはとてもべんりなくだものですね。",
+        romaji: "Sou desu ne. Ringo wa totemo benri na kudamono desu ne.",
+        es: "Tienes razón. La manzana es una fruta muy conveniente.",
+        audio: "audio/u6_c5_l6_F.mp3",
+        highlight: ["べんり","くだもの"]
+      }
+    ]
+  },
+
+  explain: {
+    summaryEs: "Para el superlativo se usa 〜のなかで〜がいちばん〜です = 'entre ~, ~ es el más ~'.",
+    blocks: [
+      { type: "rule", es: "Estructura: [grupo] のなかで [elemento] がいちばん [adjetivo] です = Dentro de [grupo], [elemento] es el más [adj]." },
+      { type: "pattern", es: "Pregunta: [grupo] のなかで なに/だれ/どこ がいちばん [adj] ですか = Dentro de [grupo], ¿qué/quién/dónde es el más [adj]?" },
+      { type: "examples", labelEs: "Ejemplos", items: [
+        { ja: "くだもののなかでりんごがいちばんすきです。", romaji: "Kudamono no naka de ringo ga ichiban suki desu.", es: "Entre las frutas, las manzanas son las que más me gustan." },
+        { ja: "日本の食べ物のなかで、すしがいちばんおいしいです。", romaji: "Nihon no tabemono no naka de, sushi ga ichiban oishii desu.", es: "Entre las comidas japonesas, el sushi es el más delicioso." },
+        { ja: "クラスのなかでだれがいちばんせがたかいですか。", romaji: "Kurasu no naka de dare ga ichiban se ga takai desu ka.", es: "En la clase, ¿quién es el más alto?" },
+        { ja: "のみもののなかでコーヒーがいちばんすきです。", romaji: "Nomimono no naka de koohii ga ichiban suki desu.", es: "Entre las bebidas, el café es el que más me gusta." }
+      ]},
+      { type: "note", es: "いちばん = 'el número 1' (más ~). La partícula del elemento elegido es siempre が." },
+      { type: "pitfall", labelEs: "Errores frecuentes", cases: [
+        { wrong: "くだもののなかでりんごはいちばんすきです。", right: "くだもののなかでりんごがいちばんすきです。", es: "El elemento que es 'el más ~' se marca con が, NO con は." },
+        { wrong: "くだもののいちばんりんごがすきです。", right: "くだもののなかでりんごがいちばんすきです。", es: "No olvidar のなかで después del grupo." }
+      ]}
+    ]
+  },
+
+  practice: {
+    passRate: 0.8,
+    items: [
+      {
+        id: "u6_c5_q1", type: "conv",
+        promptEs: "Te preguntan:",
+        prompt: "くだもののなかでなにがいちばんすきですか。",
+        promptHint: "Entre las frutas, ¿cuál te gusta más?",
+        options: ["りんごがいちばんすきです。","りんごはいちばんすきです。","りんごがいちばんすきいです。","りんごよりいちばんすきです。"],
+        answer: 0,
+        explainEs: "El elemento elegido se marca con が: [X]がいちばん〜です.",
+        audio: null
+      },
+      {
+        id: "u6_c5_q2", type: "conv",
+        promptEs: "Te preguntan:",
+        prompt: "にほんりょうりのなかでなにがいちばんおいしいですか。",
+        promptHint: "Entre la comida japonesa, ¿cuál es la más deliciosa?",
+        options: ["すしがいちばんおいしいです。","すしのほうがいちばんおいしいです。","すしよりいちばんおいしいです。","すしはいちばんおいしくです。"],
+        answer: 0,
+        explainEs: "[X]がいちばん[adj]です.",
+        audio: null
+      },
+      {
+        id: "u6_c5_q3", type: "conv",
+        promptEs: "Te preguntan:",
+        prompt: "のみもののなかでなにがいちばんすきですか。",
+        promptHint: "Entre las bebidas, ¿cuál te gusta más?",
+        options: ["コーヒーがいちばんすきです。","コーヒーよりいちばんすきです。","コーヒーのほうがすきです。","コーヒーはいちばんです。"],
+        answer: 0,
+        explainEs: "[X]がいちばんすきです.",
+        audio: null
+      },
+      {
+        id: "u6_c5_q4", type: "conv",
+        promptEs: "Te preguntan:",
+        prompt: "やさいのなかでなにがいちばんおいしいですか。",
+        promptHint: "Entre las verduras, ¿cuál es la más deliciosa?",
+        options: ["トマトがいちばんおいしいです。","トマトはいちばんです。","トマトよりいちばんおいしいです。","トマトのほうおいしいです。"],
+        answer: 0,
+        explainEs: "[X]がいちばん[adj]です.",
+        audio: null
+      },
+      {
+        id: "u6_c5_q5", type: "conv",
+        promptEs: "Te preguntan:",
+        prompt: "このみせのケーキはどうですか。",
+        promptHint: "¿Qué tal los pasteles de esta tienda?",
+        options: ["とてもおいしくて、やすいです。","とてもおいしいくて、やすいです。","あまりおいしくて、やすいです。","とてもおいしいでやすいです。"],
+        answer: 0,
+        explainEs: "Unión de adjetivos い: おいしい→おいしくて.",
+        audio: null
+      },
+      {
+        id: "u6_c5_q6", type: "mc",
+        promptEs: "¿Cuál es el significado de 「いちばん」?",
+        ja: "りんごが<ruby>一番<rt>いちばん</rt></ruby><ruby>好<rt>す</rt></ruby>きです。",
+        options: ["el más / número 1","un poco","muy","también"],
+        answer: 0,
+        explainEs: "いちばん = 'el más / número 1' (superlativo).",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c5_q7", type: "mc",
+        promptEs: "¿Cuál es el significado de 「なか」 en 「〜のなかで」?",
+        ja: "くだものの<ruby>中<rt>なか</rt></ruby>で…",
+        options: ["entre / dentro de","fuera","arriba","cerca"],
+        answer: 0,
+        explainEs: "のなかで = 'dentro de / entre' (delimita el grupo).",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c5_q8", type: "mc",
+        promptEs: "Selecciona la traducción: 'Entre las frutas, la manzana es la que más me gusta.'",
+        ja: "<ruby>果物<rt>くだもの</rt></ruby>のなかでりんごが<ruby>一番<rt>いちばん</rt></ruby><ruby>好<rt>す</rt></ruby>きです。",
+        options: ["Entre las frutas, la manzana es la que más me gusta.","Las manzanas son más baratas que las frutas.","Las frutas son deliciosas.","La manzana es una fruta."],
+        answer: 0,
+        explainEs: "[grupo]のなかで[X]がいちばん[adj]です.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c5_q9", type: "fill",
+        promptEs: "Completa: 'Entre las frutas...' → くだものの___で…",
+        ja: "くだものの___で…",
+        options: ["なか","うえ","した","よこ"],
+        answer: 0,
+        explainEs: "のなかで = entre / dentro de.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c5_q10", type: "fill",
+        promptEs: "Completa: 'La manzana es la que más me gusta.' → りんご___いちばんすきです。",
+        ja: "りんご___いちばんすきです。",
+        options: ["が","は","を","の"],
+        answer: 0,
+        explainEs: "El elemento del superlativo se marca con が.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c5_q11", type: "fill",
+        promptEs: "Completa: 'El sushi es el más delicioso.' → すしが___おいしいです。",
+        ja: "すしが___おいしいです。",
+        options: ["いちばん","とても","あまり","ちょっと"],
+        answer: 0,
+        explainEs: "いちばん = el más (superlativo).",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c5_q12", type: "fill",
+        promptEs: "Completa: 'Es un pastel barato y delicioso.' → やすくて___ケーキです。",
+        ja: "やすくて___ケーキです。",
+        options: ["おいしい","おいしくて","おいしいで","おいしいに"],
+        answer: 0,
+        explainEs: "El último adjetivo va en forma normal: やすくて + おいしい + ケーキ.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c5_q13", type: "reorder",
+        promptEs: "Ordena: 'Entre las frutas, la manzana es la que más me gusta.'",
+        ja: "",
+        options: ["くだもののなかで","りんごが","いちばんすきです"],
+        displayOptions: ["<ruby>果物<rt>くだもの</rt></ruby>のなかで","りんごが","<ruby>一番<rt>いちばん</rt></ruby><ruby>好<rt>す</rt></ruby>きです"],
+        answer: "くだもののなかでりんごがいちばんすきです",
+        explainEs: "[grupo]のなかで[X]がいちばん[adj]です.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c5_q14", type: "reorder",
+        promptEs: "Ordena: 'Entre las comidas japonesas, el sushi es el más delicioso.'",
+        ja: "",
+        options: ["にほんりょうりのなかで","すしが","いちばんおいしいです"],
+        displayOptions: ["<ruby>日本料理<rt>にほんりょうり</rt></ruby>のなかで","すしが","<ruby>一番<rt>いちばん</rt></ruby>おいしいです"],
+        answer: "にほんりょうりのなかですしがいちばんおいしいです",
+        explainEs: "[grupo]のなかで[X]がいちばん[adj]です.",
+        jlptForm: "n5-grammar"
+      },
+      {
+        id: "u6_c5_q15", type: "reorder",
+        promptEs: "Ordena: 'Entre las bebidas, el café es el que más me gusta.'",
+        ja: "",
+        options: ["のみもののなかで","コーヒーが","いちばんすきです"],
+        displayOptions: ["<ruby>飲<rt>の</rt></ruby>み<ruby>物<rt>もの</rt></ruby>のなかで","コーヒーが","<ruby>一番<rt>いちばん</rt></ruby><ruby>好<rt>す</rt></ruby>きです"],
+        answer: "のみもののなかでコーヒーがいちばんすきです",
+        explainEs: "[grupo]のなかで[X]がいちばん[adj]です.",
+        jlptForm: "n5-grammar"
+      }
+    ]
+  },
+
+  escuchar: {
+    passRate: 0.7,
+    items: [
+      {
+        type: 'audio_meaning',
+        text: 'くだもののなかでりんごがいちばんすきです。',
+        promptEs: '¿Qué significa esta frase?',
+        options: ['Entre las frutas, la manzana es la que más me gusta.','Las manzanas son baratas.','Las manzanas son grandes.','Como muchas frutas.'],
+        answer: 0,
+        explainEs: '[grupo]のなかで[X]がいちばん[adj]です.'
+      },
+      {
+        type: 'audio_meaning',
+        text: 'にほんりょうりのなかですしがいちばんおいしいです。',
+        promptEs: '¿Qué significa esta frase?',
+        options: ['Entre las comidas japonesas, el sushi es el más delicioso.','El sushi es barato.','La comida japonesa es famosa.','El ramen es delicioso.'],
+        answer: 0,
+        explainEs: 'すしがいちばんおいしい = el sushi es el más delicioso.'
+      },
+      {
+        type: 'audio_meaning',
+        text: 'のみもののなかでコーヒーがいちばんすきです。',
+        promptEs: '¿Qué significa esta frase?',
+        options: ['Entre las bebidas, el café es el que más me gusta.','El café está caliente.','El café es caro.','Bebo café cada día.'],
+        answer: 0,
+        explainEs: 'コーヒーがいちばんすき = el café es el que más me gusta.'
+      },
+      {
+        type: 'audio_meaning',
+        text: 'りんごよりオレンジのほうがやすいです。',
+        promptEs: '¿Qué significa esta frase?',
+        options: ['Las naranjas son más baratas que las manzanas.','Las manzanas son más baratas.','Las naranjas son caras.','Las manzanas y naranjas son baratas.'],
+        answer: 0,
+        explainEs: '[A]より[B]のほうが[adj]です.'
+      },
+      {
+        type: 'audio_match',
+        text: 'くだもののなかでなにがいちばんすきですか。— りんごがいちばんすきです。',
+        promptEs: '¿Qué afirmación es correcta?',
+        options: ['Las manzanas son la fruta favorita.','Las naranjas son la fruta favorita.','No le gustan las frutas.','Le gustan todas las frutas igual.'],
+        answer: 0,
+        explainEs: 'りんごがいちばんすき = la manzana es la que más le gusta.'
+      },
+      {
+        type: 'audio_match',
+        text: 'このケーキはどうですか。— とてもあまくておいしいです。',
+        promptEs: '¿Qué afirmación es correcta?',
+        options: ['El pastel está muy dulce y delicioso.','El pastel está un poco amargo.','El pastel no está dulce.','El pastel está frío.'],
+        answer: 0,
+        explainEs: 'あまくておいしい = dulce y delicioso (unión de い-adj).'
+      },
+      {
+        type: 'audio_match',
+        text: 'にくとさかな、どちらがすきですか。— さかなのほうがすきです。',
+        promptEs: '¿Qué afirmación es correcta?',
+        options: ['Le gusta más el pescado.','Le gusta más la carne.','No le gusta ninguno.','Le gustan ambos por igual.'],
+        answer: 0,
+        explainEs: 'さかなのほうがすき = me gusta más el pescado.'
+      },
+      {
+        type: 'audio_match',
+        text: 'にほんりょうりのなかでなにがいちばんおいしいですか。— ラーメンがいちばんおいしいです。',
+        promptEs: '¿Qué afirmación es correcta?',
+        options: ['El ramen es la comida japonesa más deliciosa para esa persona.','El sushi es lo más delicioso.','La comida japonesa no es deliciosa.','El ramen es caro.'],
+        answer: 0,
+        explainEs: 'ラーメンがいちばんおいしい = el ramen es el más delicioso.'
+      }
+    ]
+  },
+
+  challenge: {
+    personaEs: "Estás con amigos hablando de tus comidas y bebidas favoritas. Usa 〜のなかで〜がいちばん〜です para hablar de tus preferencias en comida japonesa, frutas y bebidas.",
+    openingJa: "にほんのたべもののなかでなにがいちばんすきですか。",
+    mustUse: ["のなかで","いちばん","すき","おいしい"],
     minTurns: 3, maxTurns: 5,
     bannedTopics: ["política","religión","violencia"]
   }
