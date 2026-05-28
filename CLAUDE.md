@@ -7,7 +7,7 @@
 
 ## 技術スタック
 - **Vanilla HTML / CSS / JavaScript** — フレームワーク・ビルドツールなし
-- **単一ファイル**: `index.html`（約14,000行超、CSS・JS・データすべて内包）
+- **単一ファイル**: `index.html`（約24,852行、CSS・JS・データすべて内包）
 - 永続化: `localStorage`（`chizu_scores` / `learnedChars` / `nm_*` キー群）
 - 認証: **Firebase Authentication**（メール/パスワード・Google 有効済み）
 - 外部依存: Google Fonts + Firebase CDN（10.12.0 compat版）
@@ -154,7 +154,7 @@ window.canDoData.push({
 ```
 - `displayOptions`: reorder問題のチップ表示用（rubyタグ含むHTML）。省略時は `answer` をそのまま使用
 
-### Can-do 実装済み一覧（2026-05-27更新 / 35本）
+### Can-do 実装済み一覧（2026-05-28更新 / 45本）
 | id | unit | テーマ | traceChars | escuchar |
 |---|---|---|---|---|
 | u1_c1 | 1 | ひらがな母音（あいうえお） | あいうえお | — |
@@ -192,6 +192,31 @@ window.canDoData.push({
 | u5_c3 | 5 | 位置表現（うえ/した/まえ/うしろ/なか/そと/よこ/ちかく/あいだ） | なし | ✅ meaning×4+match×4 |
 | u5_c4 | 5 | 助詞 で/へ（動作場所・移動方向） | なし | — |
 | u5_c5 | 5 | 街案内の総合会話（Unit 5まとめ） | なし | ✅ meaning×4+match×4 |
+| u6_c1 | 6 | い形容詞（おいしい・たかい・やすい） | なし | — |
+| u6_c2 | 6 | な形容詞（きれい・すき・べんり） | なし | — |
+| u6_c3 | 6 | どうですか（感想を聞く・答える） | なし | ✅ meaning×4+match×4 |
+| u6_c4 | 6 | より〜のほうが（比較） | なし | — |
+| u6_c5 | 6 | いちばん（最上級・Unit 6まとめ） | なし | ✅ meaning×4+match×4 |
+| u7_c1 | 7 | 〜ましょう・ましょうか（誘い・申し出） | なし | — |
+| u7_c2 | 7 | 〜たいです・たくないです（願望） | なし | — |
+| u7_c3 | 7 | 〜にいきます・きます（目的移動） | なし | ✅ meaning×4+match×4 |
+| u7_c4 | 7 | 〜前に・〜後で（順序） | なし | — |
+| u7_c5 | 7 | 一日のスケジュール（Unit 7まとめ） | なし | ✅ meaning×4+match×4 |
+| u8_c1 | 8 | 〜くて・で（形容詞をつなげる） | なし | — |
+| u8_c2 | 8 | 〜くなります/になります（変化） | なし | — |
+| u8_c3 | 8 | 〜とおもいます（意見を言う） | なし | ✅ meaning×4+match×4 |
+| u8_c4 | 8 | 形容詞の否定・過去形 | なし | — |
+| u8_c5 | 8 | 形容詞で詳しく描写する（Unit 8まとめ） | なし | ✅ meaning×4+match×4 |
+| u9_c1 | 9 | 家族構成を言う（〜は〜が〜人います） | なし | — |
+| u9_c2 | 9 | 家族の職業・特徴を言う（〜の〜は〜です） | なし | — |
+| u9_c3 | 9 | うち vs そと の使い分け | なし | ✅ meaning×4+match×4 |
+| u9_c4 | 9 | 家族について質問・答える（何人/何歳/どんな人） | なし | — |
+| u9_c5 | 9 | 家族紹介まとめ（Unit 9総合） | なし | ✅ meaning×4+match×4 |
+| u10_c1 | 10 | 朝のルーティン（〜てから） | なし | — |
+| u10_c2 | 10 | 経験を話す（〜たことがある・たあとで） | なし | — |
+| u10_c3 | 10 | 禁止・義務・不必要（ない形3文型） | なし | ✅ meaning×4+match×4 |
+| u10_c4 | 10 | 理由・逆接（だから/でも/そして/それから/それに） | なし | — |
+| u10_c5 | 10 | 一日のスケジュール（Unit 10総合） | なし | ✅ meaning×4+match×4 |
 
 ### showSection() の動作
 ```javascript
@@ -321,18 +346,24 @@ desu → katsu → keiyo → masu → aru → mashou → tai → maeni → niiku
 | — | Unit 1（ひらがな）・Unit 2（カタカナ）Can-doデータ（各3本） | 2026-05-25 |
 | — | Trazar（なぞり書き）ステップをUnit 1・2フローに統合 | 2026-05-25 |
 
-### ✅ 完了済み追加分（2026-05-27）
+### ✅ 完了済み追加分（2026-05-27〜29）
 | 内容 | 完了日 |
 |---|---|
 | Unit 4 Can-do 5本（u4_c1〜u4_c5）+ escuchar（c3/c5） | 2026-05-27 |
 | Unit 5 Can-do 5本（u5_c1〜u5_c5）+ escuchar（c3/c5）+ conv renderer | 2026-05-27 |
+| Unit 6 Can-do 5本（u6_c1〜u6_c5）+ escuchar（c3/c5） | 2026-05-27 |
+| Unit 7 Can-do 5本（u7_c1〜u7_c5）+ escuchar（c3/c5） | 2026-05-28 |
+| Unit 8 Can-do 5本（u8_c1〜u8_c5）+ escuchar（c3/c5） | 2026-05-28 |
+| Unit 9 Can-do 5本（u9_c1〜u9_c5）+ escuchar（c3/c5）+ 選択肢ランダム化 | 2026-05-29 |
+| Unit 10 Can-do 5本（u10_c1〜u10_c5）+ escuchar（c3/c5）+ 選択肢ランダム化 | 2026-05-29 |
 
 ### 🔜 残タスク（優先順）
 | # | 内容 | 担当モデル |
 |---|---|---|
-| — | Unit 6 Can-do 5本（u6_c1〜u6_c5）Compras y comida | Opus |
-| — | Unit 7〜10 Can-do 各5本 | Opus |
-| 10 | VOICEVOXバッチスクリプト（Unit 1〜5 MP3生成） | Opus |
+| ✅ | Unit 8 Can-do 5本（u8_c1〜u8_c5）| Opus/Sonnet |
+| ✅ | Unit 9 Can-do 5本（u9_c1〜u9_c5）| Opus/Sonnet |
+| ✅ | Unit 10 Can-do 5本（u10_c1〜u10_c5）| Opus/Sonnet |
+| 10 | VOICEVOXバッチスクリプト（Unit 1〜10 MP3生成） | Opus |
 | 11 | admin.html + Claude API シナリオ自動生成 | Sonnet |
 | 13 | Lemon Squeezy 連携・`nm_plan` サーバ検証 | Sonnet |
 | 14 | OpenAI Realtime PoC（Unit 3 c1 の Reto） | Sonnet |
@@ -347,7 +378,7 @@ desu → katsu → keiyo → masu → aru → mashou → tai → maeni → niiku
 
 ---
 
-## index.html 行番号インデックス（約19,130行 / 2026-05-27更新）
+## index.html 行番号インデックス（約24,852行 / 2026-05-29更新）
 
 ### HTML構造
 | 行 | 内容 |
@@ -376,6 +407,11 @@ desu → katsu → keiyo → masu → aru → mashou → tai → maeni → niiku
 | 13765 | `window.canDoData = []` |
 | 13768〜17681 | `window.canDoData.push(...)` × 30本（u1_c1〜u4_c5） |
 | 17682〜19117 | `window.canDoData.push(...)` × 5本（u5_c1〜u5_c5） |
+| 19118〜20398 | `window.canDoData.push(...)` × 5本（u6_c1〜u6_c5） |
+| 20400〜21717 | `window.canDoData.push(...)` × 5本（u7_c1〜u7_c5） |
+| 21718〜23036 | `window.canDoData.push(...)` × 5本（u8_c1〜u8_c5） |
+| 23037〜24450 | `window.canDoData.push(...)` × 5本（u9_c1〜u9_c5） |
+| 24451〜24850 | `window.canDoData.push(...)` × 5本（u10_c1〜u10_c5） |
 
 ### 既存ロードマップ関数
 | 行 | 関数 |
