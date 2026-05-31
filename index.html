@@ -1342,6 +1342,9 @@
         .prac-ja{font-family:'Noto Sans JP',sans-serif;font-size:1.1rem;color:var(--night);margin:0 0 1rem;padding:0.6rem 0.9rem;background:rgba(29,53,87,0.05);border-radius:var(--radius-sm);line-height:2}
         .prac-ja ruby{display:inline ruby}
         .prac-ja rt{font-size:0.55em;color:var(--night);opacity:0.7}
+        .prac-fill-prefix{font-family:'Noto Sans JP',sans-serif;font-size:1rem;color:var(--night);margin:0 0 0.75rem;padding:0.55rem 0.9rem;background:rgba(244,162,97,0.12);border-left:3px solid var(--accent);border-radius:var(--radius-sm);line-height:2}
+        .prac-fill-prefix ruby{display:inline ruby}
+        .prac-fill-prefix rt{font-size:0.55em;color:var(--night);opacity:0.7}
         .reorder-answer{min-height:44px;border:2px dashed #DDD;border-radius:var(--radius-md);padding:0.5rem;display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.6rem}
         .reorder-bank{display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.5rem}
         .word-chip{background:var(--night);color:#fff;border:none;border-radius:var(--radius-sm);padding:0.4rem 0.8rem;font:600 0.9rem 'Noto Sans JP',sans-serif;cursor:pointer;transition:opacity .15s}
@@ -2007,7 +2010,9 @@ const kanjiStrokes = {
   "駅":["M16.24,17.12c0.76,0.63,1.5,1.69,1.49,2.88c-0.04,7.8-0.57,24.25-0.67,34.5c-0.02,2.35,0.09,3.32-0.31,5.75","M18.23,18.15c4.39-0.65,17.37-2.21,22.41-2.87c1.63-0.21,3.26-0.51,4.9-0.21","M30.31,17.82c0.49,0.49,0.95,1.46,0.95,2.49c0,6.17-0.25,26.44-0.25,35.66","M18.41,32.09c5.46-0.51,16.44-2.11,21.13-2.77c1.19-0.17,3.34-0.57,4.56-0.25","M18.51,44.88c5.61-0.52,16.7-1.95,21.02-2.57c1.15-0.17,3.05-0.71,4.17-0.2","M17.74,59.65c6.17-1.41,20.29-4.04,23.68-4.63c4.33-0.76,4.19,2.81,3.95,6.45C44.7,71.81,42.59,83.13,39.75,90c-3,7.25-5.62,1.62-7.21-0.86","M9.79,73.5c0.28,6.41-0.57,12.04-0.87,13.32","M17.5,71.5c1.08,2.1,2,4.75,2.25,8.5","M25.44,68.22C26,69.25,28,72.64,28.25,76","M32.75,65.25c1.25,2.01,3.3,4.09,3.75,6.75","M55.22,20.32c1.16,0.77,2.9,0.9,4.14,0.79c7.4-0.61,19.18-2.64,21.85-2.97c3.3-0.4,4.77,1.69,4.42,3.94C84.97,26.2,83.6,34.25,82,40.32","M58.61,44.25c3.51-0.38,13.46-1.53,20.43-2.42c2.36-0.3,3.58-0.33,5.1-0.09","M56.84,21.12c0.91,0.88,1.04,2.43,1.05,3.38c0.67,41.32-3.54,54.77-10.14,66.5","M64.28,44.75c5.1,9.38,16.09,30.23,25.17,40.55c2.13,2.42,4.99,5.29,8.05,6.45"],
   "部":["M35.6,13.25c0.88,0.66,1.32,1.91,1.32,3.45s0,4.63,0,8.81","M16.79,27.98c1.81,0.51,3.75,0.46,5.6,0.34c6.87-0.44,18.87-2.19,26.99-3.98c2.05-0.45,4.15-0.46,6.23-0.11","M23.64,32.15c3.38,4.42,4.91,8.93,5.21,11.84","M47.75,28c0.38,0.75,0.5,1.93,0.19,2.78c-1.81,4.96-4.31,11.09-5.87,14.25","M12.67,50.39c2.29,0.61,4.53,0.3,6.84,0.04C30.98,49.12,39,47.72,52.13,47c2.61-0.14,5.12-0.24,7.71,0.18","M22.16,63.08c0.8,0.64,1.26,1.47,1.38,2.49c0.98,3.6,1.97,10.3,2.75,15.78c0.19,1.31,0.36,2.54,0.52,3.65","M24.07,64.38c7.15-1.03,17.57-2.36,23.07-3.05c2.61-0.33,4.48,1.05,3.95,3.84c-0.84,4.42-2.09,10.38-3.34,15.32","M28.25,83.78c4.48-0.45,11.21-1.17,17.99-1.87c1.28-0.13,2.52-0.27,3.68-0.4","M65.27,19.39c1.23,0.61,2.76,0.57,4.23,0.47c6.16-0.43,14.88-1.86,19.33-2.89c3.26-0.75,5.42,0.28,3.92,4.28c-1,2.66-7.62,12.88-12.1,19.23","M80.65,40.73c20.48,10.02,17.48,43.14,4.65,31.63","M67.37,20.14c0.74,0.74,1.07,2.1,1.07,3.19c0,2.91,0.02,49.64,0.02,68.04c0,2.4,0,4.31,0,5.59"],
   "屋":["M26.66,20.23c1.78,0.56,3.23,0.59,5.11,0.45c10.72-0.8,40.99-3.82,45.07-4.27c2.66-0.29,4.29,1.12,3.91,3.07c-0.29,1.46-1.84,6.27-2.84,9.41c-0.41,1.29-0.73,2.3-0.83,2.68","M30.94,35.74c4.26-0.16,31.44-2.36,43.94-3.55c2.47-0.23,3.62-0.19,5.26,0.06","M29.13,21.17c0.54,0.52,1.43,1.91,1.41,3.96C30.25,60,24,80.12,13.25,92.73","M37.26,46.35c1.84,0.26,4.73,0.21,6.56,0.01c10.55-1.11,19.85-1.86,33.26-2.99c3.05-0.26,4.91-0.12,6.45,0.01","M56.93,48.43c0.32,1.44-0.3,2.57-1.2,3.46c-4.7,4.65-5.6,5.7-11.59,10.52c-1.93,1.55-1.55,3.22,1.53,2.64c8.21-1.55,17.84-3.3,29.32-5.69","M70.5,52.62C74.6,54.81,81.1,61.6,82.12,65","M39.25,78.38c1.28,0.22,3.64,0.31,4.9,0.22C52.5,78,67.38,76,77.18,75.76c2.13-0.05,3.41,0.1,4.47,0.21","M58.08,64.24c1.17,0.76,1.46,2.13,1.46,3.92c0,6.03-0.04,21-0.04,22.72","M28.97,93.1c2.56,0.65,5.48,0.73,7.45,0.65c19.63-0.87,31.17-2.62,51.31-2.77c3.24-0.02,5.18,0.31,6.81,0.63"],
-  "机":["M12.03,37.72c1.85,0.41,3.89,0.4,5.14,0.36c5.46-0.2,17.7-1.87,23.61-2.98c1.85-0.35,3.23-0.47,4.74-0.23","M30.86,14.5c1.13,1.13,1.54,2.88,1.54,4.92c0,6.18,0.02,50.73-0.04,69.83c-0.01,2.78-0.01,5.01-0.01,6.5","M31.44,38.28c0,1.72-0.44,4.3-0.93,5.47c-5.38,13-10.13,20.75-17.15,30.34","M34.97,49.4c2.73,1.43,7.22,6.08,9.53,8.85","M54,25.51c1.06,1.06,1.39,2.74,1.38,4.52C55.25,58.5,55,76,41,92.65","M56.15,27.94c7.22-1.44,11.89-2.37,16.17-3.1c4.93-0.84,5.62,1.19,5.09,4.83c-2.29,15.83-3.46,35.46-3.46,51.83c0,5.5,1.8,7.94,11.33,7.94c10.22,0,10.99-1.94,10.99-9.38"]
+  "机":["M12.03,37.72c1.85,0.41,3.89,0.4,5.14,0.36c5.46-0.2,17.7-1.87,23.61-2.98c1.85-0.35,3.23-0.47,4.74-0.23","M30.86,14.5c1.13,1.13,1.54,2.88,1.54,4.92c0,6.18,0.02,50.73-0.04,69.83c-0.01,2.78-0.01,5.01-0.01,6.5","M31.44,38.28c0,1.72-0.44,4.3-0.93,5.47c-5.38,13-10.13,20.75-17.15,30.34","M34.97,49.4c2.73,1.43,7.22,6.08,9.53,8.85","M54,25.51c1.06,1.06,1.39,2.74,1.38,4.52C55.25,58.5,55,76,41,92.65","M56.15,27.94c7.22-1.44,11.89-2.37,16.17-3.1c4.93-0.84,5.62,1.19,5.09,4.83c-2.29,15.83-3.46,35.46-3.46,51.83c0,5.5,1.8,7.94,11.33,7.94c10.22,0,10.99-1.94,10.99-9.38"],
+  "飛":["M29.75,20.75c1.75,0.38,3.47,0.54,5.18,0.32c10.79-1.38,22.63-3.15,29.59-4.61c2.03-0.42,3.9-0.07,3.48,2.54c-3.25,20.5,7.88,27.25,20.25,30.5c5.4,1.42,5.75,0.75,5.25-6.5","M82.53,16.64c0.02,0.2,0.04,0.51-0.04,0.79c-0.47,1.66-3.2,5.31-6.94,7.54","M75.89,30.33c3.32,1.44,8.59,5.9,9.42,8.13","M49.87,25.75c1.06,1.06,1.46,2.5,1.46,3.75c0,0.87,0.02,42.99,0.03,59.88c0,2.89,0,5.05,0,6.12","M38.5,30.88c0,0.8-0.39,1.6-1.06,2.57c-2.96,4.22-7.56,8.81-13.69,12.81","M34.02,41.89c0.73,0.86,1.25,2.17,1.18,3.8C34.5,62.38,33,77.12,22.06,90.22","M16.5,58.75c2.5,0.75,4.85,0.52,6.78,0.19C36.01,56.73,51,52.75,63.45,48.68c3.22-1.05,4.25,0.07,3.9,3.44c-2.73,26.63,5.85,34.96,21.9,41.38c5,2,6,0.88,5-6.5","M83.28,56.14c0.02,0.2,0.05,0.51-0.05,0.79c-0.56,1.66-3.78,5.3-8.18,7.54","M76,70.88c3.29,1.52,8.49,6.23,9.31,8.59"],
+  "機":["M10.28,39.47c1.6,0.66,3.76,0.28,4.98,0.09c4.46-0.7,12.85-2.31,18.53-3.4c1.23-0.23,2.99-0.8,4.23-0.29","M25.36,15c1.26,1.26,1.79,2.75,1.79,4.42c0,0.82-0.04,50.17-0.05,69.95c0,3.14,0,5.54,0,6.88","M26.19,39.53c0,0.84-0.1,1.58-0.34,2.33C22,54.25,19.33,62.31,12.11,75.34","M29.88,45.75c2.33,1.62,6.16,6.86,8.12,10","M50.09,15.25c0.22,1.11,0.42,2.05-0.11,3.14c-2.32,4.8-3.86,8.86-5.95,12.16c-0.57,0.89-0.91,2.45,0.25,3.02c1.27,0.62,3.58,1.91,6.1,4.49","M54.01,28.56c0.2,0.5,0.27,2.15,0,2.68c-3.93,7.86-5.26,9.77-10.61,18.2c-1.1,1.74,0.31,2.58,1.11,2.25c3.38-1.4,8.97-3.53,13.32-4.87","M55.13,42.62c1.6,1.42,4.15,5.84,4.55,8.05","M76.71,11.75c0.22,1.11,0.31,2-0.11,3.14c-1.85,4.99-3.47,8.49-6.03,12.41c-0.4,0.61-0.32,1.95,0.75,2.52c1.25,0.66,3.33,1.66,5.85,4.24","M85.8,17.56c0.2,0.5,0.27,2.15,0,2.68c-3.93,7.86-7.71,14.03-13.11,21.2c-1.24,1.64,0.31,2.59,1.12,2.25c3.38-1.4,9.22-3.53,13.56-4.87","M85.4,34.3c1.81,1.69,5.61,6.07,6.06,8.7","M39.54,63.98c2.96,0.39,6.03,0.22,8.92-0.32c8.74-1.64,28.25-4.82,39.65-6.4c3.37-0.47,7.51-0.64,9.89,0.06","M52.42,66.43c0.06,0.81,0.12,1.6-0.12,2.75c-1.79,8.61-4.55,16.95-11.99,24.49","M54.25,75.38c2.13,0.84,6.01,4.05,7.95,7.41","M59.15,12c1.34,1.84,2.13,3.09,2.43,7.04C64,51,74.38,82.25,92.57,94.75c5.44,3.74,5.23,1.46,4.56-6.67","M86.62,63.5c0.08,0.7,0.17,1.82-0.16,2.83C84.56,72.29,75.52,86.5,60.55,94.5","M77.38,47.25c2.3,1.21,5.98,3.96,7.05,6.03"]
 };
 // ===== DATA =====
 const hiragana = {
@@ -2239,6 +2244,7 @@ const unitKanji = {
     mashou:  ['行','来','見','聞','書','電','車','飛','機'],
     kute:    ['寒','暑','疲','雨','病','院'],
     kazoku:  ['父','母','兄','弟','姉','妹'],
+    nichijou:['今','毎','週','帰','出','休','読','話'],
 };
 
 const roadmapUnits = [
@@ -2251,7 +2257,7 @@ const roadmapUnits = [
     {id:7,  icon:'🏃', es:'Acciones cotidianas (ます形)',   keys:['mashou','tai','niiku','maeni'],                            section:'grammar', tab:'mashou',   kanjiKey:'mashou'},
     {id:8,  icon:'💬', es:'Describir con adjetivos',        keys:['kute','naru','omou'],                                      section:'grammar', tab:'kute',     kanjiKey:'kute'},
     {id:9,  icon:'👨‍👩‍👧', es:'Familia y personas',           keys:['kazoku'],                                                  section:'grammar', tab:'kazoku',   kanjiKey:'kazoku'},
-    {id:10, icon:'📅', es:'Horario diario',                 keys:['te','ta','nai','setsuzoku'],                               section:'grammar', tab:'te',       kanjiKey:null},
+    {id:10, icon:'📅', es:'Horario diario',                 keys:['te','ta','nai','setsuzoku'],                               section:'grammar', tab:'te',       kanjiKey:'nichijou'},
 ];
 
 // State
@@ -13699,7 +13705,7 @@ function openExplainView() {
 function openTrazarView() {
   const cd = (window.canDoData || []).find(c => c.id === currentCanDoId);
   if (!cd || !cd.traceChars || !cd.traceChars.length) { openPracticeView(); return; }
-  trazarScript = cd.unit === 2 ? 'katakana' : 'hiragana';
+  trazarScript = cd.unit >= 3 ? 'kanji' : (cd.unit === 2 ? 'katakana' : 'hiragana');
   trazarList   = cd.traceChars;
   trazarIdx    = 0;
   trazarMode   = 'guide';
@@ -13710,7 +13716,9 @@ function openTrazarView() {
 function showCanDoTrazarChar() {
   const item   = trazarList[trazarIdx];
   const total  = trazarList.length;
-  const sData  = (trazarScript === 'hiragana' ? hiraganaStrokes : katakanaStrokes) || {};
+  const sData  = (trazarScript === 'hiragana' ? hiraganaStrokes
+              : trazarScript === 'katakana' ? katakanaStrokes
+              : kanjiStrokes) || {};
   const sc     = (sData[item.c] || []).length;
   const needsRef = trazarMode !== 'guide';
   const isLast   = trazarIdx === total - 1;
@@ -13804,7 +13812,9 @@ function renderPracticeItem() {
     const opts = item.options.map((o, i) =>
       `<button class="placement-opt" onclick="checkPracticeAnswer(${i})">${o}</button>`
     ).join('');
-    bodyHtml = `<div class="placement-opts">${opts}</div>`;
+    const prefixHtml = (item.type === 'fill' && item.prefix)
+      ? `<p class="prac-fill-prefix" lang="ja">${item.prefix}</p>` : '';
+    bodyHtml = `${prefixHtml}<div class="placement-opts">${opts}</div>`;
   } else if (item.type === 'reorder') {
     _reorderSelected = [];
     const shuffledOpts = [...item.options]; shuffle(shuffledOpts);
@@ -13848,7 +13858,7 @@ function renderPracticeItem() {
       <div class="prac-bar-bg"><div class="prac-bar" style="width:${pct}%"></div></div>
     </div>
     <div class="prac-card">
-      <p class="prac-prompt">${item.promptEs}</p>
+      <p class="prac-prompt">${item.promptEs || item.prompt || ''}</p>
       ${jaDisplay}
       ${bodyHtml}
     </div>`;
@@ -18722,6 +18732,251 @@ window.canDoData.push({
     mustUse: ["で","へ","いきます"],
     minTurns: 3, maxTurns: 5,
     bannedTopics: ["política","religión","violencia"]
+  }
+});
+
+window.canDoData.push({
+  id: "u5_c6",
+  unit: 5,
+  index: 6,
+  es: "Construir frases progresivamente usando は, に, で, を.",
+  jaGoal: "マリアはまいあさバスでがっこうにいきます。マリアはがっこうでにほんごをべんきょうします。",
+  grammarTabs: ["joshi", "aru"],
+  traceChars: [],
+  source: "ai", status: "published", version: 1,
+  updatedAt: "2026-05-29T00:00:00Z",
+  vocab: ["がっこう","としょかん","こうえん","バス","でんしゃ","じてんしゃ","にほんご","ほん","ジョギング","8じ","まいあさ","べんきょうします","いきます"],
+  kanji: ["学","校","図","書","館","公","園","電","車","自","転","日","本","語","毎","朝","時","勉","強","行","読"],
+
+  scenario: {
+    title: "La rutina diaria de María",
+    contextEs: "María le cuenta al señor Tanaka qué hace cada día, paso a paso.",
+    lines: [
+      {
+        speaker: "Tanaka",
+        ja: "マリアさんは<ruby>毎朝<rt>まいあさ</rt></ruby><ruby>何<rt>なに</rt></ruby>をしますか。",
+        jaPlain: "マリアさんはまいあさなにをしますか。",
+        romaji: "Maria-san wa maiasa nani o shimasu ka.",
+        es: "María, ¿qué haces cada mañana?",
+        audio: "audio/u5_c6_l1_T.mp3",
+        highlight: ["毎朝","何"]
+      },
+      {
+        speaker: "María",
+        ja: "わたしは<ruby>毎朝<rt>まいあさ</rt></ruby>8<ruby>時<rt>じ</rt></ruby>にバスで<ruby>学校<rt>がっこう</rt></ruby>に<ruby>行<rt>い</rt></ruby>きます。",
+        jaPlain: "わたしはまいあさ8じにバスでがっこうにいきます。",
+        romaji: "Watashi wa maiasa hachi-ji ni basu de gakkō ni ikimasu.",
+        es: "Cada mañana voy a la escuela en autobús a las 8.",
+        audio: "audio/u5_c6_l2_M.mp3",
+        highlight: ["8時に","バスで","学校に"]
+      },
+      {
+        speaker: "Tanaka",
+        ja: "<ruby>学校<rt>がっこう</rt></ruby>で<ruby>何<rt>なに</rt></ruby>を<ruby>勉強<rt>べんきょう</rt></ruby>しますか。",
+        jaPlain: "がっこうでなにをべんきょうしますか。",
+        romaji: "Gakkō de nani o benkyō shimasu ka.",
+        es: "¿Qué estudias en la escuela?",
+        audio: "audio/u5_c6_l3_T.mp3",
+        highlight: ["学校で","勉強"]
+      },
+      {
+        speaker: "María",
+        ja: "<ruby>学校<rt>がっこう</rt></ruby>で<ruby>日本語<rt>にほんご</rt></ruby>を<ruby>勉強<rt>べんきょう</rt></ruby>します。",
+        jaPlain: "がっこうでにほんごをべんきょうします。",
+        romaji: "Gakkō de nihongo o benkyō shimasu.",
+        es: "En la escuela estudio japonés.",
+        audio: "audio/u5_c6_l4_M.mp3",
+        highlight: ["学校で","日本語を"]
+      },
+      {
+        speaker: "Tanaka",
+        ja: "<ruby>週末<rt>しゅうまつ</rt></ruby>は<ruby>何<rt>なに</rt></ruby>をしますか。",
+        jaPlain: "しゅうまつはなにをしますか。",
+        romaji: "Shūmatsu wa nani o shimasu ka.",
+        es: "¿Y los fines de semana?",
+        audio: "audio/u5_c6_l5_T.mp3",
+        highlight: ["週末"]
+      },
+      {
+        speaker: "María",
+        ja: "<ruby>公園<rt>こうえん</rt></ruby>でジョギングします。それから<ruby>図書館<rt>としょかん</rt></ruby>で<ruby>本<rt>ほん</rt></ruby>を<ruby>読<rt>よ</rt></ruby>みます。",
+        jaPlain: "こうえんでジョギングします。それからとしょかんでほんをよみます。",
+        romaji: "Kōen de jogingu shimasu. Sorekara toshokan de hon o yomimasu.",
+        es: "Hago jogging en el parque. Luego leo libros en la biblioteca.",
+        audio: "audio/u5_c6_l6_M.mp3",
+        highlight: ["公園で","図書館で","本を"]
+      }
+    ]
+  },
+
+  explain: {
+    summaryEs: "Para construir frases completas en japonés, usamos は (tema), に (tiempo/destino), で (lugar de acción/medio de transporte), を (objeto directo).",
+    blocks: [
+      { type: "rule", es: "は = marca el tema de la oración. Indica de quién o qué hablamos." },
+      { type: "rule", es: "で① = lugar donde ocurre la acción. 学校で勉強します (estudio EN la escuela)." },
+      { type: "rule", es: "で② = medio de transporte. バスで行きます (voy EN autobús)." },
+      { type: "rule", es: "に① = tiempo. 8時に行きます (voy A las 8)." },
+      { type: "rule", es: "に② = destino. 学校に行きます (voy A la escuela)." },
+      { type: "rule", es: "を = objeto directo. 日本語を勉強します (estudio EL japonés)." },
+      {
+        type: "contrast",
+        labelEs: "で（acción・medio）vs に（destino・tiempo）",
+        headers: ["日本語", "Español", "Nota"],
+        rows: [
+          { ja: "<ruby>学校<rt>がっこう</rt></ruby>で べんきょうします", es: "Estudio EN la escuela", note: "で = lugar de acción" },
+          { ja: "<ruby>学校<rt>がっこう</rt></ruby>に いきます",        es: "Voy A la escuela",      note: "に = destino" },
+          { ja: "バスで いきます",                                      es: "Voy EN autobús",       note: "で = medio de transporte" },
+          { ja: "8<ruby>時<rt>じ</rt></ruby>に いきます",               es: "Voy A las 8",          note: "に = tiempo" }
+        ]
+      },
+      { type: "pattern", es: "Frase completa: マリアは 8時に バスで 学校に 行きます。= María va a la escuela en autobús a las 8." }
+    ]
+  },
+
+  practice: {
+    passRate: 0.8,
+    items: [
+      {
+        id: "u5_c6_q1", type: "reorder",
+        promptEs: "Ordena: 'Estudio en la escuela.'",
+        ja: "",
+        options: ["学校で","勉強します。"],
+        displayOptions: ["<ruby>学校<rt>がっこう</rt></ruby>で","<ruby>勉強<rt>べんきょう</rt></ruby>します。"],
+        answer: "学校で勉強します。",
+        explainEs: "で marca el lugar donde ocurre la acción (la escuela)."
+      },
+      {
+        id: "u5_c6_q2", type: "reorder",
+        promptEs: "Ordena: 'María estudia en la escuela.'",
+        ja: "",
+        options: ["マリアは","学校で","勉強します。"],
+        displayOptions: ["マリアは","<ruby>学校<rt>がっこう</rt></ruby>で","<ruby>勉強<rt>べんきょう</rt></ruby>します。"],
+        answer: "マリアは学校で勉強します。",
+        explainEs: "は marca el tema (María) y で el lugar de la acción."
+      },
+      {
+        id: "u5_c6_q3", type: "reorder",
+        promptEs: "Ordena: 'María estudia japonés en la escuela.'",
+        ja: "",
+        options: ["マリアは","学校で","日本語を","勉強します。"],
+        displayOptions: ["マリアは","<ruby>学校<rt>がっこう</rt></ruby>で","<ruby>日本語<rt>にほんご</rt></ruby>を","<ruby>勉強<rt>べんきょう</rt></ruby>します。"],
+        answer: "マリアは学校で日本語を勉強します。",
+        explainEs: "を marca el objeto directo (el japonés)."
+      },
+      {
+        id: "u5_c6_q4", type: "reorder",
+        promptEs: "Ordena: 'María estudia japonés en la escuela cada mañana.'",
+        ja: "",
+        options: ["マリアは","毎朝","学校で","日本語を","勉強します。"],
+        displayOptions: ["マリアは","<ruby>毎朝<rt>まいあさ</rt></ruby>","<ruby>学校<rt>がっこう</rt></ruby>で","<ruby>日本語<rt>にほんご</rt></ruby>を","<ruby>勉強<rt>べんきょう</rt></ruby>します。"],
+        answer: "マリアは毎朝学校で日本語を勉強します。",
+        explainEs: "毎朝 (cada mañana) es una expresión de tiempo sin partícula; va al inicio."
+      },
+      {
+        id: "u5_c6_q5", type: "reorder",
+        promptEs: "Ordena: 'Voy a la escuela.'",
+        ja: "",
+        options: ["学校に","行きます。"],
+        displayOptions: ["<ruby>学校<rt>がっこう</rt></ruby>に","<ruby>行<rt>い</rt></ruby>きます。"],
+        answer: "学校に行きます。",
+        explainEs: "に marca el destino del movimiento (la escuela)."
+      },
+      {
+        id: "u5_c6_q6", type: "reorder",
+        promptEs: "Ordena: 'Voy a la escuela en autobús.'",
+        ja: "",
+        options: ["バスで","学校に","行きます。"],
+        displayOptions: ["バスで","<ruby>学校<rt>がっこう</rt></ruby>に","<ruby>行<rt>い</rt></ruby>きます。"],
+        answer: "バスで学校に行きます。",
+        explainEs: "で marca el medio de transporte (el autobús), に el destino."
+      },
+      {
+        id: "u5_c6_q7", type: "reorder",
+        promptEs: "Ordena: 'María va a la escuela en autobús.'",
+        ja: "",
+        options: ["マリアは","バスで","学校に","行きます。"],
+        displayOptions: ["マリアは","バスで","<ruby>学校<rt>がっこう</rt></ruby>に","<ruby>行<rt>い</rt></ruby>きます。"],
+        answer: "マリアはバスで学校に行きます。",
+        explainEs: "は (tema) + で (medio) + に (destino)."
+      },
+      {
+        id: "u5_c6_q8", type: "reorder",
+        promptEs: "Ordena: 'María va a la escuela en autobús a las 8.'",
+        ja: "",
+        options: ["マリアは","8時に","バスで","学校に","行きます。"],
+        displayOptions: ["マリアは","8<ruby>時<rt>じ</rt></ruby>に","バスで","<ruby>学校<rt>がっこう</rt></ruby>に","<ruby>行<rt>い</rt></ruby>きます。"],
+        answer: "マリアは8時にバスで学校に行きます。",
+        explainEs: "に aquí marca el tiempo (8時に = a las 8). Orden: は→tiempo→medio→destino→verbo."
+      },
+      {
+        id: "u5_c6_q9", type: "fill",
+        promptEs: "Completa con las partículas correctas:",
+        prefix: "マリアは <ruby>学校<rt>がっこう</rt></ruby>___ <ruby>日本語<rt>にほんご</rt></ruby>___ <ruby>勉強<rt>べんきょう</rt></ruby>します。",
+        options: ["で・を", "に・を", "で・に", "を・で"],
+        answer: 0,
+        explainEs: "学校で = lugar de acción (で), 日本語を = objeto directo (を)."
+      },
+      {
+        id: "u5_c6_q10", type: "fill",
+        promptEs: "Completa con las partículas correctas:",
+        prefix: "マリアは バス___ <ruby>学校<rt>がっこう</rt></ruby>___ <ruby>行<rt>い</rt></ruby>きます。",
+        options: ["に・で", "で・に", "を・に", "が・に"],
+        answer: 1,
+        explainEs: "バスで = medio de transporte (で), 学校に = destino (に)."
+      },
+      {
+        id: "u5_c6_q11", type: "fill",
+        promptEs: "Completa con las partículas correctas:",
+        prefix: "マリアは 8<ruby>時<rt>じ</rt></ruby>___ バス___ <ruby>学校<rt>がっこう</rt></ruby>___ <ruby>行<rt>い</rt></ruby>きます。",
+        options: ["に・で・に", "で・に・に", "に・に・で", "を・で・に"],
+        answer: 0,
+        explainEs: "8時に = tiempo (に), バスで = medio (で), 学校に = destino (に)."
+      },
+      {
+        id: "u5_c6_q12", type: "fill",
+        promptEs: "Completa con las partículas y la terminación correctas:",
+        prefix: "マリアは <ruby>毎朝<rt>まいあさ</rt></ruby> <ruby>学校<rt>がっこう</rt></ruby>___ <ruby>日本語<rt>にほんご</rt></ruby>___ <ruby>勉強<rt>べんきょう</rt></ruby>し___。",
+        options: ["で・を・ます", "に・を・ます", "で・が・ます", "を・で・ます"],
+        answer: 0,
+        explainEs: "学校で (lugar) + 日本語を (objeto) + 勉強します (forma ます)."
+      },
+      {
+        id: "u5_c6_q13", type: "conv",
+        promptEs: "María responde. Elige la frase con la partícula correcta:",
+        prompt: "マリアさんは どこで べんきょうしますか。",
+        promptHint: "lugar de acción → で",
+        options: ["学校で べんきょうします。", "学校に べんきょうします。", "学校を べんきょうします。", "学校へ べんきょうします。"],
+        answer: 0,
+        explainEs: "El lugar donde se realiza una acción se marca con で: 学校で.",
+        audio: null
+      },
+      {
+        id: "u5_c6_q14", type: "conv",
+        promptEs: "María responde. Elige la frase con la partícula correcta:",
+        prompt: "マリアさんは <ruby>何<rt>なに</rt></ruby>で がっこうに いきますか。",
+        promptHint: "medio de transporte → で",
+        options: ["バスで 行きます。", "バスに 行きます。", "バスを 行きます。", "バスは 行きます。"],
+        answer: 0,
+        explainEs: "El medio de transporte se marca con で: バスで行きます.",
+        audio: null
+      },
+      {
+        id: "u5_c6_q15", type: "mc",
+        promptEs: "Elige la combinación correcta de partículas: 「マリアは 8時__ バス__ 学校__ 行きます。」",
+        ja: "マリアは 8<ruby>時<rt>じ</rt></ruby>__ バス__ <ruby>学校<rt>がっこう</rt></ruby>__ <ruby>行<rt>い</rt></ruby>きます。",
+        options: ["に・で・に", "で・に・で", "に・に・に", "で・で・で"],
+        answer: 0,
+        explainEs: "8時に (tiempo) + バスで (medio) + 学校に (destino)."
+      },
+      {
+        id: "u5_c6_q16", type: "mc",
+        promptEs: "¿Qué significa: 「マリアは 公園で ジョギングします。」?",
+        ja: "マリアは <ruby>公園<rt>こうえん</rt></ruby>で ジョギングします。",
+        options: ["María hace jogging en el parque.", "María va al parque.", "María mira el parque.", "María corre hacia el parque."],
+        answer: 0,
+        explainEs: "公園で = en el parque (lugar de acción con で); ジョギングします = hace jogging."
+      }
+    ]
   }
 });
 
@@ -24822,13 +25077,13 @@ window.canDoData.push({
       { type: "conv", prompt: "<ruby>週末<rt>しゅうまつ</rt></ruby>に <ruby>料理<rt>りょうり</rt></ruby>をしたり、___したり します。", promptHint: "¿Qué más haces los fines de semana?", options: ["<ruby>散歩<rt>さんぽ</rt></ruby>", "<ruby>散歩<rt>さんぽ</rt></ruby>して", "<ruby>散歩<rt>さんぽ</rt></ruby>します", "<ruby>散歩<rt>さんぽ</rt></ruby>した"], answer: 0 },
       { type: "conv", prompt: "<ruby>毎日<rt>まいにち</rt></ruby> <ruby>運動<rt>うんどう</rt></ruby>を していますか。", promptHint: "¿Haces ejercicio todos los días?", options: ["はい、<ruby>運動<rt>うんどう</rt></ruby>しています。", "はい、<ruby>運動<rt>うんどう</rt></ruby>します。", "はい、<ruby>運動<rt>うんどう</rt></ruby>してください。", "はい、<ruby>運動<rt>うんどう</rt></ruby>しました。"], answer: 0 },
       { type: "mc", prompt: "¿Qué significa 「<ruby>映画<rt>えいが</rt></ruby>を <ruby>見<rt>み</rt></ruby>たり、<ruby>本<rt>ほん</rt></ruby>を <ruby>読<rt>よ</rt></ruby>んだり します」?", ja: "<ruby>映画<rt>えいが</rt></ruby>を <ruby>見<rt>み</rt></ruby>たり、<ruby>本<rt>ほん</rt></ruby>を <ruby>読<rt>よ</rt></ruby>んだり します。", options: ["Veo películas y leo libros (lista exhaustiva).", "Veo películas, leo libros, ese tipo de cosas.", "Veo películas mientras leo libros.", "He visto películas y leído libros."], answer: 1 },
-      { type: "mc", prompt: "¿Cómo se forma たり a partir de 食べる?", ja: "<ruby>食<rt>た</rt></ruby>べる → たり", options: ["<ruby>食<rt>た</rt></ruby>べるたり", "<ruby>食<rt>た</rt></ruby>べたり", "<ruby>食<rt>た</rt></ruby>べてたり", "<ruby>食<rt>た</rt></ruby>べるたり"], answer: 1 },
+      { type: "mc", prompt: "¿Cómo se forma たり a partir de 食べる?", ja: "<ruby>食<rt>た</rt></ruby>べる → たり", options: ["<ruby>食<rt>た</rt></ruby>べるたり", "<ruby>食<rt>た</rt></ruby>べたり", "<ruby>食<rt>た</rt></ruby>べてたり", "<ruby>食<rt>た</rt></ruby>べてから"], answer: 1 },
       { type: "mc", prompt: "¿Cómo se forma たり a partir de 飲む?", ja: "<ruby>飲<rt>の</rt></ruby>む → たり", options: ["<ruby>飲<rt>の</rt></ruby>みたり", "<ruby>飲<rt>の</rt></ruby>むたり", "<ruby>飲<rt>の</rt></ruby>んだり", "<ruby>飲<rt>の</rt></ruby>んでたり"], answer: 2 },
       { type: "mc", prompt: "「<ruby>毎朝<rt>まいあさ</rt></ruby> コーヒーを <ruby>飲<rt>の</rt></ruby>んでいます」 ¿Qué expresa?", ja: "<ruby>毎朝<rt>まいあさ</rt></ruby> コーヒーを <ruby>飲<rt>の</rt></ruby>んでいます。", options: ["Ahora mismo estoy bebiendo café.", "Bebo café cada mañana (hábito).", "Por favor bebe café.", "He bebido café."], answer: 1 },
-      { type: "fill", prompt: "Completa: Veo películas, como ramen, ese tipo de cosas.", prefix: "<ruby>映画<rt>えいが</rt></ruby>を <ruby>見<rt>み</rt></ruby>___、ラーメンを <ruby>食<rt>た</rt></ruby>べ___ します。", options: ["たり / だり", "てり / でり", "たり / たり", "だり / だり"], answer: 0 },
+      { type: "fill", prompt: "Completa: Veo películas, como ramen, ese tipo de cosas.", prefix: "<ruby>映画<rt>えいが</rt></ruby>を <ruby>見<rt>み</rt></ruby>___、ラーメンを <ruby>食<rt>た</rt></ruby>べ___ します。", options: ["たり / だり", "てり / でり", "たり / たり", "だり / だり"], answer: 2 },
       { type: "fill", prompt: "Completa: Suelo estudiar japonés todos los días (hábito).", prefix: "<ruby>毎日<rt>まいにち</rt></ruby> <ruby>日本語<rt>にほんご</rt></ruby>を <ruby>勉強<rt>べんきょう</rt></ruby>し___ います。", options: ["て", "た", "たり", "ない"], answer: 0 },
       { type: "fill", prompt: "Completa: Cocino, paseo, ese tipo de cosas los fines de semana.", prefix: "<ruby>週末<rt>しゅうまつ</rt></ruby>に <ruby>料理<rt>りょうり</rt></ruby>を ___、<ruby>散歩<rt>さんぽ</rt></ruby>し___ します。", options: ["したり / たり", "して / て", "する / たり", "した / て"], answer: 0 },
-      { type: "fill", prompt: "Completa: ¿Qué tipo de cosas haces los fines de semana?", prefix: "<ruby>週末<rt>しゅうまつ</rt></ruby>は <ruby>何<rt>なに</rt></ruby>を ___ します。", options: ["たり", "してたり", "してたり〜たり", "したり〜したり"], answer: 0 },
+      { type: "fill", prompt: "Completa: Escucho música, leo libros, ese tipo de cosas.", prefix: "おんがくを きい___、ほんを よん___します。", options: ["たり / だり", "て / て", "だり / たり", "から / から"], answer: 0 },
       { type: "reorder", prompt: "Veo películas, leo libros, ese tipo de cosas.", answer: "えいがをみたりほんをよんだりします。", options: ["えいがを", "みたり", "ほんを", "よんだり", "します", "。"], displayOptions: ["<ruby>映画<rt>えいが</rt></ruby>を", "<ruby>見<rt>み</rt></ruby>たり", "<ruby>本<rt>ほん</rt></ruby>を", "<ruby>読<rt>よ</rt></ruby>んだり", "します", "。"] },
       { type: "reorder", prompt: "Cada mañana hago jogging (hábito).", answer: "まいあさジョギングをしています。", options: ["まいあさ", "ジョギングを", "して", "います", "。"], displayOptions: ["<ruby>毎朝<rt>まいあさ</rt></ruby>", "ジョギングを", "して", "います", "。"] },
       { type: "reorder", prompt: "Los fines de semana cocino, paseo, ese tipo de cosas.", answer: "しゅうまつにりょうりをしたりさんぽしたりします。", options: ["しゅうまつに", "りょうりを", "したり", "さんぽ", "したり", "します", "。"], displayOptions: ["<ruby>週末<rt>しゅうまつ</rt></ruby>に", "<ruby>料理<rt>りょうり</rt></ruby>を", "したり", "<ruby>散歩<rt>さんぽ</rt></ruby>", "したり", "します", "。"] }
@@ -24917,6 +25172,364 @@ window.canDoData.push({
   }
 });
 
+// ============================================================
+// 漢字なぞり書き Can-do（u3_kanji〜u10_kanji）— 各ユニット末尾の漢字専用カード
+// traceChars で Trazar ステップ自動表示・learnedChars 連動
+// ============================================================
+
+window.canDoData.push({
+  id:"u3_kanji", unit:3, index:6,
+  es:"Escribir y leer los kanji de la Unidad 3",
+  jaGoal:"このユニットの漢字を書ける・読める",
+  grammarTabs:[], source:"ai", status:"published", version:1, updatedAt:"2026-05-30",
+  vocab:[], kanji:["名","前","先","生","学","日","本","語"],
+  traceChars:[
+    {c:"名",r:"な／メイ"},{c:"前",r:"まえ／ゼン"},{c:"先",r:"さき／セン"},{c:"生",r:"い(きる)／セイ"},
+    {c:"学",r:"まな(ぶ)／ガク"},{c:"日",r:"ひ／ニチ"},{c:"本",r:"ホン／もと"},{c:"語",r:"かた(る)／ゴ"}
+  ],
+  scenario:{
+    title:"Los kanji de la Unidad 3",
+    contextEs:"María repasa los kanji para presentarse: nombre, profesor, escuela y japonés.",
+    lines:[
+      {speaker:"A", ja:"<ruby>名前<rt>なまえ</rt></ruby>は マリアです。", jaPlain:"なまえはマリアです。",
+       romaji:"Namae wa Maria desu.", es:"Mi nombre es María.", audio:"", highlight:["名前"]},
+      {speaker:"B", ja:"<ruby>日本語<rt>にほんご</rt></ruby>の <ruby>先生<rt>せんせい</rt></ruby>です。", jaPlain:"にほんごのせんせいです。",
+       romaji:"Nihongo no sensei desu.", es:"Soy profesora de japonés.", audio:"", highlight:["日本語","先生"]},
+      {speaker:"A", ja:"わたしは <ruby>学生<rt>がくせい</rt></ruby>です。", jaPlain:"わたしはがくせいです。",
+       romaji:"Watashi wa gakusei desu.", es:"Yo soy estudiante.", audio:"", highlight:["学生"]}
+    ]
+  },
+  explain:{
+    summaryEs:"Practica el trazo y la lectura de los 8 kanji de la Unidad 3.",
+    blocks:[
+      {type:"rule", es:"Cada kanji tiene un orden de trazos fijo. Sigue los números de la guía al escribir."},
+      {type:"pattern", es:"名前 = nombre · 先生 = profesor · 学生 = estudiante · 学ぶ = estudiar · 生きる = vivir · 日本 = Japón · 本 = libro · 日本語 = idioma japonés"},
+      {type:"note", es:"Un mismo kanji puede tener varias lecturas: on'yomi (de origen chino) y kun'yomi (japonesa)."}
+    ]
+  },
+  practice:{ passRate:0.8, items:[
+    {type:"mc", prompt:"¿Cómo se lee 名前?", ja:"名前", options:["なまえ","めいぜん","なまい","ぜんな"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 先生?", ja:"先生", options:["せんせい","さきせい","せいせん","せんせん"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 学生?", ja:"学生", options:["がくせい","まなせい","がくしょう","がくせいい"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 日本語?", ja:"日本語", options:["にほんご","にっぽんかた","ひもとご","にちほんご"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 日本?", ja:"日本", options:["にほん","にちほん","ひもと","にっぽんご"], answer:0},
+    {type:"mc", prompt:"¿Qué significa 学ぶ?", ja:"学ぶ", options:["estudiar/aprender","escribir","vivir","leer"], answer:0},
+    {type:"mc", prompt:"¿Qué significa 名前?", ja:"名前", options:["nombre","profesor","estudiante","idioma"], answer:0},
+    {type:"mc", prompt:"¿Qué significa 先生?", ja:"先生", options:["profesor","estudiante","nombre","libro"], answer:0},
+    {type:"mc", prompt:"¿Qué significa 本?", ja:"本", options:["libro","día","idioma","nombre"], answer:0}
+  ]}
+});
+
+window.canDoData.push({
+  id:"u4_kanji", unit:4, index:6,
+  es:"Escribir y leer los kanji de la Unidad 4",
+  jaGoal:"このユニットの漢字を書ける・読める",
+  grammarTabs:[], source:"ai", status:"published", version:1, updatedAt:"2026-05-30",
+  vocab:[], kanji:["一","二","三","四","五","六","七","八","九","十","百","千","万","時","分","曜","月","年"],
+  traceChars:[
+    {c:"一",r:"いち／ひと"},{c:"二",r:"に／ふた"},{c:"三",r:"さん／みっ"},{c:"四",r:"し／よん"},
+    {c:"五",r:"ご／いつ"},{c:"六",r:"ろく／むっ"},{c:"七",r:"しち／なな"},{c:"八",r:"はち／やっ"},
+    {c:"九",r:"きゅう／ここの"},{c:"十",r:"じゅう／とお"},{c:"百",r:"ヒャク"},{c:"千",r:"セン／ち"},
+    {c:"万",r:"マン"},{c:"時",r:"ジ／とき"},{c:"分",r:"フン／わ"},{c:"曜",r:"ヨウ"},
+    {c:"月",r:"つき／ゲツ"},{c:"年",r:"とし／ネン"}
+  ],
+  scenario:{
+    title:"Los kanji de la Unidad 4",
+    contextEs:"María repasa los kanji de números, tiempo y fechas.",
+    lines:[
+      {speaker:"A", ja:"<ruby>三時<rt>さんじ</rt></ruby><ruby>十分<rt>じゅっぷん</rt></ruby>です。", jaPlain:"さんじじゅっぷんです。",
+       romaji:"San-ji juppun desu.", es:"Son las 3:10.", audio:"", highlight:["三時","十分"]},
+      {speaker:"B", ja:"きょうは <ruby>月曜日<rt>げつようび</rt></ruby>です。", jaPlain:"きょうはげつようびです。",
+       romaji:"Kyō wa getsuyōbi desu.", es:"Hoy es lunes.", audio:"", highlight:["月曜日"]},
+      {speaker:"A", ja:"<ruby>一<rt>いち</rt></ruby>、<ruby>二<rt>に</rt></ruby>、<ruby>三<rt>さん</rt></ruby>…<ruby>百<rt>ひゃく</rt></ruby>まで かぞえます。", jaPlain:"いち、に、さん…ひゃくまでかぞえます。",
+       romaji:"Ichi, ni, san… hyaku made kazoemasu.", es:"Cuento del 1, 2, 3… hasta 100.", audio:"", highlight:["一","二","三","百"]}
+    ]
+  },
+  explain:{
+    summaryEs:"Practica el trazo y la lectura de los 18 kanji de números, tiempo y fechas.",
+    blocks:[
+      {type:"rule", es:"Cada kanji tiene un orden de trazos fijo. Sigue los números de la guía al escribir."},
+      {type:"pattern", es:"一〜十 = 1 a 10 · 百 = cien · 千 = mil · 万 = diez mil · 時 = hora · 分 = minuto · 曜 = día de la semana · 月 = mes/luna · 年 = año"},
+      {type:"note", es:"Los números cambian de lectura según la palabra: 四 = し/よん, 七 = しち/なな, 九 = きゅう/く."}
+    ]
+  },
+  practice:{ passRate:0.8, items:[
+    {type:"mc", prompt:"¿Cómo se lee 三時?", ja:"三時", options:["さんじ","さんとき","みじ","さんふん"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 十分?", ja:"十分", options:["じゅっぷん","じゅうふん","とおぶん","じゅうわ"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 一月?", ja:"一月", options:["いちがつ","ひとつき","いちげつ","いっがつ"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 二月?", ja:"二月", options:["にがつ","ふたつき","にげつ","じがつ"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 四月?", ja:"四月", options:["しがつ","よんがつ","よがつ","しげつ"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 五時?", ja:"五時", options:["ごじ","ごとき","いつじ","ごふん"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 六月?", ja:"六月", options:["ろくがつ","むつき","ろくげつ","りくがつ"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 七時?", ja:"七時", options:["しちじ","ななじ","しちとき","なないじ"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 八月?", ja:"八月", options:["はちがつ","やつき","はちげつ","はつがつ"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 九時?", ja:"九時", options:["くじ","きゅうじ","ここのじ","くとき"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 百円?", ja:"百円", options:["ひゃくえん","ひゃくまる","びゃくえん","ひゃっえん"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 千円?", ja:"千円", options:["せんえん","ちえん","せんまる","ぜんえん"], answer:0},
+    {type:"mc", prompt:"¿Qué significa 一万円?", ja:"一万円", options:["10.000 yenes","1.000 yenes","100 yenes","10 yenes"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 月曜日?", ja:"月曜日", options:["げつようび","がつようび","つきようび","げつよう"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 一年?", ja:"一年", options:["いちねん","ひととし","いちとし","いつねん"], answer:0}
+  ]}
+});
+
+window.canDoData.push({
+  id:"u5_kanji", unit:5, index:6,
+  es:"Escribir y leer los kanji de la Unidad 5",
+  jaGoal:"このユニットの漢字を書ける・読める",
+  grammarTabs:[], source:"ai", status:"published", version:1, updatedAt:"2026-05-30",
+  vocab:[], kanji:["東","京","校","駅","店","上","下","部","屋","机"],
+  traceChars:[
+    {c:"東",r:"ひがし／トウ"},{c:"京",r:"キョウ／ケイ"},{c:"校",r:"コウ"},{c:"駅",r:"エキ"},
+    {c:"店",r:"みせ／テン"},{c:"上",r:"うえ／ジョウ"},{c:"下",r:"した／カ"},{c:"部",r:"ブ"},
+    {c:"屋",r:"や／オク"},{c:"机",r:"つくえ／キ"}
+  ],
+  scenario:{
+    title:"Los kanji de la Unidad 5",
+    contextEs:"María repasa los kanji de lugares y posiciones de la ciudad.",
+    lines:[
+      {speaker:"A", ja:"<ruby>駅<rt>えき</rt></ruby>は どこですか。", jaPlain:"えきはどこですか。",
+       romaji:"Eki wa doko desu ka.", es:"¿Dónde está la estación?", audio:"", highlight:["駅"]},
+      {speaker:"B", ja:"<ruby>東京<rt>とうきょう</rt></ruby><ruby>駅<rt>えき</rt></ruby>の <ruby>下<rt>した</rt></ruby>に <ruby>店<rt>みせ</rt></ruby>が あります。", jaPlain:"とうきょうえきのしたにみせがあります。",
+       romaji:"Tōkyō-eki no shita ni mise ga arimasu.", es:"Debajo de la estación de Tokio hay tiendas.", audio:"", highlight:["東京","下","店"]},
+      {speaker:"A", ja:"<ruby>学校<rt>がっこう</rt></ruby>の <ruby>部屋<rt>へや</rt></ruby>の <ruby>机<rt>つくえ</rt></ruby>の <ruby>上<rt>うえ</rt></ruby>です。", jaPlain:"がっこうのへやのつくえのうえです。",
+       romaji:"Gakkō no heya no tsukue no ue desu.", es:"Encima del escritorio de la sala de la escuela.", audio:"", highlight:["学校","部屋","机","上"]}
+    ]
+  },
+  explain:{
+    summaryEs:"Practica el trazo y la lectura de los 10 kanji de lugares y posiciones.",
+    blocks:[
+      {type:"rule", es:"Cada kanji tiene un orden de trazos fijo. Sigue los números de la guía al escribir."},
+      {type:"pattern", es:"東京 = Tokio · 学校 = escuela · 駅 = estación · 店 = tienda · 上 = arriba · 下 = abajo · 部屋 = habitación · 机 = escritorio"},
+      {type:"note", es:"駅 y 校 casi siempre se leen con on'yomi: えき, こう (学校 = がっこう)."}
+    ]
+  },
+  practice:{ passRate:0.8, items:[
+    {type:"mc", prompt:"¿Cómo se lee 東京?", ja:"東京", options:["とうきょう","ひがしきょう","とうけい","とんきょう"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 学校?", ja:"学校", options:["がっこう","がくこう","まなこう","がっこ"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 部屋?", ja:"部屋", options:["へや","ぶおく","ぶや","へおく"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 東京駅?", ja:"東京駅", options:["とうきょうえき","とうきょうばし","ひがしえき","とうけいえき"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 机?", ja:"机", options:["つくえ","き","いす","つき"], answer:0},
+    {type:"mc", prompt:"¿Qué significa 店?", ja:"店", options:["tienda","estación","escuela","habitación"], answer:0},
+    {type:"mc", prompt:"¿Qué significa 上?", ja:"上", options:["arriba","abajo","dentro","al lado"], answer:0},
+    {type:"mc", prompt:"¿Qué significa 下?", ja:"下", options:["abajo","arriba","delante","detrás"], answer:0},
+    {type:"mc", prompt:"¿Qué significa 東京?", ja:"東京", options:["Tokio","escuela","estación","tienda"], answer:0}
+  ]}
+});
+
+window.canDoData.push({
+  id:"u6_kanji", unit:6, index:6,
+  es:"Escribir y leer los kanji de la Unidad 6",
+  jaGoal:"このユニットの漢字を書ける・読める",
+  grammarTabs:[], source:"ai", status:"published", version:1, updatedAt:"2026-05-30",
+  vocab:[], kanji:["高","安","新","古","大","小","食","飲"],
+  traceChars:[
+    {c:"高",r:"たか(い)／コウ"},{c:"安",r:"やす(い)／アン"},{c:"新",r:"あたら(しい)／シン"},{c:"古",r:"ふる(い)／コ"},
+    {c:"大",r:"おお(きい)／ダイ"},{c:"小",r:"ちい(さい)／ショウ"},{c:"食",r:"た(べる)／ショク"},{c:"飲",r:"の(む)／イン"}
+  ],
+  scenario:{
+    title:"Los kanji de la Unidad 6",
+    contextEs:"María repasa los kanji de adjetivos, compras y comida.",
+    lines:[
+      {speaker:"A", ja:"この <ruby>店<rt>みせ</rt></ruby>は <ruby>安<rt>やす</rt></ruby>いです。", jaPlain:"このみせはやすいです。",
+       romaji:"Kono mise wa yasui desu.", es:"Esta tienda es barata.", audio:"", highlight:["安"]},
+      {speaker:"B", ja:"<ruby>新<rt>あたら</rt></ruby>しい くるまは <ruby>高<rt>たか</rt></ruby>いです。", jaPlain:"あたらしいくるまはたかいです。",
+       romaji:"Atarashii kuruma wa takai desu.", es:"El coche nuevo es caro.", audio:"", highlight:["新","高"]},
+      {speaker:"A", ja:"<ruby>大<rt>おお</rt></ruby>きいのを <ruby>食<rt>た</rt></ruby>べて、<ruby>小<rt>ちい</rt></ruby>さいのを <ruby>飲<rt>の</rt></ruby>みます。", jaPlain:"おおきいのをたべて、ちいさいのをのみます。",
+       romaji:"Ōkii no o tabete, chiisai no o nomimasu.", es:"Como el grande y bebo el pequeño.", audio:"", highlight:["大","食","小","飲"]}
+    ]
+  },
+  explain:{
+    summaryEs:"Practica el trazo y la lectura de los 8 kanji de adjetivos, compras y comida.",
+    blocks:[
+      {type:"rule", es:"Cada kanji tiene un orden de trazos fijo. Sigue los números de la guía al escribir."},
+      {type:"pattern", es:"高い = alto/caro · 安い = barato · 新しい = nuevo · 古い = viejo · 大きい = grande · 小さい = pequeño · 食べる = comer · 飲む = beber"},
+      {type:"note", es:"En adjetivos い se usa la lectura kun: 高い = たかい, 安い = やすい, 新しい = あたらしい."}
+    ]
+  },
+  practice:{ passRate:0.8, items:[
+    {type:"mc", prompt:"¿Cómo se lee 高い?", ja:"高い", options:["たかい","こうい","だかい","たかしい"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 安い?", ja:"安い", options:["やすい","あんい","やすしい","やすらい"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 新しい?", ja:"新しい", options:["あたらしい","しんしい","あらたしい","にいしい"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 古い?", ja:"古い", options:["ふるい","こい","ふりい","くるい"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 大きい?", ja:"大きい", options:["おおきい","だいきい","おおいきい","たいきい"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 小さい?", ja:"小さい", options:["ちいさい","しょうさい","こさい","ちさい"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 食べる?", ja:"食べる", options:["たべる","しょくべる","のべる","くべる"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 飲む?", ja:"飲む", options:["のむ","いんむ","たむ","よむ"], answer:0},
+    {type:"mc", prompt:"¿Qué significa 高い?", ja:"高い", options:["alto/caro","barato","nuevo","pequeño"], answer:0}
+  ]}
+});
+
+window.canDoData.push({
+  id:"u7_kanji", unit:7, index:6,
+  es:"Escribir y leer los kanji de la Unidad 7",
+  jaGoal:"このユニットの漢字を書ける・読める",
+  grammarTabs:[], source:"ai", status:"published", version:1, updatedAt:"2026-05-30",
+  vocab:[], kanji:["行","来","見","聞","書","電","車","飛","機"],
+  traceChars:[
+    {c:"行",r:"い(く)／コウ"},{c:"来",r:"く(る)／ライ"},{c:"見",r:"み(る)／ケン"},{c:"聞",r:"き(く)／ブン"},
+    {c:"書",r:"か(く)／ショ"},{c:"電",r:"デン"},{c:"車",r:"くるま／シャ"},{c:"飛",r:"と(ぶ)／ヒ"},{c:"機",r:"はた／キ"}
+  ],
+  scenario:{
+    title:"Los kanji de la Unidad 7",
+    contextEs:"María repasa los kanji de acciones y medios de transporte.",
+    lines:[
+      {speaker:"A", ja:"<ruby>電車<rt>でんしゃ</rt></ruby>で <ruby>行<rt>い</rt></ruby>きます。", jaPlain:"でんしゃでいきます。",
+       romaji:"Densha de ikimasu.", es:"Voy en tren.", audio:"", highlight:["電車","行"]},
+      {speaker:"B", ja:"<ruby>飛行機<rt>ひこうき</rt></ruby>で <ruby>来<rt>き</rt></ruby>ます。", jaPlain:"ひこうきできます。",
+       romaji:"Hikōki de kimasu.", es:"Vengo en avión.", audio:"", highlight:["飛行機","来"]},
+      {speaker:"A", ja:"テレビを <ruby>見<rt>み</rt></ruby>たり、おんがくを <ruby>聞<rt>き</rt></ruby>いたり、てがみを <ruby>書<rt>か</rt></ruby>いたり します。", jaPlain:"テレビをみたり、おんがくをきいたり、てがみをかいたりします。",
+       romaji:"Terebi o mitari, ongaku o kiitari, tegami o kaitari shimasu.", es:"Veo la tele, escucho música y escribo cartas.", audio:"", highlight:["見","聞","書"]}
+    ]
+  },
+  explain:{
+    summaryEs:"Practica el trazo y la lectura de los 9 kanji de acciones y transporte.",
+    blocks:[
+      {type:"rule", es:"Cada kanji tiene un orden de trazos fijo. Sigue los números de la guía al escribir."},
+      {type:"pattern", es:"行く = ir · 来る = venir · 見る = ver · 聞く = escuchar · 書く = escribir · 電車 = tren · 車 = coche · 飛ぶ = volar · 飛行機 = avión"},
+      {type:"note", es:"飛行機 (avión) junta tres kanji: 飛 + 行 + 機 = ひこうき."}
+    ]
+  },
+  practice:{ passRate:0.8, items:[
+    {type:"mc", prompt:"¿Cómo se lee 行く?", ja:"行く", options:["いく","こうく","ぎょうく","いきく"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 来る?", ja:"来る", options:["くる","らいる","きる","こる"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 見る?", ja:"見る", options:["みる","けんる","みえる","める"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 聞く?", ja:"聞く", options:["きく","ぶんく","もんく","きこく"], answer:0},
+    {type:"mc", prompt:"¿Qué significa 書く?", ja:"書く", options:["escribir","leer","ver","ir"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 電車?", ja:"電車", options:["でんしゃ","でんくるま","でんち","てんしゃ"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 飛行機?", ja:"飛行機", options:["ひこうき","ひぎょうき","とびこうき","ひこうぎ"], answer:0},
+    {type:"mc", prompt:"¿Qué significa 飛行機?", ja:"飛行機", options:["avión","tren","coche","máquina"], answer:0},
+    {type:"mc", prompt:"¿Qué significa 電車?", ja:"電車", options:["tren","avión","coche","bicicleta"], answer:0}
+  ]}
+});
+
+window.canDoData.push({
+  id:"u8_kanji", unit:8, index:6,
+  es:"Escribir y leer los kanji de la Unidad 8",
+  jaGoal:"このユニットの漢字を書ける・読める",
+  grammarTabs:[], source:"ai", status:"published", version:1, updatedAt:"2026-05-30",
+  vocab:[], kanji:["寒","暑","疲","雨","病","院"],
+  traceChars:[
+    {c:"寒",r:"さむ(い)／カン"},{c:"暑",r:"あつ(い)／ショ"},{c:"疲",r:"つか(れる)／ヒ"},
+    {c:"雨",r:"あめ／ウ"},{c:"病",r:"ビョウ／やまい"},{c:"院",r:"イン"}
+  ],
+  scenario:{
+    title:"Los kanji de la Unidad 8",
+    contextEs:"María repasa los kanji para describir el clima y el estado de salud.",
+    lines:[
+      {speaker:"A", ja:"きょうは <ruby>寒<rt>さむ</rt></ruby>いです。", jaPlain:"きょうはさむいです。",
+       romaji:"Kyō wa samui desu.", es:"Hoy hace frío.", audio:"", highlight:["寒"]},
+      {speaker:"B", ja:"なつは <ruby>暑<rt>あつ</rt></ruby>くて、<ruby>雨<rt>あめ</rt></ruby>が おおいです。", jaPlain:"なつはあつくて、あめがおおいです。",
+       romaji:"Natsu wa atsukute, ame ga ōi desu.", es:"En verano hace calor y llueve mucho.", audio:"", highlight:["暑","雨"]},
+      {speaker:"A", ja:"<ruby>疲<rt>つか</rt></ruby>れたので、<ruby>病院<rt>びょういん</rt></ruby>へ <ruby>行<rt>い</rt></ruby>きます。", jaPlain:"つかれたので、びょういんへいきます。",
+       romaji:"Tsukareta node, byōin e ikimasu.", es:"Como estoy cansado/a, voy al hospital.", audio:"", highlight:["疲","病院"]}
+    ]
+  },
+  explain:{
+    summaryEs:"Practica el trazo y la lectura de los 6 kanji de clima y salud.",
+    blocks:[
+      {type:"rule", es:"Cada kanji tiene un orden de trazos fijo. Sigue los números de la guía al escribir."},
+      {type:"pattern", es:"寒い = frío · 暑い = calor · 疲れる = cansarse · 雨 = lluvia · 病院 = hospital"},
+      {type:"note", es:"病院 (hospital) junta 病 (enfermedad) + 院 (edificio) = びょういん."}
+    ]
+  },
+  practice:{ passRate:0.8, items:[
+    {type:"mc", prompt:"¿Cómo se lee 寒い?", ja:"寒い", options:["さむい","かんい","さびい","あつい"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 暑い?", ja:"暑い", options:["あつい","しょい","さむい","あつしい"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 疲れる?", ja:"疲れる", options:["つかれる","ひれる","つれる","つかられる"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 雨?", ja:"雨", options:["あめ","う","みず","ゆき"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 病院?", ja:"病院", options:["びょういん","びょうかん","へいいん","びょいん"], answer:0},
+    {type:"mc", prompt:"¿Qué significa 病院?", ja:"病院", options:["hospital","lluvia","calor","frío"], answer:0},
+    {type:"mc", prompt:"¿Qué significa 寒い?", ja:"寒い", options:["frío","calor","cansado","lluvia"], answer:0},
+    {type:"mc", prompt:"¿Qué significa 暑い?", ja:"暑い", options:["calor","frío","lluvia","cansado"], answer:0}
+  ]}
+});
+
+window.canDoData.push({
+  id:"u9_kanji", unit:9, index:6,
+  es:"Escribir y leer los kanji de la Unidad 9",
+  jaGoal:"このユニットの漢字を書ける・読める",
+  grammarTabs:[], source:"ai", status:"published", version:1, updatedAt:"2026-05-30",
+  vocab:[], kanji:["父","母","兄","弟","姉","妹"],
+  traceChars:[
+    {c:"父",r:"ちち／フ"},{c:"母",r:"はは／ボ"},{c:"兄",r:"あに／ケイ"},
+    {c:"弟",r:"おとうと／ダイ"},{c:"姉",r:"あね／シ"},{c:"妹",r:"いもうと／マイ"}
+  ],
+  scenario:{
+    title:"Los kanji de la Unidad 9",
+    contextEs:"María repasa los kanji de los miembros de la familia.",
+    lines:[
+      {speaker:"A", ja:"これは わたしの <ruby>父<rt>ちち</rt></ruby>と <ruby>母<rt>はは</rt></ruby>です。", jaPlain:"これはわたしのちちとははです。",
+       romaji:"Kore wa watashi no chichi to haha desu.", es:"Estos son mi padre y mi madre.", audio:"", highlight:["父","母"]},
+      {speaker:"B", ja:"<ruby>兄<rt>あに</rt></ruby>が ひとりと、<ruby>弟<rt>おとうと</rt></ruby>が ふたり います。", jaPlain:"あにがひとりと、おとうとがふたりいます。",
+       romaji:"Ani ga hitori to, otōto ga futari imasu.", es:"Tengo un hermano mayor y dos hermanos menores.", audio:"", highlight:["兄","弟"]},
+      {speaker:"A", ja:"<ruby>姉<rt>あね</rt></ruby>と <ruby>妹<rt>いもうと</rt></ruby>も います。", jaPlain:"あねといもうともいます。",
+       romaji:"Ane to imōto mo imasu.", es:"También tengo una hermana mayor y una hermana menor.", audio:"", highlight:["姉","妹"]}
+    ]
+  },
+  explain:{
+    summaryEs:"Practica el trazo y la lectura de los 6 kanji de la familia.",
+    blocks:[
+      {type:"rule", es:"Cada kanji tiene un orden de trazos fijo. Sigue los números de la guía al escribir."},
+      {type:"pattern", es:"父 = padre · 母 = madre · 兄 = hermano mayor · 弟 = hermano menor · 姉 = hermana mayor · 妹 = hermana menor"},
+      {type:"note", es:"Para tu propia familia se usa la lectura kun: 父 = ちち, 母 = はは, 兄 = あに."}
+    ]
+  },
+  practice:{ passRate:0.8, items:[
+    {type:"mc", prompt:"¿Cómo se lee 父?", ja:"父", options:["ちち","はは","あに","おとうと"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 母?", ja:"母", options:["はは","ちち","あね","いもうと"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 兄?", ja:"兄", options:["あに","おとうと","あね","ちち"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 弟?", ja:"弟", options:["おとうと","あに","いもうと","はは"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 姉?", ja:"姉", options:["あね","いもうと","はは","あに"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 妹?", ja:"妹", options:["いもうと","あね","おとうと","はは"], answer:0},
+    {type:"mc", prompt:"¿Qué significa 父?", ja:"父", options:["padre","madre","hermano mayor","hermana menor"], answer:0},
+    {type:"mc", prompt:"¿Qué significa 母?", ja:"母", options:["madre","padre","hermana mayor","hermana menor"], answer:0}
+  ]}
+});
+
+window.canDoData.push({
+  id:"u10_kanji", unit:10, index:6,
+  es:"Escribir y leer los kanji de la Unidad 10",
+  jaGoal:"このユニットの漢字を書ける・読める",
+  grammarTabs:[], source:"ai", status:"published", version:1, updatedAt:"2026-05-30",
+  vocab:[], kanji:["今","毎","週","帰","出","休","読","話"],
+  traceChars:[
+    {c:"今",r:"いま／コン"},{c:"毎",r:"マイ"},{c:"週",r:"シュウ"},{c:"帰",r:"かえ(る)／キ"},
+    {c:"出",r:"で(る)／シュツ"},{c:"休",r:"やす(む)／キュウ"},{c:"読",r:"よ(む)／ドク"},{c:"話",r:"はな(す)／ワ"}
+  ],
+  scenario:{
+    title:"Los kanji de la Unidad 10",
+    contextEs:"María repasa los kanji de su horario diario y sus acciones de cada día.",
+    lines:[
+      {speaker:"A", ja:"<ruby>今週<rt>こんしゅう</rt></ruby>は <ruby>毎<rt>まい</rt></ruby><ruby>日<rt>にち</rt></ruby> いそがしいです。", jaPlain:"こんしゅうはまいにちいそがしいです。",
+       romaji:"Konshū wa mainichi isogashii desu.", es:"Esta semana estoy ocupado/a todos los días.", audio:"", highlight:["今週","毎日"]},
+      {speaker:"B", ja:"うちへ <ruby>帰<rt>かえ</rt></ruby>ってから、<ruby>本<rt>ほん</rt></ruby>を <ruby>読<rt>よ</rt></ruby>みます。", jaPlain:"うちへかえってから、ほんをよみます。",
+       romaji:"Uchi e kaette kara, hon o yomimasu.", es:"Después de volver a casa, leo un libro.", audio:"", highlight:["帰","読"]},
+      {speaker:"A", ja:"<ruby>出<rt>で</rt></ruby>かけてから、ともだちと <ruby>話<rt>はな</rt></ruby>して <ruby>休<rt>やす</rt></ruby>みます。", jaPlain:"でかけてから、ともだちとはなしてやすみます。",
+       romaji:"Dekakete kara, tomodachi to hanashite yasumimasu.", es:"Después de salir, hablo con amigos y descanso.", audio:"", highlight:["出","話","休"]}
+    ]
+  },
+  explain:{
+    summaryEs:"Practica el trazo y la lectura de los 8 kanji del horario diario y las acciones cotidianas.",
+    blocks:[
+      {type:"rule", es:"Cada kanji tiene un orden de trazos fijo. Sigue los números de la guía al escribir."},
+      {type:"pattern", es:"今週 = esta semana · 毎日 = cada día · 帰る = regresar · 出る = salir · 休む = descansar · 読む = leer · 話す = hablar"},
+      {type:"note", es:"今週 = esta semana, 毎日 = cada día. Los verbos usan kun: 帰る, 出る, 休む, 読む, 話す."}
+    ]
+  },
+  practice:{ passRate:0.8, items:[
+    {type:"mc", prompt:"¿Cómo se lee 今週?", ja:"今週", options:["こんしゅう","いましゅう","きんしゅう","こんじゅう"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 毎日?", ja:"毎日", options:["まいにち","まいじつ","ごとにち","めにち"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 毎週?", ja:"毎週", options:["まいしゅう","まいにち","ごとしゅう","めしゅう"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 帰る?", ja:"帰る", options:["かえる","きる","かえす","きえる"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 出る?", ja:"出る", options:["でる","しゅつる","だる","いでる"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 休む?", ja:"休む", options:["やすむ","きゅうむ","やすらむ","よむ"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 読む?", ja:"読む", options:["よむ","どくむ","よもむ","はなむ"], answer:0},
+    {type:"mc", prompt:"¿Cómo se lee 話す?", ja:"話す", options:["はなす","わす","はなしす","かたす"], answer:0},
+    {type:"mc", prompt:"¿Qué significa 今週?", ja:"今週", options:["esta semana","cada día","cada semana","hoy"], answer:0},
+    {type:"mc", prompt:"¿Qué significa 毎日?", ja:"毎日", options:["cada día","esta semana","cada mañana","todas las noches"], answer:0}
+  ]}
+});
+
 
 // ------------------------------------------------------------
 // Profile セクション
@@ -24993,21 +25606,268 @@ function renderProfile() {
 }
 
 // ------------------------------------------------------------
-// JLPT セクション（Premium プレースホルダー）
+// JLPT セクション — N5 総まとめテスト（35問）
 // ------------------------------------------------------------
+
+const jlptQuestionBank = [
+  // ── Section 1: Vocabulario (10問) ──────────────────────────
+  { section:1, sectionName:"Vocabulario",
+    q:"¿Qué significa 「ありがとう」?",
+    options:["Por favor","Perdón","Gracias","Hola"], answer:2 },
+  { section:1, sectionName:"Vocabulario",
+    q:"¿Qué significa 「すみません」?",
+    options:["Gracias","De nada","Disculpe / Perdón","Buenas noches"], answer:2 },
+  { section:1, sectionName:"Vocabulario",
+    q:"「コーヒー」¿qué es?",
+    options:["Té verde","Café","Agua","Jugo"], answer:1 },
+  { section:1, sectionName:"Vocabulario",
+    q:"¿Cómo se lee 「食べる」?", ja:"食べる",
+    options:["たべる","のむ","かう","みる"], answer:0 },
+  { section:1, sectionName:"Vocabulario",
+    q:"¿Cómo se lee 「学校」?", ja:"学校",
+    options:["がっこ","がくこう","がっこう","がくこ"], answer:2 },
+  { section:1, sectionName:"Vocabulario",
+    q:"¿Cómo se lee 「毎日」?", ja:"毎日",
+    options:["まいにち","まいび","まいか","まいじつ"], answer:0 },
+  { section:1, sectionName:"Vocabulario",
+    q:"「___を 飲みます。」 (Bebo café.)",
+    options:["コーヒー","りんご","パン","ごはん"], answer:0 },
+  { section:1, sectionName:"Vocabulario",
+    q:"「公園で ___ します。」 (Hago jogging en el parque.)",
+    options:["べんきょう","ジョギング","かいもの","しゅくだい"], answer:1 },
+  { section:1, sectionName:"Vocabulario",
+    q:"「___ が あります。」 (Hay un examen.)",
+    options:["しけん","ともだち","いぬ","みず"], answer:0 },
+  { section:1, sectionName:"Vocabulario",
+    q:"「___ は おいしいです。」 (El sushi está delicioso.)",
+    options:["コーヒー","かばん","おすし","えんぴつ"], answer:2 },
+
+  // ── Section 2: Gramática (20問) ────────────────────────────
+  // 助詞 (5問)
+  { section:2, sectionName:"Gramática",
+    q:"「学校 ___ 行きます。」 ¿Qué partícula va?",
+    options:["を","へ","で","が"], answer:1 },
+  { section:2, sectionName:"Gramática",
+    q:"「友だち ___ 映画を 見ました。」 ¿Qué partícula va?",
+    options:["を","に","と","で"], answer:2 },
+  { section:2, sectionName:"Gramática",
+    q:"「図書館 ___ 本を 読みます。」 ¿Qué partícula va?",
+    options:["へ","を","に","で"], answer:3 },
+  { section:2, sectionName:"Gramática",
+    q:"「7時 ___ 起きます。」 ¿Qué partícula va?",
+    options:["で","を","に","と"], answer:2 },
+  { section:2, sectionName:"Gramática",
+    q:"「コーヒー ___ 砂糖 ___ 入れます。」 ¿Qué partículas van?",
+    options:["に / を","を / に","が / に","を / で"], answer:0 },
+  // 文法形式 (10問)
+  { section:2, sectionName:"Gramática",
+    q:"「映画を 見 ___。」 (Quiero ver una película.)",
+    options:["たいです","てください","ています","たことがあります"], answer:0 },
+  { section:2, sectionName:"Gramática",
+    q:"「ここで タバコを ___。」 (Por favor no fume aquí.)",
+    options:["すってください","すわないでください","すいてもいいです","すってはいいです"], answer:1 },
+  { section:2, sectionName:"Gramática",
+    q:"「毎朝 ジョギングを ___。」 (Hago jogging cada mañana — hábito.)",
+    options:["します","しました","しています","してください"], answer:2 },
+  { section:2, sectionName:"Gramática",
+    q:"「日本へ 行った ___。」 (He ido a Japón.)",
+    options:["ことがあります","ことがありません","たことがない","あとで"], answer:0 },
+  { section:2, sectionName:"Gramática",
+    q:"「学校へ 行く ___、歯を 磨きます。」 (Antes de ir, me cepillo los dientes.)",
+    options:["あとで","てから","まえに","ながら"], answer:2 },
+  { section:2, sectionName:"Gramática",
+    q:"「映画を 見 ___、ごはんを 食べました。」 (Después de ver la película, comí.)",
+    options:["てから","たあとで","まえに","ながら"], answer:1 },
+  { section:2, sectionName:"Gramática",
+    q:"「土曜日は 来 ___。」 (No es necesario venir el sábado.)",
+    options:["ないでください","なければなりません","なくてもいいです","てはいけません"], answer:2 },
+  { section:2, sectionName:"Gramática",
+    q:"「写真を 撮っては ___。」 (No está permitido tomar fotos.)",
+    options:["いいです","いけません","もいいです","ください"], answer:1 },
+  { section:2, sectionName:"Gramática",
+    q:"「この 映画は おもしろい ___。」 (Creo que esta película es interesante.)",
+    options:["とおもいます","ことがあります","たいです","ています"], answer:0 },
+  { section:2, sectionName:"Gramática",
+    q:"「映画を 見たり、___ したりします。」 (Veo películas, leo libros, ese tipo de cosas.)",
+    options:["本を 読ん","本を 読む","本を 読んだ","本を 読んで"], answer:2 },
+  // 接続詞・文整序 (5問)
+  { section:2, sectionName:"Gramática",
+    q:"「疲れました。___、頑張ります。」 ¿Qué conector va?",
+    options:["だから","でも","そして","それから"], answer:1 },
+  { section:2, sectionName:"Gramática",
+    q:"「試験が あります。___、勉強します。」 ¿Qué conector va?",
+    options:["でも","そして","だから","それに"], answer:2 },
+  { section:2, sectionName:"Gramática",
+    q:"「コーヒーを 飲んでから、___。」 ¿Qué continúa correctamente?",
+    options:["学校へ 行きます。","学校へ 行きてから。","学校へ 行くてから。","学校へ 行ったから。"], answer:0 },
+  { section:2, sectionName:"Gramática",
+    q:"「先生 ___ 聞いてください。」 ¿Qué partícula va?",
+    options:["を","が","に","で"], answer:2 },
+  { section:2, sectionName:"Gramática",
+    q:"「田中さんは 先生 ___。」 ¿Qué completa la frase?",
+    options:["だ","は","です","が"], answer:2 },
+
+  // ── Section 3: Lectura (5問) ──────────────────────────────
+  { section:3, sectionName:"Lectura", passage:true,
+    q:"¿A qué hora se levanta María cada mañana?",
+    options:["A las 5","A las 6","A las 7","A las 8"], answer:1 },
+  { section:3, sectionName:"Lectura", passage:true,
+    q:"¿Qué hace María justo antes de ir a la escuela?",
+    options:["Bebe café","Ve una película","Habla con amigos","Estudia kanji"], answer:0 },
+  { section:3, sectionName:"Lectura", passage:true,
+    q:"¿Qué hizo María ayer?",
+    options:["Hizo jogging","Fue al cine con amigos","Fue a Japón","Estudió toda la noche"], answer:1 },
+  { section:3, sectionName:"Lectura", passage:true,
+    q:"¿María ha ido a Japón alguna vez?",
+    options:["Sí, ha ido","No, todavía no","No lo menciona","Va la próxima semana"], answer:1 },
+  { section:3, sectionName:"Lectura", passage:true,
+    q:"¿Qué piensa María sobre ir a Japón?",
+    options:["No quiere ir","Ya fue y no quiere volver","Algún día quiere ir","Debe ir por obligación"], answer:2 }
+];
+
+const _jlptPassage = `<div style="background:#F0F7F6;border-left:4px solid var(--ocean);border-radius:var(--radius-md);padding:1rem 1.2rem;margin-bottom:1rem;font-family:'Noto Sans JP',sans-serif;font-size:0.88rem;line-height:1.9">
+  <p style="margin:0 0 0.4rem;font:700 0.75rem 'DM Sans',sans-serif;color:var(--ocean);text-transform:uppercase;letter-spacing:0.04em">📄 Lee el texto</p>
+  <p style="margin:0 0 0.6rem">マリアは まいあさ <u>6じ</u>に おきます。おきてから、ジョギングを します。それから、シャワーを あびて、あさごはんを たべます。がっこうへ いく まえに、コーヒーを のみます。</p>
+  <p style="margin:0 0 0.6rem">きのう、ともだちと えいがを みました。えいがを みたあとで、すしを たべました。とても おいしかったです。</p>
+  <p style="margin:0">にほんへ いったことが ありますか。マリアは まだ ありません。でも、いつか いきたいです。</p>
+</div>`;
+
+let _jlptQuestions = [];
+let _jlptIdx       = 0;
+let _jlptScore     = 0;
+let _jlptAnswers   = [];
 
 function renderJlpt() {
   document.getElementById('jlpt-content').innerHTML = `
-    <div style="max-width:480px;margin:0 auto;padding:2rem 1rem;text-align:center">
-      <p style="font-size:3rem;margin:0 0 0.5rem">🎯</p>
-      <h2 style="font:700 1.4rem 'Zen Maru Gothic',sans-serif;color:var(--night);margin:0 0 0.75rem">Examen JLPT N5</h2>
-      <p style="font-family:'DM Sans',sans-serif;color:var(--text-light);margin-bottom:1.5rem">
-        Exámenes de práctica con el formato oficial JLPT N5.<br>Disponible con el plan Premium.
-      </p>
-      ${isPremium()
-        ? `<p style="color:var(--ocean);font-weight:700">Próximamente — estamos preparando los exámenes.</p>`
-        : `<button onclick="openPlansModal()" class="btn btn-primary">⭐ Ver planes Premium</button>`
-      }
+    <div style="max-width:480px;margin:0 auto;padding:1.5rem 1rem">
+      <div style="text-align:center;margin-bottom:1.5rem">
+        <p style="font-size:3rem;margin:0 0 0.4rem">🎯</p>
+        <h2 style="font:700 1.4rem 'Zen Maru Gothic',sans-serif;color:var(--night);margin:0 0 0.4rem">Simulacro JLPT N5</h2>
+        <p style="font-family:'DM Sans',sans-serif;color:var(--text-light);font-size:0.88rem;margin:0">Pon a prueba todo lo que aprendiste en los Units 1–10.</p>
+      </div>
+      <div style="background:#fff;border-radius:var(--radius-lg);padding:1.2rem 1.4rem;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:1rem">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;text-align:center;margin-bottom:1rem">
+          <div><p style="margin:0;font:800 1.5rem 'Outfit',sans-serif;color:var(--primary)">35</p><p style="margin:0;font-size:0.7rem;color:var(--text-light)">preguntas</p></div>
+          <div><p style="margin:0;font:800 1.5rem 'Outfit',sans-serif;color:var(--ocean)">60%</p><p style="margin:0;font-size:0.7rem;color:var(--text-light)">para aprobar</p></div>
+          <div><p style="margin:0;font:800 1.5rem 'Outfit',sans-serif;color:var(--accent)">+100</p><p style="margin:0;font-size:0.7rem;color:var(--text-light)">XP al aprobar</p></div>
+        </div>
+        <div style="font-family:'DM Sans',sans-serif;font-size:0.82rem;color:var(--text-light);line-height:1.8">
+          <p style="margin:0">📝 <strong>Sección 1</strong> — Vocabulario (10 preguntas)</p>
+          <p style="margin:0">📖 <strong>Sección 2</strong> — Gramática (20 preguntas)</p>
+          <p style="margin:0">📄 <strong>Sección 3</strong> — Lectura (5 preguntas)</p>
+        </div>
+      </div>
+      <button onclick="startJlptTest()" class="btn btn-primary" style="width:100%;padding:0.85rem;font-size:1rem">🚀 Comenzar examen</button>
+    </div>`;
+}
+
+function startJlptTest() {
+  _jlptQuestions = jlptQuestionBank.slice();
+  _jlptIdx   = 0;
+  _jlptScore = 0;
+  _jlptAnswers = [];
+  renderJlptQuestion();
+}
+
+function renderJlptQuestion() {
+  if (_jlptIdx >= _jlptQuestions.length) { showJlptResults(); return; }
+  const q     = _jlptQuestions[_jlptIdx];
+  const num   = _jlptIdx + 1;
+  const total = _jlptQuestions.length;
+  const pct   = Math.round((_jlptIdx) / total * 100);
+
+  const prevSec = _jlptIdx > 0 ? _jlptQuestions[_jlptIdx - 1].section : 0;
+  const secColor = q.section === 1 ? 'var(--primary)' : q.section === 2 ? 'var(--ocean)' : 'var(--accent)';
+  const secIcon  = q.section === 1 ? '📝' : q.section === 2 ? '📖' : '📄';
+  const secHeader = q.section !== prevSec ? `
+    <div style="background:${secColor};color:#fff;border-radius:var(--radius-md);padding:0.45rem 1rem;margin-bottom:0.75rem;font:700 0.82rem 'DM Sans',sans-serif">
+      ${secIcon} Sección ${q.section} — ${q.sectionName}
+    </div>` : '';
+
+  const optHtml = q.options.map((o, i) => `
+    <button class="placement-opt" id="jlpt-opt-${i}" onclick="checkJlptAnswer(${i})"
+      style="text-align:left;width:100%;margin-bottom:0.5rem;padding:0.7rem 1rem;background:#fff;border:2px solid #E8E8E8;border-radius:var(--radius-md);font-family:'DM Sans',sans-serif;font-size:0.9rem;cursor:pointer;transition:border-color 0.15s"
+      onmouseover="this.style.borderColor='${secColor}'" onmouseout="this.style.borderColor='#E8E8E8'">
+      <span style="font-weight:700;color:${secColor};margin-right:0.5rem">${['A','B','C','D'][i]}.</span>${o}
+    </button>`).join('');
+
+  document.getElementById('jlpt-content').innerHTML = `
+    <div style="max-width:480px;margin:0 auto;padding:1rem">
+      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem">
+        <div style="flex:1;background:#E8E8E8;border-radius:99px;height:8px;overflow:hidden">
+          <div style="background:${secColor};height:100%;border-radius:99px;width:${pct}%;transition:width 0.3s"></div>
+        </div>
+        <span style="font:700 0.78rem 'DM Sans',sans-serif;color:var(--text-light);white-space:nowrap">${num} / ${total}</span>
+      </div>
+      ${secHeader}
+      ${q.passage ? _jlptPassage : ''}
+      <div style="background:#fff;border-radius:var(--radius-lg);padding:1.2rem 1.4rem;margin-bottom:0.75rem;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
+        <p style="margin:0 0 0.5rem;font:700 0.75rem 'DM Sans',sans-serif;color:var(--text-light)">Pregunta ${num}</p>
+        <p style="margin:0;font:600 0.93rem 'DM Sans',sans-serif;color:var(--night);line-height:1.55">${q.q}</p>
+        ${q.ja ? `<p style="margin:0.4rem 0 0;font:700 1rem 'Noto Sans JP',sans-serif;color:var(--night)">${q.ja}</p>` : ''}
+      </div>
+      <div>${optHtml}</div>
+    </div>`;
+}
+
+function checkJlptAnswer(idx) {
+  const q       = _jlptQuestions[_jlptIdx];
+  const correct = idx === q.answer;
+  if (correct) _jlptScore++;
+  _jlptAnswers.push({ idx, correct });
+
+  const btns = document.querySelectorAll('#jlpt-content .placement-opt');
+  btns.forEach(b => { b.onclick = null; b.style.cursor = 'default'; b.onmouseover = null; b.onmouseout = null; });
+  if (btns[idx])      { btns[idx].style.background = correct ? '#D4EDDA' : '#F8D7DA'; btns[idx].style.borderColor = correct ? '#28A745' : '#DC3545'; }
+  if (!correct && btns[q.answer]) { btns[q.answer].style.background = '#D4EDDA'; btns[q.answer].style.borderColor = '#28A745'; }
+
+  _jlptIdx++;
+  setTimeout(renderJlptQuestion, 850);
+}
+
+function showJlptResults() {
+  const total  = _jlptQuestions.length;
+  const pct    = Math.round(_jlptScore / total * 100);
+  const passed = pct >= 60;
+  const s1 = _jlptAnswers.slice(0, 10).filter(a => a.correct).length;
+  const s2 = _jlptAnswers.slice(10, 30).filter(a => a.correct).length;
+  const s3 = _jlptAnswers.slice(30, 35).filter(a => a.correct).length;
+
+  if (passed) grantXP(100);
+
+  const barHtml = (score, max, color) => {
+    const p = Math.round(score / max * 100);
+    return `<div style="background:#E8E8E8;border-radius:99px;height:8px;overflow:hidden"><div style="background:${color};height:100%;border-radius:99px;width:${p}%"></div></div>`;
+  };
+
+  document.getElementById('jlpt-content').innerHTML = `
+    <div style="max-width:480px;margin:0 auto;padding:1.5rem 1rem;text-align:center">
+      <p style="font-size:3rem;margin:0 0 0.25rem">${passed ? '🏆' : '📚'}</p>
+      <h2 style="font:800 2rem 'Outfit',sans-serif;color:${passed ? 'var(--ocean)' : 'var(--primary)'};margin:0 0 0.2rem">${pct}%</h2>
+      <p style="font:700 1rem 'Zen Maru Gothic',sans-serif;color:var(--night);margin:0 0 0.4rem">${passed ? '✅ ¡Aprobado!' : '📖 ¡Sigue estudiando!'}</p>
+      <p style="font-family:'DM Sans',sans-serif;font-size:0.83rem;color:var(--text-light);margin:0 0 1.5rem">${_jlptScore} de ${total} correctas${passed ? ' — ¡+100 XP otorgados!' : ''}</p>
+
+      <div style="background:#fff;border-radius:var(--radius-lg);padding:1.2rem 1.4rem;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:1rem;text-align:left">
+        <p style="margin:0 0 0.75rem;font:700 0.85rem 'DM Sans',sans-serif;color:var(--night)">Resultados por sección</p>
+        ${[
+          { name:'📝 Vocabulario', score:s1, max:10, color: s1/10>=0.6?'var(--ocean)':'var(--primary)' },
+          { name:'📖 Gramática',   score:s2, max:20, color: s2/20>=0.6?'var(--ocean)':'var(--primary)' },
+          { name:'📄 Lectura',     score:s3, max:5,  color: s3/5 >=0.6?'var(--ocean)':'var(--primary)' }
+        ].map(s => `
+          <div style="margin-bottom:0.8rem">
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.25rem">
+              <span style="font:600 0.82rem 'DM Sans',sans-serif;color:var(--night)">${s.name}</span>
+              <span style="font:700 0.82rem 'DM Sans',sans-serif;color:${s.color}">${s.score}/${s.max}</span>
+            </div>
+            ${barHtml(s.score, s.max, s.color)}
+          </div>`).join('')}
+      </div>
+
+      ${s1 < 6  ? `<div style="background:#FFF3CD;border-radius:var(--radius-md);padding:0.65rem 1rem;margin-bottom:0.6rem;text-align:left;font-size:0.82rem;font-family:'DM Sans',sans-serif">📝 Vocabulario débil — <button onclick="showSection('moji',null)" style="background:none;border:none;color:var(--primary);font-weight:700;cursor:pointer;font-size:0.82rem;padding:0">Repasar Moji →</button></div>` : ''}
+      ${s2 < 12 ? `<div style="background:#FFF3CD;border-radius:var(--radius-md);padding:0.65rem 1rem;margin-bottom:0.6rem;text-align:left;font-size:0.82rem;font-family:'DM Sans',sans-serif">📖 Gramática débil — <button onclick="showSection('grammar',document.getElementById('nav-grammar'))" style="background:none;border:none;color:var(--primary);font-weight:700;cursor:pointer;font-size:0.82rem;padding:0">Practicar Gramática →</button></div>` : ''}
+      ${s3 < 3  ? `<div style="background:#FFF3CD;border-radius:var(--radius-md);padding:0.65rem 1rem;margin-bottom:0.6rem;text-align:left;font-size:0.82rem;font-family:'DM Sans',sans-serif">📄 Lectura débil — <button onclick="showSection('roadmap',document.getElementById('nav-roadmap'))" style="background:none;border:none;color:var(--primary);font-weight:700;cursor:pointer;font-size:0.82rem;padding:0">Repasar Units →</button></div>` : ''}
+
+      <button onclick="renderJlpt()" class="btn btn-secondary" style="width:100%;padding:0.8rem;margin-top:0.75rem">🔄 Volver al inicio</button>
     </div>`;
 }
 

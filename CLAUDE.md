@@ -7,7 +7,7 @@
 
 ## 技術スタック
 - **Vanilla HTML / CSS / JavaScript** — フレームワーク・ビルドツールなし
-- **単一ファイル**: `index.html`（約24,852行、CSS・JS・データすべて内包）
+- **単一ファイル**: `index.html`（約25,883行、CSS・JS・データすべて内包）
 - 永続化: `localStorage`（`chizu_scores` / `learnedChars` / `nm_*` キー群）
 - 認証: **Firebase Authentication**（メール/パスワード・Google 有効済み）
 - 外部依存: Google Fonts + Firebase CDN（10.12.0 compat版）
@@ -108,8 +108,8 @@ const firebaseConfig = {
 | `renderScenarioView(cd)` | Escena（会話）表示 |
 | `toggleHint(lineId)` | 0→1(romaji)→2(romaji+es)→0 のヒント3段階 |
 | `openExplainView()` | Gramática説明表示（Siguiente→Trazar or Práctica） |
-| `openTrazarView()` | なぞり書き画面（Unit 1・2 のみ） |
-| `showCanDoTrazarChar()` | `#scenario-content` に既存Trazar UIを描画 |
+| `openTrazarView()` | なぞり書き画面（Unit 1=hiragana / 2=katakana / **3以降=kanji**。`cd.unit>=3?'kanji':…`で分岐） |
+| `showCanDoTrazarChar()` | `#scenario-content` に既存Trazar UIを描画（`sData`は**hiragana/katakana/kanji の3択**。kanji対応済み） |
 | `openPracticeView()` | 練習問題開始（mc/fill/reorder 対応） |
 | `renderPracticeItem()` | 問題1問描画（displayOptions でフリガナ対応） |
 | `checkPracticeAnswer(idx)` | 4択採点（インデックスベース） |
@@ -154,7 +154,9 @@ window.canDoData.push({
 ```
 - `displayOptions`: reorder問題のチップ表示用（rubyタグ含むHTML）。省略時は `answer` をそのまま使用
 
-### Can-do 実装済み一覧（2026-05-28更新 / 45本）
+### Can-do 実装済み一覧（2026-05-30更新 / 72本）
+**漢字なぞり書きCan-do（u3_kanji〜u10_kanji / 8本・各ユニット末尾）** — Unit 3〜10の全漢字をなぞり書き（番号付き筆順ガイド）＋読み4択＋意味→漢字。完了で`learnedChars`連動。`id`は`u{n}_kanji`（既存`u5_c6`/`u10_c6`とのID衝突回避）。`trazarScript='kanji'`で描画。Unit 10は`unitKanji.nichijou=['今','毎','週','帰','出','休','読','話']`を新規定義し`roadmapUnits[10].kanjiKey='nichijou'`で漢字バッジ連動。Unit 7の`飛`「機」はKanjiVG筆順パスを`kanjiStrokes`へ追記済み。
+
 | id | unit | テーマ | traceChars | escuchar |
 |---|---|---|---|---|
 | u1_c1 | 1 | ひらがな母音（あいうえお） | あいうえお | — |
@@ -191,6 +193,7 @@ window.canDoData.push({
 | u5_c2 | 5 | あります vs います（物 vs 人・動物） | なし | — |
 | u5_c3 | 5 | 位置表現（うえ/した/まえ/うしろ/なか/そと/よこ/ちかく/あいだ） | なし | ✅ meaning×4+match×4 |
 | u5_c4 | 5 | 助詞 で/へ（動作場所・移動方向） | なし | — |
+| u5_c6 | 5 | 段階的文作り（は/に/で/を・で vs に） | なし | ✅ reorder×8+fill×4+conv×2+mc×2 |
 | u5_c5 | 5 | 街案内の総合会話（Unit 5まとめ） | なし | ✅ meaning×4+match×4 |
 | u6_c1 | 6 | い形容詞（おいしい・たかい・やすい） | なし | — |
 | u6_c2 | 6 | な形容詞（きれい・すき・べんり） | なし | — |
@@ -296,7 +299,7 @@ desu → katsu → keiyo → masu → aru → mashou → tai → maeni → niiku
 | 7 | Acciones cotidianas | grammar/mashou | mashou/tai/niiku/maeni | mashou |
 | 8 | Describir con adjetivos | grammar/kute | kute/naru/omou | kute |
 | 9 | Familia y personas | grammar/kazoku | kazoku | kazoku |
-| 10 | Horario diario | grammar/te | te/ta/nai/setsuzoku | null |
+| 10 | Horario diario | grammar/te | te/ta/nai/setsuzoku | nichijou |
 
 ロードマップ関数: `renderRoadmap()` / `getUnitScore(keys)` / `getKanjiProgress(chars)` / `navigateToUnit(section, tab)`
 
@@ -378,7 +381,7 @@ desu → katsu → keiyo → masu → aru → mashou → tai → maeni → niiku
 
 ---
 
-## index.html 行番号インデックス（約24,852行 / 2026-05-29更新）
+## index.html 行番号インデックス（約25,883行 / 2026-05-29更新）
 
 ### HTML構造
 | 行 | 内容 |
@@ -406,12 +409,15 @@ desu → katsu → keiyo → masu → aru → mashou → tai → maeni → niiku
 | 2213 | `let trazarScript, trazarList, ...` |
 | 13765 | `window.canDoData = []` |
 | 13768〜17681 | `window.canDoData.push(...)` × 30本（u1_c1〜u4_c5） |
-| 17682〜19117 | `window.canDoData.push(...)` × 5本（u5_c1〜u5_c5） |
-| 19118〜20398 | `window.canDoData.push(...)` × 5本（u6_c1〜u6_c5） |
-| 20400〜21717 | `window.canDoData.push(...)` × 5本（u7_c1〜u7_c5） |
-| 21718〜23036 | `window.canDoData.push(...)` × 5本（u8_c1〜u8_c5） |
-| 23037〜24450 | `window.canDoData.push(...)` × 5本（u9_c1〜u9_c5） |
-| 24451〜24850 | `window.canDoData.push(...)` × 5本（u10_c1〜u10_c5） |
+| 17682〜19289 | `window.canDoData.push(...)` × 6本（u5_c1〜u5_c4, **u5_c6**, u5_c5） |
+| 19290〜20656 | `window.canDoData.push(...)` × 5本（u6_c1〜u6_c5） |
+| 20657〜21973 | `window.canDoData.push(...)` × 5本（u7_c1〜u7_c5） |
+| 21974〜23291 | `window.canDoData.push(...)` × 5本（u8_c1〜u8_c5） |
+| 23292〜24638 | `window.canDoData.push(...)` × 5本（u9_c1〜u9_c5） |
+| 〜25174 | `window.canDoData.push(...)` 既存分（u1_c1〜u10_c5・64本） |
+| 25176〜25534 | `window.canDoData.push(...)` × 8本（**u3_kanji〜u10_kanji** 漢字なぞり書き） |
+
+※ 行番号は kanjiStrokes（`飛`「機」追記）・unitKanji（`nichijou`追加）で全体が後ろにシフト。`const kanjiStrokes`末尾に飛・機の2字、`const unitKanji`に`nichijou`を追加済み。
 
 ### 既存ロードマップ関数
 | 行 | 関数 |
