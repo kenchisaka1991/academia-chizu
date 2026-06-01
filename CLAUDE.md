@@ -7,7 +7,7 @@
 
 ## 技術スタック
 - **Vanilla HTML / CSS / JavaScript** — フレームワーク・ビルドツールなし
-- **単一ファイル**: `index.html`（約25,883行、CSS・JS・データすべて内包）
+- **単一ファイル**: `index.html`（約27,130行、CSS・JS・データすべて内包）
 - 永続化: `localStorage`（`chizu_scores` / `learnedChars` / `nm_*` キー群）
 - 認証: **Firebase Authentication**（メール/パスワード・Google 有効済み）
 - 外部依存: Google Fonts + Firebase CDN（10.12.0 compat版）
@@ -110,8 +110,9 @@ const firebaseConfig = {
 | `openExplainView()` | Gramática説明表示（Siguiente→Trazar or Práctica） |
 | `openTrazarView()` | なぞり書き画面（Unit 1=hiragana / 2=katakana / **3以降=kanji**。`cd.unit>=3?'kanji':…`で分岐） |
 | `showCanDoTrazarChar()` | `#scenario-content` に既存Trazar UIを描画（`sData`は**hiragana/katakana/kanji の3択**。kanji対応済み） |
-| `openPracticeView()` | 練習問題開始（mc/fill/reorder 対応） |
+| `openPracticeView()` | 練習問題開始（mc/fill/reorder 対応）。**items を浅いコピーし、mc/fill/conv の選択肢を描画時シャッフルして answer を追従**（正解が answer:0 に偏っていたため。元データ非破壊・採点はindexベースのまま） |
 | `renderPracticeItem()` | 問題1問描画（displayOptions でフリガナ対応） |
+| `startEscucharPart()` | Escuchar（聞き取り）練習開始。**openPracticeView と同型で audio_mc/audio_meaning/audio_match の選択肢を描画時シャッフルして answer を追従**（正解が answer:0 に92%偏っていたため。audio_fill 無料dictado は `_buildDictadoFreeOpts` が別途シャッフル済み） |
 | `checkPracticeAnswer(idx)` | 4択採点（インデックスベース） |
 | `practiceReorderTap(btn)` | 並び替えチップ選択 |
 | `checkPracticeReorder()` | 並び替え採点 |
@@ -154,7 +155,9 @@ window.canDoData.push({
 ```
 - `displayOptions`: reorder問題のチップ表示用（rubyタグ含むHTML）。省略時は `answer` をそのまま使用
 
-### Can-do 実装済み一覧（2026-05-30更新 / 72本）
+### Can-do 実装済み一覧（2026-05-31更新 / 75本）
+**N5標準文法追加Can-do（3本・2026-05-31）** — `u7_c7`（〜ことができます / `dekiru`タブ連動 / できますvs上手の対比）、`u8_c6`（〜と言いました / `itta` / と言いましたvsと思います）、`u8_c7`（〜でしょう簡易版 / `deshou` / でしょうvsです）。各 scenario→explain（`contrast`ブロックで対比明示）→practice（mc/fill/reorder・passRate0.8）。canDoData最末尾に追記（表示はユニット内末尾＝漢字Can-doの後）。
+
 **漢字なぞり書きCan-do（u3_kanji〜u10_kanji / 8本・各ユニット末尾）** — Unit 3〜10の全漢字をなぞり書き（番号付き筆順ガイド）＋読み4択＋意味→漢字。完了で`learnedChars`連動。`id`は`u{n}_kanji`（既存`u5_c6`/`u10_c6`とのID衝突回避）。`trazarScript='kanji'`で描画。Unit 10は`unitKanji.nichijou=['今','毎','週','帰','出','休','読','話']`を新規定義し`roadmapUnits[10].kanjiKey='nichijou'`で漢字バッジ連動。Unit 7の`飛`「機」はKanjiVG筆順パスを`kanjiStrokes`へ追記済み。
 
 | id | unit | テーマ | traceChars | escuchar |
@@ -205,11 +208,14 @@ window.canDoData.push({
 | u7_c3 | 7 | 〜にいきます・きます（目的移動） | なし | ✅ meaning×4+match×4 |
 | u7_c4 | 7 | 〜前に・〜後で（順序） | なし | — |
 | u7_c5 | 7 | 一日のスケジュール（Unit 7まとめ） | なし | ✅ meaning×4+match×4 |
+| u7_c7 | 7 | 〜ことができます（能力・可能／vs上手） | なし | — |
 | u8_c1 | 8 | 〜くて・で（形容詞をつなげる） | なし | — |
 | u8_c2 | 8 | 〜くなります/になります（変化） | なし | — |
 | u8_c3 | 8 | 〜とおもいます（意見を言う） | なし | ✅ meaning×4+match×4 |
 | u8_c4 | 8 | 形容詞の否定・過去形 | なし | — |
 | u8_c5 | 8 | 形容詞で詳しく描写する（Unit 8まとめ） | なし | ✅ meaning×4+match×4 |
+| u8_c6 | 8 | 〜と言いました（引用／vsと思います） | なし | — |
+| u8_c7 | 8 | 〜でしょう（推量・確認・簡易版／vsです） | なし | — |
 | u9_c1 | 9 | 家族構成を言う（〜は〜が〜人います） | なし | — |
 | u9_c2 | 9 | 家族の職業・特徴を言う（〜の〜は〜です） | なし | — |
 | u9_c3 | 9 | うち vs そと の使い分け | なし | ✅ meaning×4+match×4 |
@@ -233,22 +239,27 @@ function showSection(id, btn) {
 }
 ```
 
-### 音声再生
+### 音声再生（VOICEVOX / Opus）
 ```javascript
-playScenarioAudio("audio/u3_c1_l1_A.mp3", "これはあです。", btnEl)
-// → Audio.load() → onerror → speakFallback() にフォールバック
+playScenarioAudio("audio/u3_kanji_l1.opus", "なまえはマリアです。", btnEl)
+// → Audio.load() → onerror → speakFallback()（Web Speech API）にフォールバック
 ```
-MP3ファイルを `audio/` フォルダに配置するだけで自動切替。VOICEVOX生成前はWeb Speech APIで動作。
+- **命名規約**: `audio/{canDoId}_l{行番号}.opus`（話者はファイル名に含めない）。`renderScenarioView` が `line.audio` を無視して**この規約パスを自動生成**して 🔊 ボタンに埋め込む。
+- ファイルを `audio/` に置くだけで自動切替。**未生成なら Web Speech API で動作**（＝音声無しでも全機能OK）。
+- **生成ツール**: `tools/`（`extract_audio_manifest.js`→`audio/audio_manifest.json`→`voicevox_build.py`）。VOICEVOX(localhost:50021) + ffmpeg で WAV→Opus(28kbps mono)変換。詳細は `tools/README.md`。
+- 形式は **Opus** を採用（MP3比 約半分サイズ・データ通信節約）。レガシーの `line.audio` 内 `.mp3` パス（24件）は規約パスに置換されたため死にデータ（無害）。
 
 ---
 
-## 文法モジュール一覧（22タブ）
+## 文法モジュール一覧（25タブ）
 
-**renderGrammar の if-else 分岐順:**
-```
-desu → katsu → keiyo → masu → aru → mashou → tai → maeni → niiku → te → ta → nai → kute → gimon → shiji → yori → dou → omou → ichiban → naru → setsuzoku → kazoku → joshi（else）
-```
-**⚠️ 新タブ追加時は必ず3箇所に追記：** ① タブボタンHTML ② if-else分岐（joshi elseの直前） ③ render関数本体
+**⚠️ 実物の構造（CLAUDE.md旧記述の訂正）：**
+- タブボタンは `data-tab` 属性ではなく **`lesson-tab` クラス + `onclick="setCurrentLesson('key')"`**。HTMLは `renderGrammar()`（index.html:3151付近）**関数内のテンプレートリテラル**に直書き。`currentLesson` 変数で active 制御。
+- 分岐は if-else ではなく **`currentLesson` のモード制 if 連鎖**（index.html:3185付近〜）：`if(currentLesson==='xxx'){ if(grammarMode==='learn') renderXxxLearn(); else renderXxxPractice(); }`。各タブは **learn / practice の2関数構成**。
+- 分岐末尾の `else { ... renderJoshiLearn/Practice }` が joshi（デフォルト）。
+- タブ横スクロール：`renderGrammar()` 内 `requestAnimationFrame`（3180付近）でactiveタブを中央へスクロール。
+
+**⚠️ 新タブ追加時は必ず3箇所に追記：** ① タブボタンHTML（renderGrammarテンプレート内） ② `currentLesson` モード制 if 連鎖 ③ `renderXxxLearn`/`renderXxxPractice` 本体（+ データプール `xxxLesson`/`xxxReorderPool`/`xxxFillPool` を関数外に定義、+ 状態変数 `xxxPracMode` 等）。並び替え＋4択タブは既存 `omou` 系を雛形にする（プレフィックス置換）。
 
 | key | タブ名 | Practicar形式 |
 |---|---|---|
@@ -270,6 +281,9 @@ desu → katsu → keiyo → masu → aru → mashou → tai → maeni → niiku
 | `nai` | ない形 | Conjugación / Orden |
 | `dou` | 〜はどうですか | 並び替え / 4択 |
 | `omou` | 〜と思います | 並び替え / 4択 |
+| `dekiru` | 〜ことができます（能力・可能） | 並び替え / 4択 |
+| `itta` | 〜と言いました（引用・伝聞） | 並び替え / 4択 |
+| `deshou` | 〜でしょう（推量・確認／簡易版） | 並び替え / 4択 |
 | `ichiban` | 〜のなかで〜がいちばん〜 | 並び替え / 4択 |
 | `naru` | 〜になります/〜くなります | 並び替え / 4択 |
 | `setsuzoku` | 接続詞 | 並び替え / 4択 |
@@ -296,8 +310,8 @@ desu → katsu → keiyo → masu → aru → mashou → tai → maeni → niiku
 | 4 | Números, tiempo | grammar/gimon | gimon/shiji | gimon |
 | 5 | Lugares y direcciones | grammar/aru | aru/joshi | aru |
 | 6 | Compras y comida | grammar/keiyo | keiyo/dou/yori/ichiban | keiyo |
-| 7 | Acciones cotidianas | grammar/mashou | mashou/tai/niiku/maeni | mashou |
-| 8 | Describir con adjetivos | grammar/kute | kute/naru/omou | kute |
+| 7 | Acciones cotidianas | grammar/mashou | mashou/tai/niiku/maeni/dekiru | mashou |
+| 8 | Describir con adjetivos | grammar/kute | kute/naru/omou/deshou/itta | kute |
 | 9 | Familia y personas | grammar/kazoku | kazoku | kazoku |
 | 10 | Horario diario | grammar/te | te/ta/nai/setsuzoku | nichijou |
 
@@ -327,6 +341,7 @@ desu → katsu → keiyo → masu → aru → mashou → tai → maeni → niiku
 ## 要注意箇所
 - `renderGrammar()` に新タブ追加時は**必ず3箇所**に追記
 - `taReorderPool` の `use:'hou'` エントリが2重（軽微な既知バグ）
+- Can-do の `practice.items` / `escuchar.items` は **answer:0 のまま書いてよい**（`openPracticeView`/`startEscucharPart` が描画時に選択肢をシャッフルして answer を追従させる）。データ側で正解位置を手動分散させる必要なし
 - ビルド・テスト・lint なし。動作確認は `python -m http.server 8080`
 - 実装完了後は必ず未実装リストを `✅完了` に更新すること
 
@@ -366,7 +381,7 @@ desu → katsu → keiyo → masu → aru → mashou → tai → maeni → niiku
 | ✅ | Unit 8 Can-do 5本（u8_c1〜u8_c5）| Opus/Sonnet |
 | ✅ | Unit 9 Can-do 5本（u9_c1〜u9_c5）| Opus/Sonnet |
 | ✅ | Unit 10 Can-do 5本（u10_c1〜u10_c5）| Opus/Sonnet |
-| 10 | VOICEVOXバッチスクリプト（Unit 1〜10 MP3生成） | Opus |
+| ✅ | VOICEVOXバッチスクリプト（**Opus(.opus)** 生成 / `tools/`）— 2026-05-31完了 | Opus |
 | 11 | admin.html + Claude API シナリオ自動生成 | Sonnet |
 | 13 | Lemon Squeezy 連携・`nm_plan` サーバ検証 | Sonnet |
 | 14 | OpenAI Realtime PoC（Unit 3 c1 の Reto） | Sonnet |
@@ -381,7 +396,17 @@ desu → katsu → keiyo → masu → aru → mashou → tai → maeni → niiku
 
 ---
 
-## index.html 行番号インデックス（約25,883行 / 2026-05-29更新）
+## index.html 行番号インデックス（約27,130行 / 2026-05-31更新）
+
+**⚠️ 2026-05-31の文法3タブ追加で全体が後方へシフト。新規追加箇所：**
+- 状態変数 `dekiru/itta/deshou` 系：index.html:2359付近（omou状態変数の直後）
+- タブボタン3つ：`renderGrammar()` テンプレート内 `omou` ボタンの直後
+- `currentLesson` 分岐3つ：`omou` 分岐の直後
+- render関数：`// ===== DEKIRU ... FUNCTIONS =====`（index.html:7399）以降に dekiru/itta/deshou の各16関数（omou系と同型）
+- データプール：`// ===== DEKIRU ... DATA =====`（index.html:11173）に `dekiruLesson`/`dekiruReorderPool`/`dekiruFillPool` ほか（KAZOKU DATAの直前）
+- Can-do 3本：canDoData最末尾（index.html:26440〜 `u7_c7`/`u8_c6`/`u8_c7`）
+
+※下記の旧行番号はシフト前のもの。おおよその相対位置の参考に留め、編集前に必ず Grep で実物を再確認すること。
 
 ### HTML構造
 | 行 | 内容 |
@@ -416,6 +441,7 @@ desu → katsu → keiyo → masu → aru → mashou → tai → maeni → niiku
 | 23292〜24638 | `window.canDoData.push(...)` × 5本（u9_c1〜u9_c5） |
 | 〜25174 | `window.canDoData.push(...)` 既存分（u1_c1〜u10_c5・64本） |
 | 25176〜25534 | `window.canDoData.push(...)` × 8本（**u3_kanji〜u10_kanji** 漢字なぞり書き） |
+| 〜26440〜 | `window.canDoData.push(...)` × 3本（**u7_c7 / u8_c6 / u8_c7** N5文法追加・2026-05-31） |
 
 ※ 行番号は kanjiStrokes（`飛`「機」追記）・unitKanji（`nichijou`追加）で全体が後ろにシフト。`const kanjiStrokes`末尾に飛・機の2字、`const unitKanji`に`nichijou`を追加済み。
 
