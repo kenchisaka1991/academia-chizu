@@ -155,6 +155,9 @@ window.canDoData.push({
 ```
 - `displayOptions`: reorder問題のチップ表示用（rubyタグ含むHTML）。省略時は `answer` をそのまま使用
 
+### 会話練習（Reto）台本 — `data/conversation_scripts.js`（`window.NM_SCRIPTS`）
+エンジン実装済み。台本データは **47 Can-do・147会話**（Unit1〜10全て。u9_c1〜u9_c5 / u10_c1〜u10_c5 を2026-07-03 Opus生成で追加）。各Can-do 3会話×3〜4ステップ。scoring用 `jaPlain`/`accept` は全ひらがな（loanwordもひらがな化・`ー`のみ許容）。詳細・残タスク（u9/u10のKANJI_KANA追記＋実機検証）は memory の `next_session_prompt.md` / `conversation-feature-plan.md`。
+
 ### Can-do 実装済み一覧（2026-05-31更新 / 75本）
 **N5標準文法追加Can-do（3本・2026-05-31）** — `u7_c7`（〜ことができます / `dekiru`タブ連動 / できますvs上手の対比）、`u8_c6`（〜と言いました / `itta` / と言いましたvsと思います）、`u8_c7`（〜でしょう簡易版 / `deshou` / でしょうvsです）。各 scenario→explain（`contrast`ブロックで対比明示）→practice（mc/fill/reorder・passRate0.8）。canDoData最末尾に追記（表示はユニット内末尾＝漢字Can-doの後）。
 

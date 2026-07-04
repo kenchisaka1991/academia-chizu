@@ -70,6 +70,16 @@
             animation: float 8s ease-in-out infinite;
         }
 
+        /* 地図の座標グリッドのような点描テクスチャ */
+        .header::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(rgba(255,255,255,0.14) 1px, transparent 1.4px);
+            background-size: 16px 16px;
+            pointer-events: none;
+        }
+
         @keyframes float {
             0%, 100% { transform: translate(0, 0) scale(1); }
             50% { transform: translate(-20px, 20px) scale(1.1); }
@@ -1173,18 +1183,42 @@
 
         /* ===== ROADMAP ===== */
         .roadmap-wrap{max-width:480px;margin:0 auto;padding:1.5rem 1rem 3rem}
-        .roadmap-header{text-align:center;margin-bottom:2rem}
-        .roadmap-header h2{font-family:'Zen Maru Gothic',sans-serif;color:var(--night);font-size:1.4rem;margin-bottom:0.4rem}
-        .roadmap-header p{color:var(--night);opacity:0.65;font-size:0.82rem;font-family:'DM Sans',sans-serif;margin-bottom:1rem}
+        .roadmap-header{text-align:center;margin-bottom:1.4rem}
+        .roadmap-header h2{font-family:'Zen Maru Gothic',sans-serif;color:var(--night);font-size:1.75rem;font-weight:800;margin-bottom:0.35rem;letter-spacing:-0.01em}
+        .roadmap-header p{color:var(--night);opacity:0.6;font-size:0.85rem;font-family:'DM Sans',sans-serif;margin-bottom:1rem}
         .btn-placement{background:linear-gradient(135deg,var(--accent),#e8903c);color:white;border:none;border-radius:var(--radius-md);padding:0.65rem 1.5rem;font-size:0.88rem;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(244,162,97,0.35);font-family:'DM Sans',sans-serif;transition:transform 0.15s}
         .btn-placement:hover{transform:translateY(-2px)}
+
+        /* ===== "Continuar" ヒーローカード：地図上の現在地への導線 ===== */
+        .continue-card{display:flex;align-items:center;gap:0.9rem;background:linear-gradient(135deg,var(--night) 0%,var(--night-light) 100%);border-radius:var(--radius-lg);padding:1.1rem 1.2rem;margin-bottom:1.8rem;cursor:pointer;box-shadow:var(--shadow-md);position:relative;overflow:hidden;transition:transform .15s}
+        .continue-card:hover{transform:translateY(-2px)}
+        .continue-card::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,0.13) 1px,transparent 1.4px);background-size:14px 14px;opacity:.5;pointer-events:none}
+        .continue-card__pin{font-size:1.6rem;flex-shrink:0;width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,0.14);display:flex;align-items:center;justify-content:center;animation:pin-pulse 2.2s ease-in-out infinite;position:relative;z-index:1}
+        @keyframes pin-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+        .continue-card__body{flex:1;min-width:0;position:relative;z-index:1}
+        .continue-card__eyebrow{display:block;font:700 0.66rem 'DM Sans',sans-serif;letter-spacing:0.06em;text-transform:uppercase;color:var(--sky);margin-bottom:0.2rem}
+        .continue-card__title{font-family:'Zen Maru Gothic',sans-serif;font-size:1.02rem;font-weight:700;color:#fff;margin:0;line-height:1.35}
+        .continue-card__cta{flex-shrink:0;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-md);padding:0.55rem 1rem;font:700 0.82rem 'DM Sans',sans-serif;cursor:pointer;position:relative;z-index:1;white-space:nowrap}
+
         .map-path{display:flex;flex-direction:column;align-items:stretch;gap:0}
         .map-node{width:82%;border-radius:var(--radius-lg);padding:1.1rem 1.3rem;cursor:pointer;transition:transform 0.15s,box-shadow 0.15s;position:relative}
         .map-node:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,0.18)}
         .map-node.done{background:linear-gradient(135deg,var(--ocean),#22b09e);color:white}
         .map-node.inprogress{background:linear-gradient(135deg,var(--accent),#e8903c);color:white}
-        .map-node.notstarted{background:var(--night);color:rgba(255,255,255,0.85)}
+        .map-node.notstarted{background:var(--cream);color:var(--night);border:2px dashed rgba(29,53,87,0.22);box-shadow:none}
+        .map-node.notstarted:hover{box-shadow:0 4px 14px rgba(29,53,87,0.1)}
+        .map-node.notstarted .node-name{opacity:0.75}
+        .map-node.notstarted .node-unit-num{color:var(--night);opacity:0.45}
+        .map-node.notstarted .node-score-bar-bg{background:rgba(29,53,87,0.1)}
+        .map-node.notstarted .node-score-bar{background:var(--night);opacity:0.3}
+        .map-node.notstarted .node-score-pct{color:var(--night);opacity:0.5}
+        .map-node.notstarted .kanji-badge{background:rgba(29,53,87,0.07);color:var(--night)}
+        .map-node.notstarted .kanji-badge.learned{background:rgba(29,53,87,0.16);font-weight:700}
+        .map-node.notstarted .node-kanji-label,.map-node.notstarted .node-kanji-link{color:var(--night);opacity:0.55}
         .map-node.recommended::after{content:'⭐ Recomendado';position:absolute;top:-10px;right:12px;background:#ffd700;color:#333;font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:20px}
+        .map-node.current{box-shadow:0 0 0 3px rgba(244,162,97,0.4),var(--shadow-md)}
+        .map-node__marker{position:absolute;top:-12px;left:14px;font-size:1.1rem;width:28px;height:28px;border-radius:50%;background:#fff;box-shadow:var(--shadow-sm);display:flex;align-items:center;justify-content:center;z-index:1}
+        .map-node.current .map-node__marker{animation:pin-pulse 2.2s ease-in-out infinite}
         .map-node-left{margin-right:auto;margin-left:0}
         .map-node-right{margin-left:auto;margin-right:0}
         .node-header{display:flex;align-items:center;gap:0.55rem;margin-bottom:0.5rem;flex-wrap:wrap}
@@ -1201,7 +1235,7 @@
         .kanji-badge.learned{background:rgba(255,255,255,0.48);font-weight:700}
         .kanji-badge:hover{background:rgba(255,255,255,0.55)}
         .node-kanji-link{font-size:0.68rem;opacity:0.72;margin-left:2px;cursor:pointer;text-decoration:underline;font-family:'DM Sans',sans-serif}
-        .map-connector{width:3px;height:28px;background:rgba(29,53,87,0.18);margin:0 auto}
+        .map-connector{width:0;height:30px;margin:0 auto;border-left:3px dashed rgba(29,53,87,0.25)}
 
         /* ===== PLACEMENT TEST ===== */
         .placement-wrap{max-width:480px;margin:0 auto;padding:1.5rem 1rem 3rem}
@@ -1248,11 +1282,12 @@
 
         /* Can-do カード */
         .cando-list{display:grid;gap:1rem;padding:0.5rem 0}
-        .cando-card{background:#fff;border:1px solid #EEE;border-radius:var(--radius-lg);padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.04);transition:transform .15s}
+        .cando-card{background:#fff;border:1.5px solid #EEE;border-radius:var(--radius-lg);padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.04);transition:transform .15s;position:relative}
         .cando-card:hover{transform:translateY(-2px)}
-        .cando-card[data-status="done"]{border-color:var(--ocean)}
-        .cando-card[data-status="inprogress"]{border-left:4px solid var(--accent)}
-        .cando-card[data-status="locked"]{opacity:0.5;pointer-events:none}
+        .cando-card[data-status="done"]{border-color:var(--ocean);background:linear-gradient(135deg,rgba(42,157,143,0.07),rgba(42,157,143,0.015))}
+        .cando-card[data-status="inprogress"]{border-color:rgba(244,162,97,0.5);border-left:4px solid var(--accent);background:linear-gradient(135deg,rgba(244,162,97,0.07),transparent)}
+        .cando-card[data-status="available"]{border-color:rgba(29,53,87,0.14)}
+        .cando-card[data-status="locked"]{opacity:0.55;pointer-events:none;border-style:dashed;box-shadow:none}
         .cando-card__head{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem}
         .cando-card__badge{font:600 12px/1 'DM Sans',sans-serif;color:var(--primary)}
         .cando-card__progress{font-size:1rem;letter-spacing:2px}
@@ -1261,10 +1296,62 @@
         .cando-card__foot{display:flex;justify-content:space-between;align-items:center}
         .cando-card__xp{font:700 0.82rem 'DM Sans',sans-serif;color:var(--accent)}
 
-        /* HUD */
-        .hud{display:flex;align-items:center;gap:1rem;padding:0.5rem 1rem;background:#fff;border-bottom:1px solid #EEE;font-family:'DM Sans',sans-serif;font-size:0.88rem}
-        .hud__xp,.hud__streak{display:flex;align-items:center;gap:0.3rem;font-weight:700;color:var(--night)}
-        #hud-daily{flex:1;max-width:120px;height:6px;border-radius:3px;accent-color:var(--ocean)}
+        /* HUD — "tira de pasaporte" */
+        .hud{display:flex;align-items:center;gap:0.6rem;padding:0.55rem 1rem;background:var(--cream);border-bottom:1px dashed rgba(29,53,87,0.16);font-family:'DM Sans',sans-serif;font-size:0.88rem}
+        .hud-badge{display:flex;align-items:center;gap:0.4rem;padding:0.22rem 0.65rem 0.22rem 0.22rem;border-radius:99px;background:#fff;box-shadow:var(--shadow-sm);flex-shrink:0}
+        .hud-badge__icon{font-size:1rem;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+        .hud-badge--xp .hud-badge__icon{background:linear-gradient(135deg,var(--accent-gold),var(--accent))}
+        .hud-badge--streak .hud-badge__icon{background:linear-gradient(135deg,var(--primary-light),var(--primary))}
+        .hud-badge__value{display:flex;align-items:baseline;gap:0.22rem;font-weight:800;color:var(--night);line-height:1;white-space:nowrap}
+        .hud-badge__value b{font-size:0.92rem}
+        .hud-badge__value small{font-size:0.6rem;opacity:0.55;font-weight:600}
+        .hud-daily-wrap{flex:1;display:flex;align-items:center;gap:0.5rem;min-width:0}
+        .hud-daily-label{font-size:0.66rem;color:var(--night);opacity:0.5;font-weight:700;white-space:nowrap}
+        #hud-daily{flex:1;height:8px;border-radius:99px;accent-color:var(--ocean);-webkit-appearance:none;appearance:none;border:none;background:rgba(29,53,87,0.1)}
+        #hud-daily::-webkit-progress-bar{background:rgba(29,53,87,0.1);border-radius:99px}
+        #hud-daily::-webkit-progress-value{background:linear-gradient(90deg,var(--ocean),var(--ocean-light));border-radius:99px;transition:width .4s ease}
+        #hud-daily::-moz-progress-bar{background:linear-gradient(90deg,var(--ocean),var(--ocean-light));border-radius:99px}
+
+        /* ===== Perfil — "Pasaporte de viaje" ===== */
+        .profile-wrap{max-width:480px;margin:0 auto;padding:1.5rem 1rem 3rem}
+        .profile-title{font:800 1.5rem 'Zen Maru Gothic',sans-serif;color:var(--night);margin:0 0 1.1rem}
+
+        .passport-card{position:relative;display:flex;align-items:center;gap:1rem;background:linear-gradient(135deg,var(--night) 0%,var(--night-light) 100%);border-radius:var(--radius-lg);padding:1.3rem 1.4rem;margin-bottom:1.2rem;overflow:hidden;box-shadow:var(--shadow-md)}
+        .passport-card::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,0.12) 1px,transparent 1.4px);background-size:14px 14px;pointer-events:none}
+        .passport-card__avatar{position:relative;z-index:1;flex-shrink:0;width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.14);border:2px dashed rgba(255,255,255,0.4);display:flex;align-items:center;justify-content:center;font:700 1.4rem 'Noto Sans JP',sans-serif;color:#fff}
+        .passport-card__body{position:relative;z-index:1;min-width:0}
+        .passport-card__name{margin:0;font:700 1rem 'DM Sans',sans-serif;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .passport-card__email{margin:0.15rem 0 0.5rem;font-size:0.78rem;color:var(--sky);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .passport-card__badge{display:inline-block;background:rgba(255,255,255,0.16);color:#fff;border-radius:99px;padding:0.22rem 0.75rem;font:700 0.7rem 'DM Sans',sans-serif}
+        .passport-card__badge.is-premium{background:var(--accent-gold);color:#3a2c05}
+
+        .stamp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.7rem;margin-bottom:1.2rem}
+        .stamp{background:#fff;border:2px dashed rgba(29,53,87,0.18);border-radius:var(--radius-md);padding:0.9rem 0.4rem;text-align:center;display:flex;flex-direction:column;gap:0.15rem;transform:rotate(-1.5deg)}
+        .stamp:nth-child(2){transform:rotate(1.2deg)}
+        .stamp:nth-child(3){transform:rotate(-1deg)}
+        .stamp__value{font:800 1.5rem 'Outfit',sans-serif;color:var(--primary)}
+        .stamp--accent .stamp__value{color:var(--accent)}
+        .stamp--ocean .stamp__value{color:var(--ocean)}
+        .stamp__label{font-size:0.68rem;color:var(--text-light);font-weight:600}
+
+        .profile-panel{background:#fff;border-radius:var(--radius-lg);padding:1.2rem 1.4rem;margin-bottom:1rem;box-shadow:var(--shadow-sm)}
+        .profile-panel__title{margin:0 0 0.55rem;font:700 0.88rem 'DM Sans',sans-serif;color:var(--night)}
+        .profile-daily{display:flex;align-items:center;gap:0.75rem}
+        .profile-daily progress{flex:1;height:9px;border-radius:99px;-webkit-appearance:none;appearance:none;border:none;background:rgba(29,53,87,0.1)}
+        .profile-daily progress::-webkit-progress-bar{background:rgba(29,53,87,0.1);border-radius:99px}
+        .profile-daily progress::-webkit-progress-value{background:linear-gradient(90deg,var(--ocean),var(--ocean-light));border-radius:99px}
+        .profile-daily progress::-moz-progress-bar{background:linear-gradient(90deg,var(--ocean),var(--ocean-light));border-radius:99px}
+        .profile-daily span{font:700 0.85rem 'DM Sans',sans-serif;color:var(--primary);flex-shrink:0}
+        .profile-panel__foot{margin:0.5rem 0 0;font-size:0.75rem;color:var(--text-light)}
+
+        .profile-plan{border-radius:var(--radius-lg);padding:1.2rem 1.4rem;color:#fff;box-shadow:var(--shadow-md)}
+        .profile-plan--upsell{background:linear-gradient(135deg,var(--night),var(--night-light))}
+        .profile-plan--active{background:linear-gradient(135deg,var(--ocean),#22b09e)}
+        .profile-plan p{margin:0}
+        .profile-plan p+p{margin-top:0.3rem;font-size:0.82rem;opacity:0.85}
+        .profile-plan button{margin-top:1rem;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-md);padding:0.6rem 1.4rem;font:700 0.88rem 'DM Sans',sans-serif;cursor:pointer}
+
+        .profile-logout{text-align:center;margin-top:1.5rem}
 
         /* ===== シナリオ行 ===== */
         .scenario-context{background:rgba(29,53,87,0.05);border-radius:var(--radius-md);padding:1rem 1.2rem;margin-bottom:1.2rem}
@@ -1455,9 +1542,18 @@
 
     <!-- HUD: XP・ストリーク・日次進捗 -->
     <div class="hud" id="hud">
-        <span class="hud__xp">⭐ <b id="hud-xp">0</b> XP</span>
-        <span class="hud__streak">🔥 <b id="hud-streak">0</b></span>
-        <progress id="hud-daily" max="100" value="0" title="Progreso diario"></progress>
+        <div class="hud-badge hud-badge--xp">
+            <span class="hud-badge__icon">⭐</span>
+            <span class="hud-badge__value"><b id="hud-xp">0</b><small>XP</small></span>
+        </div>
+        <div class="hud-badge hud-badge--streak">
+            <span class="hud-badge__icon">🔥</span>
+            <span class="hud-badge__value"><b id="hud-streak">0</b><small>días</small></span>
+        </div>
+        <div class="hud-daily-wrap">
+            <span class="hud-daily-label">Hoy</span>
+            <progress id="hud-daily" max="100" value="0" title="Progreso diario"></progress>
+        </div>
     </div>
 
     <main class="main">
@@ -13145,12 +13241,32 @@ function renderRoadmap() {
     const placement = JSON.parse(localStorage.getItem('chizu_placement') || 'null');
     const recommendedUnit = placement ? placement.recommended : null;
 
-    const nodesHtml = roadmapUnits.map((unit, i) => {
+    // 1回目のパス: 各Unitの進捗状態を計算し、次にやるべき「現在地」を特定する
+    const unitStates = roadmapUnits.map(unit => {
         const candoScore = getUnitCanDoScore(unit.id);
         const score = candoScore !== null ? candoScore : getUnitScore(unit.keys);
         const stateClass = score >= 80 ? 'done' : score > 0 ? 'inprogress' : 'notstarted';
+        return { unit, score, stateClass };
+    });
+
+    const anyProgress = unitStates.some(s => s.score > 0);
+    let nextState = unitStates.find(s => s.stateClass === 'inprogress');
+    let nextMode = 'continue';
+    if (!nextState) {
+        nextState = (recommendedUnit && unitStates.find(s => s.unit.id === recommendedUnit && s.stateClass === 'notstarted'))
+            || unitStates.find(s => s.stateClass === 'notstarted');
+        nextMode = anyProgress ? 'next' : 'start';
+    }
+
+    const nodesHtml = unitStates.map(({unit, score, stateClass}, i) => {
         const alignClass = i % 2 === 0 ? 'map-node-left' : 'map-node-right';
-        const recClass = recommendedUnit === unit.id ? 'recommended' : '';
+        const isCurrent = !!(nextState && nextState.unit.id === unit.id);
+        const recClass = (recommendedUnit === unit.id && !isCurrent) ? 'recommended' : '';
+        const currentClass = isCurrent ? 'current' : '';
+
+        let marker = '';
+        if (stateClass === 'done') marker = `<span class="map-node__marker" title="Completado">🚩</span>`;
+        else if (isCurrent) marker = `<span class="map-node__marker" title="Siguiente parada">📍</span>`;
 
         let kanjiHtml = '';
         if(unit.kanjiKey && unitKanji[unit.kanjiKey]) {
@@ -13168,7 +13284,7 @@ function renderRoadmap() {
             </div>`;
         }
 
-        const connector = i < roadmapUnits.length - 1
+        const connector = i < unitStates.length - 1
             ? `<div class="map-connector"></div>`
             : '';
 
@@ -13177,8 +13293,9 @@ function renderRoadmap() {
             ? `renderUnit(${unit.id})`
             : `navigateToUnit('${unit.section}','${unit.tab}')`;
 
-        return `<div class="map-node ${stateClass} ${alignClass} ${recClass}"
+        return `<div class="map-node ${stateClass} ${alignClass} ${recClass} ${currentClass}"
                      onclick="${nodeClick}">
+            ${marker}
             <div class="node-header">
                 <span class="node-unit-num">Unidad ${unit.id}</span>
                 <span class="node-icon">${unit.icon}</span>
@@ -13199,6 +13316,26 @@ function renderRoadmap() {
         ? `<button class="btn-placement" style="background:linear-gradient(135deg,var(--ocean),#22b09e);margin-top:0.5rem" onclick="showPlacementResult(${prevResult.score})">Ver último resultado (${prevResult.score}/${prevResult.total})</button>`
         : '';
 
+    let continueHtml = '';
+    if (nextState) {
+        const {unit} = nextState;
+        const hasCando = (window.canDoData || []).some(c => c.unit === unit.id);
+        const nodeClick = hasCando
+            ? `renderUnit(${unit.id})`
+            : `navigateToUnit('${unit.section}','${unit.tab}')`;
+        const eyebrow = nextMode === 'continue' ? 'Continuar donde lo dejaste'
+            : nextMode === 'next' ? 'Siguiente parada'
+            : 'Empieza aquí';
+        continueHtml = `<div class="continue-card" onclick="${nodeClick}">
+            <div class="continue-card__pin">📍</div>
+            <div class="continue-card__body">
+                <span class="continue-card__eyebrow">${eyebrow}</span>
+                <h3 class="continue-card__title">${unit.icon} Unidad ${unit.id} · ${unit.es}</h3>
+            </div>
+            <button class="continue-card__cta" onclick="event.stopPropagation();${nodeClick}">Empezar →</button>
+        </div>`;
+    }
+
     document.getElementById('roadmap-content').innerHTML = `
         <div class="roadmap-wrap">
             <div class="roadmap-header">
@@ -13207,6 +13344,7 @@ function renderRoadmap() {
                 <button class="btn-placement" onclick="startPlacementTest()">Hacer prueba de nivel</button>
                 ${prevBtn}
             </div>
+            ${continueHtml}
             <div class="map-path">${nodesHtml}</div>
         </div>`;
 }
@@ -15153,7 +15291,50 @@ const KANJI_KANA = {
   "野菜":"やさい","肉":"にく","魚":"さかな","一番":"いちばん",
   "高い":"たかい","安い":"やすい","甘い":"あまい","辛い":"からい",
   "冷たい":"つめたい","暑い":"あつい","熱い":"あつい",
-  "静か":"しずか","有名":"ゆうめい","大切":"たいせつ","嫌い":"きらい"
+  "静か":"しずか","有名":"ゆうめい","大切":"たいせつ","嫌い":"きらい",
+  // Unit7: 動詞ます形（〜ましょう・たい・にいく・できます）
+  "手伝います":"てつだいます","走ります":"はしります","泳ぎます":"およぎます",
+  "話します":"はなします","作ります":"つくります","歌います":"うたいます",
+  "書きます":"かきます","聞きます":"ききます","洗います":"あらいます",
+  "磨きます":"みがきます","弾きます":"ひきます","入れます":"いれます",
+  "習います":"ならいます","持ちます":"もちます","見せます":"みせます",
+  // Unit7: 動詞辞書形
+  "歌う":"うたう","泳ぐ":"およぐ","話す":"はなす",
+  "作る":"つくる","読む":"よむ","弾く":"ひく",
+  // Unit7: 動詞語幹（ましょう/たい/に行く等の活用に対応）
+  "行き":"いき","買い":"かい","持ち":"もち","作り":"つくり","見せ":"みせ",
+  "手伝い":"てつだい","走り":"はしり","書き":"かき","聞き":"きき",
+  "洗い":"あらい","磨き":"みがき","弾き":"ひき","入れ":"いれ","習い":"ならい",
+  "見":"み",
+  // Unit7: 名詞
+  "映画":"えいが","映画館":"えいがかん","写真":"しゃしん","旅行":"りょこう",
+  "飛行機":"ひこうき","電車":"でんしゃ","食堂":"しょくどう","教科書":"きょうかしょ",
+  "荷物":"にもつ","部屋":"へや","車":"くるま","歌":"うた","手":"て","歯":"は",
+  // Unit8: い形容詞（辞書形 + 語幹 — くて/なります/否定/過去のSTT漢字変換対応）
+  "暖かい":"あたたかい","暖か":"あたたか",
+  "涼しい":"すずしい","涼し":"すずし",
+  "楽しい":"たのしい","楽し":"たのし",
+  "難しい":"むずかしい","難し":"むずかし",
+  "新しい":"あたらしい","新し":"あたらし",
+  "大きい":"おおきい","大き":"おおき",
+  "小さい":"ちいさい","小さ":"ちいさ",
+  "忙しい":"いそがしい","忙し":"いそがし",
+  "面白い":"おもしろい","面白":"おもしろ",
+  "美味しい":"おいしい","美味し":"おいし",
+  "寒い":"さむい","寒":"さむ",
+  "長い":"ながい","長":"なが",
+  "広い":"ひろい","広":"ひろ",
+  "明るい":"あかるい","明る":"あかる",
+  // Unit6既存い形容詞の語幹追記（くて/なります/過去対応）
+  "高":"たか","安":"やす","甘":"あま","辛":"から",
+  "冷た":"つめた","暑":"あつ","熱":"あつ","遠":"とお",
+  // Unit8: な形容詞・名詞
+  "親切":"しんせつ","便利":"べんり","大変":"たいへん",
+  "天気予報":"てんきよほう","天気":"てんき",
+  "町":"まち","人気":"にんき","音楽":"おんがく",
+  // Unit8: 動詞（言う/思う活用）
+  "思います":"おもいます","言いました":"いいました",
+  "思い":"おもい","言い":"いい"
 };
 const KANJI_KANA_KEYS = Object.keys(KANJI_KANA).sort((a, b) => b.length - a.length);
 function kanjiToKana(s) {
@@ -27180,62 +27361,64 @@ function renderProfile() {
   const total  = (window.canDoData || []).length;
   const isPrem = isPremium();
 
+  const displayName = user ? (user.displayName || user.email) : 'Invitado';
+  const avatarInitial = displayName.charAt(0).toUpperCase();
+
   document.getElementById('profile-content').innerHTML = `
-    <div style="max-width:480px;margin:0 auto;padding:1rem">
-      <h2 style="font:700 1.4rem 'Zen Maru Gothic',sans-serif;color:var(--night);margin:0 0 1.2rem">👤 Mi Perfil</h2>
+    <div class="profile-wrap">
+      <h2 class="profile-title">🧭 Mi Pasaporte</h2>
 
       <!-- Usuario -->
-      <div style="background:#fff;border-radius:var(--radius-lg);padding:1.2rem 1.4rem;margin-bottom:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
-        <p style="margin:0 0 0.25rem;font:700 1rem 'DM Sans',sans-serif;color:var(--night)">
-          ${user ? (user.displayName || user.email) : 'Invitado'}
-        </p>
-        <p style="margin:0;font-size:0.82rem;color:var(--text-light)">${user ? user.email : ''}</p>
-        <span style="display:inline-block;margin-top:0.5rem;background:${isPrem ? 'var(--ocean)' : 'var(--text-light)'};color:#fff;border-radius:99px;padding:0.2rem 0.75rem;font:700 0.72rem 'DM Sans',sans-serif">
-          ${isPrem ? '⭐ Premium' : 'Gratuito'}
-        </span>
+      <div class="passport-card">
+        <div class="passport-card__avatar">${avatarInitial}</div>
+        <div class="passport-card__body">
+          <p class="passport-card__name">${displayName}</p>
+          <p class="passport-card__email">${user ? user.email : 'Sesión sin guardar'}</p>
+          <span class="passport-card__badge ${isPrem ? 'is-premium' : ''}">${isPrem ? '⭐ Premium' : '🧭 Explorador gratuito'}</span>
+        </div>
       </div>
 
-      <!-- Estadísticas -->
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-bottom:1rem">
-        <div style="background:#fff;border-radius:var(--radius-md);padding:1rem 0.5rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
-          <p style="margin:0;font:800 1.8rem 'Outfit',sans-serif;color:var(--primary)">${xp.total}</p>
-          <p style="margin:0;font-size:0.72rem;color:var(--text-light)">XP Total</p>
+      <!-- Estadísticas (sellos del pasaporte) -->
+      <div class="stamp-grid">
+        <div class="stamp">
+          <span class="stamp__value">${xp.total}</span>
+          <span class="stamp__label">XP Total</span>
         </div>
-        <div style="background:#fff;border-radius:var(--radius-md);padding:1rem 0.5rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
-          <p style="margin:0;font:800 1.8rem 'Outfit',sans-serif;color:var(--accent)">🔥 ${streak.current}</p>
-          <p style="margin:0;font-size:0.72rem;color:var(--text-light)">Días seguidos</p>
+        <div class="stamp stamp--accent">
+          <span class="stamp__value">🔥 ${streak.current}</span>
+          <span class="stamp__label">Días seguidos</span>
         </div>
-        <div style="background:#fff;border-radius:var(--radius-md);padding:1rem 0.5rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
-          <p style="margin:0;font:800 1.8rem 'Outfit',sans-serif;color:var(--ocean)">${done}/${total}</p>
-          <p style="margin:0;font-size:0.72rem;color:var(--text-light)">Can-dos</p>
+        <div class="stamp stamp--ocean">
+          <span class="stamp__value">${done}/${total}</span>
+          <span class="stamp__label">Can-dos</span>
         </div>
       </div>
 
       <!-- Progreso diario -->
-      <div style="background:#fff;border-radius:var(--radius-lg);padding:1.2rem 1.4rem;margin-bottom:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
-        <p style="margin:0 0 0.5rem;font:700 0.88rem 'DM Sans',sans-serif;color:var(--night)">Progreso hoy</p>
-        <div style="display:flex;align-items:center;gap:0.75rem">
-          <progress value="${xp.today}" max="100" style="flex:1;height:10px;border-radius:99px"></progress>
-          <span style="font:700 0.85rem 'DM Sans',sans-serif;color:var(--primary)">${xp.today} XP</span>
+      <div class="profile-panel">
+        <p class="profile-panel__title">Progreso de hoy</p>
+        <div class="profile-daily">
+          <progress value="${xp.today}" max="100"></progress>
+          <span>${xp.today} XP</span>
         </div>
-        <p style="margin:0.4rem 0 0;font-size:0.75rem;color:var(--text-light)">Racha más larga: ${streak.longest} días</p>
+        <p class="profile-panel__foot">Racha más larga: ${streak.longest} días</p>
       </div>
 
       <!-- Plan -->
       ${!isPrem ? `
-      <div style="background:linear-gradient(135deg,var(--night),var(--night-light));border-radius:var(--radius-lg);padding:1.2rem 1.4rem;color:#fff;box-shadow:0 4px 16px rgba(29,53,87,0.25)">
-        <p style="margin:0 0 0.3rem;font:700 1rem 'DM Sans',sans-serif">⭐ Hazte Premium</p>
-        <p style="margin:0 0 1rem;font-size:0.82rem;opacity:0.8">Acceso ilimitado a todos los ejercicios, exámenes JLPT y conversación IA.</p>
-        <button onclick="openPlansModal()" style="background:var(--primary);color:#fff;border:none;border-radius:var(--radius-md);padding:0.6rem 1.4rem;font:700 0.88rem 'DM Sans',sans-serif;cursor:pointer">Ver planes</button>
+      <div class="profile-plan profile-plan--upsell">
+        <p style="font:700 1rem 'DM Sans',sans-serif">⭐ Hazte Premium</p>
+        <p>Acceso ilimitado a todos los ejercicios, exámenes JLPT y conversación IA.</p>
+        <button onclick="openPlansModal()">Ver planes</button>
       </div>` : `
-      <div style="background:linear-gradient(135deg,var(--ocean),#22b09e);border-radius:var(--radius-lg);padding:1.2rem 1.4rem;color:#fff;box-shadow:0 4px 16px rgba(42,157,143,0.25)">
-        <p style="margin:0;font:700 1rem 'DM Sans',sans-serif">✅ Plan Premium activo</p>
-        <p style="margin:0.3rem 0 0;font-size:0.82rem;opacity:0.85">¡Gracias por tu apoyo! Disfruta el acceso completo.</p>
+      <div class="profile-plan profile-plan--active">
+        <p style="font:700 1rem 'DM Sans',sans-serif">✅ Plan Premium activo</p>
+        <p>¡Gracias por tu apoyo! Disfruta el acceso completo.</p>
       </div>`}
 
       <!-- Cerrar sesión -->
-      <div style="text-align:center;margin-top:1.5rem">
-        <button onclick="authSignOut()" style="background:transparent;border:1.5px solid #DDD;border-radius:var(--radius-md);padding:0.55rem 1.4rem;font:600 0.85rem 'DM Sans',sans-serif;color:var(--text-light);cursor:pointer">🚪 Cerrar sesión</button>
+      <div class="profile-logout">
+        <button class="btn-back" onclick="authSignOut()">🚪 Cerrar sesión</button>
       </div>
     </div>`;
 }
@@ -27374,19 +27557,22 @@ let _jlptAnswers   = [];
 
 function renderJlpt() {
   document.getElementById('jlpt-content').innerHTML = `
-    <div style="max-width:480px;margin:0 auto;padding:1.5rem 1rem">
-      <div style="text-align:center;margin-bottom:1.5rem">
-        <p style="font-size:3rem;margin:0 0 0.4rem">🎯</p>
-        <h2 style="font:700 1.4rem 'Zen Maru Gothic',sans-serif;color:var(--night);margin:0 0 0.4rem">Simulacro JLPT N5</h2>
-        <p style="font-family:'DM Sans',sans-serif;color:var(--text-light);font-size:0.88rem;margin:0">Pon a prueba todo lo que aprendiste en los Units 1–10.</p>
-      </div>
-      <div style="background:#fff;border-radius:var(--radius-lg);padding:1.2rem 1.4rem;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:1rem">
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;text-align:center;margin-bottom:1rem">
-          <div><p style="margin:0;font:800 1.5rem 'Outfit',sans-serif;color:var(--primary)">35</p><p style="margin:0;font-size:0.7rem;color:var(--text-light)">preguntas</p></div>
-          <div><p style="margin:0;font:800 1.5rem 'Outfit',sans-serif;color:var(--ocean)">60%</p><p style="margin:0;font-size:0.7rem;color:var(--text-light)">para aprobar</p></div>
-          <div><p style="margin:0;font:800 1.5rem 'Outfit',sans-serif;color:var(--accent)">+100</p><p style="margin:0;font-size:0.7rem;color:var(--text-light)">XP al aprobar</p></div>
+    <div class="profile-wrap">
+      <div class="passport-card" style="margin-bottom:1.2rem">
+        <div class="passport-card__avatar" style="font-size:1.7rem">🎯</div>
+        <div class="passport-card__body">
+          <p class="passport-card__name" style="font-family:'Zen Maru Gothic',sans-serif;font-size:1.05rem">Simulacro JLPT N5</p>
+          <p class="passport-card__email" style="white-space:normal">Pon a prueba todo lo que aprendiste en los Units 1–10</p>
         </div>
-        <div style="font-family:'DM Sans',sans-serif;font-size:0.82rem;color:var(--text-light);line-height:1.8">
+      </div>
+      <div class="stamp-grid">
+        <div class="stamp"><span class="stamp__value">35</span><span class="stamp__label">preguntas</span></div>
+        <div class="stamp stamp--ocean"><span class="stamp__value">60%</span><span class="stamp__label">para aprobar</span></div>
+        <div class="stamp stamp--accent"><span class="stamp__value">+100</span><span class="stamp__label">XP al aprobar</span></div>
+      </div>
+      <div class="profile-panel">
+        <p class="profile-panel__title">Ruta del examen</p>
+        <div style="font-family:'DM Sans',sans-serif;font-size:0.86rem;color:var(--night);display:flex;flex-direction:column;gap:0.6rem;line-height:1.5">
           <p style="margin:0">📝 <strong>Sección 1</strong> — Vocabulario (10 preguntas)</p>
           <p style="margin:0">📖 <strong>Sección 2</strong> — Gramática (20 preguntas)</p>
           <p style="margin:0">📄 <strong>Sección 3</strong> — Lectura (5 preguntas)</p>
