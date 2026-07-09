@@ -7,7 +7,11 @@
 
 ## 技術スタック
 - **Vanilla HTML / CSS / JavaScript** — フレームワーク・ビルドツールなし
-- **単一ファイル**: `index.html`（約27,130行、CSS・JS・データすべて内包）
+- **単一ファイル**: `index.html`（約26,520行、CSS・JS・データすべて内包 / 2026-07-06実カウント）
+- **回帰テスト**（データ追加・修正後は必ず実行）:
+  - 静的: `node scripts/verify_app_static.js`（依存なし・FAIL 0 が正常）
+  - E2E: `python C:/Users/LENOVO/.claude/skills/webapp-testing/scripts/with_server.py --server "python -m http.server 8899" --port 8899 -- python scripts/verify_app_e2e.py`（Playwright headless・16項目・2026-07-09時点 16/16 pass。稼働中サーバ再利用なら `PYTHONIOENCODING=utf-8 NM_PORT=8080 python scripts/verify_app_e2e.py` が確実）
+  - 手動スニペット集: `scripts/verify_app_eval.md`（DevToolsコンソール用）
 - 永続化: `localStorage`（`chizu_scores` / `learnedChars` / `nm_*` キー群）
 - 認証: **Firebase Authentication**（メール/パスワード・Google 有効済み）
 - 外部依存: Google Fonts + Firebase CDN（10.12.0 compat版）
@@ -56,11 +60,11 @@ const firebaseConfig = {
 ```
 #roadmap   — ホーム（ロードマップ）。初期表示 class="section active"
 #unit      — ユニット詳細（Can-doカード一覧）
-#scenario  — シナリオ学習フロー（Escena→Gramática→[Trazar]→Práctica→Reto）
-#jlpt      — JLPT N5模擬試験（Premium・プレースホルダー）
+#scenario  — シナリオ学習フロー（Escena→Gramática→[Trazar]→Práctica→[Escuchar]→[Lectura]→Reto。Escuchar/Lectura はデータがある Can-do のみ・ステップ見出しには出さずボタン遷移）
+#jlpt      — JLPT N5模擬試験（**実装済み**: 35問=語彙10+文法20+読解5・60%合格・+100XP・弱点誘導。現状ゲート未接続で無料開放）＋ **Práctica de Lectura ドリル**（2026-07-09実装: `lecturaDrillBank` 12パッセージ17問からランダム5パッセージ・60%合格・+20XP）
 #profile   — ユーザープロフィール（XP・ストリーク・プラン）
 #moji      — 文字（ひらがな・カタカナ・漢字）
-#grammar   — 文法（22タブ）
+#grammar   — 文法（26タブ）
 #vocab     — 語彙（20カテゴリ）
 ```
 
@@ -113,6 +117,12 @@ const firebaseConfig = {
 | `openPracticeView()` | 練習問題開始（mc/fill/reorder 対応）。**items を浅いコピーし、mc/fill/conv の選択肢を描画時シャッフルして answer を追従**（正解が answer:0 に偏っていたため。元データ非破壊・採点はindexベースのまま） |
 | `renderPracticeItem()` | 問題1問描画（displayOptions でフリガナ対応） |
 | `startEscucharPart()` | Escuchar（聞き取り）練習開始。**openPracticeView と同型で audio_mc/audio_meaning/audio_match の選択肢を描画時シャッフルして answer を追従**（正解が answer:0 に92%偏っていたため。audio_fill 無料dictado は `_buildDictadoFreeOpts` が別途シャッフル済み） |
+| `startLecturaPart()` | Lectura（読解）練習開始（2026-07-09実装）。`cd.lectura.items`（read_mc）を浅いコピー→**描画時シャッフル＋answer追従**。状態変数 `_lectura*`。フロー: Práctica合格→[Escuchar]→Lectura→Reto（`showPracticeResult`/`showEscucharResult` の hasLectura 分岐） |
+| `renderLecturaItem()` | パッセージ（`.lectura-passage`・ルビ付き）＋promptEs＋4択を `#scenario-content` に描画 |
+| `checkLecturaAnswer(idx)` | インデックス採点・explainEs 表示 → `advanceLectura()` |
+| `showLecturaResult()` | passRate 0.7判定・**+15XP**・合格で Reto ボタン |
+| `startLecturaDrill()` | JLPT形式読解ドリル（2026-07-09実装）。`lecturaDrillBank` からランダム5パッセージ→設問フラット化（シャッフル＋answer追従）。状態変数 `_lectDrill*`（模試 `_jlpt*` と分離） |
+| `renderLectDrillQuestion()` / `checkLectDrillAnswer(idx)` / `showLectDrillResults()` | ドリル出題・採点（explainEs表示）・結果（60%合格・**+20XP**）。`#jlpt-content` に描画 |
 | `checkPracticeAnswer(idx)` | 4択採点（インデックスベース） |
 | `practiceReorderTap(btn)` | 並び替えチップ選択 |
 | `checkPracticeReorder()` | 並び替え採点 |
@@ -122,7 +132,7 @@ const firebaseConfig = {
 | `playScenarioAudio(path, text, btn)` | MP3優先→Web Speech APIフォールバック |
 | `speakFallback(text, btn)` | Web Speech API TTS（ja-JP、0.85倍速） |
 | `renderProfile()` | `#profile-content` にXP・ストリーク・プラン表示 |
-| `renderJlpt()` | `#jlpt-content` にPremiumプレースホルダー表示 |
+| `renderJlpt()` | `#jlpt-content` に模試イントロ＋**Práctica de Lectura エントリ** → `startJlptTest()` で35問実施（`jlptQuestionBank`・`showJlptResults()` +100XP）／ `startLecturaDrill()` で読解ドリル |
 
 ### Can-do データ構造
 ```javascript
@@ -150,41 +160,55 @@ window.canDoData.push({
       {type:"fill", prompt:"...", prefix:"...", answer:"...", options:[...]},
       {type:"reorder", prompt:"...", answer:[...], displayOptions:[...]}  // displayOptionsでruby対応
     ]
+  },
+  escuchar: {   // 任意。あると Práctica 合格後に Escuchar ステップ
+    passRate: 0.7,
+    items: [{type:"audio_meaning"|"audio_match"|"audio_mc"|"audio_fill", text:"（読み上げ文）", promptEs, options, answer, explainEs}]
+  },
+  lectura: {    // 任意（2026-07-09実装）。あると Práctica/Escuchar 合格後に Lectura ステップ
+    passRate: 0.7,
+    items: [{type:"read_mc", passage:"（ルビ付き2〜4文）", promptEs, options:[×4], answer:0, explainEs}]  // explainEs 必須
   }
 });
 ```
 - `displayOptions`: reorder問題のチップ表示用（rubyタグ含むHTML）。省略時は `answer` をそのまま使用
+- **lectura 搭載 Can-do（9本・36問）**: まとめ系 u3_c5/u4_c5/u5_c5/u6_c5/u7_c5/u8_c5/u9_c5/u10_c5 ＋ u8t_c4（掲示読解）。各4問。構造は `verify_app_static.js` の [A18] で検証
 
 ### 会話練習（Reto）台本 — `data/conversation_scripts.js`（`window.NM_SCRIPTS`）
-エンジン実装済み。台本データは **47 Can-do・147会話**（Unit1〜10全て。u9_c1〜u9_c5 / u10_c1〜u10_c5 を2026-07-03 Opus生成で追加）。各Can-do 3会話×3〜4ステップ。scoring用 `jaPlain`/`accept` は全ひらがな（loanwordもひらがな化・`ー`のみ許容）。詳細・残タスク（u9/u10のKANJI_KANA追記＋実機検証）は memory の `next_session_prompt.md` / `conversation-feature-plan.md`。
+エンジン実装済み。台本データは **53 Can-do・163会話・562ステップ**（Unit1〜10全て＋u5_c6/u10_c6/u10_c7/u10_c8＋**新U8 u8t_c2/u8t_c4**。2026-07-08実カウント）。scoring用 `jaPlain`/`accept` はかな（カタカナ外来語可 — `normalizeJa` がひらがなへ正規化するため。漢字のみ禁止）。**新規台本は expect.ja もかな限定で書くと KANJI_KANA 追記不要で [A17] 安全**（u8t の12ステップはこの方式）。**KANJI_KANA 追記完了（2026-07-06）**: WS指定13語＋採点回帰で検出した10語（何人/何歳/歳/上手/大すき/何か/友だち/買い物/行か/読ん）。全562ステップの採点回帰は `scripts/verify_app_static.js` の [A17] で自動検証（547/547 pass・dynamic除く）。残タスクは実機STT検証のみ。
 
-### Can-do 実装済み一覧（2026-05-31更新 / 75本）
+### Can-do 実装済み一覧（2026-07-09更新 / 表示77本・canDoData計83本）
 **N5標準文法追加Can-do（3本・2026-05-31）** — `u7_c7`（〜ことができます / `dekiru`タブ連動 / できますvs上手の対比）、`u8_c6`（〜と言いました / `itta` / と言いましたvsと思います）、`u8_c7`（〜でしょう簡易版 / `deshou` / でしょうvsです）。各 scenario→explain（`contrast`ブロックで対比明示）→practice（mc/fill/reorder・passRate0.8）。canDoData最末尾に追記（表示はユニット内末尾＝漢字Can-doの後）。
 
 **漢字なぞり書きCan-do（u3_kanji〜u10_kanji / 8本・各ユニット末尾）** — Unit 3〜10の全漢字をなぞり書き（番号付き筆順ガイド）＋読み4択＋意味→漢字。完了で`learnedChars`連動。`id`は`u{n}_kanji`（既存`u5_c6`/`u10_c6`とのID衝突回避）。`trazarScript='kanji'`で描画。Unit 10は`unitKanji.nichijou=['今','毎','週','帰','出','休','読','話']`を新規定義し`roadmapUnits[10].kanjiKey='nichijou'`で漢字バッジ連動。Unit 7の`飛`「機」はKanjiVG筆順パスを`kanjiStrokes`へ追記済み。
 
 | id | unit | テーマ | traceChars | escuchar |
 |---|---|---|---|---|
-| u1_c1 | 1 | ひらがな母音（あいうえお） | あいうえお | — |
-| u1_c2 | 1 | ひらがな単語読み | えきあめて | — |
-| u1_c3 | 1 | 長い単語・あいさつ | なし | — |
-| u1_c4 | 1 | か行・さ行 | かきくけこさしすせそ | — |
-| u1_c5 | 1 | た行・な行 | たちつてとなにぬねの | — |
-| u1_c6 | 1 | は行・ま行・や行 | はひふへほまみむめもやゆよ | — |
-| u1_c7 | 1 | ら行・わ行・ん | らりるれろわをん | — |
-| u1_c8 | 1 | 濁音（が・ざ・だ・ば行） | が行等代表 | — |
-| u1_c9 | 1 | 半濁音（ぱ行）＋拗音 | ぱ行・きゃ等 | — |
-| u1_c10 | 1 | ひらがな総まとめ | [] | ✅ audio_mc/fill |
-| u2_c1 | 2 | カタカナ母音（アイウエオ） | アイウエオ | — |
-| u2_c2 | 2 | カタカナ単語（コンビニ等） | コケキスミ | — |
-| u2_c3 | 2 | カタカナ外来語（マリアカルロス） | マリアカルス | — |
-| u2_c4 | 2 | カ行・サ行 | カキクケコサシスセソ | — |
-| u2_c5 | 2 | タ行・ナ行 | タチツテトナニヌネノ | — |
-| u2_c6 | 2 | ハ行・マ行・ヤ行 | ハヒフへほマミムメモヤユヨ | — |
-| u2_c7 | 2 | ラ行・ワ行・ン | ラリルレロワヲン | — |
-| u2_c8 | 2 | 濁音（ガ・ザ・ダ・バ行） | ガ行等代表 | — |
-| u2_c9 | 2 | 半濁音（パ行）＋長音符ー | パ行・キャ等 | — |
-| u2_c10 | 2 | カタカナ総まとめ | [] | ✅ audio_mc/fill |
+**⚠️ U1・U2 は 2026-07-09 に五十音行順＋累積制約で全面再構成（各12本・1行1CanDo）。** 語彙は「その行までに学習済みのかなだけで書ける言葉」に限定（濁音・半濁音・拗音・促音・長音は専用CanDo c11/c12 まで登場しない）。旧まとめ（c10）の escuchar/challenge は c12 へ移設。並び順は `displayUnit`/`displayOrder`（=unit/index、1〜12）で制御。累積制約は `scratchpad/check_cumulative.py` 相当のロジックで検証済み（行CanDo 20本すべてクリーン）。
+| u1_c1 | 1 | あ行（あいうえお） | あいうえお | — |
+| u1_c2 | 1 | か行（かきくけこ） | かきくけこ | — |
+| u1_c3 | 1 | さ行（さしすせそ） | さしすせそ | — |
+| u1_c4 | 1 | た行（たちつてと） | たちつてと | — |
+| u1_c5 | 1 | な行（なにぬねの） | なにぬねの | — |
+| u1_c6 | 1 | は行（はひふへほ） | はひふへほ | — |
+| u1_c7 | 1 | ま行（まみむめも） | まみむめも | — |
+| u1_c8 | 1 | や行（やゆよ） | やゆよ | — |
+| u1_c9 | 1 | ら行（らりるれろ） | らりるれろ | — |
+| u1_c10 | 1 | わ・を・ん＋初めての文 | わをん | — |
+| u1_c11 | 1 | 濁音・半濁音（が・ざ・だ・ば・ぱ行） | がざだばぱ（代表） | — |
+| u1_c12 | 1 | 拗音（きゃ…）・促音っ | ゃゅょっ | ✅ audio_mc/fill（旧c10より移設） |
+| u2_c1 | 2 | ア行（アイウエオ） | アイウエオ | — |
+| u2_c2 | 2 | カ行（カキクケコ） | カキクケコ | — |
+| u2_c3 | 2 | サ行（サシスセソ） | サシスセソ | — |
+| u2_c4 | 2 | タ行（タチツテト） | タチツテト | — |
+| u2_c5 | 2 | ナ行（ナニヌネノ） | ナニヌネノ | — |
+| u2_c6 | 2 | ハ行（ハヒフヘホ） | ハヒフヘホ | — |
+| u2_c7 | 2 | マ行（マミムメモ） | マミムメモ | — |
+| u2_c8 | 2 | ヤ行（ヤユヨ） | ヤユヨ | — |
+| u2_c9 | 2 | ラ行（ラリルレロ） | ラリルレロ | — |
+| u2_c10 | 2 | ワ・ヲ・ン＋完全な単語 | ワヲン | — |
+| u2_c11 | 2 | 濁音・半濁音（ガ・ザ・ダ・バ・パ行） | ガザダバパ（代表） | — |
+| u2_c12 | 2 | 拗音（キャ…）・促音ッ・長音ー | ャュョッー | ✅ audio_mc/fill（旧c10より移設） |
 | u3_c1 | 3 | 自己紹介（です・ます） | なし | — |
 | u3_c2 | 3 | 職業（じゃありません） | なし | — |
 | u3_c3 | 3 | 年齢（〜さいです） | なし | ✅ meaning×4+match×4 |
@@ -229,6 +253,9 @@ window.canDoData.push({
 | u10_c3 | 10 | 禁止・義務・不必要（ない形3文型） | なし | ✅ meaning×4+match×4 |
 | u10_c4 | 10 | 理由・逆接（だから/でも/そして/それから/それに） | なし | — |
 | u10_c5 | 10 | 一日のスケジュール（Unit 10総合） | なし | ✅ meaning×4+match×4 |
+| u10_c6 | 10 | 〜てください・〜ています（指示・進行） | なし | — |
+| u10_c7 | 10 | 〜てもいいですか・〜てはいけません（許可・禁止） | なし | — |
+| u10_c8 | 10 | 〜たり〜たりします・〜ています（習慣列挙） | なし | — |
 
 ### showSection() の動作
 ```javascript
@@ -254,7 +281,7 @@ playScenarioAudio("audio/u3_kanji_l1.opus", "なまえはマリアです。", bt
 
 ---
 
-## 文法モジュール一覧（25タブ）
+## 文法モジュール一覧（26タブ）
 
 **⚠️ 実物の構造（CLAUDE.md旧記述の訂正）：**
 - タブボタンは `data-tab` 属性ではなく **`lesson-tab` クラス + `onclick="setCurrentLesson('key')"`**。HTMLは `renderGrammar()`（index.html:3151付近）**関数内のテンプレートリテラル**に直書き。`currentLesson` 変数で active 制御。
@@ -303,27 +330,38 @@ playScenarioAudio("audio/u3_kanji_l1.opus", "なまえはマリアです。", bt
 
 ---
 
-## 学習ロードマップ（10ユニット）
+## 学習ロードマップ（11ユニット・2026-07-08 カリキュラム再構成）
 
-| # | テーマ | section/tab | scoreKeys | kanjiKey |
-|---|---|---|---|---|
-| 1 | Hiragana | moji/hiragana | kana_hiragana | null |
-| 2 | Katakana | moji/katakana | kana_katakana | null |
-| 3 | Autopresentación | grammar/desu | desu/katsu/masu | desu |
-| 4 | Números, tiempo | grammar/gimon | gimon/shiji | gimon |
-| 5 | Lugares y direcciones | grammar/aru | aru/joshi | aru |
-| 6 | Compras y comida | grammar/keiyo | keiyo/dou/yori/ichiban | keiyo |
-| 7 | Acciones cotidianas | grammar/mashou | mashou/tai/niiku/maeni/dekiru | mashou |
-| 8 | Describir con adjetivos | grammar/kute | kute/naru/omou/deshou/itta | kute |
-| 9 | Familia y personas | grammar/kazoku | kazoku | kazoku |
-| 10 | Horario diario | grammar/te | te/ta/nai/setsuzoku | nichijou |
+**⚠️ 表示ユニット/順序は `displayUnit`/`displayOrder` で制御（ID・音声パス・進捗キーは不変）。**
+- Can-do の実 `unit`/`index` は変更せず、`candoEffUnit(c)=c.displayUnit??c.unit` / `candoEffOrder(c)=c.displayOrder??c.index` で表示上の割当を決める。
+- `candosForUnit(unitId)` が hidden除外＋effOrderソートして返す（`renderUnit`/`getUnitCanDoScore`/`renderRoadmap` の hasCando が使用）。
+- `desafioExtra:true` の Can-do は「⭐ Desafío extra」バッジ付き・完了率の分母から除外（必須進行外）。
+- `hidden:true` の Can-do は全表示から除外（データは温存）。
 
-ロードマップ関数: `renderRoadmap()` / `getUnitScore(keys)` / `getKanjiProgress(chars)` / `navigateToUnit(section, tab)`
+| # | テーマ | section/tab | scoreKeys | kanjiKey | 表示Can-do（displayOrder順） |
+|---|---|---|---|---|---|
+| 1 | Hiragana | moji/hiragana | kana_hiragana | null | u1_c1〜c12（五十音行順・2026-07-09再構成） |
+| 2 | Katakana | moji/katakana | kana_katakana | null | u2_c1〜c12（五十音行順・2026-07-09再構成） |
+| 3 | Autopresentación (です) | grammar/desu | desu/katsu | desu | u3_c1,c2,c3,c5,u3_kanji（**u3_c4はU7へ移動**） |
+| 4 | Números, tiempo | grammar/gimon | gimon/shiji | gimon | u4_c1〜c5,u4_kanji |
+| 5 | Lugares y direcciones | grammar/aru | aru/joshi | aru | u5_c1〜c4,c6,c5,u5_kanji |
+| 6 | Compras y comida | grammar/keiyo | keiyo/dou/yori/ichiban | keiyo | u6_c1〜c5,u6_kanji |
+| 7 | Acciones cotidianas (ます形) | grammar/mashou | masu/mashou/tai/niiku/maeni/dekiru | mashou | **u3_c4**,u7_c1,c2,c3,c4,c7,c5,u7_kanji |
+| 8 | **La forma て（新設）** | grammar/te | te | null | u8t_c1,u8t_c2,u8t_c3,u8t_c4（新規） |
+| 9 | Describir con adjetivos（旧U8） | grammar/kute | kute/naru/omou/deshou/itta | kute | u8_c1〜c5,u8_kanji＋u8_c6,c7=**Desafío extra** |
+| 10 | Familia y personas（旧U9） | grammar/kazoku | kazoku | kazoku | u9_c1〜c5,u9_kanji |
+| 11 | Horario diario（旧U10） | grammar/ta | ta/nai/setsuzoku | nichijou | u10_c1,c2,c3,c4,c8,c5,u10_kanji（**c6/c7は`hidden`＝U8へ移設**） |
 
-配置テスト判定:
-- 12〜15問正解 → Pre-intermedio → Unit 9推奨
-- 8〜11問正解 → Básico-intermedio → Unit 5推奨
-- 0〜7問正解 → Básico → Unit 1推奨
+**新U8「La forma て」（u8t_ プレフィックス・unit:8・2026-07-08）:** u8t_c1=て形の作り方（G1/2/3・リズム記憶）、u8t_c2=〜てください（旧u10_c6該当部を移設・職場シーン）、u8t_c3=〜ています（旧u10_c6から分離・作業中を伝える）、u8t_c4=〜てもいいですか/〜てはいけません（旧u10_c7を移設・教室の規則）。旧 `u10_c6`/`u10_c7` は `hidden:true` で退避（進捗は非継承・プレローンチのため無影響）。**Reto会話**: u8t_c2/u8t_c4 に各2会話（NM_SCRIPTS・expect.jaかな限定）。**Escuchar**: u8t_c4 に audio_meaning×4+audio_match×4。**Lectura**: u8t_c4 に read_mc×4（掲示読解・2026-07-09）。u8t_c1/c3 は Reto/Escuchar/Lectura なし。
+
+**explain ブロック新タイプ `objetivo`（2026-07-08 全Can-do展開完了）:** 学習目標を explain 先頭に表示（`renderExplainBlock` に case ＋ `.explain-block--objetivo` CSS）。**表示中の全77 Can-do に配置済み**（hidden 2本を除く全て）。objetivo文は各Can-doの `es`（=学習目標そのもの）から「Hoy podrás {es先頭小文字}.」を自動導出。一人称/体言止めの5件（u1_c10,u2_c10,u2_c3,u3_c2,u3_c3）のみ手動調整。挿入は冪等スクリプトで実施（`blocks:` 正規表現マッチ→直後に差し込み・既存objetivoはskip）。
+
+ロードマップ関数: `renderRoadmap()` / `getUnitScore(keys)` / `getUnitCanDoScore(unitId)` / `candosForUnit(unitId)` / `getKanjiProgress(chars)` / `navigateToUnit(section, tab)`
+
+配置テスト判定（推奨ユニット名は `showPlacementResult` が `roadmapUnits` から動的取得＝名称ドリフト防止・2026-07-08）:
+- 12〜15問正解 → Pre-intermedio → Unit 9推奨（＝Describir con adjetivos。再構成前は「Familia y personas」だった）
+- 8〜11問正解 → Básico-intermedio → Unit 5推奨（Lugares y direcciones）
+- 0〜7問正解 → Básico → Unit 1推奨（Hiragana）
 
 ---
 
@@ -343,8 +381,11 @@ playScenarioAudio("audio/u3_kanji_l1.opus", "なまえはマリアです。", bt
 
 ## 要注意箇所
 - `renderGrammar()` に新タブ追加時は**必ず3箇所**に追記
-- `taReorderPool` の `use:'hou'` エントリが2重（軽微な既知バグ）
-- Can-do の `practice.items` / `escuchar.items` は **answer:0 のまま書いてよい**（`openPracticeView`/`startEscucharPart` が描画時に選択肢をシャッフルして answer を追従させる）。データ側で正解位置を手動分散させる必要なし
+- ~~`taReorderPool` の `use:'hou'` エントリが2重~~ → **2026-07-06 修正済み**（重複8件削除）
+- **`canUse()`/`consume()` は定義のみで呼び出し箇所ゼロ**（FEATURE_GATES は休眠状態。日次制限・Premium制限は現状未発動。isPremium() 直呼びは Escuchar dictado のみ）
+- `nm_*` の読み出しは `nmSafeParse()` 経由（破損JSON耐性・2026-07-06導入）。ただし `chizu_scores`/`learnedChars`/`chizu_placement` は直 `JSON.parse` が残っている（index.html:1935 ほか）
+- 料金モーダル `openPlansModal()` の「Elegir plan」はモーダルを閉じるだけ（決済未連携）。表示される機能制限（trazos/audio有料）は実装と不一致
+- Can-do の `practice.items` / `escuchar.items` / `lectura.items` / `lecturaDrillBank` は **answer:0 のまま書いてよい**（`openPracticeView`/`startEscucharPart`/`startLecturaPart`/`startLecturaDrill` が描画時に選択肢をシャッフルして answer を追従させる）。データ側で正解位置を手動分散させる必要なし。**lectura 系の explainEs は全問必須**（[A18] が FAIL にする）
 - ビルド・テスト・lint なし。動作確認は `python -m http.server 8080`
 - 実装完了後は必ず未実装リストを `✅完了` に更新すること
 
@@ -378,24 +419,41 @@ playScenarioAudio("audio/u3_kanji_l1.opus", "なまえはマリアです。", bt
 | Unit 9 Can-do 5本（u9_c1〜u9_c5）+ escuchar（c3/c5）+ 選択肢ランダム化 | 2026-05-29 |
 | Unit 10 Can-do 5本（u10_c1〜u10_c5）+ escuchar（c3/c5）+ 選択肢ランダム化 | 2026-05-29 |
 
-### 🔜 残タスク（優先順）
-| # | 内容 | 担当モデル |
-|---|---|---|
-| ✅ | Unit 8 Can-do 5本（u8_c1〜u8_c5）| Opus/Sonnet |
-| ✅ | Unit 9 Can-do 5本（u9_c1〜u9_c5）| Opus/Sonnet |
-| ✅ | Unit 10 Can-do 5本（u10_c1〜u10_c5）| Opus/Sonnet |
-| ✅ | VOICEVOXバッチスクリプト（**Opus(.opus)** 生成 / `tools/`）— 2026-05-31完了 | Opus |
-| 11 | admin.html + Claude API シナリオ自動生成 | Sonnet |
-| 13 | Lemon Squeezy 連携・`nm_plan` サーバ検証 | Sonnet |
-| 14 | OpenAI Realtime PoC（Unit 3 c1 の Reto） | Sonnet |
+### 🔜 残タスク（2026-07-06 監査で実態更新・優先順）
 
-### 🟢 バックエンド（後回し）
-| 項目 | 規模 |
+**🔴 launch blocker（販売開始前に必須）**
+| # | 内容 | 現状（根拠） | 規模 |
+|---|---|---|---|
+| L1 | 決済＝**WhatsApp手動MVPで確定**（2026-07-08）: 「Elegir plan」→ wa.me deeplink＋Firestore `users/{uid}.plan` を手動付与。Lemon Squeezy は後日判断 | grep 0件。ボタンは閉じるだけ | 中（手動MVP化で縮小） |
+| L2 | 料金モーダルの機能表と実装の整合（trazos/audio は実際は無料） | `openPlansModal` の文言が実態と不一致 | 小 |
+| L3 | FEATURE_GATES の実接続（canUse/consume 呼び出しゼロ＝無料制限もPremium価値も未発動） | grep: 定義のみ | 中 |
+| L4 | nm_*（XP/streak/Can-do進捗/plan）の Firestore 同期（機種変更で消える） | 同期は chizu_scores+learnedChars のみ（index.html:1932-1964） | 大 |
+| L5 | nm_plan のサーバ検証（現状 localStorage 書き換えで Premium 化可能） | `verifyPlanWithServer()` は空スタブ | 中 |
+
+**🟡 品質・コンテンツ**
+| # | 内容 | 現状 | 規模 |
+|---|---|---|---|
+| Q1 | 音声 .opus 生成（VOICEVOX+ffmpeg・ユーザー環境タスク） | manifest 345行 / 生成 0件（TTSフォールバックで動作中） | ユーザー作業 |
+| Q2 | Reto 実機STT検証（マイク・Web Speech認識） | 採点ロジックは回帰535/535 pass済み | 小 |
+| Q3 | 語彙拡充 520→600〜800語 | 実カウント 524語/20カテゴリ | Opus |
+| Q4 | Can-do完了時の達成演出（現状 무演出でロードマップへ戻るだけ） | `completeCandoDone()` | 小 |
+| Q5 | 🔊/ヒントボタンのタップターゲット拡大（28px→44px） | モバイル実測 | 小 |
+| Q6 | u10_c1〜c8・u*_kanji の practice.items へ explainEs 追加（現状フォールバック表示） | 150問 | Opus |
+| ~~Q7~~ | ~~読解モジュール~~ | **✅完了（2026-07-09）**: (A) Can-doフロー組込 lectura 9本×4問（まとめ8本＋u8t_c4）＋ (B) JLPTドリル `lecturaDrillBank` 12パッセージ17問。回帰 [A18]/T15/T16 追加・16/16 pass・モバイル375px確認済み | — |
+
+**⚪ 保留・要判断**
+| # | 内容 | 備考 |
+|---|---|---|
+| 11 | admin.html + Claude API シナリオ自動生成 | admin.html 不存在。Unit1-10コンテンツ完成済みのため優先度低下 |
+| 14 | OpenAI Realtime PoC | **保留のまま残す**（2026-07-08 ユーザー確認済み。将来のPremium差別化候補。今は着手しない） |
+
+### 🟢 バックエンド（2026-07-06 監査: 大半が実装済みと判明）
+| 項目 | 状態 |
 |---|---|
-| Googleログインボタン（Firebase Google Auth） | 中 |
-| パスワードリセット | 小 |
-| Firestore進捗保存（nm_cando_progress 同期） | 大 |
-| 利用規約・プライバシーポリシー | 中 |
+| Googleログインボタン | ✅ 実装済み（index.html:1491 UI + signInWithGoogle） |
+| パスワードリセット | ✅ 実装済み（reset-view UI + sendPasswordResetEmail） |
+| 利用規約・プライバシーポリシー | ✅ 実装済み（showLegal モーダル・スペイン語） |
+| Firestore進捗保存 | ⚠️ 部分実装: chizu_scores + learnedChars のみ（save/load・maxマージ）。nm_* は未同期（→L4） |
 
 ---
 
