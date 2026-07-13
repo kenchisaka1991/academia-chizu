@@ -7,10 +7,10 @@
 
 ## 技術スタック
 - **Vanilla HTML / CSS / JavaScript** — フレームワーク・ビルドツールなし
-- **単一ファイル**: `index.html`（約26,520行、CSS・JS・データすべて内包 / 2026-07-06実カウント）
+- **単一ファイル**: `index.html`（約28,560行、CSS・JS・データすべて内包 / 2026-07-10実カウント）
 - **回帰テスト**（データ追加・修正後は必ず実行）:
   - 静的: `node scripts/verify_app_static.js`（依存なし・FAIL 0 が正常）
-  - E2E: `python C:/Users/LENOVO/.claude/skills/webapp-testing/scripts/with_server.py --server "python -m http.server 8899" --port 8899 -- python scripts/verify_app_e2e.py`（Playwright headless・16項目・2026-07-09時点 16/16 pass。稼働中サーバ再利用なら `PYTHONIOENCODING=utf-8 NM_PORT=8080 python scripts/verify_app_e2e.py` が確実）
+  - E2E: `python C:/Users/LENOVO/.claude/skills/webapp-testing/scripts/with_server.py --server "python -m http.server 8899" --port 8899 -- python scripts/verify_app_e2e.py`（Playwright headless・**22項目・2026-07-10時点 22/22 pass**（WS5でT17〜T19・WS8でT20〜T21・**WS9でT22（nm_*同期マージ）追加**）。静的側は **[A19]（nm_*マージ関数・15アサーション）** をWS9で追加。稼働中サーバ再利用なら `PYTHONIOENCODING=utf-8 NM_PORT=8080 python scripts/verify_app_e2e.py` が確実。※`with_server.py` は NM_PORT を渡さないと 8899 既定になるので、別ポート時は `NM_PORT=<port>` を必ず前置。8899/with_server が ERR_EMPTY_RESPONSE で不安定なら `python -m http.server <port> &` を自前で立てて `NM_PORT=<port> python scripts/verify_app_e2e.py` が確実）
   - 手動スニペット集: `scripts/verify_app_eval.md`（DevToolsコンソール用）
 - 永続化: `localStorage`（`chizu_scores` / `learnedChars` / `nm_*` キー群）
 - 認証: **Firebase Authentication**（メール/パスワード・Google 有効済み）
@@ -82,17 +82,19 @@ const firebaseConfig = {
 - JS互換: `querySelectorAll('.nav-btn')` はそのまま動作
 
 ### NihongoMap Phase 1 — localStorage キー
+**⚠️ Firestore 同期状況（WS9・2026-07-10）**: `chizu_scores`/`learnedChars`（既存）＋ **`nm_cando_progress`/`nm_xp`/`nm_streak`/`nm_jlpt`（WS9で同期化）** が `users/{uid}` に保存される。`nm_daily`/`nm_challenge_quota` は**意図的に同期スコープ外**（端末ローカル据え置き＝日次リセットとの二重管理回避。ユーザー承認済み）。`nm_plan` はWS8で同期（読込のみ）。
 | キー | 型 | 用途 |
 |---|---|---|
-| `chizu_scores` | object | **既存**: 練習タブごとのスコア（0〜100） |
-| `learnedChars` | array | **既存**: 学習済み文字 |
-| `chizu_placement` | object | **既存**: 配置テスト結果 |
-| `nm_cando_progress` | object | Can-do別進捗（status/stars/practiceScore/…） |
-| `nm_xp` | object | `{total, today, lastUpdate}` |
-| `nm_streak` | object | `{current, longest, lastActiveDate}` |
-| `nm_daily` | object | 日次カウンター（`{date, practiceCount, …}`） |
-| `nm_plan` | object | プランフラグ（`{tier, expiresAt, source}`） |
-| `nm_challenge_quota` | object | 会話チャレンジ無料枠 |
+| `chizu_scores` | object | **既存**: 練習タブごとのスコア（0〜100）。**Firestore同期** |
+| `learnedChars` | array | **既存**: 学習済み文字。**Firestore同期** |
+| `chizu_placement` | object | **既存**: 配置テスト結果（未同期） |
+| `nm_cando_progress` | object | Can-do別進捗（status/stars/practiceScore/…）。**WS5追加** `xpAwarded:{practice,escuchar,lectura,done}`＝初回満額XP判定フラグ。**WS9でFirestore同期**（`users/{uid}.nm.cando`） |
+| `nm_xp` | object | `{total, today, lastUpdate}`。**WS9でFirestore同期**（total=maxマージ・today/lastUpdateはローカル当日優先） |
+| `nm_streak` | object | `{current, longest, lastActiveDate}`。**WS9でFirestore同期**（longest=max・current/lastActiveDateは新しい日付の端末採用） |
+| `nm_jlpt` | object | **WS5追加**: 模試初回合格管理。**WS9でFirestore同期**（passedOnce=OR・bestScore=max） |
+| `nm_daily` | object | 日次カウンター（`{date, practiceCount, listeningPractice, lecturaDrill, …}`）。**WS5追加** `lecturaDrill`＝読解ドリル無料枠。**同期スコープ外**（端末ローカル） |
+| `nm_plan` | object | プランフラグ（`{tier, expiresAt, source}`）。`source:'teacher_code'`＝教師コード解放（180日Premium）。WS8で同期（読込のみ・`mergePlanFromServer`） |
+| `nm_challenge_quota` | object | 会話チャレンジ無料枠（週次）。**同期スコープ外**（端末ローカル） |
 
 ### NihongoMap Phase 1 — 主要関数
 | 関数 | 役割 |
@@ -100,10 +102,15 @@ const firebaseConfig = {
 | `rolloverDailyIfNeeded()` | 日次リセット・ストリーク判定（起動時呼び出し） |
 | `getTodayString()` | `sv-SE` ロケールでタイムゾーン対応の日付文字列 |
 | `nmGetDaily/Streak/XP/Progress/Plan()` | nm_* 読み出しユーティリティ |
-| `grantXP(amount)` | XP加算・ストリーク更新・HUD再描画 |
+| `grantXP(amount)` | XP加算・ストリーク更新・HUD再描画。**WS9**: 末尾で `scheduleCloudSave()` |
+| `nmMergeXP/Streak/Jlpt(l,s)` / `nmMergeCandoOne(l,s)` / `nmMergeCandoProgress(l,s)` | **WS9追加**: nm_* の純粋マージ関数（`NM_MERGE_START`〜`NM_MERGE_END`）。退行なし・単調増加・二重満額XP防止（xpAwarded=OR）。`server` falsy なら local を返す。回帰 [A19]/T22 で検証 |
+| `mergeNmFromServer(serverNm)` | **WS9追加**: サーバ `nm{xp,streak,cando,jlpt}` を純粋マージ関数で localStorage へ反映（副作用あり）。`loadProgressFromCloud` が呼ぶ。末尾で `updateHUD()`＋ロードマップ表示中なら `renderRoadmap()` |
+| `nmBuildSyncPayload()` / `scheduleCloudSave()` | **WS9追加**: 前者は nm_* を保存用 `{xp,streak,cando,jlpt}` に束ねる（daily/quota除外）。後者は grantXP/saveCanDoProgress/showJlptResults 後に**3秒デバウンス**で `saveProgressToCloud()` を1回に集約（未ログインは即return） |
+| `awardStepXP(id, field, full, repeat)` | **WS5追加**: ステップXPを初回満額・2回目以降減額で付与し実額を返す。初回判定は `nm_cando_progress[id].xpAwarded[field]` |
 | `isPremium()` | nm_plan の tier/expiresAt をチェック |
-| `canUse(feature, ctx)` | FEATURE_GATES で機能制限チェック |
+| `canUse(feature, ctx)` | FEATURE_GATES で機能制限チェック（**WS5で `'lectura.drill'` が初の実接続**） |
 | `consume(feature)` | 日次カウンタを消費 |
+| `sha256Hex(str)` / `redeemTeacherCode(code,msgId)` / `submitTeacherCode(inputId,msgId,after)` | **WS5追加**: 教師コードを `crypto.subtle` でSHA-256照合（ホワイトリスト `TEACHER_CODE_HASHES`）→一致で180日Premium付与。平文はソースに置かない |
 | `updateHUD()` | `#hud-xp` / `#hud-streak` / `#hud-daily` を更新 |
 | `renderUnit(unitId)` | Can-doカード一覧を `#unit-content` に描画 |
 | `openCanDo(canDoId)` | シナリオ画面へ遷移・ステップ初期化 |
@@ -116,23 +123,27 @@ const firebaseConfig = {
 | `showCanDoTrazarChar()` | `#scenario-content` に既存Trazar UIを描画（`sData`は**hiragana/katakana/kanji の3択**。kanji対応済み） |
 | `openPracticeView()` | 練習問題開始（mc/fill/reorder 対応）。**items を浅いコピーし、mc/fill/conv の選択肢を描画時シャッフルして answer を追従**（正解が answer:0 に偏っていたため。元データ非破壊・採点はindexベースのまま） |
 | `renderPracticeItem()` | 問題1問描画（displayOptions でフリガナ対応） |
-| `startEscucharPart()` | Escuchar（聞き取り）練習開始。**openPracticeView と同型で audio_mc/audio_meaning/audio_match の選択肢を描画時シャッフルして answer を追従**（正解が answer:0 に92%偏っていたため。audio_fill 無料dictado は `_buildDictadoFreeOpts` が別途シャッフル済み） |
+| `startEscucharPart()` | Escuchar（聞き取り）練習開始。**openPracticeView と同型で audio_mc/audio_meaning/audio_match の選択肢を描画時シャッフルして answer を追従**（正解が answer:0 に92%偏っていたため。audio_fill 無料dictado は `_buildDictadoFreeOpts` が別途シャッフル済み）。**WS5**: コピー時に `_origIdx` を保持 |
+| `speakEscucharItem(btn)` | **WS5変更**: `playScenarioAudio('audio/{id}_esc{n}.opus', text, btn)` 経由（n=`_origIdx`+1）。音声ファイル→TTSフォールバック |
 | `startLecturaPart()` | Lectura（読解）練習開始（2026-07-09実装）。`cd.lectura.items`（read_mc）を浅いコピー→**描画時シャッフル＋answer追従**。状態変数 `_lectura*`。フロー: Práctica合格→[Escuchar]→Lectura→Reto（`showPracticeResult`/`showEscucharResult` の hasLectura 分岐） |
 | `renderLecturaItem()` | パッセージ（`.lectura-passage`・ルビ付き）＋promptEs＋4択を `#scenario-content` に描画 |
 | `checkLecturaAnswer(idx)` | インデックス採点・explainEs 表示 → `advanceLectura()` |
 | `showLecturaResult()` | passRate 0.7判定・**+15XP**・合格で Reto ボタン |
-| `startLecturaDrill()` | JLPT形式読解ドリル（2026-07-09実装）。`lecturaDrillBank` からランダム5パッセージ→設問フラット化（シャッフル＋answer追従）。状態変数 `_lectDrill*`（模試 `_jlpt*` と分離） |
+| `startLecturaDrill()` | JLPT形式読解ドリル（2026-07-09実装）。`lecturaDrillBank` からランダム5パッセージ→設問フラット化（シャッフル＋answer追従）。状態変数 `_lectDrill*`（模試 `_jlpt*` と分離）。**WS5**: 冒頭 `canUse('lectura.drill')`＝無料1日1回ゲート→ブロック時 `renderLecturaDrillUpsell()`（教師コード入力）・通過時 `consume` |
+| `composeReorderCorrectHtml(item)` | **WS5追加**: reorder誤答時の正しい並びをHTML再構成（displayOptions→ルビ付き・貪欲DFS。無ければ answer文字列） |
 | `renderLectDrillQuestion()` / `checkLectDrillAnswer(idx)` / `showLectDrillResults()` | ドリル出題・採点（explainEs表示）・結果（60%合格・**+20XP**）。`#jlpt-content` に描画 |
 | `checkPracticeAnswer(idx)` | 4択採点（インデックスベース） |
 | `practiceReorderTap(btn)` | 並び替えチップ選択 |
-| `checkPracticeReorder()` | 並び替え採点 |
-| `showPracticeResult()` | passRate 0.8判定・+20XP |
+| `checkPracticeReorder()` | 並び替え採点。**WS5**: 誤答時に `composeReorderCorrectHtml` で正解文（可能ならルビ付き）＋explainEs を表示 |
+| `showPracticeResult()` | passRate 0.8判定・**WS5: 初回+20/以降+5**（`awardStepXP`・実額を結果画面に表示） |
 | `openChallengeView()` | Reto（Phase 1: プレースホルダー） |
-| `completeCandoDone()` | Can-do完了・+50XP・ロードマップへ |
+| `completeCandoDone()` | Can-do完了・**WS5: 初回+50/以降+0**・ロードマップへ |
 | `playScenarioAudio(path, text, btn)` | MP3優先→Web Speech APIフォールバック |
 | `speakFallback(text, btn)` | Web Speech API TTS（ja-JP、0.85倍速） |
 | `renderProfile()` | `#profile-content` にXP・ストリーク・プラン表示 |
-| `renderJlpt()` | `#jlpt-content` に模試イントロ＋**Práctica de Lectura エントリ** → `startJlptTest()` で35問実施（`jlptQuestionBank`・`showJlptResults()` +100XP）／ `startLecturaDrill()` で読解ドリル |
+| `renderJlpt()` | `#jlpt-content` に模試イントロ＋**Práctica de Lectura エントリ** → `startJlptTest()` で35問実施（`jlptQuestionBank`・`showJlptResults()`）／ `startLecturaDrill()` で読解ドリル |
+| `startJlptTest()` | **WS5変更**: section1/2 の出題順シャッフル＋各問の選択肢シャッフル＋answer追従（浅コピー・元データ非破壊）。section3（読解・同一パッセージ参照）は順序固定 |
+| `showJlptResults()` | **WS5変更**: セクション別集計を `_jlptQuestions[i].section` ベース化（シャッフル耐性）。XP＝**初回+100/以降+20**（`nm_jlpt`） |
 
 ### Can-do データ構造
 ```javascript
@@ -172,15 +183,15 @@ window.canDoData.push({
 });
 ```
 - `displayOptions`: reorder問題のチップ表示用（rubyタグ含むHTML）。省略時は `answer` をそのまま使用
-- **lectura 搭載 Can-do（9本・36問）**: まとめ系 u3_c5/u4_c5/u5_c5/u6_c5/u7_c5/u8_c5/u9_c5/u10_c5 ＋ u8t_c4（掲示読解）。各4問。構造は `verify_app_static.js` の [A18] で検証
+- **lectura 搭載 Can-do（10本・40問）**: まとめ系 u3_c5/u4_c5/u5_c5/u6_c5/u7_c5/u8_c5/u9_c5/u10_c5 ＋ u8t_c4（掲示読解）＋ **u8t_c5（職場ルール読解・WS6）**。各4問。構造は `verify_app_static.js` の [A18] で検証
 
 ### 会話練習（Reto）台本 — `data/conversation_scripts.js`（`window.NM_SCRIPTS`）
-エンジン実装済み。台本データは **53 Can-do・163会話・562ステップ**（Unit1〜10全て＋u5_c6/u10_c6/u10_c7/u10_c8＋**新U8 u8t_c2/u8t_c4**。2026-07-08実カウント）。scoring用 `jaPlain`/`accept` はかな（カタカナ外来語可 — `normalizeJa` がひらがなへ正規化するため。漢字のみ禁止）。**新規台本は expect.ja もかな限定で書くと KANJI_KANA 追記不要で [A17] 安全**（u8t の12ステップはこの方式）。**KANJI_KANA 追記完了（2026-07-06）**: WS指定13語＋採点回帰で検出した10語（何人/何歳/歳/上手/大すき/何か/友だち/買い物/行か/読ん）。全562ステップの採点回帰は `scripts/verify_app_static.js` の [A17] で自動検証（547/547 pass・dynamic除く）。残タスクは実機STT検証のみ。
+エンジン実装済み。台本データは **54 Can-do・165会話・568ステップ**（Unit1〜10全て＋u5_c6/u10_c6/u10_c7/u10_c8＋**新U8 u8t_c2/u8t_c4/u8t_c5**。2026-07-10実カウント）。scoring用 `jaPlain`/`accept` はかな（カタカナ外来語可 — `normalizeJa` がひらがなへ正規化するため。漢字のみ禁止）。**新規台本は expect.ja もかな限定で書くと KANJI_KANA 追記不要で [A17] 安全**（u8t の18ステップはこの方式）。**KANJI_KANA 追記完了（2026-07-06）**: WS指定13語＋採点回帰で検出した10語（何人/何歳/歳/上手/大すき/何か/友だち/買い物/行か/読ん）。全568ステップの採点回帰は `scripts/verify_app_static.js` の [A17] で自動検証（553/553 pass・dynamic除く）。残タスクは実機STT検証のみ。
 
-### Can-do 実装済み一覧（2026-07-09更新 / 表示77本・canDoData計83本）
-**N5標準文法追加Can-do（3本・2026-05-31）** — `u7_c7`（〜ことができます / `dekiru`タブ連動 / できますvs上手の対比）、`u8_c6`（〜と言いました / `itta` / と言いましたvsと思います）、`u8_c7`（〜でしょう簡易版 / `deshou` / でしょうvsです）。各 scenario→explain（`contrast`ブロックで対比明示）→practice（mc/fill/reorder・passRate0.8）。canDoData最末尾に追記（表示はユニット内末尾＝漢字Can-doの後）。
+### Can-do 実装済み一覧（2026-07-10更新 / 表示79本・canDoData計85本）
+**N5標準文法追加Can-do（3本・2026-05-31 / WS6で各15問に増量）** — `u7_c7`（〜ことができます / `dekiru`タブ連動 / できますvs上手の対比）、`u8_c6`（〜と言いました / `itta` / と言いましたvsと思います）、`u8_c7`（〜でしょう簡易版 / `deshou` / でしょうvsです）。各 scenario→explain（`contrast`ブロックで対比明示）→practice（**各15問**=mc/fill/reorder・全問explainEs・passRate0.8。この3本のみ `promptEs`/`id`/`jlptForm` フィールド書式）。canDoData最末尾に追記（表示はユニット内末尾＝漢字Can-doの後）。
 
-**漢字なぞり書きCan-do（u3_kanji〜u10_kanji / 8本・各ユニット末尾）** — Unit 3〜10の全漢字をなぞり書き（番号付き筆順ガイド）＋読み4択＋意味→漢字。完了で`learnedChars`連動。`id`は`u{n}_kanji`（既存`u5_c6`/`u10_c6`とのID衝突回避）。`trazarScript='kanji'`で描画。Unit 10は`unitKanji.nichijou=['今','毎','週','帰','出','休','読','話']`を新規定義し`roadmapUnits[10].kanjiKey='nichijou'`で漢字バッジ連動。Unit 7の`飛`「機」はKanjiVG筆順パスを`kanjiStrokes`へ追記済み。
+**漢字なぞり書きCan-do（u3_kanji〜u10_kanji＋u8t_kanji / 9本・各ユニット末尾）** — 各ユニットの漢字をなぞり書き（番号付き筆順ガイド）＋読み4択＋意味→漢字。完了で`learnedChars`連動。`id`は`u{n}_kanji`（既存`u5_c6`/`u10_c6`とのID衝突回避）。`trazarScript='kanji'`で描画。Unit 10は`unitKanji.nichijou=['今','毎','週','帰','出','休','読','話']`、**新U8は`unitKanji.teform=['写','真','使','入','待','作','手','伝']`（WS6・`roadmapUnits[8].kanjiKey='teform'`）**で漢字バッジ連動。KanjiVG筆順パス追記済み: 飛・機（U7）＋**写・真・使・待・作・伝（WS6。入・手は既存）**。
 
 | id | unit | テーマ | traceChars | escuchar |
 |---|---|---|---|---|
@@ -347,14 +358,14 @@ playScenarioAudio("audio/u3_kanji_l1.opus", "なまえはマリアです。", bt
 | 5 | Lugares y direcciones | grammar/aru | aru/joshi | aru | u5_c1〜c4,c6,c5,u5_kanji |
 | 6 | Compras y comida | grammar/keiyo | keiyo/dou/yori/ichiban | keiyo | u6_c1〜c5,u6_kanji |
 | 7 | Acciones cotidianas (ます形) | grammar/mashou | masu/mashou/tai/niiku/maeni/dekiru | mashou | **u3_c4**,u7_c1,c2,c3,c4,c7,c5,u7_kanji |
-| 8 | **La forma て（新設）** | grammar/te | te | null | u8t_c1,u8t_c2,u8t_c3,u8t_c4（新規） |
+| 8 | **La forma て（新設）** | grammar/te | te | teform | u8t_c1,u8t_c2,u8t_c3,u8t_c4,**u8t_c5,u8t_kanji（WS6）** |
 | 9 | Describir con adjetivos（旧U8） | grammar/kute | kute/naru/omou/deshou/itta | kute | u8_c1〜c5,u8_kanji＋u8_c6,c7=**Desafío extra** |
 | 10 | Familia y personas（旧U9） | grammar/kazoku | kazoku | kazoku | u9_c1〜c5,u9_kanji |
 | 11 | Horario diario（旧U10） | grammar/ta | ta/nai/setsuzoku | nichijou | u10_c1,c2,c3,c4,c8,c5,u10_kanji（**c6/c7は`hidden`＝U8へ移設**） |
 
-**新U8「La forma て」（u8t_ プレフィックス・unit:8・2026-07-08）:** u8t_c1=て形の作り方（G1/2/3・リズム記憶）、u8t_c2=〜てください（旧u10_c6該当部を移設・職場シーン）、u8t_c3=〜ています（旧u10_c6から分離・作業中を伝える）、u8t_c4=〜てもいいですか/〜てはいけません（旧u10_c7を移設・教室の規則）。旧 `u10_c6`/`u10_c7` は `hidden:true` で退避（進捗は非継承・プレローンチのため無影響）。**Reto会話**: u8t_c2/u8t_c4 に各2会話（NM_SCRIPTS・expect.jaかな限定）。**Escuchar**: u8t_c4 に audio_meaning×4+audio_match×4。**Lectura**: u8t_c4 に read_mc×4（掲示読解・2026-07-09）。u8t_c1/c3 は Reto/Escuchar/Lectura なし。
+**新U8「La forma て」（u8t_ プレフィックス・unit:8・2026-07-08 / WS6でc5+kanji追加=6本構成）:** u8t_c1=て形の作り方（G1/2/3・リズム記憶）、u8t_c2=〜てください（旧u10_c6該当部を移設・職場シーン）、u8t_c3=〜ています（旧u10_c6から分離・作業中を伝える）、u8t_c4=〜てもいいですか/〜てはいけません（旧u10_c7を移設・教室の規則）、**u8t_c5=まとめ「アルバイト初日」（WS6・practice15/escuchar8/lectura4/Reto2会話のフルセット・displayOrder:5）、u8t_kanji=漢字なぞり書き（写真使入待作手伝・displayOrder:6）**。旧 `u10_c6`/`u10_c7` は `hidden:true` で退避（進捗は非継承・プレローンチのため無影響）。**Reto会話**: u8t_c2/u8t_c4/u8t_c5 に各2会話（NM_SCRIPTS・expect.jaかな限定）。**Escuchar**: u8t_c4/u8t_c5 に audio_meaning×4+audio_match×4。**Lectura**: u8t_c4（掲示読解）/u8t_c5（職場ルール）に read_mc×4。u8t_c1/c3 は Reto/Escuchar/Lectura なし。
 
-**explain ブロック新タイプ `objetivo`（2026-07-08 全Can-do展開完了）:** 学習目標を explain 先頭に表示（`renderExplainBlock` に case ＋ `.explain-block--objetivo` CSS）。**表示中の全77 Can-do に配置済み**（hidden 2本を除く全て）。objetivo文は各Can-doの `es`（=学習目標そのもの）から「Hoy podrás {es先頭小文字}.」を自動導出。一人称/体言止めの5件（u1_c10,u2_c10,u2_c3,u3_c2,u3_c3）のみ手動調整。挿入は冪等スクリプトで実施（`blocks:` 正規表現マッチ→直後に差し込み・既存objetivoはskip）。
+**explain ブロック新タイプ `objetivo`（2026-07-08 全Can-do展開完了）:** 学習目標を explain 先頭に表示（`renderExplainBlock` に case ＋ `.explain-block--objetivo` CSS）。**表示中の全Can-do に配置済み**（hidden 2本を除く全て。WS6新設の u8t_c5/u8t_kanji も配置済み）。objetivo文は各Can-doの `es`（=学習目標そのもの）から「Hoy podrás {es先頭小文字}.」を自動導出。一人称/体言止めの5件（u1_c10,u2_c10,u2_c3,u3_c2,u3_c3）のみ手動調整。挿入は冪等スクリプトで実施（`blocks:` 正規表現マッチ→直後に差し込み・既存objetivoはskip）。
 
 ロードマップ関数: `renderRoadmap()` / `getUnitScore(keys)` / `getUnitCanDoScore(unitId)` / `candosForUnit(unitId)` / `getKanjiProgress(chars)` / `navigateToUnit(section, tab)`
 
@@ -382,10 +393,13 @@ playScenarioAudio("audio/u3_kanji_l1.opus", "なまえはマリアです。", bt
 ## 要注意箇所
 - `renderGrammar()` に新タブ追加時は**必ず3箇所**に追記
 - ~~`taReorderPool` の `use:'hou'` エントリが2重~~ → **2026-07-06 修正済み**（重複8件削除）
-- **`canUse()`/`consume()` は定義のみで呼び出し箇所ゼロ**（FEATURE_GATES は休眠状態。日次制限・Premium制限は現状未発動。isPremium() 直呼びは Escuchar dictado のみ）
+- **`canUse()`/`consume()` の実接続（WS8完了・2026-07-10）**: `practice.unlimited`（openPracticeView・無料10/日・counter `practiceCount`）／ `listening.practice`（startEscucharPart・無料3/日・`listeningPractice`）／ `lectura.drill`（startLecturaDrill・無料1/日・`lecturaDrill`・WS5）／ `jlpt.mock`（startJlptTest・Premium限定 blocked）。**`challenge.realtime`（Reto）は canUse ではなく専用 `checkChallengeQuota()`（週1・`nm_challenge_quota`）で接続**（canUse は weekly を解さない）。ブロック時は全て `renderGateUpsell(containerId, {...})` でPremium導線＋教師コード入力を描画。**死にゲート**（reading.simulacro/listening.simulacro/analytics.weakness/phrases.dict/reading.practice/scenario.audio）は FEATURE_GATES 内でコメント休眠（対応機能なし・scenario.audioは音声無料方針で恒久撤去）。isPremium() 直呼びは Escuchar dictado と教師コード解放。**教師コード** = `TEACHER_CODE_HASHES`（SHA-256）に一致で180日Premium。コード追加/変更は `printf '%s' 'CODE' | sha256sum` のハッシュを配列に追記/差し替え（平文は置かない）
+- **プラン検証（L5簡易・WS8）**: `verifyPlanWithServer()`＋`mergePlanFromServer(serverPlan)`。ログイン時 `loadProgressFromCloud` が Firestore `users/{uid}.plan` を読み nm_plan へマージ（**期限が遠い方を採用**＝サーバの手動付与を受け取りつつ、教師コード起源 `source:'teacher_code'` はサーバに無くても保護）。localStorage の nm_plan 改ざんはログイン時サーバ値で上書きされる（完全な改ざん防止=L5完全版はセキュリティルール）
+- **nm_* コア進捗の Firestore 同期（WS9完了・2026-07-10）**: `saveProgressToCloud()` が `users/{uid}.nm={xp,streak,cando,jlpt}` を `set({merge:true})` で保存（`nmBuildSyncPayload()`）。書込トリガは grantXP/saveCanDoProgress/showJlptResults の後に `scheduleCloudSave()`（**3秒デバウンス・過剰write抑制**・未ログイン即return）。既存 saveScore/toggleLearned の即時 `saveProgressToCloud` にも nm が相乗り。読込は `loadProgressFromCloud` → `mergeNmFromServer(data.nm)`。**マージ規則**（`NM_MERGE_START`〜`NM_MERGE_END` の純粋関数・[A19]/T22で全数検証）: xp.total=max（当日todayはローカル優先）／streak.longest=max・current/lastActiveDateは新しい日付の端末／cando は status(done>inprogress>available)・数値max・bool/xpAwardedはOR（**初回満額XPの二重付与防止**）・片方のみのIDも取込／jlpt passedOnce=OR・bestScore=max。`server` falsy（未書込）なら local を返し**初回ログインで退行しない**。⚠️ **XPは加算ログが無くmax採用のため多端末で別々に稼いだ分は合算されない**（多い方が残る・MVP既知の限界）。**`nm_daily`/`nm_challenge_quota` は意図的に非同期**（日次/週次リセットとの二重管理回避・ユーザー承認済み＝端末を替えると無料枠がリセットされ得るが実害小と判断）。L5完全版のルール草案は `docs/firestore_rules_draft.md`
 - `nm_*` の読み出しは `nmSafeParse()` 経由（破損JSON耐性・2026-07-06導入）。ただし `chizu_scores`/`learnedChars`/`chizu_placement` は直 `JSON.parse` が残っている（index.html:1935 ほか）
-- 料金モーダル `openPlansModal()` の「Elegir plan」はモーダルを閉じるだけ（決済未連携）。表示される機能制限（trazos/audio有料）は実装と不一致
-- Can-do の `practice.items` / `escuchar.items` / `lectura.items` / `lecturaDrillBank` は **answer:0 のまま書いてよい**（`openPracticeView`/`startEscucharPart`/`startLecturaPart`/`startLecturaDrill` が描画時に選択肢をシャッフルして answer を追従させる）。データ側で正解位置を手動分散させる必要なし。**lectura 系の explainEs は全問必須**（[A18] が FAIL にする）
+- 料金モーダル `openPlansModal()`（WS8で2枚化: Gratis / Premium Bs.60）: 「Elegir Premium」＝`openWhatsAppPlan()`（wa.me 手動決済MVP）。機能表は実装と整合済み（audio/trazos は無料表記）。漢字モーダルの書き順ボタンは `openKanjiTrazarFromModal`（無料・実機能）
+- Can-do の `practice.items` / `escuchar.items` / `lectura.items` / `lecturaDrillBank` / **`jlptQuestionBank`（WS5）** は **answer:0 のまま書いてよい**（`openPracticeView`/`startEscucharPart`/`startLecturaPart`/`startLecturaDrill`/`startJlptTest` が描画時に選択肢をシャッフルして answer を追従させる）。データ側で正解位置を手動分散させる必要なし。**lectura 系の explainEs は全問必須**（[A18] が FAIL にする）
+- **漢字Can-do（u3_kanji〜u10_kanji）の practice explainEs は `scripts/gen_kanji_explain.js`（冪等）で機械生成**（読み/意味データから導出）。データ追加時は再実行（既存はskip）。u10系の手書き90問は **WS6で完了**（冪等 `scripts/gen_u10_explain.js`・u8t_kanji は最初から手書きexplainEs入り）
 - ビルド・テスト・lint なし。動作確認は `python -m http.server 8080`
 - 実装完了後は必ず未実装リストを `✅完了` に更新すること
 
@@ -424,21 +438,21 @@ playScenarioAudio("audio/u3_kanji_l1.opus", "なまえはマリアです。", bt
 **🔴 launch blocker（販売開始前に必須）**
 | # | 内容 | 現状（根拠） | 規模 |
 |---|---|---|---|
-| L1 | 決済＝**WhatsApp手動MVPで確定**（2026-07-08）: 「Elegir plan」→ wa.me deeplink＋Firestore `users/{uid}.plan` を手動付与。Lemon Squeezy は後日判断 | grep 0件。ボタンは閉じるだけ | 中（手動MVP化で縮小） |
-| L2 | 料金モーダルの機能表と実装の整合（trazos/audio は実際は無料） | `openPlansModal` の文言が実態と不一致 | 小 |
-| L3 | FEATURE_GATES の実接続（canUse/consume 呼び出しゼロ＝無料制限もPremium価値も未発動） | grep: 定義のみ | 中 |
-| L4 | nm_*（XP/streak/Can-do進捗/plan）の Firestore 同期（機種変更で消える） | 同期は chizu_scores+learnedChars のみ（index.html:1932-1964） | 大 |
-| L5 | nm_plan のサーバ検証（現状 localStorage 書き換えで Premium 化可能） | `verifyPlanWithServer()` は空スタブ | 中 |
+| ~~L1~~ | ~~決済＝WhatsApp手動MVP~~ **✅完了（WS8・2026-07-10）**: 「Elegir Premium」→ `openWhatsAppPlan()` が wa.me deeplink（定型文=プラン名＋ログインメール・URLエンコード確認済み）。管理者手順は `docs/plan_activation_manual.md`（Firebase Console で `users/{uid}.plan={tier,expiresAt(ISO),source:'whatsapp'}` を手動付与） | — |
+| ~~L2~~ | ~~料金モーダルの嘘~~ **✅完了（WS8）**: プラン2枚化（Gratis / Premium Bs.60）。audio/trazos の❌行を撤去し、接続済みゲート（練習10/日・聴解3/日・模試Premium限定・lectura 1/日）を反映。漢字モーダルの偽ロックは**実機能化**（`openKanjiTrazarFromModal` で moji/kanji Trazar へ・無料・kanjiStrokes 有りのみ表示） | — |
+| ~~L3~~ | ~~FEATURE_GATES 休眠~~ **✅完了（WS8）**: `practice.unlimited`(openPracticeView・10/日)・`listening.practice`(startEscucharPart・3/日)・`jlpt.mock`(startJlptTest・Premium限定)・`challenge.realtime`(openChallengeView→checkChallengeQuota・週1)を接続。死にゲート5個は休眠コメント化。全てアップセル＋教師コード導線（`renderGateUpsell` 汎用化） | — |
+| ~~L4~~ | ~~nm_*（XP/streak/Can-do進捗）の Firestore 同期~~ **✅完了（WS9・2026-07-10）**: `nm_xp`/`nm_streak`/`nm_cando_progress`/`nm_jlpt` を `users/{uid}.nm` に同期。純粋マージ関数（退行なし・単調増加・二重満額XP防止=xpAwarded OR）＋ `mergeNmFromServer`（ログイン時読込マージ）＋ `scheduleCloudSave`（grantXP/saveCanDoProgress/showJlptResults 後に3秒デバウンス）。`nm_daily`/`nm_challenge_quota` は同期スコープ外（ユーザー承認）。回帰 [A19]（静的15）／T22（E2E）。**⚠️残: 実機ログインでの往復＋デバウンス確認（Stage 4）はユーザー実施** | — |
+| ~~L5簡易~~ | ~~nm_plan サーバ検証~~ **✅完了（WS8簡易版）**: `verifyPlanWithServer()`＋`mergePlanFromServer()` 実装。ログイン時 Firestore `users/{uid}.plan` を読み nm_plan へマージ（期限が遠い方採用・教師コード起源は保護）。localStorage 改ざんはログイン時サーバ値で上書き。**L5完全版**（Firestoreセキュリティルールでの改ざん防止・削除即時反映）はL4と同時実施が残 | 完全版=中 |
 
 **🟡 品質・コンテンツ**
 | # | 内容 | 現状 | 規模 |
 |---|---|---|---|
-| Q1 | 音声 .opus 生成（VOICEVOX+ffmpeg・ユーザー環境タスク） | manifest 345行 / 生成 0件（TTSフォールバックで動作中） | ユーザー作業 |
-| Q2 | Reto 実機STT検証（マイク・Web Speech認識） | 採点ロジックは回帰535/535 pass済み | 小 |
-| Q3 | 語彙拡充 520→600〜800語 | 実カウント 524語/20カテゴリ | Opus |
-| Q4 | Can-do完了時の達成演出（現状 무演出でロードマップへ戻るだけ） | `completeCandoDone()` | 小 |
-| Q5 | 🔊/ヒントボタンのタップターゲット拡大（28px→44px） | モバイル実測 | 小 |
-| Q6 | u10_c1〜c8・u*_kanji の practice.items へ explainEs 追加（現状フォールバック表示） | 150問 | Opus |
+| Q1 | 音声 .opus 生成（VOICEVOX or ユーザー録音・ffmpeg） | manifest **520行**（364シーン+156Escuchar）/ 生成 0件（TTSフォールバックで動作中）。**WS5**: 録音リスト `docs/grabacion_lista.md` 出力済み・Escuchar も `audio/{id}_esc{n}.opus` で自動切替対応 | ユーザー作業 |
+| Q2 | Reto 実機STT検証（マイク・Web Speech認識） | 採点ロジックは回帰 pass済み | 小 |
+| Q3 | 語彙拡充 520→600〜800語 | 実カウント 524語/20カテゴリ | Opus（WS7） |
+| Q4 | Can-do完了時の達成演出（現状 無演出でロードマップへ戻るだけ） | `completeCandoDone()` | 小 |
+| ~~Q5~~ | ~~🔊/ヒントボタンのタップターゲット拡大（28px→44px）~~ | **✅完了（WS5）**: `.btn-speak`/`.btn-hint` に 44px の `::after` 当たり判定（見た目28px維持）。E2Eで computed 44px 確認 | — |
+| ~~Q6~~ | ~~u10系 practice.items へ explainEs 追加~~ | **✅完了（WS6・2026-07-10）**: u10_c1/c2/c3/c4/c5/c8 の90問（reorder含む）に追記（冪等 `scripts/gen_u10_explain.js`）。hidden の u10_c6/c7 のみ未付与（対象外） | — |
 | ~~Q7~~ | ~~読解モジュール~~ | **✅完了（2026-07-09）**: (A) Can-doフロー組込 lectura 9本×4問（まとめ8本＋u8t_c4）＋ (B) JLPTドリル `lecturaDrillBank` 12パッセージ17問。回帰 [A18]/T15/T16 追加・16/16 pass・モバイル375px確認済み | — |
 
 **⚪ 保留・要判断**
