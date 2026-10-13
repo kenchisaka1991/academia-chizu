@@ -1,0 +1,30 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Documento del usuario: users/{uid}
+    // - Lee solo su propio documento.
+    // - Escribe solo su progreso (learnedChars, scores, nm, updatedAt).
+    // - El campo "plan" (y cualquier otro) NUNCA lo escribe el cliente:
+    //   solo el servidor (Cloud Functions / Admin SDK / consola), que ignoran estas reglas.
+    match /users/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+
+      allow create: if request.auth != null
+                    && request.auth.uid == uid
+                    && request.resource.data.keys().hasOnly(['learnedChars', 'scores', 'nm', 'updatedAt']);
+
+      allow update: if request.auth != null
+                    && request.auth.uid == uid
+                    && request.resource.data.diff(resource.data).affectedKeys()
+                         .hasOnly(['learnedChars', 'scores', 'nm', 'updatedAt']);
+
+      allow delete: if false;
+    }
+
+    // Todo lo demás (orders, teacherCodes, etc.) queda cerrado al cliente.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
