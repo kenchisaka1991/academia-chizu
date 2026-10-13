@@ -1953,7 +1953,7 @@ function loadProgressFromCloud(uid) {
     db.enableNetwork().then(() => {
         return db.collection('users').doc(uid).get();
     }).then(doc => {
-        if (!doc.exists) return;
+        if (!doc.exists) { mergePlanFromServer(undefined); return; }  // sin documento = sin plan en el servidor
         const data = doc.data();
         if (data.learnedChars && data.learnedChars.length > 0) {
             const merged = [...new Set([...learned, ...data.learnedChars])];
@@ -14440,8 +14440,8 @@ function planBenefits(tier) {
 // プラン検証（L5簡易版）
 //   Firestore users/{uid}.plan を「正」とする。ログイン時（loadProgressFromCloud）で
 //   一度読み、以降 isPremium() の日次チェックからも再取得する。
-//   localStorage の nm_plan を手で premium に書き換えても、ログイン時に Firestore の値で
-//   上書きされるため楽観的な改ざんは無効化される（完全な改ざん防止は L5完全版=セキュリティルール）。
+//   localStorage の nm_plan（キャッシュ）を手で書き換えても、次のログイン/ページ読込時に Firestore の値で
+//   上書き・削除される。Firestore の plan はセキュリティルールでクライアント書込不可（Tarea 3）。
 // ------------------------------------------------------------
 
 /**
@@ -14460,20 +14460,24 @@ function mergePlanFromServer(serverPlan) {
   const local = nmGetPlan();
   const localMs = activeMs(local);
   const serverMs = activeMs(serverPlan);
-  if (serverMs > localMs) {
-    // サーバのプランがローカルより有効期限が遠い → サーバを採用（正）
+  // Único plan local que se respeta: canje de código de profesor (hasta que pase al servidor en Tarea 6),
+  // mientras dure más que el plan del servidor.
+  if (local.source === 'teacher_code' && localMs > 0 && localMs >= serverMs) return;
+  if (serverMs > 0) {
+    // El servidor manda: se copia tal cual (incluye bajadas de plan y vencimientos adelantados)
     localStorage.setItem('nm_plan', JSON.stringify({
       tier: serverPlan.tier,
       source: serverPlan.source || 'server',
       expiresAt: planExpiryMs(serverPlan),
       lastVerifiedAt: new Date().toISOString()
     }));
-    updateHUD();
-  } else if (!serverPlan && localMs > 0 && local.source !== 'teacher_code') {
-    // サーバに plan が無く、ローカルが教師コード起源でもない（=改ざん or 失効済み受領）
-    // → 期限切れ扱いにはしないが、lastVerifiedAt を更新して次回チェックを促す。
-    /* no-op: teacher_code 以外のローカル起源は次回サーバ確認まで楽観維持 */
+  } else if (localStorage.getItem('nm_plan') !== null) {
+    // Sin plan vigente en el servidor: un plan local (manipulado, revocado o vencido) se borra → Inicial
+    localStorage.removeItem('nm_plan');
+  } else {
+    return;
   }
+  updateHUD();
 }
 
 /**
@@ -14488,7 +14492,7 @@ function verifyPlanWithServer() {
   p.lastVerifiedAt = new Date().toISOString();
   localStorage.setItem('nm_plan', JSON.stringify(p));
   db.enableNetwork().then(() => db.collection('users').doc(user.uid).get())
-    .then(doc => { if (doc.exists) mergePlanFromServer(doc.data().plan); })
+    .then(doc => { mergePlanFromServer(doc.exists ? doc.data().plan : undefined); })
     .catch(() => {})
     .finally(() => { db.disableNetwork().catch(() => {}); });
 }
