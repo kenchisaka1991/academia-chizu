@@ -1726,7 +1726,7 @@
             <div class="plans-grid" id="plans-grid"></div>
             <p style="font-size:0.78rem;color:var(--text-light);margin-top:0.9rem;text-align:center;line-height:1.5;">
                 💬 El pago es mensual por adelantado (sin renovación automática). En Bolivia: <strong>QR en Bs.</strong>.
-                En el extranjero: <strong>AirTM en USD</strong>.
+                En el extranjero: <strong>tarjeta (enlace de pago), AirTM o Binance, en USD</strong>.
                 Después de confirmar tu pago, activamos tu plan en <strong>menos de 24 horas</strong>.
             </p>
             <div style="margin-top:1.2rem;padding-top:1rem;border-top:1px solid rgba(0,0,0,0.08);max-width:360px;margin-left:auto;margin-right:auto">
@@ -13450,14 +13450,14 @@ function closePlansModal() { document.getElementById('plans-modal').classList.re
 
 // 決済 = WhatsApp 手動MVP。wa.me deeplink に定型文（プラン名・希望期間・ログインメール）を載せ、
 // 管理者が支払い確認後に Firestore users/{uid}.plan を手動付与する（docs/plan_activation_manual.md）。
-// region: 'bo' = Bolivia（銀行QR・Bs）／ 'intl' = 海外（AirTM・USD）。precio = PLANS[tier]
+// region: 'bo' = Bolivia（銀行QR・Bs）／ 'intl' = 海外（tarjeta/AirTM/Binance・USD）。precio = PLANS[tier]
 function openWhatsAppPlan(region, tier) {
   const p = PLANS[tier] || PLANS.premium;
   const email = (auth && auth.currentUser && auth.currentUser.email) || '';
   const emailLine = email ? `\nMi correo de acceso: ${email}` : '';
   let text;
   if (region === 'intl') {
-    text = `¡Hola! 😊 Quiero suscribirme al plan ${p.name} de NihongoMap ($${p.priceUsd} USD/mes). Estoy fuera de Bolivia.\n¿Me pueden enviar los datos de pago por AirTM, por favor?${emailLine}`;
+    text = `¡Hola! 😊 Quiero suscribirme al plan ${p.name} de NihongoMap ($${p.priceUsd} USD/mes). Estoy fuera de Bolivia.\n¿Me pueden enviar el enlace de pago con tarjeta, o los datos para pagar por AirTM o Binance, por favor?${emailLine}`;
   } else {
     text = `¡Hola! 😊 Quiero suscribirme al plan ${p.name} de NihongoMap (Bs. ${p.priceBs}/mes). Estoy en Bolivia.\n¿Me pueden enviar el QR para hacer el pago, por favor?${emailLine}`;
   }
@@ -14353,7 +14353,7 @@ function grantXP(amount) {
 // los gates (canUse/consume), el modal de planes, los mensajes de bloqueo y el perfil leen de PLANS.
 //   limits.<clave>: { max, per } = cupo (per: 'day' | 'week' | 'month'; max: Infinity = ilimitado; max: 0 = no incluido)
 //                   true / false = función incluida / no incluida
-//   priceBs = QR Bolivia (pago manual) · priceUsd = Binance/AirTM (extranjero)
+//   priceBs = QR Bolivia (pago manual) · priceUsd = tarjeta (enlace Takenos)/AirTM/Binance (extranjero)
 // Para añadir un plan (p. ej. Intermedio): una entrada nueva aquí + su nombre en PLAN_ORDER.
 // El servidor (functions/plans.js) tiene su propia copia de tier/precio; la verifica verify_app_static.js [A20].
 // ============================================================
