@@ -1122,7 +1122,7 @@
         .kanji-hint-box{display:flex;gap:1rem;justify-content:center;font-family:'Noto Sans JP';font-size:0.9rem;color:var(--text-light);margin-bottom:0.6rem;min-height:1.2rem}
         .kanji-q-char{font-family:'Noto Sans JP';font-size:3rem;font-weight:700;color:var(--primary);text-align:center;margin-bottom:0.5rem}
         /* Plans modal */
-        .plans-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0.8rem}
+        .plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.8rem}
         .plan-card{background:var(--cream);border-radius:var(--radius-md);padding:1rem;position:relative;border:2px solid transparent;display:flex;flex-direction:column}
         .plan-card.featured{background:white;border-color:var(--primary);box-shadow:var(--shadow-md)}
         .plan-badge{position:absolute;top:-0.6rem;left:50%;transform:translateX(-50%);background:var(--primary);color:white;font-size:0.6rem;font-weight:700;padding:0.15rem 0.6rem;border-radius:99px;white-space:nowrap}
@@ -1136,7 +1136,8 @@
         .plan-btn.current{background:#E8E8E8;color:var(--text-light);cursor:default}
         .plan-btn.gold{background:linear-gradient(135deg,var(--accent-gold),var(--accent));color:white}
         .plan-btn:not(.current):hover{opacity:0.85;transform:scale(1.02)}
-        @media(max-width:550px){.plans-grid{grid-template-columns:1fr}}
+        @media(max-width:620px){.plans-grid{grid-template-columns:1fr}}
+        .plan-price-usd{font-size:0.74rem;color:var(--text-light);margin:-0.5rem 0 0.8rem}
         /* Header plans button */
         .header-content{justify-content:space-between}
         .plans-header-btn{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;padding:0.4rem 0.9rem;border-radius:var(--radius-xl);font-size:0.75rem;font-weight:600;cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif}
@@ -1718,46 +1719,14 @@
 
     <!-- Plans Modal -->
     <div class="modal-overlay" id="plans-modal" onclick="if(event.target===this)closePlansModal()">
-        <div class="modal" style="max-width:540px;">
+        <div class="modal" style="max-width:760px;">
             <button class="modal-close" onclick="closePlansModal()">×</button>
             <h2 style="font-family:'Outfit';font-weight:800;margin-bottom:0.2rem;">⭐ Planes</h2>
             <p style="color:var(--text-light);font-size:0.82rem;margin-bottom:1.2rem;">Elige el plan que mejor se adapte a ti</p>
-            <div class="plans-grid">
-                <div class="plan-card">
-                    <div class="plan-name">Gratis</div>
-                    <div class="plan-price">Bs. 0<span>/mes</span></div>
-                    <ul class="plan-features">
-                        <li>✅ Todas las lecciones y Can-dos</li>
-                        <li>✅ Hiragana, katakana y kanji con trazos</li>
-                        <li>✅ 🔊 Audio y pronunciación</li>
-                        <li>✅ 10 rondas de práctica por día</li>
-                        <li>✅ 3 rondas de escucha por día</li>
-                        <li>✅ 1 práctica de lectura JLPT por día</li>
-                        <li class="off">❌ Práctica sin límites diarios</li>
-                        <li class="off">❌ Simulacro JLPT N5</li>
-                        <li class="off">❌ Dictado escrito en Escuchar</li>
-                    </ul>
-                    <button class="plan-btn current">Plan actual</button>
-                </div>
-                <div class="plan-card featured">
-                    <div class="plan-badge">⭐ Recomendado</div>
-                    <div class="plan-name">Premium</div>
-                    <div class="plan-price">Bs. 60<span>/mes</span></div>
-                    <ul class="plan-features">
-                        <li>✅ Todo lo de Gratis, sin límites diarios</li>
-                        <li>✅ 🎯 Simulacro JLPT N5 completo</li>
-                        <li>✅ 📄 Práctica de lectura ilimitada</li>
-                        <li>✅ ✍️ Dictado escrito en Escuchar</li>
-                        <li>✅ 💬 Soporte por WhatsApp</li>
-                    </ul>
-                    <p style="font:600 0.74rem 'DM Sans',sans-serif;color:var(--text-light);margin:0 0 0.5rem;text-align:center">¿Desde dónde pagas?</p>
-                    <button class="plan-btn gold" onclick="openWhatsAppPlan('bo')">🇧🇴 Estoy en Bolivia</button>
-                    <button class="plan-btn gold" style="margin-top:0.4rem" onclick="openWhatsAppPlan('intl')">🌎 Estoy en el extranjero</button>
-                </div>
-            </div>
+            <div class="plans-grid" id="plans-grid"></div>
             <p style="font-size:0.78rem;color:var(--text-light);margin-top:0.9rem;text-align:center;line-height:1.5;">
-                💬 El pago es manual por WhatsApp. En Bolivia: <strong>QR (Bs. 60/mes)</strong>.
-                En el extranjero: <strong>AirTM o Binance ($10 USD/mes)</strong>.
+                💬 El pago es mensual por adelantado (sin renovación automática). En Bolivia: <strong>QR en Bs.</strong>.
+                En el extranjero: <strong>AirTM o Binance en USD</strong>.
                 Después de confirmar tu pago, activamos tu plan en <strong>menos de 24 horas</strong>.
             </p>
             <div style="margin-top:1.2rem;padding-top:1rem;border-top:1px solid rgba(0,0,0,0.08);max-width:360px;margin-left:auto;margin-right:auto">
@@ -13416,20 +13385,54 @@ function renderRoadmap() {
         </div>`;
 }
 
-function openPlansModal() { document.getElementById('plans-modal').classList.add('active'); }
+function openPlansModal() { renderPlansModal(); document.getElementById('plans-modal').classList.add('active'); }
+
+/** Dibuja las tarjetas de planes a partir de PLANS (una tarjeta por entrada de PLAN_ORDER). */
+function renderPlansModal() {
+  const grid = document.getElementById('plans-grid');
+  if (!grid) return;
+  const cur = planTier();
+  grid.innerHTML = PLAN_ORDER.map(t => {
+    const p = PLANS[t];
+    const paid = p.level > 0;
+    const price = paid
+      ? `Bs. ${p.priceBs}<span>/mes</span></div><div class="plan-price-usd">o $${p.priceUsd} USD/mes desde el extranjero</div>`
+      : `Gratis</div>`;
+    const lis = planBenefits(t).map(b => `<li class="${b.ok ? '' : 'off'}">${b.ok ? '✅' : '❌'} ${b.text}</li>`).join('');
+    let action;
+    if (!paid) {
+      action = t === cur ? '<button class="plan-btn current">Plan actual</button>' : '<button class="plan-btn current">Incluido siempre</button>';
+    } else {
+      const label = t === cur ? 'Renovar' : 'Elegir';
+      action = `
+        ${t === cur ? '<button class="plan-btn current" style="margin-bottom:0.5rem">Plan actual</button>' : ''}
+        <p style="font:600 0.74rem 'DM Sans',sans-serif;color:var(--text-light);margin:0 0 0.5rem;text-align:center">${label} · ¿Desde dónde pagas?</p>
+        <button class="plan-btn gold" onclick="openWhatsAppPlan('bo','${t}')">🇧🇴 Estoy en Bolivia</button>
+        <button class="plan-btn gold" style="margin-top:0.4rem" onclick="openWhatsAppPlan('intl','${t}')">🌎 Estoy en el extranjero</button>`;
+    }
+    return `<div class="plan-card${p.featured ? ' featured' : ''}">
+      ${p.featured ? '<div class="plan-badge">⭐ Recomendado</div>' : ''}
+      <div class="plan-name">${p.name}</div>
+      <div class="plan-price">${price}
+      <ul class="plan-features">${lis}</ul>
+      ${action}
+    </div>`;
+  }).join('');
+}
 function closePlansModal() { document.getElementById('plans-modal').classList.remove('active'); }
 
 // 決済 = WhatsApp 手動MVP。wa.me deeplink に定型文（プラン名・希望期間・ログインメール）を載せ、
 // 管理者が支払い確認後に Firestore users/{uid}.plan を手動付与する（docs/plan_activation_manual.md）。
-// region: 'bo' = Bolivia（銀行QR・Bs.60）／ 'intl' = 海外（AirTM/Binance・$10 USD）
-function openWhatsAppPlan(region) {
+// region: 'bo' = Bolivia（銀行QR・Bs）／ 'intl' = 海外（AirTM/Binance・USD）。precio = PLANS[tier]
+function openWhatsAppPlan(region, tier) {
+  const p = PLANS[tier] || PLANS.premium;
   const email = (auth && auth.currentUser && auth.currentUser.email) || '';
   const emailLine = email ? `\nMi correo de acceso: ${email}` : '';
   let text;
   if (region === 'intl') {
-    text = `¡Hola! 😊 Quiero suscribirme al plan Premium de NihongoMap ($10 USD/mes). Estoy fuera de Bolivia.\n¿Me pueden enviar los datos de pago por AirTM o Binance (USDT), por favor?${emailLine}`;
+    text = `¡Hola! 😊 Quiero suscribirme al plan ${p.name} de NihongoMap ($${p.priceUsd} USD/mes). Estoy fuera de Bolivia.\n¿Me pueden enviar los datos de pago por AirTM o Binance (USDT), por favor?${emailLine}`;
   } else {
-    text = `¡Hola! 😊 Quiero suscribirme al plan Premium de NihongoMap (Bs. 60/mes). Estoy en Bolivia.\n¿Me pueden enviar el QR para hacer el pago, por favor?${emailLine}`;
+    text = `¡Hola! 😊 Quiero suscribirme al plan ${p.name} de NihongoMap (Bs. ${p.priceBs}/mes). Estoy en Bolivia.\n¿Me pueden enviar el QR para hacer el pago, por favor?${emailLine}`;
   }
   const url = 'https://wa.me/59176083176?text=' + encodeURIComponent(text);
   window.open(url, '_blank');
@@ -14317,16 +14320,120 @@ function grantXP(amount) {
 // プレミアム判定
 // ------------------------------------------------------------
 
-function isPremium() {
+// ============================================================
+// PLANES (Tarea 2) — ÚNICA fuente de precios, límites y beneficios.
+// Para cambiar un precio, un límite o un beneficio basta editar una línea aquí:
+// los gates (canUse/consume), el modal de planes, los mensajes de bloqueo y el perfil leen de PLANS.
+//   limits.<clave>: { max, per } = cupo (per: 'day' | 'week' | 'month'; max: Infinity = ilimitado; max: 0 = no incluido)
+//                   true / false = función incluida / no incluida
+//   priceBs = QR Bolivia (pago manual) · priceUsd = Binance/AirTM (extranjero)
+// Para añadir un plan (p. ej. Intermedio): una entrada nueva aquí + su nombre en PLAN_ORDER.
+// El servidor (functions/plans.js) tiene su propia copia de tier/precio; la verifica verify_app_static.js [A20].
+// ============================================================
+/* PLANS_START */
+const PLANS = {
+  inicial: {
+    level: 0, name: 'Inicial', priceBs: 0, priceUsd: 0,
+    extras: ['Todas las lecciones y Can-dos', 'Hiragana, katakana y kanji con trazos', '🔊 Audio y pronunciación'],
+    limits: {
+      practice:  { max: 3, per: 'day' },
+      listening: { max: 1, per: 'day' },
+      lectura:   { max: 0, per: 'day' },
+      reto:      { max: 1, per: 'month' },
+      simulacro: false, dictado: false, soporte: false
+    }
+  },
+  basico: {
+    level: 1, name: 'Básico', priceBs: 30, priceUsd: 4,
+    extras: ['Todo lo del plan Inicial'],
+    limits: {
+      practice:  { max: 10, per: 'day' },
+      listening: { max: 3, per: 'day' },
+      lectura:   { max: 1, per: 'day' },
+      reto:      { max: 1, per: 'week' },
+      simulacro: false, dictado: false, soporte: false
+    }
+  },
+  premium: {
+    level: 2, name: 'Premium', priceBs: 60, priceUsd: 8, featured: true,
+    extras: ['Todo lo del plan Básico, sin límites diarios'],
+    limits: {
+      practice:  { max: Infinity, per: 'day' },
+      listening: { max: Infinity, per: 'day' },
+      lectura:   { max: Infinity, per: 'day' },
+      reto:      { max: Infinity, per: 'week' },
+      simulacro: true, dictado: true, soporte: true
+    }
+  }
+};
+/* PLANS_END */
+const PLAN_ORDER = ['inicial', 'basico', 'premium'];
+const PLAN_PERIOD_DAYS = 30;  // pago mensual por adelantado (sin renovación automática)
+
+function planExists(tier) { return Object.prototype.hasOwnProperty.call(PLANS, tier); }
+
+/** expiresAt (número o ISO) → milisegundos; 0 si falta o es inválido */
+function planExpiryMs(p) {
+  if (!p || !p.expiresAt) return 0;
+  const e = typeof p.expiresAt === 'number' ? p.expiresAt : Date.parse(p.expiresAt);
+  return e || 0;
+}
+
+/**
+ * Plan vigente del usuario: 'inicial' | 'basico' | 'premium'.
+ * Lee nm_plan (caché local del plan de Firestore + canje de código de profesor).
+ * Un plan de pago vencido o desconocido cuenta como 'inicial'.
+ */
+function planTier() {
   const p = nmGetPlan();
-  if (p.tier !== 'premium') return false;
-  // expiresAt は数値タイムスタンプ / ISO文字列 の両形式を許容（数値に Date.parse は NaN になる）
-  const exp = typeof p.expiresAt === 'number' ? p.expiresAt : Date.parse(p.expiresAt || '');
-  if (!exp || exp < Date.now()) return false;
-  if (Date.now() - Date.parse(p.lastVerifiedAt || 0) > 86400000) {
+  if (!p || !planExists(p.tier) || PLANS[p.tier].level < 1) return 'inicial';
+  const exp = planExpiryMs(p);
+  if (!exp || exp < Date.now()) return 'inicial';
+  if (Date.now() - (Date.parse(p.lastVerifiedAt || '') || 0) > 86400000) {
     verifyPlanWithServer();
   }
-  return true;
+  return p.tier;
+}
+
+function planLevel() { return PLANS[planTier()].level; }
+/** Compatibilidad: ¿tiene el plan más alto? */
+function isPremium() { return planTier() === 'premium'; }
+
+/** Límite del plan para una clave de PLANS.<plan>.limits (tier opcional; por defecto el vigente) */
+function planLimit(key, tier) { return PLANS[tier || planTier()].limits[key]; }
+
+/** ¿La función está incluida (aunque tenga cupo)? */
+function planAllows(key, tier) {
+  const l = planLimit(key, tier);
+  return l === true || (!!l && typeof l === 'object' && l.max > 0);
+}
+
+/** Texto del beneficio/límite para el modal y los mensajes. */
+function planLimitText(key, tier) {
+  const l = planLimit(key, tier);
+  const unlimited = l && typeof l === 'object' && l.max === Infinity;
+  const per = (l && l.per === 'month') ? 'al mes' : (l && l.per === 'week') ? 'por semana' : 'por día';
+  const n = l && l.max;
+  switch (key) {
+    case 'practice':  return unlimited ? 'Práctica sin límites' : `${n} ronda${n === 1 ? '' : 's'} de práctica por día`;
+    case 'listening': return unlimited ? 'Escucha sin límites' : `${n} ronda${n === 1 ? '' : 's'} de escucha por día`;
+    case 'lectura':   return unlimited ? 'Lectura JLPT sin límites' : (n > 0 ? `${n} práctica${n === 1 ? '' : 's'} de lectura JLPT por día` : 'Práctica de lectura JLPT');
+    case 'reto':      return unlimited ? 'Retos de conversación sin límites' : `${n} reto${n === 1 ? '' : 's'} de conversación ${per}`;
+    case 'simulacro': return 'Simulacro JLPT N5 completo';
+    case 'dictado':   return 'Dictado escrito en Escuchar';
+    case 'soporte':   return 'Soporte por WhatsApp';
+  }
+  return key;
+}
+
+/** Lista de beneficios de un plan para el modal: [{ok, text}] */
+function planBenefits(tier) {
+  const p = PLANS[tier];
+  const out = p.extras.map(t => ({ ok: true, text: t }));
+  ['practice', 'listening', 'lectura', 'reto', 'simulacro', 'dictado', 'soporte'].forEach(k => {
+    out.push({ ok: planAllows(k, tier), text: planLimitText(k, tier) });
+  });
+  return out;
 }
 
 // ------------------------------------------------------------
@@ -14345,28 +14452,26 @@ function isPremium() {
  * @param {Object|undefined} serverPlan - Firestore の users/{uid}.plan
  */
 function mergePlanFromServer(serverPlan) {
-  const localExpMs = (p) => {
-    if (!p || p.tier !== 'premium' || !p.expiresAt) return 0;
-    const e = typeof p.expiresAt === 'number' ? p.expiresAt : Date.parse(p.expiresAt);
-    return (e && e > Date.now()) ? e : 0;
+  const activeMs = (p) => {
+    if (!p || !planExists(p.tier) || PLANS[p.tier].level < 1) return 0;
+    const e = planExpiryMs(p);
+    return e > Date.now() ? e : 0;
   };
   const local = nmGetPlan();
-  const localMs = localExpMs(local);
-  const serverMs = localExpMs(serverPlan);
+  const localMs = activeMs(local);
+  const serverMs = activeMs(serverPlan);
   if (serverMs > localMs) {
     // サーバのプランがローカルより有効期限が遠い → サーバを採用（正）
     localStorage.setItem('nm_plan', JSON.stringify({
-      tier: 'premium',
+      tier: serverPlan.tier,
       source: serverPlan.source || 'server',
-      expiresAt: typeof serverPlan.expiresAt === 'number'
-        ? serverPlan.expiresAt : Date.parse(serverPlan.expiresAt),
+      expiresAt: planExpiryMs(serverPlan),
       lastVerifiedAt: new Date().toISOString()
     }));
     updateHUD();
   } else if (!serverPlan && localMs > 0 && local.source !== 'teacher_code') {
     // サーバに plan が無く、ローカルが教師コード起源でもない（=改ざん or 失効済み受領）
     // → 期限切れ扱いにはしないが、lastVerifiedAt を更新して次回チェックを促す。
-    // 完全な失効（サーバ削除の反映）は L5完全版のセキュリティルールで対応。
     /* no-op: teacher_code 以外のローカル起源は次回サーバ確認まで楽観維持 */
   }
 }
@@ -14547,62 +14652,56 @@ function submitTeacherCode(inputId, msgId, after) {
 // 機能ゲート一元管理
 // ------------------------------------------------------------
 
-// WS8 で実接続したゲート（canUse/consume 経由）:
-//   practice.unlimited → openPracticeView()   （無料10回/日）
-//   listening.practice → startEscucharPart()  （無料3回/日）
-//   lectura.drill      → startLecturaDrill()   （無料1回/日・WS5接続）
-//   jlpt.mock          → startJlptTest()       （Premium限定）
-//   challenge.realtime → openChallengeView() は canUse ではなく専用の checkChallengeQuota()
-//                        （週1・nm_challenge_quota）で接続。canUse は weekly を解さないため定義は参考値。
-// 対応機能が存在しないゲート（reading.simulacro / listening.simulacro / analytics.weakness /
-//   phrases.dict / reading.practice / scenario.audio）は休眠。機能実装時に有効化する。
-//   ※ scenario.audio は「音声は無料」方針（L2整合）のため恒久的に撤去。
+// Gates conectados (los límites salen de PLANS; aquí solo se enlaza función → clave de límite):
+//   practice.unlimited → openPracticeView()   (limits.practice, contador diario practiceCount)
+//   listening.practice → startEscucharPart()  (limits.listening, contador listeningPractice)
+//   lectura.drill      → startLecturaDrill()  (limits.lectura, contador lecturaDrill)
+//   jlpt.mock          → startJlptTest()      (limits.simulacro, solo planes que lo incluyen)
+//   challenge.realtime → openChallengeView() usa checkChallengeQuota() (limits.reto, cupo semanal/mensual)
+// Dictado escrito (limits.dictado) se consulta con planAllows('dictado').
 const FEATURE_GATES = {
-  'practice.unlimited':  { free: { limit: 10, counter: 'practiceCount' }, premium: {} },
-  'listening.practice':  { free: { limit: 3, counter: 'listeningPractice' }, premium: {} },
-  'lectura.drill':       { free: { limit: 1, counter: 'lecturaDrill' }, premium: {} },
-  'jlpt.mock':           { free: { blocked: true }, premium: {} },
-  'challenge.realtime':  { free: { weekly: 1, turns: 5 }, premium: { daily: Infinity } }
-  // --- 休眠中（対応機能が未実装。実装時にコメント解除して接続する）---
-  // 'reading.practice':    { free: { limit: 3, counter: 'readingPractice' }, premium: {} },
-  // 'reading.simulacro':   { free: { blocked: true }, premium: {} },
-  // 'listening.simulacro': { free: { blocked: true }, premium: {} },
-  // 'analytics.weakness':  { free: { blocked: true }, premium: {} },
-  // 'phrases.dict':        { free: { limit: 10 }, premium: {} },
+  'practice.unlimited':  { limit: 'practice',  counter: 'practiceCount' },
+  'listening.practice':  { limit: 'listening', counter: 'listeningPractice' },
+  'lectura.drill':       { limit: 'lectura',   counter: 'lecturaDrill' },
+  'jlpt.mock':           { limit: 'simulacro' },
+  'challenge.realtime':  { limit: 'reto' }
 };
 
 /**
- * 機能の利用可否を判定する
- * @param {string} feature - FEATURE_GATES のキー
- * @param {Object} [ctx={}] - コンテキスト（例: {id:'u3_c1'}）
- * @returns {{ ok: boolean, reason?: string }}
+ * Comprueba si el plan vigente permite la función.
+ * @returns {{ ok: boolean, reason?: 'premium_only'|'daily_limit' }}
  */
 function canUse(feature, ctx = {}) {
   rolloverDailyIfNeeded();
   const gate = FEATURE_GATES[feature];
   if (!gate) return { ok: true };
-  const cfg = isPremium() ? gate.premium : gate.free;
-  if (cfg.blocked) return { ok: false, reason: 'premium_only' };
-  if (cfg.allowedIds && !cfg.allowedIds.includes(ctx.id)) return { ok: false, reason: 'premium_only' };
-  if (cfg.limit != null && cfg.counter) {
+  const lim = planLimit(gate.limit);
+  if (!planAllows(gate.limit)) return { ok: false, reason: 'premium_only' };
+  if (gate.counter && lim && typeof lim === 'object' && Number.isFinite(lim.max)) {
     const d = nmGetDaily();
-    if ((d[cfg.counter] || 0) >= cfg.limit) return { ok: false, reason: 'daily_limit' };
+    if ((d[gate.counter] || 0) >= lim.max) return { ok: false, reason: 'daily_limit' };
   }
   return { ok: true };
 }
 
-/**
- * 機能使用カウンターをインクリメントする
- * @param {string} feature - FEATURE_GATES のキー
- */
+/** Incrementa el contador diario de la función (solo si el plan tiene un cupo finito). */
 function consume(feature) {
   const gate = FEATURE_GATES[feature];
-  if (!gate) return;
-  const cfg = isPremium() ? gate.premium : gate.free;
-  if (!cfg.counter) return;
+  if (!gate || !gate.counter) return;
+  const lim = planLimit(gate.limit);
+  if (!lim || typeof lim !== 'object' || !Number.isFinite(lim.max)) return;
   const d = nmGetDaily();
-  d[cfg.counter] = (d[cfg.counter] || 0) + 1;
+  d[gate.counter] = (d[gate.counter] || 0) + 1;
   localStorage.setItem('nm_daily', JSON.stringify(d));
+}
+
+/** Mensaje de bloqueo (HTML) según el plan vigente y la clave de límite. */
+function gateMessage(limitKey) {
+  const cur = PLANS[planTier()];
+  if (!planAllows(limitKey)) {
+    return `Esta función no está incluida en tu plan <strong>${cur.name}</strong>. Mejora tu plan para usarla.`;
+  }
+  return `Tu plan <strong>${cur.name}</strong> incluye <strong>${planLimitText(limitKey)}</strong>. Mejora tu plan para tener más.`;
 }
 
 /**
@@ -14627,7 +14726,7 @@ function renderGateUpsell(containerId, o) {
       <p style="font-family:'DM Sans',sans-serif;font-size:0.9rem;color:var(--text-light);line-height:1.55;margin:0 0 1.2rem">
         ${o.message}
       </p>
-      <button onclick="openPlansModal()" class="btn btn-primary" style="width:100%;padding:0.85rem;margin-bottom:1.2rem">⭐ Ver Premium</button>
+      <button onclick="openPlansModal()" class="btn btn-primary" style="width:100%;padding:0.85rem;margin-bottom:1.2rem">⭐ Ver planes</button>
       <div class="profile-panel" style="text-align:left;margin-bottom:1rem">
         <p class="profile-panel__title">¿Tienes un código de tu profesor?</p>
         <input id="${codeId}" type="text" placeholder="Código de profesor"
@@ -14641,11 +14740,11 @@ function renderGateUpsell(containerId, o) {
 }
 
 // ------------------------------------------------------------
-// 広告表示制御（無料プランのみ、1日3回上限）
+// 広告表示制御（Inicial=無料プランのみ、1日3回上限）
 // ------------------------------------------------------------
 
 function maybeShowAd(slot) {
-  if (isPremium()) return;
+  if (planLevel() > 0) return;
   const d = nmGetDaily();
   if ((d.adsShown || 0) >= 3) return;
   showAd(slot);
@@ -14671,11 +14770,14 @@ function getISOWeek(date) {
 }
 
 function checkChallengeQuota() {
-  if (isPremium()) return { allowed: true };
-  const q = JSON.parse(localStorage.getItem('nm_challenge_quota') || '{}');
-  const weekKey = getISOWeek(new Date());
-  if (q.week !== weekKey) { q.week = weekKey; q.used = 0; }
-  if ((q.used || 0) >= 1) return { allowed: false, reason: 'weekly_limit' };
+  const lim = planLimit('reto');
+  if (!lim || !(lim.max > 0)) return { allowed: false, reason: 'premium_only' };
+  if (!Number.isFinite(lim.max)) return { allowed: true };
+  const q = nmSafeParse(localStorage.getItem('nm_challenge_quota'), {});
+  // Periodo del cupo: semana ISO (plan Básico) o mes calendario (plan Inicial). Al cambiar de periodo se reinicia.
+  const key = lim.per === 'month' ? getTodayString().slice(0, 7) : getISOWeek(new Date());
+  if (q.key !== key) { q.key = key; q.used = 0; }
+  if ((q.used || 0) >= lim.max) return { allowed: false, reason: 'period_limit' };
   q.used = (q.used || 0) + 1;
   localStorage.setItem('nm_challenge_quota', JSON.stringify(q));
   return { allowed: true, turnsLeft: 5 };
@@ -15213,12 +15315,12 @@ function openPracticeView() {
   const cd = (window.canDoData || []).find(c => c.id === currentCanDoId);
   if (!cd) return;
   setScenarioStep('practice');
-  // 無料は 1日10ラウンド（Reintentar 含む）。Premium・教師コード解放は無制限。
+  // Cupo diario según el plan (PLANS.<plan>.limits.practice・Reintentar incluido)。教師コード解放=Premium。
   if (!canUse('practice.unlimited').ok) {
     renderGateUpsell('scenario-content', {
       icon: '🎯',
       title: 'Límite diario de práctica',
-      message: 'La práctica gratuita es de <strong>10 rondas por día</strong>. Con Premium practicas sin límites.',
+      message: gateMessage('practice'),
       retryJs: 'openPracticeView()',
       backJs: "showSection('roadmap',document.getElementById('nav-roadmap'))"
     });
@@ -15455,12 +15557,12 @@ function showPracticeResult() {
 function startEscucharPart() {
   const cd = (window.canDoData || []).find(c => c.id === currentCanDoId);
   if (!cd || !cd.escuchar) { openChallengeView(); return; }
-  // 無料は 1日3ラウンド。Premium・教師コード解放は無制限。
+  // Cupo diario según el plan (PLANS.<plan>.limits.listening)。
   if (!canUse('listening.practice').ok) {
     renderGateUpsell('scenario-content', {
       icon: '🔊',
       title: 'Límite diario de escucha',
-      message: 'La práctica de escucha gratuita es de <strong>3 rondas por día</strong>. Con Premium escuchas sin límites.',
+      message: gateMessage('listening'),
       retryJs: 'startEscucharPart()',
       backJs: "showSection('roadmap',document.getElementById('nav-roadmap'))"
     });
@@ -15501,7 +15603,7 @@ function renderEscucharItem() {
     ).join('');
     bodyHtml = `<div class="placement-opts">${opts}</div>`;
   } else if (item.type === 'audio_fill') {
-    if (isPremium()) {
+    if (planAllows('dictado')) {
       bodyHtml = `
         <div style="margin-top:1rem">
           <input id="esc-dictado-input" type="text"
@@ -15985,12 +16087,12 @@ function openChallengeView() {
   }
   const p = nmGetProfile();
   if (!p.name || !p.countryJa) { showProfileModal(() => openChallengeView()); return; }
-  // Reto 会話は無料で週1回。Premium・教師コード解放は無制限（checkChallengeQuota が isPremium を見る）。
+  // Reto 会話: cupo semanal/mensual según el plan（checkChallengeQuota が PLANS.<plan>.limits.reto を見る）。
   if (!checkChallengeQuota().allowed) {
     renderGateUpsell('scenario-content', {
       icon: '💬',
-      title: 'Reto conversacional semanal',
-      message: 'El reto conversacional gratuito es <strong>1 vez por semana</strong>. Con Premium conversas sin límites.',
+      title: 'Límite del reto conversacional',
+      message: gateMessage('reto'),
       retryJs: 'openChallengeView()',
       backJs: "showSection('roadmap',document.getElementById('nav-roadmap'))"
     });
@@ -28240,7 +28342,12 @@ function renderProfile() {
   const prog   = nmGetProgress();
   const done   = Object.values(prog).filter(p => p.status === 'done').length;
   const total  = (window.canDoData || []).length;
-  const isPrem = isPremium();
+  const tier   = planTier();
+  const cfg    = PLANS[tier];
+  const isPaid = cfg.level > 0;
+  const expMs  = isPaid ? planExpiryMs(plan) : 0;
+  const daysLeft = expMs ? Math.ceil((expMs - Date.now()) / 86400000) : 0;
+  const expText = expMs ? new Date(expMs).toLocaleDateString('es-BO', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
 
   const displayName = user ? (user.displayName || user.email) : 'Invitado';
   const avatarInitial = displayName.charAt(0).toUpperCase();
@@ -28255,7 +28362,7 @@ function renderProfile() {
         <div class="passport-card__body">
           <p class="passport-card__name">${displayName}</p>
           <p class="passport-card__email">${user ? user.email : 'Sesión sin guardar'}</p>
-          <span class="passport-card__badge ${isPrem ? 'is-premium' : ''}">${isPrem ? '⭐ Premium' : '🧭 Explorador gratuito'}</span>
+          <span class="passport-card__badge ${isPaid ? 'is-premium' : ''}">${isPaid ? '⭐ Plan ' + cfg.name : '🧭 Plan Inicial'}</span>
         </div>
       </div>
 
@@ -28286,10 +28393,10 @@ function renderProfile() {
       </div>
 
       <!-- Plan -->
-      ${!isPrem ? `
+      ${!isPaid ? `
       <div class="profile-plan profile-plan--upsell">
-        <p style="font:700 1rem 'DM Sans',sans-serif">⭐ Hazte Premium</p>
-        <p>Acceso ilimitado a todos los ejercicios, exámenes JLPT y conversación IA.</p>
+        <p style="font:700 1rem 'DM Sans',sans-serif">⭐ Mejora tu plan</p>
+        <p>Más práctica y escucha cada día, lectura JLPT, retos de conversación y simulacro del JLPT N5.</p>
         <button onclick="openPlansModal()">Ver planes</button>
         <div style="margin-top:0.9rem;padding-top:0.9rem;border-top:1px solid rgba(0,0,0,0.08)">
           <p style="font:600 0.82rem 'DM Sans',sans-serif;margin:0 0 0.5rem;color:var(--night)">¿Tienes un código de tu profesor?</p>
@@ -28301,8 +28408,10 @@ function renderProfile() {
         </div>
       </div>` : `
       <div class="profile-plan profile-plan--active">
-        <p style="font:700 1rem 'DM Sans',sans-serif">✅ Plan Premium activo</p>
-        <p>¡Gracias por tu apoyo! Disfruta el acceso completo.</p>
+        <p style="font:700 1rem 'DM Sans',sans-serif">✅ Plan ${cfg.name} activo</p>
+        <p>${expText ? 'Vence el <strong>' + expText + '</strong>' + (daysLeft > 0 ? ' (' + daysLeft + ' día' + (daysLeft === 1 ? '' : 's') + ')' : '') + '.' : '¡Gracias por tu apoyo!'}</p>
+        ${daysLeft > 0 && daysLeft <= 3 ? '<p style="font-weight:700;opacity:1">⚠️ Tu plan vence pronto. Renueva para no perder tus beneficios.</p>' : ''}
+        <button onclick="openPlansModal()">${daysLeft > 0 && daysLeft <= 3 ? 'Renovar plan' : 'Ver planes'}</button>
       </div>`}
 
       <!-- Cerrar sesión -->
@@ -28485,7 +28594,7 @@ function startJlptTest() {
     renderGateUpsell('jlpt-content', {
       icon: '🎯',
       title: 'Simulacro JLPT — Premium',
-      message: 'El simulacro completo del JLPT N5 (35 preguntas) es una función Premium. Con Premium puedes practicar el examen las veces que quieras.',
+      message: 'El simulacro completo del JLPT N5 (35 preguntas) no está incluido en tu plan <strong>' + PLANS[planTier()].name + '</strong>. Con el plan Premium puedes practicar el examen las veces que quieras.',
       retryJs: 'startJlptTest()',
       backJs: 'renderJlpt()'
     });
@@ -28742,31 +28851,19 @@ let _lectDrillItems = [];
 let _lectDrillIdx   = 0;
 let _lectDrillScore = 0;
 
-function renderLecturaDrillUpsell() {
-  document.getElementById('jlpt-content').innerHTML = `
-    <div style="max-width:480px;margin:0 auto;padding:1.5rem 1rem;text-align:center">
-      <p style="font-size:2.6rem;margin:0 0 0.4rem">🔒</p>
-      <h2 style="font:800 1.4rem 'Outfit',sans-serif;color:var(--night);margin:0 0 0.5rem">Ya practicaste hoy</h2>
-      <p style="font-family:'DM Sans',sans-serif;font-size:0.9rem;color:var(--text-light);line-height:1.55;margin:0 0 1.2rem">
-        La práctica de lectura gratuita es <strong>1 ronda por día</strong>. Con Premium tienes rondas ilimitadas.
-      </p>
-      <button onclick="openPlansModal()" class="btn btn-primary" style="width:100%;padding:0.85rem;margin-bottom:1.2rem">⭐ Ver Premium</button>
-      <div class="profile-panel" style="text-align:left;margin-bottom:1rem">
-        <p class="profile-panel__title">¿Tienes un código de tu profesor?</p>
-        <input id="lect-teacher-code" type="text" placeholder="Código de profesor"
-          style="width:100%;padding:0.7rem;font-size:1rem;border:2px solid var(--ocean);border-radius:var(--radius-sm);text-align:center;box-sizing:border-box;margin-bottom:0.6rem"
-          onkeydown="if(event.key==='Enter')submitTeacherCode('lect-teacher-code','lect-teacher-msg',()=>startLecturaDrill())">
-        <button onclick="submitTeacherCode('lect-teacher-code','lect-teacher-msg',()=>startLecturaDrill())" class="btn btn-secondary" style="width:100%;padding:0.7rem">Canjear código</button>
-        <p id="lect-teacher-msg" style="font-family:'DM Sans',sans-serif;font-size:0.82rem;margin:0.6rem 0 0;text-align:center"></p>
-      </div>
-      <button onclick="renderJlpt()" class="btn btn-secondary" style="width:100%;padding:0.8rem">← Volver</button>
-    </div>`;
-}
-
 function startLecturaDrill() {
-  // 無料は 1日1ラウンド。Premium・教師コード解放は無制限。
+  // Cupo diario según el plan (PLANS.<plan>.limits.lectura; Inicial no lo incluye)。
   const gate = canUse('lectura.drill');
-  if (!gate.ok) { renderLecturaDrillUpsell(); return; }
+  if (!gate.ok) {
+    renderGateUpsell('jlpt-content', {
+      icon: '📄',
+      title: gate.reason === 'premium_only' ? 'Lectura JLPT — no incluida' : 'Ya practicaste hoy',
+      message: gateMessage('lectura'),
+      retryJs: 'startLecturaDrill()',
+      backJs: 'renderJlpt()'
+    });
+    return;
+  }
   consume('lectura.drill');
   // ランダム5パッセージ → 設問をフラット化。元データを破壊しないようコピーし、
   // 選択肢を描画時シャッフルして answer を追従させる（既存 openPracticeView 方式）
