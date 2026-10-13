@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@700;800&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-functions-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
 :root{--primary:#E63946;--ocean:#2A9D8F;--accent:#F4A261;--night:#1D3557;--cream:#FDFBF7;--text:#2b2d42;--text-light:#6b7280;--radius:14px}
 *{box-sizing:border-box}
@@ -76,7 +76,8 @@ code{font-family:ui-monospace,Consolas,monospace;font-weight:700}
   <!-- Sin permiso -->
   <div class="card hidden" id="denegado">
     <h2>🚫 No autorizado</h2>
-    <p style="margin:0">Esta cuenta no tiene el rol de administrador. Si deberías tenerlo, cierra sesión y vuelve a entrar con la cuenta correcta.</p>
+    <p style="margin:0">Esta cuenta no es la de administración. Cierra sesión y entra con la cuenta correcta (con el correo verificado).</p>
+    <p id="denegado-detalle" style="margin:0.6rem 0 0;font-size:0.8rem;color:var(--text-light)"></p>
   </div>
 
   <!-- Panel -->
@@ -163,22 +164,41 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
-const fns = firebase.app().functions('us-central1');
+const db = firebase.firestore();
 // Solo para pruebas locales con el emulador (localhost + ?emulator). En producción no hace nada.
 if (location.hostname === 'localhost' && location.search.indexOf('emulator') >= 0) {
   auth.useEmulator('http://127.0.0.1:9099');
-  fns.useEmulator('127.0.0.1', 5001);
+  db.useEmulator('127.0.0.1', 8085);
 }
+// Cuenta de administrador. Es solo cosmético: la autoridad real son las reglas de Firestore (firestore.rules → isAdmin()).
+const ADMIN_EMAIL = 'kenchisaka@academiachizu.com';
 const TIER_NAME = { basico: 'Básico', premium: 'Premium' };
-let usuarioActual = null;   // resultado de adminBuscarUsuario
+const DAY_MS = 86400000;
+const TS = firebase.firestore.Timestamp;
+const SVT = firebase.firestore.FieldValue.serverTimestamp;
+let usuarioRef = null;      // referencia al documento users/{uid} encontrado
+let usuarioData = null;     // datos de ese documento
 
 const $ = (id) => document.getElementById(id);
 function esc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 function show(id, on) { $(id).classList.toggle('hidden', !on); }
 function msg(id, text, ok) { const el = $(id); el.textContent = text || ''; el.className = 'msg' + (text ? (ok ? ' good' : ' err') : ''); }
+function toMs(v) {
+  if (!v) return 0;
+  if (typeof v === 'number') return v;
+  if (typeof v.toMillis === 'function') return v.toMillis();
+  return Date.parse(v) || 0;
+}
 function fecha(ms) { return (ms && !isNaN(ms)) ? new Date(ms).toLocaleString('es-BO', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'; }
-function errTexto(e) { return (e && e.message) ? e.message : 'Ocurrió un error. Inténtalo de nuevo.'; }
-async function llamar(nombre, datos) { const r = await fns.httpsCallable(nombre)(datos || {}); return r.data; }
+function errTexto(e) {
+  if (e && e.code === 'permission-denied') return 'Permiso denegado: esta cuenta no es la de administrador (o falta verificar el correo).';
+  return (e && e.message) ? e.message : 'Ocurrió un error. Inténtalo de nuevo.';
+}
+function log(tx, accion, objetivo, detalle) {
+  const ref = db.collection('adminLog').doc();
+  const data = { at: SVT(), by: auth.currentUser.uid, byEmail: auth.currentUser.email, action: accion, target: objetivo, detail: detalle || null };
+  return tx ? tx.set(ref, data) : ref.set(data);
+}
 
 // ---------- sesión ----------
 auth.onAuthStateChanged(async (user) => {
@@ -190,9 +210,8 @@ auth.onAuthStateChanged(async (user) => {
   }
   $('who').textContent = user.email || ''; $('btn-salir').classList.remove('hidden');
   show('login-box', false);
-  let esAdmin = false;
-  try { esAdmin = (await user.getIdTokenResult(true)).claims.admin === true; } catch (e) {}
-  // Solo cosmético: el servidor vuelve a comprobar el rol en cada función.
+  const esAdmin = (user.email || '').toLowerCase() === ADMIN_EMAIL && user.emailVerified === true;
+  $('denegado-detalle').textContent = `Sesión: ${user.email || '(sin correo)'} · correo verificado: ${user.emailVerified ? 'sí' : 'no'}.`;
   show('denegado', !esAdmin); show('panel', esAdmin);
   if (esAdmin) cargarCodigos();
 });
@@ -210,50 +229,79 @@ async function entrarCorreo() {
 
 // ---------- activar plan ----------
 function setDias(n) { $('u-days').value = n; }
-function pintarUsuario(u) {
-  const p = u.plan;
+function pintarUsuario() {
+  const u = usuarioData, p = u.plan;
+  const exp = p ? toMs(p.expiresAt) : 0;
   const plan = p
-    ? `<span class="pill ${p.vigente ? 'on' : 'off'}">${esc(TIER_NAME[p.tier] || p.tier)} · ${p.vigente ? 'vigente' : 'vencido'}</span> vence ${esc(fecha(p.expiresAt))} <small>(origen: ${esc(p.source || '—')})</small>`
+    ? `<span class="pill ${exp > Date.now() ? 'on' : 'off'}">${esc(TIER_NAME[p.tier] || p.tier)} · ${exp > Date.now() ? 'vigente' : 'vencido'}</span> vence ${esc(fecha(exp))} <small>(origen: ${esc(p.source || '—')}${p.code ? ' · código ' + esc(p.code) : ''})</small>`
     : '<span class="pill">Plan Inicial (sin plan de pago)</span>';
-  $('u-info').innerHTML = `<b>${esc(u.email)}</b>${u.nombre ? ' · ' + esc(u.nombre) : ''}<br>
-    Registrado: ${esc(fecha(Date.parse(u.creado)))}<br>Último acceso: ${esc(fecha(Date.parse(u.ultimoAcceso)))}<br>Plan actual: ${plan}`;
+  const xp = u.nm && u.nm.xp ? u.nm.xp.total : 0;
+  $('u-info').innerHTML = `<b>${esc(u.email)}</b><br>XP total: ${esc(xp || 0)} · Última actividad: ${esc(fecha(toMs(u.updatedAt)))}<br>Plan actual: ${plan}`;
 }
 async function buscar() {
-  msg('u-msg', ''); show('u-box', false); usuarioActual = null;
-  const email = $('u-email').value.trim();
+  msg('u-msg', ''); show('u-box', false); usuarioRef = null; usuarioData = null;
+  const email = $('u-email').value.trim().toLowerCase();
   if (!email) { msg('u-msg', 'Escribe un correo.', false); return; }
   $('btn-buscar').disabled = true;
-  try { usuarioActual = await llamar('adminBuscarUsuario', { email }); pintarUsuario(usuarioActual); show('u-box', true); }
-  catch (e) { msg('u-msg', errTexto(e), false); }
+  try {
+    const snap = await db.collection('users').where('email', '==', email).limit(1).get();
+    if (snap.empty) {
+      msg('u-msg', 'No encontrado. El usuario debe haber iniciado sesión en la web al menos una vez (después de esta actualización) y escribirse con el mismo correo.', false);
+    } else {
+      usuarioRef = snap.docs[0].ref; usuarioData = snap.docs[0].data();
+      pintarUsuario(); show('u-box', true);
+    }
+  } catch (e) { msg('u-msg', errTexto(e), false); }
   $('btn-buscar').disabled = false;
 }
 async function activar() {
-  if (!usuarioActual) return;
+  if (!usuarioRef) return;
   const tier = $('u-tier').value, days = Number($('u-days').value);
-  if (!confirm(`¿Activar plan ${TIER_NAME[tier]} por ${days} días a ${usuarioActual.email}?`)) return;
+  if (!(tier in TIER_NAME) || !Number.isInteger(days) || days < 1 || days > 366) { msg('u-msg', 'Los días deben ser un número entero entre 1 y 366.', false); return; }
+  if (!confirm(`¿Activar plan ${TIER_NAME[tier]} por ${days} días a ${usuarioData.email}?`)) return;
   $('btn-activar').disabled = true; msg('u-msg', '');
   try {
-    const r = await llamar('adminActivarPlan', { email: usuarioActual.email, tier, days });
-    usuarioActual.plan = r.plan; pintarUsuario(usuarioActual);
-    msg('u-msg', `✅ Plan ${TIER_NAME[r.plan.tier]} activo hasta ${fecha(r.plan.expiresAt)}.`, true);
+    const plan = await db.runTransaction(async (tx) => {
+      const snap = await tx.get(usuarioRef);
+      const cur = snap.data().plan;
+      const curExp = cur ? toMs(cur.expiresAt) : 0;
+      // Mismo plan vigente → se suma al vencimiento; otro plan, vencido o ninguno → empieza hoy
+      const inicio = (cur && cur.tier === tier && curExp > Date.now()) ? curExp : Date.now();
+      const nuevo = { tier, source: 'admin', expiresAt: TS.fromMillis(inicio + days * DAY_MS), grantedBy: auth.currentUser.uid };
+      tx.set(usuarioRef, { plan: nuevo }, { merge: true });
+      log(tx, 'activarPlan', usuarioRef.id, { email: usuarioData.email, tier, days });
+      return nuevo;
+    });
+    usuarioData.plan = plan; pintarUsuario();
+    msg('u-msg', `✅ Plan ${TIER_NAME[plan.tier]} activo hasta ${fecha(toMs(plan.expiresAt))}.`, true);
   } catch (e) { msg('u-msg', errTexto(e), false); }
   $('btn-activar').disabled = false;
 }
 async function quitar() {
-  if (!usuarioActual || !confirm(`¿Quitar el plan de pago a ${usuarioActual.email}? Volverá al plan Inicial.`)) return;
+  if (!usuarioRef || !confirm(`¿Quitar el plan de pago a ${usuarioData.email}? Volverá al plan Inicial.`)) return;
   $('btn-quitar').disabled = true; msg('u-msg', '');
   try {
-    await llamar('adminQuitarPlan', { email: usuarioActual.email });
-    usuarioActual.plan = null; pintarUsuario(usuarioActual);
+    await db.runTransaction(async (tx) => {
+      tx.update(usuarioRef, { plan: firebase.firestore.FieldValue.delete() });
+      log(tx, 'quitarPlan', usuarioRef.id, { email: usuarioData.email });
+    });
+    delete usuarioData.plan; pintarUsuario();
     msg('u-msg', '✅ Plan quitado.', true);
   } catch (e) { msg('u-msg', errTexto(e), false); }
   $('btn-quitar').disabled = false;
 }
 
 // ---------- códigos de profesor ----------
+const CODE_RE = /^[A-Z0-9][A-Z0-9-]{3,31}$/;
+function codigoAleatorio() {
+  const abc = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const bytes = crypto.getRandomValues(new Uint8Array(8));
+  return 'CHIZU-' + Array.from(bytes, b => abc[b % abc.length]).join('');
+}
 async function cargarCodigos() {
   try {
-    const lista = await llamar('adminListarCodigos');
+    const snap = await db.collection('teacherCodes').orderBy('createdAt', 'desc').limit(200).get();
+    const lista = snap.docs.map(d => d.data());
     $('c-lista').innerHTML = lista.length ? lista.map(c => `<tr>
       <td><code>${esc(c.code)}</code></td><td>${esc(TIER_NAME[c.tier] || c.tier)}</td><td>${esc(c.days)}</td>
       <td>${esc(c.uses)} / ${esc(c.maxUses)}</td>
@@ -265,11 +313,19 @@ async function cargarCodigos() {
 async function crearCodigo() {
   msg('c-msg', ''); $('btn-crear').disabled = true;
   try {
-    const r = await llamar('adminCrearCodigo', {
-      code: $('c-code').value.trim(), tier: $('c-tier').value,
-      days: Number($('c-days').value), maxUses: Number($('c-max').value)
+    const tier = $('c-tier').value, days = Number($('c-days').value), maxUses = Number($('c-max').value);
+    const code = ($('c-code').value.trim().toUpperCase()) || codigoAleatorio();
+    if (!CODE_RE.test(code)) throw new Error('El código usa 4 a 32 letras mayúsculas, números o guiones.');
+    if (!(tier in TIER_NAME)) throw new Error('Plan no válido.');
+    if (!Number.isInteger(days) || days < 1 || days > 366) throw new Error('Los días deben ser un entero entre 1 y 366.');
+    if (!Number.isInteger(maxUses) || maxUses < 1 || maxUses > 10000) throw new Error('Los usos máximos deben ser un entero entre 1 y 10000.');
+    const ref = db.collection('teacherCodes').doc(code);
+    await db.runTransaction(async (tx) => {
+      if ((await tx.get(ref)).exists) throw new Error('Ese código ya existe.');
+      tx.set(ref, { code, tier, days, maxUses, uses: 0, active: true, createdAt: SVT(), createdBy: auth.currentUser.uid });
+      log(tx, 'crearCodigo', code, { tier, days, maxUses });
     });
-    msg('c-msg', `✅ Código creado: ${r.code}`, true);
+    msg('c-msg', `✅ Código creado: ${code}`, true);
     $('c-code').value = '';
     cargarCodigos();
   } catch (e) { msg('c-msg', errTexto(e), false); }
@@ -278,8 +334,14 @@ async function crearCodigo() {
 async function alternarCodigo(btn) {
   const code = btn.dataset.code, activar = btn.dataset.active !== '1';
   btn.disabled = true; msg('c-msg', '');
-  try { await llamar('adminDesactivarCodigo', { code, active: activar }); cargarCodigos(); }
-  catch (e) { msg('c-msg', errTexto(e), false); btn.disabled = false; }
+  try {
+    const ref = db.collection('teacherCodes').doc(code);
+    await db.runTransaction(async (tx) => {
+      tx.update(ref, { active: activar });
+      log(tx, activar ? 'activarCodigo' : 'desactivarCodigo', code, null);
+    });
+    cargarCodigos();
+  } catch (e) { msg('c-msg', errTexto(e), false); btn.disabled = false; }
 }
 </script>
 </body>
