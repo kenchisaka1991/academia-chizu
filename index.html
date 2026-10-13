@@ -1882,7 +1882,7 @@ const LEGAL_WHATSAPP = '+591 76083176';
 function legalPlansHtml() {
     return PLAN_ORDER.map(t => {
         const p = PLANS[t];
-        const price = p.level > 0 ? `Bs. ${p.priceBs} (Bolivia) o $${p.priceUsd} USD (extranjero) por 30 días` : 'Gratis';
+        const price = p.level > 0 ? `$${fmtUsd(p.priceUsd)} USD por 30 días` : 'Gratis';
         const incl = planBenefits(t).filter(b => b.ok).map(b => b.text).join('; ');
         return `<li style="margin-bottom:0.4rem"><strong>${p.name}</strong> — ${price}. Incluye: ${incl}.</li>`;
     }).join('');
@@ -1915,6 +1915,7 @@ const legalContent = {
         ${_H('5. Pagos')}
         ${_UL([
             '<strong>Pago mensual por adelantado.</strong> Cada pago activa el plan por 30 días. <strong>No hay renovación automática ni cobros recurrentes:</strong> nunca te cobramos sin que tú hagas un nuevo pago.',
+            '<strong>Los precios están en dólares (USD).</strong> En Bolivia se paga el equivalente en bolivianos al tipo de cambio de la plataforma de pago vigente el día del pago; te confirmamos el monto exacto por WhatsApp antes de que pagues.',
             '<strong>Medios de pago:</strong> en Bolivia, QR (transferencia en bolivianos); en el extranjero, tarjeta mediante un enlace de pago, AirTM o Binance (en USDT/USD). Los pagos son manuales: nos escribes por WhatsApp, te enviamos los datos y, cuando confirmamos tu pago, activamos tu plan, normalmente en menos de 24 horas.',
             '<strong>Si ya tienes ese plan vigente y pagas de nuevo,</strong> los 30 días se suman a tu fecha de vencimiento. Si pagas otro plan, empieza a contar desde la activación.',
             'Los precios pueden cambiar. Un cambio de precio no afecta un período que ya pagaste.',
@@ -13504,7 +13505,7 @@ function renderPlansModal() {
     const p = PLANS[t];
     const paid = p.level > 0;
     const price = paid
-      ? `Bs. ${p.priceBs}<span>/mes</span></div><div class="plan-price-usd">o $${p.priceUsd} USD/mes desde el extranjero</div>`
+      ? `$${fmtUsd(p.priceUsd)}<span> USD/mes</span></div><div class="plan-price-usd">En Bolivia pagas el equivalente en Bs. por QR</div>`
       : `Gratis</div>`;
     const lis = planBenefits(t).map(b => `<li class="${b.ok ? '' : 'off'}">${b.ok ? '✅' : '❌'} ${b.text}</li>`).join('');
     let action;
@@ -13538,9 +13539,9 @@ function openWhatsAppPlan(region, tier) {
   const emailLine = email ? `\nMi correo de acceso: ${email}` : '';
   let text;
   if (region === 'intl') {
-    text = `¡Hola! 😊 Quiero suscribirme al plan ${p.name} de NihongoMap ($${p.priceUsd} USD/mes). Estoy fuera de Bolivia.\n¿Me pueden enviar el enlace de pago con tarjeta, o los datos para pagar por AirTM o Binance, por favor?${emailLine}`;
+    text = `¡Hola! 😊 Quiero suscribirme al plan ${p.name} de NihongoMap ($${fmtUsd(p.priceUsd)} USD/mes). Estoy fuera de Bolivia.\n¿Me pueden enviar el enlace de pago con tarjeta, o los datos para pagar por AirTM o Binance, por favor?${emailLine}`;
   } else {
-    text = `¡Hola! 😊 Quiero suscribirme al plan ${p.name} de NihongoMap (Bs. ${p.priceBs}/mes). Estoy en Bolivia.\n¿Me pueden enviar el QR para hacer el pago, por favor?${emailLine}`;
+    text = `¡Hola! 😊 Quiero suscribirme al plan ${p.name} de NihongoMap ($${fmtUsd(p.priceUsd)} USD/mes, pagando el equivalente en Bs.). Estoy en Bolivia.\n¿Me pueden enviar el QR para hacer el pago, por favor?${emailLine}`;
   }
   const url = 'https://wa.me/59176083176?text=' + encodeURIComponent(text);
   window.open(url, '_blank');
@@ -14434,14 +14435,15 @@ function grantXP(amount) {
 // los gates (canUse/consume), el modal de planes, los mensajes de bloqueo y el perfil leen de PLANS.
 //   limits.<clave>: { max, per } = cupo (per: 'day' | 'week' | 'month'; max: Infinity = ilimitado; max: 0 = no incluido)
 //                   true / false = función incluida / no incluida
-//   priceBs = QR Bolivia (pago manual) · priceUsd = tarjeta (enlace Takenos)/AirTM/Binance (extranjero)
+//   priceUsd = precio mensual en USD (único precio que se muestra). En Bolivia se paga el equivalente en Bs. por QR
+//   al tipo de cambio de la plataforma de pago (se cotiza por WhatsApp). Medios: QR (Bolivia) · tarjeta (enlace Takenos)/AirTM/Binance (extranjero).
 // Para añadir un plan (p. ej. Intermedio): una entrada nueva aquí + su nombre en PLAN_ORDER.
 // El servidor (functions/plans.js) tiene su propia copia de tier/precio; la verifica verify_app_static.js [A20].
 // ============================================================
 /* PLANS_START */
 const PLANS = {
   inicial: {
-    level: 0, name: 'Inicial', priceBs: 0, priceUsd: 0,
+    level: 0, name: 'Inicial', priceUsd: 0,
     extras: ['Todas las lecciones y Can-dos', 'Hiragana, katakana y kanji con trazos', '🔊 Audio y pronunciación'],
     limits: {
       practice:  { max: 3, per: 'day' },
@@ -14452,7 +14454,7 @@ const PLANS = {
     }
   },
   basico: {
-    level: 1, name: 'Básico', priceBs: 61, priceUsd: 5,
+    level: 1, name: 'Básico', priceUsd: 4,
     extras: ['Todo lo del plan Inicial'],
     limits: {
       practice:  { max: 10, per: 'day' },
@@ -14463,7 +14465,7 @@ const PLANS = {
     }
   },
   premium: {
-    level: 2, name: 'Premium', priceBs: 109, priceUsd: 9, featured: true,
+    level: 2, name: 'Premium', priceUsd: 7.5, featured: true,
     extras: ['Todo lo del plan Básico, sin límites diarios'],
     limits: {
       practice:  { max: Infinity, per: 'day' },
@@ -14477,6 +14479,9 @@ const PLANS = {
 /* PLANS_END */
 const PLAN_ORDER = ['inicial', 'basico', 'premium'];
 const PLAN_PERIOD_DAYS = 30;  // pago mensual por adelantado (sin renovación automática)
+
+/** 7.5 → '7,5' (decimal con coma, como en español) */
+function fmtUsd(n) { return String(n).replace('.', ','); }
 
 function planExists(tier) { return Object.prototype.hasOwnProperty.call(PLANS, tier); }
 
