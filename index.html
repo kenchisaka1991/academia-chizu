@@ -394,6 +394,7 @@
             padding: 1rem;
         }
 
+        #legal-modal { z-index: 10001; }  /* por encima de la pantalla de login (9999) */
         .modal-overlay.active {
             display: flex;
             animation: fadeIn 0.25s ease;
@@ -1741,7 +1742,9 @@
         </div>
     </div>
 
-    <!-- Legal Modal -->
+    </div> <!-- end app-container -->
+
+    <!-- Legal Modal (fuera de app-container: se abre también desde la pantalla de login) -->
     <div class="modal-overlay" id="legal-modal" onclick="if(event.target===this)closeLegalModal()">
         <div class="modal" style="max-width:560px;text-align:left;max-height:80vh;overflow-y:auto">
             <button class="modal-close" onclick="closeLegalModal()">×</button>
@@ -1749,7 +1752,6 @@
         </div>
     </div>
 
-    </div> <!-- end app-container -->
 
 <script>
 // ===== FIREBASE AUTH =====
@@ -1873,39 +1875,118 @@ function handleReset() {
     });
 }
 
+// Textos legales. Se generan al abrirlos (getters) para que la lista de planes y precios salga siempre de PLANS.
+const LEGAL_DATE = '13 de octubre de 2026';
+const LEGAL_CONTACT = 'kenchisaka@academiachizu.com';
+const LEGAL_WHATSAPP = '+591 76083176';
+function legalPlansHtml() {
+    return PLAN_ORDER.map(t => {
+        const p = PLANS[t];
+        const price = p.level > 0 ? `Bs. ${p.priceBs} (Bolivia) o $${p.priceUsd} USD (extranjero) por 30 días` : 'Gratis';
+        const incl = planBenefits(t).filter(b => b.ok).map(b => b.text).join('; ');
+        return `<li style="margin-bottom:0.4rem"><strong>${p.name}</strong> — ${price}. Incluye: ${incl}.</li>`;
+    }).join('');
+}
+const _H = (t) => `<h3 style="margin:1rem 0 0.4rem">${t}</h3>`;
+const _P = (t) => `<p style="margin-bottom:0.7rem;font-size:0.9rem;line-height:1.55">${t}</p>`;
+const _UL = (items) => `<ul style="margin:0 0 0.8rem 1.1rem;font-size:0.9rem;line-height:1.55">${items.map(i => `<li style="margin-bottom:0.3rem">${i}</li>`).join('')}</ul>`;
+
 const legalContent = {
-    terms: `
-        <h2 style="font-family:'Outfit';font-weight:800;margin-bottom:1rem">📋 Términos de uso</h2>
-        <p style="color:var(--text-light);font-size:0.8rem;margin-bottom:1.5rem">Última actualización: abril 2026</p>
-        <h3 style="margin-bottom:0.5rem">1. Uso del servicio</h3>
-        <p style="margin-bottom:0.8rem;font-size:0.9rem">Academia Chizu es un servicio educativo de aprendizaje de japonés para hispanohablantes. Al registrarte, aceptas usarlo únicamente con fines personales y educativos.</p>
-        <h3 style="margin-bottom:0.5rem">2. Cuenta de usuario</h3>
-        <p style="margin-bottom:0.8rem;font-size:0.9rem">Eres responsable de mantener la confidencialidad de tu cuenta. Debes notificarnos inmediatamente si sospechas acceso no autorizado.</p>
-        <h3 style="margin-bottom:0.5rem">3. Contenido</h3>
-        <p style="margin-bottom:0.8rem;font-size:0.9rem">Todo el contenido educativo es propiedad de Academia Chizu. No está permitida su reproducción sin autorización.</p>
-        <h3 style="margin-bottom:0.5rem">4. Planes y pagos</h3>
-        <p style="margin-bottom:0.8rem;font-size:0.9rem">Los planes de pago (Estudio / Premium) se gestionan localmente. Los precios pueden cambiar con previo aviso.</p>
-        <h3 style="margin-bottom:0.5rem">5. Limitación de responsabilidad</h3>
-        <p style="margin-bottom:0.8rem;font-size:0.9rem">El servicio se brinda "tal como está". No garantizamos disponibilidad ininterrumpida.</p>
-        <h3 style="margin-bottom:0.5rem">6. Contacto</h3>
-        <p style="font-size:0.9rem">Para consultas: <strong>kenchisaka@academiachizu.com</strong></p>
-    `,
-    privacy: `
-        <h2 style="font-family:'Outfit';font-weight:800;margin-bottom:1rem">🔒 Política de privacidad</h2>
-        <p style="color:var(--text-light);font-size:0.8rem;margin-bottom:1.5rem">Última actualización: abril 2026</p>
-        <h3 style="margin-bottom:0.5rem">1. Datos que recopilamos</h3>
-        <p style="margin-bottom:0.8rem;font-size:0.9rem">Recopilamos: <strong>email</strong> (para autenticación) y <strong>progreso de aprendizaje</strong> (caracteres aprendidos, puntajes de quizzes).</p>
-        <h3 style="margin-bottom:0.5rem">2. Cómo usamos los datos</h3>
-        <p style="margin-bottom:0.8rem;font-size:0.9rem">Los datos se usan exclusivamente para personalizar tu experiencia de aprendizaje y guardar tu progreso entre sesiones.</p>
-        <h3 style="margin-bottom:0.5rem">3. Firebase / Google</h3>
-        <p style="margin-bottom:0.8rem;font-size:0.9rem">Usamos Firebase (Google) para autenticación y almacenamiento. Los datos se guardan en servidores seguros de Google Cloud. Consulta la <a href="https://policies.google.com/privacy" target="_blank" style="color:var(--ocean)">política de privacidad de Google</a>.</p>
-        <h3 style="margin-bottom:0.5rem">4. Compartir datos</h3>
-        <p style="margin-bottom:0.8rem;font-size:0.9rem">No vendemos ni compartimos tus datos personales con terceros.</p>
-        <h3 style="margin-bottom:0.5rem">5. Tus derechos</h3>
-        <p style="margin-bottom:0.8rem;font-size:0.9rem">Puedes solicitar la eliminación de tu cuenta y datos en cualquier momento contactándonos.</p>
-        <h3 style="margin-bottom:0.5rem">6. Contacto</h3>
-        <p style="font-size:0.9rem">Consultas de privacidad: <strong>kenchisaka@academiachizu.com</strong></p>
-    `
+    get terms() {
+        return `
+        <h2 style="font-family:'Outfit';font-weight:800;margin-bottom:0.4rem">📋 Términos de uso</h2>
+        <p style="color:var(--text-light);font-size:0.8rem;margin-bottom:1rem">Última actualización: ${LEGAL_DATE}</p>
+        ${_P('Estos términos explican cómo funciona <strong>Academia Chizu (NihongoMap)</strong>, un servicio para aprender japonés (nivel N5) dirigido a hispanohablantes. Al crear una cuenta o usar el servicio, aceptas estos términos.')}
+
+        ${_H('1. Uso del servicio')}
+        ${_P('El servicio es para uso personal y educativo. Es una herramienta de estudio: no garantizamos que apruebes un examen (por ejemplo el JLPT) ni un resultado de aprendizaje concreto.')}
+
+        ${_H('2. Tu cuenta')}
+        ${_P('Te registras con correo y contraseña o con Google. Eres responsable de cuidar tu cuenta. Cada cuenta es personal: no la compartas ni la reventas. Avísanos si sospechas que alguien más la usa.')}
+
+        ${_H('3. Contenido')}
+        ${_P('Las lecciones, ejercicios, textos y audios son propiedad de Academia Chizu. No puedes copiarlos, redistribuirlos ni venderlos sin autorización.')}
+
+        ${_H('4. Planes')}
+        ${_P('Hay tres planes. Los límites y beneficios son los que muestra la pantalla “Planes” al momento de pagar:')}
+        <ul style="margin:0 0 0.8rem 1.1rem;font-size:0.9rem;line-height:1.55;list-style:disc">${legalPlansHtml()}</ul>
+        ${_P('Puedes empezar gratis con el plan Inicial y pagar solo si quieres más. Podemos mejorar o cambiar el contenido y los límites de los planes con el tiempo; el período que ya pagaste se respeta con las condiciones con las que lo compraste.')}
+
+        ${_H('5. Pagos')}
+        ${_UL([
+            '<strong>Pago mensual por adelantado.</strong> Cada pago activa el plan por 30 días. <strong>No hay renovación automática ni cobros recurrentes:</strong> nunca te cobramos sin que tú hagas un nuevo pago.',
+            '<strong>Medios de pago:</strong> en Bolivia, QR (transferencia en bolivianos); en el extranjero, tarjeta mediante un enlace de pago, AirTM o Binance (en USDT/USD). Los pagos son manuales: nos escribes por WhatsApp, te enviamos los datos y, cuando confirmamos tu pago, activamos tu plan, normalmente en menos de 24 horas.',
+            '<strong>Si ya tienes ese plan vigente y pagas de nuevo,</strong> los 30 días se suman a tu fecha de vencimiento. Si pagas otro plan, empieza a contar desde la activación.',
+            'Los precios pueden cambiar. Un cambio de precio no afecta un período que ya pagaste.',
+            'Las comisiones de tu banco, de AirTM, de Binance o de otras plataformas por enviar el dinero corren por tu cuenta.'
+        ])}
+
+        ${_H('6. Vencimiento y cancelación')}
+        ${_P('<strong>Para cancelar solo tienes que no renovar:</strong> al terminar los 30 días tu cuenta vuelve al plan Inicial. No tienes que avisarnos ni hacer ningún trámite. Tu progreso (avance, puntajes, XP, racha) se conserva.')}
+
+        ${_H('7. Reembolsos')}
+        ${_P('Como los planes son de bajo costo y se activan en cuanto confirmamos el pago, <strong>no hacemos reembolsos una vez activado el plan</strong>. La excepción es si te cobramos dos veces por el mismo período o si hubo un error nuestro: en ese caso te devolvemos el monto. Escríbenos y lo resolvemos. Puedes probar el servicio gratis con el plan Inicial antes de pagar.')}
+
+        ${_H('8. Códigos de profesor')}
+        ${_P('Un código de profesor da acceso a un plan por un tiempo limitado. Cada persona puede canjear un mismo código una sola vez, el código tiene un número máximo de usos y podemos desactivarlo. Si ya tienes un plan vigente igual o mejor, el código no se aplica hasta que venza.')}
+
+        ${_H('9. Uso correcto')}
+        ${_P('No está permitido intentar activar un plan sin pagar, manipular el servicio, acceder a datos de otras personas ni usarlo para fines ilegales. Podemos suspender cuentas que lo hagan.')}
+
+        ${_H('10. Disponibilidad y responsabilidad')}
+        ${_P('El servicio se ofrece “tal como está”. Hacemos lo posible por mantenerlo disponible, pero puede haber interrupciones o errores. En la medida permitida por la ley, no respondemos por pérdidas indirectas derivadas del uso del servicio.')}
+
+        ${_H('11. Cambios en estos términos')}
+        ${_P('Podemos actualizar estos términos. La fecha de arriba indica la última versión. Si sigues usando el servicio después de un cambio, lo aceptas.')}
+
+        ${_H('12. Contacto')}
+        ${_P(`Correo: <strong>${LEGAL_CONTACT}</strong> · WhatsApp: <strong>${LEGAL_WHATSAPP}</strong>`)}
+        `;
+    },
+    get privacy() {
+        return `
+        <h2 style="font-family:'Outfit';font-weight:800;margin-bottom:0.4rem">🔒 Política de privacidad</h2>
+        <p style="color:var(--text-light);font-size:0.8rem;margin-bottom:1rem">Última actualización: ${LEGAL_DATE}</p>
+        ${_P('Aquí explicamos qué datos guardamos, para qué y cómo puedes pedir que los borremos.')}
+
+        ${_H('1. Qué datos guardamos')}
+        ${_UL([
+            '<strong>Cuenta:</strong> tu correo electrónico y, si entras con Google, el nombre de tu perfil.',
+            '<strong>Aprendizaje:</strong> caracteres aprendidos, puntajes, XP, racha, avance en las lecciones y resultados de los ejercicios.',
+            '<strong>Plan:</strong> qué plan tienes, hasta cuándo, cómo se activó (pago manual o código de profesor) y qué código de profesor canjeaste.',
+            '<strong>Pagos:</strong> <strong>no guardamos números de tarjeta ni contraseñas de plataformas de pago.</strong> El pago lo procesan tu banco o las plataformas que uses (Takenos, AirTM, Binance u otras) y se rigen por sus propias políticas. Nosotros solo recibimos el comprobante que nos envías por WhatsApp para activar tu plan.'
+        ])}
+
+        ${_H('2. Para qué usamos los datos')}
+        ${_P('Para que puedas iniciar sesión, guardar y recuperar tu progreso en cualquier dispositivo, aplicar los límites de tu plan, activar y renovar tu plan, y darte soporte.')}
+
+        ${_H('3. Dónde se guardan y quién los ve')}
+        ${_UL([
+            '<strong>Firebase (Google):</strong> usamos Firebase Authentication y Firestore para el inicio de sesión y el almacenamiento. Los datos están en servidores de Google Cloud, que pueden estar fuera de tu país. Consulta la <a href="https://policies.google.com/privacy" target="_blank" rel="noopener" style="color:var(--ocean)">política de privacidad de Google</a>.',
+            '<strong>En tu dispositivo:</strong> la app guarda información en el almacenamiento del navegador (progreso y preferencias) para funcionar mejor. No usamos cookies de publicidad.',
+            '<strong>Google Fonts:</strong> las tipografías se cargan desde Google, que puede registrar tu dirección IP.',
+            '<strong>Administración:</strong> quien administra Academia Chizu puede ver tu correo, tu plan y tu progreso para activar planes y darte soporte.'
+        ])}
+
+        ${_H('4. No vendemos tus datos')}
+        ${_P('No vendemos ni alquilamos tus datos personales. Solo los compartimos con los proveedores necesarios para que el servicio funcione (Firebase/Google) o si una ley nos obliga.')}
+
+        ${_H('5. Cuánto tiempo los guardamos')}
+        ${_P('Mientras tengas tu cuenta. Si pides borrarla, eliminamos tus datos como se explica abajo.')}
+
+        ${_H('6. Tus derechos y cómo pedir borrar tu cuenta')}
+        ${_P(`Puedes pedirnos ver, corregir o <strong>borrar tu cuenta y tus datos</strong>. Escríbenos a <strong>${LEGAL_CONTACT}</strong> o por WhatsApp al <strong>${LEGAL_WHATSAPP}</strong> desde el mismo correo con el que te registraste, y lo hacemos normalmente en menos de 15 días. Al borrar la cuenta pierdes tu progreso y cualquier plan activo, sin reembolso.`)}
+
+        ${_H('7. Menores de edad')}
+        ${_P('Si eres menor de edad, usa el servicio con el permiso de tu madre, padre o tutor.')}
+
+        ${_H('8. Cambios en esta política')}
+        ${_P('Podemos actualizar esta política. La fecha de arriba indica la última versión.')}
+
+        ${_H('9. Contacto')}
+        ${_P(`Correo: <strong>${LEGAL_CONTACT}</strong> · WhatsApp: <strong>${LEGAL_WHATSAPP}</strong>`)}
+        `;
+    }
 };
 
 function showLegal(type) {
