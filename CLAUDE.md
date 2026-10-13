@@ -11,6 +11,7 @@
 - **回帰テスト**（データ追加・修正後は必ず実行）:
   - 静的: `node scripts/verify_app_static.js`（依存なし・FAIL 0 が正常）
   - E2E（現在 23項目・23/23 pass）: `python C:/Users/LENOVO/.claude/skills/webapp-testing/scripts/with_server.py --server "python -m http.server 8899" --port 8899 -- python scripts/verify_app_e2e.py`（Playwright headless・**22項目・2026-07-10時点 22/22 pass**（WS5でT17〜T19・WS8でT20〜T21・**WS9でT22（nm_*同期マージ）追加**）。静的側は **[A19]（nm_*マージ関数・15アサーション）** をWS9で追加。稼働中サーバ再利用なら `PYTHONIOENCODING=utf-8 NM_PORT=8080 python scripts/verify_app_e2e.py` が確実。※`with_server.py` は NM_PORT を渡さないと 8899 既定になるので、別ポート時は `NM_PORT=<port>` を必ず前置。8899/with_server が ERR_EMPTY_RESPONSE で不安定なら `python -m http.server <port> &` を自前で立てて `NM_PORT=<port> python scripts/verify_app_e2e.py` が確実）
+  - **WS10 Bloque1（2026-10-13）**: 静的 **[A21]**（JLPT 5試験・140問・重複/explainEs検証）＋ E2E **T25**（25項目・25/25 pass）
   - 手動スニペット集: `scripts/verify_app_eval.md`（DevToolsコンソール用）
 - 永続化: `localStorage`（`chizu_scores` / `learnedChars` / `nm_*` キー群）
 - 認証: **Firebase Authentication**（メール/パスワード・Google 有効済み）
@@ -61,7 +62,7 @@ const firebaseConfig = {
 #roadmap   — ホーム（ロードマップ）。初期表示 class="section active"
 #unit      — ユニット詳細（Can-doカード一覧）
 #scenario  — シナリオ学習フロー（Escena→Gramática→[Trazar]→Práctica→[Escuchar]→[Lectura]→Reto。Escuchar/Lectura はデータがある Can-do のみ・ステップ見出しには出さずボタン遷移）
-#jlpt      — JLPT N5模擬試験（**実装済み**: 35問=語彙10+文法20+読解5・60%合格・+100XP・弱点誘導。現状ゲート未接続で無料開放）＋ **Práctica de Lectura ドリル**（2026-07-09実装: `lecturaDrillBank` 12パッセージ17問からランダム5パッセージ・60%合格・+20XP）
+#jlpt      — JLPT N5模擬試験（**5試験・WS10 Bloque1**: e1=既存35問+聴解8=43問／e2〜e5=語彙8+文法12+読解5+聴解8=33問・60%合格・各試験 初回+100XP/以降+20・Premium限定 `jlpt.mock`・選択画面 `.jlpt-exam-card`。データ `data/jlpt_exams.js`+`jlpt_exams_b.js`=`window.JLPT_EXAMS`、e1の本体は `jlptQuestionBank`）＋ **Práctica de Lectura ドリル**（2026-07-09実装: `lecturaDrillBank` 12パッセージ17問からランダム5パッセージ・60%合格・+20XP）
 #profile   — ユーザープロフィール（XP・ストリーク・プラン）
 #moji      — 文字（ひらがな・カタカナ・漢字）
 #grammar   — 文法（26タブ）
@@ -91,7 +92,7 @@ const firebaseConfig = {
 | `nm_cando_progress` | object | Can-do別進捗（status/stars/practiceScore/…）。**WS5追加** `xpAwarded:{practice,escuchar,lectura,done}`＝初回満額XP判定フラグ。**WS9でFirestore同期**（`users/{uid}.nm.cando`） |
 | `nm_xp` | object | `{total, today, lastUpdate}`。**WS9でFirestore同期**（total=maxマージ・today/lastUpdateはローカル当日優先） |
 | `nm_streak` | object | `{current, longest, lastActiveDate}`。**WS9でFirestore同期**（longest=max・current/lastActiveDateは新しい日付の端末採用） |
-| `nm_jlpt` | object | **WS5追加**: 模試初回合格管理。**WS9でFirestore同期**（passedOnce=OR・bestScore=max） |
+| `nm_jlpt` | object | **WS5追加**: 模試初回合格管理。**WS9でFirestore同期**（passedOnce=OR・bestScore=max）。**WS10追加** `exams:{e1..e5:{passed,best}}`（試験別・passed=OR・best=max。`passedOnce`は従来どおり「e1合格」の意味のみ）。旧形式同士のマージでは exams を付けない |
 | `nm_daily` | object | 日次カウンター（`{date, practiceCount, listeningPractice, lecturaDrill, …}`）。**WS5追加** `lecturaDrill`＝読解ドリル無料枠。**同期スコープ外**（端末ローカル） |
 | `nm_plan` | object | プランフラグ（`{tier, expiresAt, source}`）。`source:'teacher_code'`＝教師コード解放（180日Premium）。WS8で同期（読込のみ・`mergePlanFromServer`） |
 | `nm_challenge_quota` | object | 会話チャレンジ無料枠（週次）。**同期スコープ外**（端末ローカル） |
@@ -141,9 +142,9 @@ const firebaseConfig = {
 | `playScenarioAudio(path, text, btn)` | MP3優先→Web Speech APIフォールバック |
 | `speakFallback(text, btn)` | Web Speech API TTS（ja-JP、0.85倍速） |
 | `renderProfile()` | `#profile-content` にXP・ストリーク・プラン表示 |
-| `renderJlpt()` | `#jlpt-content` に模試イントロ＋**Práctica de Lectura エントリ** → `startJlptTest()` で35問実施（`jlptQuestionBank`・`showJlptResults()`）／ `startLecturaDrill()` で読解ドリル |
-| `startJlptTest()` | **WS5変更**: section1/2 の出題順シャッフル＋各問の選択肢シャッフル＋answer追従（浅コピー・元データ非破壊）。section3（読解・同一パッセージ参照）は順序固定 |
-| `showJlptResults()` | **WS5変更**: セクション別集計を `_jlptQuestions[i].section` ベース化（シャッフル耐性）。XP＝**初回+100/以降+20**（`nm_jlpt`） |
+| `renderJlpt()` | `#jlpt-content` に模試イントロ＋**Práctica de Lectura エントリ** → 5試験カード（`jlptBuildExam(id)`）→ `startJlptTest(examId)`／ `startLecturaDrill()` で読解ドリル |
+| `startJlptTest(examId)` | **WS10**: examId(e1〜e5)・聴解=section4（`jlptPlayListening`で2回まで再生・`audio/jlpt_{id}_l{n}.opus`→TTS）・誤答時 explainEs＋Siguiente。**WS5**: section1/2/4 の出題順シャッフル＋各問の選択肢シャッフル＋answer追従（浅コピー・元データ非破壊）。section3（読解・同一パッセージ参照）は順序固定 |
+| `showJlptResults()` | **WS5変更**: セクション別集計を `_jlptQuestions[i].section` ベース化（シャッフル耐性）。XP＝**試験ごと 初回+100/以降+20**（`nm_jlpt.exams`）。**WS10**: 4セクション（語彙/文法/読解/聴解）の結果・弱点誘導 |
 
 ### Can-do データ構造
 ```javascript
