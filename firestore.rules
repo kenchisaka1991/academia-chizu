@@ -2,27 +2,117 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Documento del usuario: users/{uid}
-    // - Lee solo su propio documento.
-    // - Escribe solo su progreso (learnedChars, scores, nm, updatedAt).
-    // - El campo "plan" (y cualquier otro) NUNCA lo escribe el cliente:
-    //   solo el servidor (Cloud Functions / Admin SDK / consola), que ignoran estas reglas.
+    // ---------- utilidades ----------
+    function signedIn() { return request.auth != null; }
+    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+
+    // Administrador: solo esta cuenta (Google/correo VERIFICADO). Sin Cloud Functions: el panel admin.html
+    // escribe directo en Firestore y estas reglas son lo único que lo autoriza.
+    function isAdmin() {
+      return signedIn()
+        && request.auth.token.email_verified == true
+        && request.auth.token.email == 'kenchisaka@academiachizu.com';
+    }
+
+    // El campo email guardado en users/{uid} debe ser el del propio usuario (el admin lo usa para buscarlo).
+    function emailOk() {
+      return !('email' in request.resource.data)
+        || ('email' in request.auth.token && request.resource.data.email == request.auth.token.email.lower());   // se guarda en minúsculas
+    }
+    function emailUnchanged() {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(['email']) || emailOk();
+    }
+
+    // El plan de un admin debe ser un plan de pago conocido.
+    function adminPlanOk() {
+      return !('plan' in request.resource.data)
+        || request.resource.data.plan.tier in ['basico', 'premium'];
+    }
+
+    // Canje de código de profesor: el usuario escribe su plan SOLO si en el mismo lote
+    //   (1) suma 1 uso al código, y (2) crea su ficha en teacherCodes/{code}/redemptions/{uid}.
+    // El código debe estar activo, con usos libres, y el plan debe coincidir con el del código y no durar más de lo permitido.
+    function redeemOk(uid) {
+      let code = request.resource.data.plan.code;
+      let cref = /databases/$(database)/documents/teacherCodes/$(code);
+      let rref = /databases/$(database)/documents/teacherCodes/$(code)/redemptions/$(uid);
+      return request.resource.data.plan.source == 'teacher_code'
+        && code is string
+        && get(cref).data.active == true
+        && get(cref).data.uses < get(cref).data.maxUses
+        && getAfter(cref).data.uses == get(cref).data.uses + 1
+        && request.resource.data.plan.tier == get(cref).data.tier
+        && request.resource.data.plan.expiresAt is timestamp
+        && request.resource.data.plan.expiresAt > request.time
+        && request.resource.data.plan.expiresAt <= request.time + duration.value(get(cref).data.days, 'd') + duration.value(1, 'd')
+        && !exists(rref)
+        && existsAfter(rref);
+    }
+
+    // ---------- users/{uid} ----------
     match /users/{uid} {
-      allow read: if request.auth != null && request.auth.uid == uid;
+      allow read: if isOwner(uid) || isAdmin();
 
-      allow create: if request.auth != null
-                    && request.auth.uid == uid
-                    && request.resource.data.keys().hasOnly(['learnedChars', 'scores', 'nm', 'updatedAt']);
+      // El usuario crea su doc solo con progreso (+ su email). Nunca con plan.
+      allow create: if (isOwner(uid)
+                        && request.resource.data.keys().hasOnly(['learnedChars', 'scores', 'nm', 'updatedAt', 'email'])
+                        && emailOk())
+                    || (isAdmin() && adminPlanOk());
 
-      allow update: if request.auth != null
-                    && request.auth.uid == uid
-                    && request.resource.data.diff(resource.data).affectedKeys()
-                         .hasOnly(['learnedChars', 'scores', 'nm', 'updatedAt']);
+      allow update: if (isOwner(uid) && emailUnchanged() && (
+                          // progreso normal
+                          request.resource.data.diff(resource.data).affectedKeys()
+                            .hasOnly(['learnedChars', 'scores', 'nm', 'updatedAt', 'email'])
+                          // canje de código de profesor
+                          || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['plan'])
+                              && redeemOk(uid))
+                       ))
+                    || (isAdmin() && adminPlanOk());
 
       allow delete: if false;
     }
 
-    // Todo lo demás (orders, teacherCodes, etc.) queda cerrado al cliente.
+    // ---------- códigos de profesor ----------
+    match /teacherCodes/{code} {
+      // Un usuario con sesión puede leer UN código si conoce su nombre (no puede listarlos).
+      allow get: if signedIn();
+      allow list: if isAdmin();
+      allow create: if isAdmin()
+                    && request.resource.data.tier in ['basico', 'premium']
+                    && request.resource.data.days is int && request.resource.data.days >= 1 && request.resource.data.days <= 366
+                    && request.resource.data.maxUses is int && request.resource.data.maxUses >= 1
+                    && request.resource.data.uses == 0
+                    && request.resource.data.active == true;
+
+      // Admin: activa/desactiva. Usuario: solo suma 1 uso y a la vez crea su ficha de canje.
+      allow update: if isAdmin()
+                    || (signedIn()
+                        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['uses'])
+                        && resource.data.active == true
+                        && resource.data.uses < resource.data.maxUses
+                        && request.resource.data.uses == resource.data.uses + 1
+                        && !exists(/databases/$(database)/documents/teacherCodes/$(code)/redemptions/$(request.auth.uid))
+                        && existsAfter(/databases/$(database)/documents/teacherCodes/$(code)/redemptions/$(request.auth.uid)));
+      allow delete: if false;
+
+      match /redemptions/{uid} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid)
+                      && request.resource.data.keys().hasOnly(['at', 'uid'])
+                      && request.resource.data.uid == uid
+                      && request.resource.data.at == request.time;
+        allow update, delete: if false;
+      }
+    }
+
+    // ---------- registro de acciones del admin ----------
+    match /adminLog/{id} {
+      allow create: if isAdmin();
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    // Todo lo demás cerrado.
     match /{document=**} {
       allow read, write: if false;
     }

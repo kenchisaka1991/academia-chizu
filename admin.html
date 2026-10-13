@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin - Academia Chizu</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@700;800&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<style>
+:root{--primary:#E63946;--ocean:#2A9D8F;--accent:#F4A261;--night:#1D3557;--cream:#FDFBF7;--text:#2b2d42;--text-light:#6b7280;--radius:14px}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--text);font-family:'DM Sans',sans-serif;line-height:1.5}
+header{background:var(--night);color:#fff;padding:0.9rem 16px;display:flex;align-items:center;justify-content:space-between;gap:0.6rem;flex-wrap:wrap}
+header h1{font:800 1.15rem 'Outfit',sans-serif;margin:0}
+header small{opacity:0.8;font-size:0.78rem;word-break:break-all}
+main{max-width:760px;margin:0 auto;padding:16px}
+.card{background:#fff;border-radius:var(--radius);box-shadow:0 2px 10px rgba(0,0,0,0.07);padding:1.1rem;margin-bottom:1rem}
+.card h2{font:800 1.05rem 'Outfit',sans-serif;margin:0 0 0.8rem;color:var(--night)}
+label{display:block;font-size:0.78rem;font-weight:600;color:var(--text-light);margin:0.6rem 0 0.2rem}
+input,select{width:100%;padding:0.65rem;font:500 0.95rem 'DM Sans',sans-serif;border:2px solid #d9dde3;border-radius:10px;background:#fff}
+input:focus,select:focus{outline:none;border-color:var(--ocean)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.6rem}
+@media(max-width:480px){.row,.row3{grid-template-columns:1fr}}
+button{font:700 0.9rem 'DM Sans',sans-serif;border:none;border-radius:10px;padding:0.7rem 1rem;cursor:pointer;background:var(--night);color:#fff}
+button:disabled{opacity:0.5;cursor:default}
+button.ok{background:var(--ocean)}
+button.danger{background:var(--primary)}
+button.ghost{background:#e8eaee;color:var(--text)}
+button.small{padding:0.4rem 0.7rem;font-size:0.78rem}
+.actions{display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.9rem}
+.chips{display:flex;gap:0.4rem;flex-wrap:wrap;margin-top:0.4rem}
+.msg{font-size:0.88rem;margin:0.7rem 0 0;padding:0.6rem 0.8rem;border-radius:10px;display:none}
+.msg.err{display:block;background:#fde8ea;color:#a1212d}
+.msg.good{display:block;background:#e3f5f2;color:#176b61}
+.user-box{background:var(--cream);border-radius:10px;padding:0.8rem;margin-top:0.8rem;font-size:0.9rem}
+.user-box b{color:var(--night)}
+.pill{display:inline-block;font-size:0.72rem;font-weight:700;padding:0.15rem 0.6rem;border-radius:99px;background:#e8eaee;color:var(--text)}
+.pill.on{background:var(--ocean);color:#fff}
+.pill.off{background:#fde8ea;color:#a1212d}
+table{width:100%;border-collapse:collapse;font-size:0.84rem}
+th,td{text-align:left;padding:0.5rem 0.3rem;border-bottom:1px solid #eceef2;vertical-align:middle}
+th{font-size:0.72rem;color:var(--text-light);text-transform:uppercase}
+.table-wrap{overflow-x:auto}
+code{font-family:ui-monospace,Consolas,monospace;font-weight:700}
+.hidden{display:none!important}
+#login-box{max-width:380px;margin:2rem auto}
+</style>
+</head>
+<body>
+<header>
+  <h1>🛠️ Admin · Academia Chizu</h1>
+  <span><small id="who"></small> <button class="ghost small" id="btn-salir" onclick="salir()" style="margin-left:0.5rem">Salir</button></span>
+</header>
+
+<main>
+  <!-- Cargando -->
+  <div class="card" id="cargando">Cargando…</div>
+
+  <!-- Inicio de sesión -->
+  <div class="card hidden" id="login-box">
+    <h2>Inicia sesión</h2>
+    <p style="font-size:0.85rem;color:var(--text-light);margin:0 0 0.6rem">Solo para la administración de Academia Chizu.</p>
+    <button class="ok" style="width:100%" onclick="entrarGoogle()">Entrar con Google</button>
+    <label for="l-email">Correo</label>
+    <input id="l-email" type="email" autocomplete="username">
+    <label for="l-pass">Contraseña</label>
+    <input id="l-pass" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')entrarCorreo()">
+    <div class="actions"><button onclick="entrarCorreo()">Entrar</button></div>
+    <p class="msg" id="login-msg"></p>
+  </div>
+
+  <!-- Sin permiso -->
+  <div class="card hidden" id="denegado">
+    <h2>🚫 No autorizado</h2>
+    <p style="margin:0">Esta cuenta no es la de administración. Cierra sesión y entra con la cuenta correcta (con el correo verificado).</p>
+    <p id="denegado-detalle" style="margin:0.6rem 0 0;font-size:0.8rem;color:var(--text-light)"></p>
+  </div>
+
+  <!-- Panel -->
+  <div id="panel" class="hidden">
+    <div class="card">
+      <h2>1 · Activar plan a un usuario</h2>
+      <label for="u-email">Correo del usuario</label>
+      <input id="u-email" type="email" placeholder="alumno@correo.com" onkeydown="if(event.key==='Enter')buscar()">
+      <div class="actions"><button onclick="buscar()" id="btn-buscar">Buscar</button></div>
+      <p class="msg" id="u-msg"></p>
+
+      <div id="u-box" class="hidden">
+        <div class="user-box" id="u-info"></div>
+        <div class="row">
+          <div>
+            <label for="u-tier">Plan</label>
+            <select id="u-tier">
+              <option value="basico">Básico</option>
+              <option value="premium">Premium</option>
+            </select>
+          </div>
+          <div>
+            <label for="u-days">Días</label>
+            <input id="u-days" type="number" min="1" max="366" step="1" value="30">
+          </div>
+        </div>
+        <div class="chips">
+          <button class="ghost small" onclick="setDias(30)">30</button>
+          <button class="ghost small" onclick="setDias(60)">60</button>
+          <button class="ghost small" onclick="setDias(90)">90</button>
+          <button class="ghost small" onclick="setDias(180)">180</button>
+          <button class="ghost small" onclick="setDias(365)">365</button>
+        </div>
+        <p style="font-size:0.78rem;color:var(--text-light);margin:0.6rem 0 0">Si el usuario ya tiene ese mismo plan vigente, los días se suman a su vencimiento. Si es otro plan, empieza hoy.</p>
+        <div class="actions">
+          <button class="ok" id="btn-activar" onclick="activar()">✅ Activar plan</button>
+          <button class="danger" id="btn-quitar" onclick="quitar()">Quitar plan</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>2 · Códigos de profesor</h2>
+      <div class="row3">
+        <div>
+          <label for="c-code">Código (opcional)</label>
+          <input id="c-code" type="text" placeholder="Se genera solo" maxlength="32" style="text-transform:uppercase">
+        </div>
+        <div>
+          <label for="c-tier">Plan que otorga</label>
+          <select id="c-tier"><option value="basico">Básico</option><option value="premium" selected>Premium</option></select>
+        </div>
+        <div>
+          <label for="c-days">Días</label>
+          <input id="c-days" type="number" min="1" max="366" step="1" value="90">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="c-max">Usos máximos</label>
+          <input id="c-max" type="number" min="1" max="10000" step="1" value="30">
+        </div>
+        <div style="display:flex;align-items:flex-end"><button class="ok" style="width:100%" id="btn-crear" onclick="crearCodigo()">Crear código</button></div>
+      </div>
+      <p class="msg" id="c-msg"></p>
+      <div class="table-wrap" style="margin-top:0.8rem">
+        <table>
+          <thead><tr><th>Código</th><th>Plan</th><th>Días</th><th>Usos</th><th>Estado</th><th></th></tr></thead>
+          <tbody id="c-lista"><tr><td colspan="6" style="color:var(--text-light)">Cargando…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDJ9aF4SPYXq7IddE4JMTQtlo8mSV2OHnI",
+  authDomain: "academia-chizu.firebaseapp.com",
+  projectId: "academia-chizu",
+  storageBucket: "academia-chizu.firebasestorage.app",
+  messagingSenderId: "164979600430",
+  appId: "1:164979600430:web:43e371a22e87ff7b9a43bf"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+// Solo para pruebas locales con el emulador (localhost + ?emulator). En producción no hace nada.
+if (location.hostname === 'localhost' && location.search.indexOf('emulator') >= 0) {
+  auth.useEmulator('http://127.0.0.1:9099');
+  db.useEmulator('127.0.0.1', 8085);
+}
+// Cuenta de administrador. Es solo cosmético: la autoridad real son las reglas de Firestore (firestore.rules → isAdmin()).
+const ADMIN_EMAIL = 'kenchisaka@academiachizu.com';
+const TIER_NAME = { basico: 'Básico', premium: 'Premium' };
+const DAY_MS = 86400000;
+const TS = firebase.firestore.Timestamp;
+const SVT = firebase.firestore.FieldValue.serverTimestamp;
+let usuarioRef = null;      // referencia al documento users/{uid} encontrado
+let usuarioData = null;     // datos de ese documento
+
+const $ = (id) => document.getElementById(id);
+function esc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function show(id, on) { $(id).classList.toggle('hidden', !on); }
+function msg(id, text, ok) { const el = $(id); el.textContent = text || ''; el.className = 'msg' + (text ? (ok ? ' good' : ' err') : ''); }
+function toMs(v) {
+  if (!v) return 0;
+  if (typeof v === 'number') return v;
+  if (typeof v.toMillis === 'function') return v.toMillis();
+  return Date.parse(v) || 0;
+}
+function fecha(ms) { return (ms && !isNaN(ms)) ? new Date(ms).toLocaleString('es-BO', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'; }
+function errTexto(e) {
+  if (e && e.code === 'permission-denied') return 'Permiso denegado: esta cuenta no es la de administrador (o falta verificar el correo).';
+  return (e && e.message) ? e.message : 'Ocurrió un error. Inténtalo de nuevo.';
+}
+function log(tx, accion, objetivo, detalle) {
+  const ref = db.collection('adminLog').doc();
+  const data = { at: SVT(), by: auth.currentUser.uid, byEmail: auth.currentUser.email, action: accion, target: objetivo, detail: detalle || null };
+  return tx ? tx.set(ref, data) : ref.set(data);
+}
+
+// ---------- sesión ----------
+auth.onAuthStateChanged(async (user) => {
+  show('cargando', false);
+  if (!user) {
+    show('login-box', true); show('denegado', false); show('panel', false);
+    $('who').textContent = ''; $('btn-salir').classList.add('hidden');
+    return;
+  }
+  $('who').textContent = user.email || ''; $('btn-salir').classList.remove('hidden');
+  show('login-box', false);
+  const esAdmin = (user.email || '').toLowerCase() === ADMIN_EMAIL && user.emailVerified === true;
+  $('denegado-detalle').textContent = `Sesión: ${user.email || '(sin correo)'} · correo verificado: ${user.emailVerified ? 'sí' : 'no'}.`;
+  show('denegado', !esAdmin); show('panel', esAdmin);
+  if (esAdmin) cargarCodigos();
+});
+function salir() { auth.signOut(); }
+async function entrarGoogle() {
+  msg('login-msg', '');
+  try { await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
+  catch (e) { msg('login-msg', 'No se pudo entrar con Google.', false); }
+}
+async function entrarCorreo() {
+  msg('login-msg', '');
+  try { await auth.signInWithEmailAndPassword($('l-email').value.trim(), $('l-pass').value); }
+  catch (e) { msg('login-msg', 'Correo o contraseña incorrectos.', false); }
+}
+
+// ---------- activar plan ----------
+function setDias(n) { $('u-days').value = n; }
+function pintarUsuario() {
+  const u = usuarioData, p = u.plan;
+  const exp = p ? toMs(p.expiresAt) : 0;
+  const plan = p
+    ? `<span class="pill ${exp > Date.now() ? 'on' : 'off'}">${esc(TIER_NAME[p.tier] || p.tier)} · ${exp > Date.now() ? 'vigente' : 'vencido'}</span> vence ${esc(fecha(exp))} <small>(origen: ${esc(p.source || '—')}${p.code ? ' · código ' + esc(p.code) : ''})</small>`
+    : '<span class="pill">Plan Inicial (sin plan de pago)</span>';
+  const xp = u.nm && u.nm.xp ? u.nm.xp.total : 0;
+  $('u-info').innerHTML = `<b>${esc(u.email)}</b><br>XP total: ${esc(xp || 0)} · Última actividad: ${esc(fecha(toMs(u.updatedAt)))}<br>Plan actual: ${plan}`;
+}
+async function buscar() {
+  msg('u-msg', ''); show('u-box', false); usuarioRef = null; usuarioData = null;
+  const email = $('u-email').value.trim().toLowerCase();
+  if (!email) { msg('u-msg', 'Escribe un correo.', false); return; }
+  $('btn-buscar').disabled = true;
+  try {
+    const snap = await db.collection('users').where('email', '==', email).limit(1).get();
+    if (snap.empty) {
+      msg('u-msg', 'No encontrado. El usuario debe haber iniciado sesión en la web al menos una vez (después de esta actualización) y escribirse con el mismo correo.', false);
+    } else {
+      usuarioRef = snap.docs[0].ref; usuarioData = snap.docs[0].data();
+      pintarUsuario(); show('u-box', true);
+    }
+  } catch (e) { msg('u-msg', errTexto(e), false); }
+  $('btn-buscar').disabled = false;
+}
+async function activar() {
+  if (!usuarioRef) return;
+  const tier = $('u-tier').value, days = Number($('u-days').value);
+  if (!(tier in TIER_NAME) || !Number.isInteger(days) || days < 1 || days > 366) { msg('u-msg', 'Los días deben ser un número entero entre 1 y 366.', false); return; }
+  if (!confirm(`¿Activar plan ${TIER_NAME[tier]} por ${days} días a ${usuarioData.email}?`)) return;
+  $('btn-activar').disabled = true; msg('u-msg', '');
+  try {
+    const plan = await db.runTransaction(async (tx) => {
+      const snap = await tx.get(usuarioRef);
+      const cur = snap.data().plan;
+      const curExp = cur ? toMs(cur.expiresAt) : 0;
+      // Mismo plan vigente → se suma al vencimiento; otro plan, vencido o ninguno → empieza hoy
+      const inicio = (cur && cur.tier === tier && curExp > Date.now()) ? curExp : Date.now();
+      const nuevo = { tier, source: 'admin', expiresAt: TS.fromMillis(inicio + days * DAY_MS), grantedBy: auth.currentUser.uid };
+      tx.set(usuarioRef, { plan: nuevo }, { merge: true });
+      log(tx, 'activarPlan', usuarioRef.id, { email: usuarioData.email, tier, days });
+      return nuevo;
+    });
+    usuarioData.plan = plan; pintarUsuario();
+    msg('u-msg', `✅ Plan ${TIER_NAME[plan.tier]} activo hasta ${fecha(toMs(plan.expiresAt))}.`, true);
+  } catch (e) { msg('u-msg', errTexto(e), false); }
+  $('btn-activar').disabled = false;
+}
+async function quitar() {
+  if (!usuarioRef || !confirm(`¿Quitar el plan de pago a ${usuarioData.email}? Volverá al plan Inicial.`)) return;
+  $('btn-quitar').disabled = true; msg('u-msg', '');
+  try {
+    await db.runTransaction(async (tx) => {
+      tx.update(usuarioRef, { plan: firebase.firestore.FieldValue.delete() });
+      log(tx, 'quitarPlan', usuarioRef.id, { email: usuarioData.email });
+    });
+    delete usuarioData.plan; pintarUsuario();
+    msg('u-msg', '✅ Plan quitado.', true);
+  } catch (e) { msg('u-msg', errTexto(e), false); }
+  $('btn-quitar').disabled = false;
+}
+
+// ---------- códigos de profesor ----------
+const CODE_RE = /^[A-Z0-9][A-Z0-9-]{3,31}$/;
+function codigoAleatorio() {
+  const abc = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const bytes = crypto.getRandomValues(new Uint8Array(8));
+  return 'CHIZU-' + Array.from(bytes, b => abc[b % abc.length]).join('');
+}
+async function cargarCodigos() {
+  try {
+    const snap = await db.collection('teacherCodes').orderBy('createdAt', 'desc').limit(200).get();
+    const lista = snap.docs.map(d => d.data());
+    $('c-lista').innerHTML = lista.length ? lista.map(c => `<tr>
+      <td><code>${esc(c.code)}</code></td><td>${esc(TIER_NAME[c.tier] || c.tier)}</td><td>${esc(c.days)}</td>
+      <td>${esc(c.uses)} / ${esc(c.maxUses)}</td>
+      <td><span class="pill ${c.active ? 'on' : 'off'}">${c.active ? 'Activo' : 'Desactivado'}</span></td>
+      <td><button class="small ${c.active ? 'danger' : 'ok'}" data-code="${esc(c.code)}" data-active="${c.active ? '1' : '0'}" onclick="alternarCodigo(this)">${c.active ? 'Desactivar' : 'Activar'}</button></td>
+    </tr>`).join('') : '<tr><td colspan="6" style="color:var(--text-light)">Aún no hay códigos.</td></tr>';
+  } catch (e) { $('c-lista').innerHTML = `<tr><td colspan="6">${esc(errTexto(e))}</td></tr>`; }
+}
+async function crearCodigo() {
+  msg('c-msg', ''); $('btn-crear').disabled = true;
+  try {
+    const tier = $('c-tier').value, days = Number($('c-days').value), maxUses = Number($('c-max').value);
+    const code = ($('c-code').value.trim().toUpperCase()) || codigoAleatorio();
+    if (!CODE_RE.test(code)) throw new Error('El código usa 4 a 32 letras mayúsculas, números o guiones.');
+    if (!(tier in TIER_NAME)) throw new Error('Plan no válido.');
+    if (!Number.isInteger(days) || days < 1 || days > 366) throw new Error('Los días deben ser un entero entre 1 y 366.');
+    if (!Number.isInteger(maxUses) || maxUses < 1 || maxUses > 10000) throw new Error('Los usos máximos deben ser un entero entre 1 y 10000.');
+    const ref = db.collection('teacherCodes').doc(code);
+    await db.runTransaction(async (tx) => {
+      if ((await tx.get(ref)).exists) throw new Error('Ese código ya existe.');
+      tx.set(ref, { code, tier, days, maxUses, uses: 0, active: true, createdAt: SVT(), createdBy: auth.currentUser.uid });
+      log(tx, 'crearCodigo', code, { tier, days, maxUses });
+    });
+    msg('c-msg', `✅ Código creado: ${code}`, true);
+    $('c-code').value = '';
+    cargarCodigos();
+  } catch (e) { msg('c-msg', errTexto(e), false); }
+  $('btn-crear').disabled = false;
+}
+async function alternarCodigo(btn) {
+  const code = btn.dataset.code, activar = btn.dataset.active !== '1';
+  btn.disabled = true; msg('c-msg', '');
+  try {
+    const ref = db.collection('teacherCodes').doc(code);
+    await db.runTransaction(async (tx) => {
+      tx.update(ref, { active: activar });
+      log(tx, activar ? 'activarCodigo' : 'desactivarCodigo', code, null);
+    });
+    cargarCodigos();
+  } catch (e) { msg('c-msg', errTexto(e), false); btn.disabled = false; }
+}
+</script>
+</body>
+</html>
