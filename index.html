@@ -14653,10 +14653,20 @@ function nmMergeStreak(local, server) {
 function nmMergeJlpt(local, server) {
   local = local || { passedOnce: false, bestScore: 0 };
   if (!server) return local;
-  return {
+  const out = {
     passedOnce: !!(local.passedOnce || server.passedOnce),
     bestScore: Math.max(local.bestScore || 0, server.bestScore || 0)
   };
+  // exams: { e1:{passed,best}, … } — por examen: passed OR, best max (solo si alguno lo tiene)
+  if (local.exams || server.exams) {
+    const le = local.exams || {}, se = server.exams || {};
+    out.exams = {};
+    Object.keys(Object.assign({}, le, se)).forEach(id => {
+      const a = le[id] || {}, b = se[id] || {};
+      out.exams[id] = { passed: !!(a.passed || b.passed), best: Math.max(a.best || 0, b.best || 0) };
+    });
+  }
+  return out;
 }
 
 // 単一 Can-do の進捗マージ。status は done>inprogress>available の良い方、
@@ -28692,31 +28702,92 @@ let _jlptQuestions = [];
 let _jlptIdx       = 0;
 let _jlptScore     = 0;
 let _jlptAnswers   = [];
+let _jlptExamId    = 'e1';
+let _jlptPlays     = 0;   // reproducciones de la pregunta de escucha actual (máx. 2)
+
+const JLPT_EXAM_IDS = ['e1', 'e2', 'e3', 'e4', 'e5'];
+const JLPT_SECTIONS = [
+  { id: 1, name: 'Vocabulario', icon: '📝', color: 'var(--primary)' },
+  { id: 2, name: 'Gramática',   icon: '📖', color: 'var(--ocean)' },
+  { id: 3, name: 'Lectura',     icon: '📄', color: 'var(--accent)' },
+  { id: 4, name: 'Escucha',     icon: '🎧', color: 'var(--night)' }
+];
+
+function jlptPassageHtml(lines) {
+  return `<div style="background:#F0F7F6;border-left:4px solid var(--ocean);border-radius:var(--radius-md);padding:1rem 1.2rem;margin-bottom:1rem;font-family:'Noto Sans JP',sans-serif;font-size:0.88rem;line-height:1.9">
+  <p style="margin:0 0 0.4rem;font:700 0.75rem 'DM Sans',sans-serif;color:var(--ocean);text-transform:uppercase;letter-spacing:0.04em">📄 Lee el texto</p>
+  ${lines.map(l => `<p style="margin:0 0 0.6rem">${l}</p>`).join('')}
+</div>`;
+}
+
+// Devuelve las preguntas del examen (copias, sin barajar). Examen 1 = jlptQuestionBank (35) + su escucha.
+function jlptBuildExam(examId) {
+  const data = (window.JLPT_EXAMS || {})[examId] || {};
+  let qs = [];
+  if (examId === 'e1') {
+    qs = jlptQuestionBank.map(q => ({ ...q, options: q.options.slice() }));
+  } else {
+    const tag = (arr, section, sectionName, extra) => (arr || []).map(q => ({ ...q, options: q.options.slice(), section, sectionName, ...(extra || {}) }));
+    const pass = data.passage ? jlptPassageHtml(data.passage) : '';
+    qs = [...tag(data.vocab, 1, 'Vocabulario'), ...tag(data.gram, 2, 'Gramática'), ...tag(data.reading, 3, 'Lectura', { passageHtml: pass })];
+  }
+  (data.listening || []).forEach((l, i) => {
+    qs.push({ ...l, options: l.options.slice(), section: 4, sectionName: 'Escucha', listening: true,
+              audio: 'audio/jlpt_' + examId + '_l' + (i + 1) + '.opus' });
+  });
+  return qs;
+}
+
+function jlptExamStats() {
+  return nmSafeParse(localStorage.getItem('nm_jlpt'), { passedOnce: false, bestScore: 0 });
+}
 
 function renderJlpt() {
+  const st = jlptExamStats();
+  const exInfo = (id) => {
+    const e = (st.exams || {})[id] || {};
+    const passed = !!e.passed || (id === 'e1' && !!st.passedOnce);
+    return { passed, best: e.best || (id === 'e1' ? (st.bestScore || 0) : 0) };
+  };
+  const cards = JLPT_EXAM_IDS.map((id, i) => {
+    const d = (window.JLPT_EXAMS || {})[id] || {};
+    const n = id === 'e1' ? jlptQuestionBank.length + ((d.listening || []).length)
+      : (d.vocab || []).length + (d.gram || []).length + (d.reading || []).length + (d.listening || []).length;
+    const info = exInfo(id);
+    return `<button onclick="startJlptTest('${id}')" class="jlpt-exam-card" data-exam="${id}"
+      style="display:flex;align-items:center;gap:0.8rem;width:100%;text-align:left;background:#fff;border:2px solid ${info.passed ? 'var(--ocean)' : '#E8E8E8'};border-radius:var(--radius-md);padding:0.75rem 1rem;margin-bottom:0.55rem;cursor:pointer;font-family:'DM Sans',sans-serif">
+      <span style="font:800 1.3rem 'Outfit',sans-serif;color:var(--primary)">${i + 1}</span>
+      <span style="flex:1;line-height:1.35"><strong style="color:var(--night)">Examen ${i + 1}</strong><br><span style="font-size:0.78rem;color:var(--text-light)">${n} preguntas${info.best ? ' · mejor: ' + info.best + '%' : ''}</span></span>
+      <span style="font-size:1.2rem">${info.passed ? '✅' : '▶️'}</span>
+    </button>`;
+  }).join('');
   document.getElementById('jlpt-content').innerHTML = `
     <div class="profile-wrap">
       <div class="passport-card" style="margin-bottom:1.2rem">
         <div class="passport-card__avatar" style="font-size:1.7rem">🎯</div>
         <div class="passport-card__body">
           <p class="passport-card__name" style="font-family:'Zen Maru Gothic',sans-serif;font-size:1.05rem">Simulacro JLPT N5</p>
-          <p class="passport-card__email" style="white-space:normal">Pon a prueba todo lo que aprendiste en los Units 1–10</p>
+          <p class="passport-card__email" style="white-space:normal">5 exámenes distintos con escucha, como el examen real</p>
         </div>
       </div>
       <div class="stamp-grid">
-        <div class="stamp"><span class="stamp__value">35</span><span class="stamp__label">preguntas</span></div>
+        <div class="stamp"><span class="stamp__value">5</span><span class="stamp__label">exámenes</span></div>
         <div class="stamp stamp--ocean"><span class="stamp__value">60%</span><span class="stamp__label">para aprobar</span></div>
-        <div class="stamp stamp--accent"><span class="stamp__value">+100</span><span class="stamp__label">XP al aprobar</span></div>
+        <div class="stamp stamp--accent"><span class="stamp__value">+100</span><span class="stamp__label">XP 1.ª vez / examen</span></div>
       </div>
       <div class="profile-panel">
-        <p class="profile-panel__title">Ruta del examen</p>
+        <p class="profile-panel__title">Partes de cada examen</p>
         <div style="font-family:'DM Sans',sans-serif;font-size:0.86rem;color:var(--night);display:flex;flex-direction:column;gap:0.6rem;line-height:1.5">
-          <p style="margin:0">📝 <strong>Sección 1</strong> — Vocabulario (10 preguntas)</p>
-          <p style="margin:0">📖 <strong>Sección 2</strong> — Gramática (20 preguntas)</p>
-          <p style="margin:0">📄 <strong>Sección 3</strong> — Lectura (5 preguntas)</p>
+          <p style="margin:0">📝 <strong>Parte 1</strong> — Vocabulario</p>
+          <p style="margin:0">📖 <strong>Parte 2</strong> — Gramática</p>
+          <p style="margin:0">📄 <strong>Parte 3</strong> — Lectura</p>
+          <p style="margin:0">🎧 <strong>Parte 4</strong> — Escucha (puedes oír cada audio 2 veces)</p>
         </div>
       </div>
-      <button onclick="startJlptTest()" class="btn btn-primary" style="width:100%;padding:0.85rem;font-size:1rem">🚀 Comenzar examen</button>
+      <div style="margin-top:1rem">
+        <p class="profile-panel__title" style="margin-bottom:0.6rem">Elige un examen</p>
+        ${cards}
+      </div>
 
       <div class="profile-panel" style="margin-top:1.2rem">
         <p class="profile-panel__title">📄 Práctica de Lectura</p>
@@ -28728,26 +28799,27 @@ function renderJlpt() {
     </div>`;
 }
 
-function startJlptTest() {
-  // 模試（35問）は Premium 限定。無料・教師コード解放外はアップセルを表示。
+function startJlptTest(examId) {
+  examId = JLPT_EXAM_IDS.indexOf(examId) >= 0 ? examId : 'e1';
+  // Los simulacros son Premium. Plan sin acceso → mensaje + código de profesor.
   if (!canUse('jlpt.mock').ok) {
     renderGateUpsell('jlpt-content', {
       icon: '🎯',
       title: 'Simulacro JLPT — Premium',
-      message: 'El simulacro completo del JLPT N5 (35 preguntas) no está incluido en tu plan <strong>' + PLANS[planTier()].name + '</strong>. Con el plan Premium puedes practicar el examen las veces que quieras.',
-      retryJs: 'startJlptTest()',
+      message: 'Los 5 simulacros completos del JLPT N5 (con parte de escucha) no están incluidos en tu plan <strong>' + PLANS[planTier()].name + '</strong>. Con el plan Premium puedes practicar los exámenes las veces que quieras.',
+      retryJs: "startJlptTest('" + examId + "')",
       backJs: 'renderJlpt()'
     });
     return;
   }
-  // 元データ非破壊で浅コピー。セクション内の出題順をシャッフルし（section3=読解は
-  // 同一パッセージ参照のため順序固定）、各問の選択肢もシャッフルして answer を追従させる。
-  const bySec = { 1: [], 2: [], 3: [] };
-  jlptQuestionBank.forEach(q => { (bySec[q.section] || (bySec[q.section] = [])).push({ ...q, options: q.options.slice() }); });
+  // Copias (el banco no se modifica). Vocabulario/gramática/escucha se barajan; lectura (mismo texto) queda en orden.
+  const all = jlptBuildExam(examId);
+  const bySec = { 1: [], 2: [], 3: [], 4: [] };
+  all.forEach(q => { bySec[q.section].push(q); });
   shuffle(bySec[1]);
   shuffle(bySec[2]);
-  // section3 は順序固定（パッセージ本文の流れに沿う）
-  _jlptQuestions = [...bySec[1], ...bySec[2], ...bySec[3]];
+  shuffle(bySec[4]);
+  _jlptQuestions = [...bySec[1], ...bySec[2], ...bySec[3], ...bySec[4]];
   _jlptQuestions.forEach(q => {
     if (Array.isArray(q.options) && q.options.length > 1 && typeof q.answer === 'number') {
       const order = q.options.map((_, i) => i);
@@ -28757,10 +28829,21 @@ function startJlptTest() {
       q.answer  = order.indexOf(correctOrig);
     }
   });
+  _jlptExamId = examId;
   _jlptIdx   = 0;
   _jlptScore = 0;
   _jlptAnswers = [];
   renderJlptQuestion();
+}
+
+function jlptPlayListening(btn) {
+  const q = _jlptQuestions[_jlptIdx];
+  if (!q || !q.listening || _jlptPlays >= 2) return;
+  _jlptPlays++;
+  playScenarioAudio(q.audio, q.text, btn);
+  const left = 2 - _jlptPlays;
+  btn.querySelector('.jlpt-plays').textContent = left > 0 ? '(' + left + (left === 1 ? ' vez más)' : ' veces más)') : '(sin más repeticiones)';
+  if (left <= 0) btn.setAttribute('data-exhausted', '1');
 }
 
 function renderJlptQuestion() {
@@ -28769,13 +28852,14 @@ function renderJlptQuestion() {
   const num   = _jlptIdx + 1;
   const total = _jlptQuestions.length;
   const pct   = Math.round((_jlptIdx) / total * 100);
+  _jlptPlays = 0;
 
   const prevSec = _jlptIdx > 0 ? _jlptQuestions[_jlptIdx - 1].section : 0;
-  const secColor = q.section === 1 ? 'var(--primary)' : q.section === 2 ? 'var(--ocean)' : 'var(--accent)';
-  const secIcon  = q.section === 1 ? '📝' : q.section === 2 ? '📖' : '📄';
+  const sec = JLPT_SECTIONS[q.section - 1] || JLPT_SECTIONS[0];
+  const secColor = sec.color;
   const secHeader = q.section !== prevSec ? `
     <div style="background:${secColor};color:#fff;border-radius:var(--radius-md);padding:0.45rem 1rem;margin-bottom:0.75rem;font:700 0.82rem 'DM Sans',sans-serif">
-      ${secIcon} Sección ${q.section} — ${q.sectionName}
+      ${sec.icon} Parte ${q.section} — ${q.sectionName}
     </div>` : '';
 
   const optHtml = q.options.map((o, i) => `
@@ -28784,6 +28868,13 @@ function renderJlptQuestion() {
       onmouseover="this.style.borderColor='${secColor}'" onmouseout="this.style.borderColor='#E8E8E8'">
       <span style="font-weight:700;color:${secColor};margin-right:0.5rem">${['A','B','C','D'][i]}.</span>${o}
     </button>`).join('');
+
+  const listenHtml = q.listening ? `
+      <button id="jlpt-play" class="btn btn-primary" onclick="jlptPlayListening(this)"
+        style="width:100%;padding:0.9rem;margin-bottom:0.75rem;font-size:1rem">
+        🔊 Escuchar <span class="jlpt-plays" style="font-size:0.78rem;font-weight:500">(2 veces)</span>
+      </button>` : '';
+  const passHtml = q.passageHtml || (q.passage ? _jlptPassage : '');
 
   document.getElementById('jlpt-content').innerHTML = `
     <div style="max-width:480px;margin:0 auto;padding:1rem">
@@ -28794,13 +28885,15 @@ function renderJlptQuestion() {
         <span style="font:700 0.78rem 'DM Sans',sans-serif;color:var(--text-light);white-space:nowrap">${num} / ${total}</span>
       </div>
       ${secHeader}
-      ${q.passage ? _jlptPassage : ''}
+      ${passHtml}
+      ${listenHtml}
       <div style="background:#fff;border-radius:var(--radius-lg);padding:1.2rem 1.4rem;margin-bottom:0.75rem;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
         <p style="margin:0 0 0.5rem;font:700 0.75rem 'DM Sans',sans-serif;color:var(--text-light)">Pregunta ${num}</p>
         <p style="margin:0;font:600 0.93rem 'DM Sans',sans-serif;color:var(--night);line-height:1.55">${q.q}</p>
         ${q.ja ? `<p style="margin:0.4rem 0 0;font:700 1rem 'Noto Sans JP',sans-serif;color:var(--night)">${q.ja}</p>` : ''}
       </div>
       <div>${optHtml}</div>
+      <div id="jlpt-explain"></div>
     </div>`;
 }
 
@@ -28814,8 +28907,18 @@ function checkJlptAnswer(idx) {
   btns.forEach(b => { b.onclick = null; b.style.cursor = 'default'; b.onmouseover = null; b.onmouseout = null; });
   if (btns[idx])      { btns[idx].style.background = correct ? '#D4EDDA' : '#F8D7DA'; btns[idx].style.borderColor = correct ? '#28A745' : '#DC3545'; }
   if (!correct && btns[q.answer]) { btns[q.answer].style.background = '#D4EDDA'; btns[q.answer].style.borderColor = '#28A745'; }
+  const playBtn = document.getElementById('jlpt-play');
+  if (playBtn) playBtn.disabled = true;
 
   _jlptIdx++;
+  // Error con explicación → se muestra y se avanza con «Siguiente»; si no, avance automático.
+  if (!correct && q.explainEs) {
+    const box = document.getElementById('jlpt-explain');
+    if (box) box.innerHTML = `
+      <div style="background:#FFF3CD;border-radius:var(--radius-md);padding:0.8rem 1rem;margin:0.4rem 0 0.75rem;font:0.85rem/1.5 'DM Sans',sans-serif;color:var(--night)">💡 ${q.explainEs}</div>
+      <button class="btn btn-primary" onclick="renderJlptQuestion()" style="width:100%;padding:0.8rem">Siguiente →</button>`;
+    return;
+  }
   setTimeout(renderJlptQuestion, 850);
 }
 
@@ -28823,28 +28926,39 @@ function showJlptResults() {
   const total  = _jlptQuestions.length;
   const pct    = Math.round(_jlptScore / total * 100);
   const passed = pct >= 60;
-  // セクション別集計は _jlptQuestions[i].section を参照（出題順シャッフル後も正しい）
+  // Aciertos por sección según _jlptQuestions[i].section (válido tras barajar)
   const secScore = (sec) => _jlptAnswers.filter((a, i) => _jlptQuestions[i] && _jlptQuestions[i].section === sec && a.correct).length;
-  const s1 = secScore(1);
-  const s2 = secScore(2);
-  const s3 = secScore(3);
+  const secMax   = (sec) => _jlptQuestions.filter(q => q.section === sec).length;
 
-  // 初回合格 +100 / 2回目以降の合格 +20（無限加算防止・nm_jlpt で永続管理）
+  // XP: +100 la primera vez que se aprueba CADA examen, +20 en repeticiones.
+  // passedOnce conserva su sentido antiguo (= Examen 1 aprobado); exams guarda el detalle por examen.
   const jstate = nmSafeParse(localStorage.getItem('nm_jlpt'), { passedOnce: false, bestScore: 0 });
+  jstate.exams = jstate.exams || {};
+  const ex = jstate.exams[_jlptExamId] || { passed: false, best: 0 };
+  const alreadyPassed = !!ex.passed || (_jlptExamId === 'e1' && !!jstate.passedOnce);
   let xpGain = 0;
   if (passed) {
-    xpGain = jstate.passedOnce ? 20 : 100;
-    jstate.passedOnce = true;
+    xpGain = alreadyPassed ? 20 : 100;
+    ex.passed = true;
+    if (_jlptExamId === 'e1') jstate.passedOnce = true;
   }
+  ex.best = Math.max(ex.best || 0, pct);
+  jstate.exams[_jlptExamId] = ex;
   jstate.bestScore = Math.max(jstate.bestScore || 0, pct);
   localStorage.setItem('nm_jlpt', JSON.stringify(jstate));
-  scheduleCloudSave();  // WS9: bestScore/passedOnce をクラウドへ（不合格でも bestScore 更新を保存）
+  scheduleCloudSave();  // sincroniza nm_jlpt (mejor puntaje, exámenes aprobados)
   if (xpGain) grantXP(xpGain);
 
   const barHtml = (score, max, color) => {
     const p = Math.round(score / max * 100);
     return `<div style="background:#E8E8E8;border-radius:99px;height:8px;overflow:hidden"><div style="background:${color};height:100%;border-radius:99px;width:${p}%"></div></div>`;
   };
+  const rows = JLPT_SECTIONS.map(s => ({ s, score: secScore(s.id), max: secMax(s.id) })).filter(r => r.max > 0);
+  const weak = (id, msg, btn) => {
+    const r = rows.find(x => x.s.id === id);
+    return r && r.score / r.max < 0.6 ? `<div style="background:#FFF3CD;border-radius:var(--radius-md);padding:0.65rem 1rem;margin-bottom:0.6rem;text-align:left;font-size:0.82rem;font-family:'DM Sans',sans-serif">${msg} — ${btn}</div>` : '';
+  };
+  const btnStyle = "background:none;border:none;color:var(--primary);font-weight:700;cursor:pointer;font-size:0.82rem;padding:0";
 
   document.getElementById('jlpt-content').innerHTML = `
     <div style="max-width:480px;margin:0 auto;padding:1.5rem 1rem;text-align:center">
@@ -28855,25 +28969,25 @@ function showJlptResults() {
 
       <div style="background:#fff;border-radius:var(--radius-lg);padding:1.2rem 1.4rem;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:1rem;text-align:left">
         <p style="margin:0 0 0.75rem;font:700 0.85rem 'DM Sans',sans-serif;color:var(--night)">Resultados por sección</p>
-        ${[
-          { name:'📝 Vocabulario', score:s1, max:10, color: s1/10>=0.6?'var(--ocean)':'var(--primary)' },
-          { name:'📖 Gramática',   score:s2, max:20, color: s2/20>=0.6?'var(--ocean)':'var(--primary)' },
-          { name:'📄 Lectura',     score:s3, max:5,  color: s3/5 >=0.6?'var(--ocean)':'var(--primary)' }
-        ].map(s => `
+        ${rows.map(r => {
+          const color = r.score / r.max >= 0.6 ? 'var(--ocean)' : 'var(--primary)';
+          return `
           <div style="margin-bottom:0.8rem">
             <div style="display:flex;justify-content:space-between;margin-bottom:0.25rem">
-              <span style="font:600 0.82rem 'DM Sans',sans-serif;color:var(--night)">${s.name}</span>
-              <span style="font:700 0.82rem 'DM Sans',sans-serif;color:${s.color}">${s.score}/${s.max}</span>
+              <span style="font:600 0.82rem 'DM Sans',sans-serif;color:var(--night)">${r.s.icon} ${r.s.name}</span>
+              <span style="font:700 0.82rem 'DM Sans',sans-serif;color:${color}">${r.score}/${r.max}</span>
             </div>
-            ${barHtml(s.score, s.max, s.color)}
-          </div>`).join('')}
+            ${barHtml(r.score, r.max, color)}
+          </div>`; }).join('')}
       </div>
 
-      ${s1 < 6  ? `<div style="background:#FFF3CD;border-radius:var(--radius-md);padding:0.65rem 1rem;margin-bottom:0.6rem;text-align:left;font-size:0.82rem;font-family:'DM Sans',sans-serif">📝 Vocabulario débil — <button onclick="showSection('moji',null)" style="background:none;border:none;color:var(--primary);font-weight:700;cursor:pointer;font-size:0.82rem;padding:0">Repasar Moji →</button></div>` : ''}
-      ${s2 < 12 ? `<div style="background:#FFF3CD;border-radius:var(--radius-md);padding:0.65rem 1rem;margin-bottom:0.6rem;text-align:left;font-size:0.82rem;font-family:'DM Sans',sans-serif">📖 Gramática débil — <button onclick="showSection('grammar',document.getElementById('nav-grammar'))" style="background:none;border:none;color:var(--primary);font-weight:700;cursor:pointer;font-size:0.82rem;padding:0">Practicar Gramática →</button></div>` : ''}
-      ${s3 < 3  ? `<div style="background:#FFF3CD;border-radius:var(--radius-md);padding:0.65rem 1rem;margin-bottom:0.6rem;text-align:left;font-size:0.82rem;font-family:'DM Sans',sans-serif">📄 Lectura débil — <button onclick="showSection('roadmap',document.getElementById('nav-roadmap'))" style="background:none;border:none;color:var(--primary);font-weight:700;cursor:pointer;font-size:0.82rem;padding:0">Repasar Units →</button></div>` : ''}
+      ${weak(1, '📝 Vocabulario débil', `<button onclick="showSection('moji',null)" style="${btnStyle}">Repasar Moji →</button>`)}
+      ${weak(2, '📖 Gramática débil', `<button onclick="showSection('grammar',document.getElementById('nav-grammar'))" style="${btnStyle}">Practicar Gramática →</button>`)}
+      ${weak(3, '📄 Lectura débil', `<button onclick="showSection('roadmap',document.getElementById('nav-roadmap'))" style="${btnStyle}">Repasar Units →</button>`)}
+      ${weak(4, '🎧 Escucha débil', `<button onclick="showSection('roadmap',document.getElementById('nav-roadmap'))" style="${btnStyle}">Practicar Escuchar en las lecciones →</button>`)}
 
-      <button onclick="renderJlpt()" class="btn btn-secondary" style="width:100%;padding:0.8rem;margin-top:0.75rem">🔄 Volver al inicio</button>
+      <button onclick="startJlptTest('${_jlptExamId}')" class="btn btn-primary" style="width:100%;padding:0.8rem;margin-top:0.75rem">🔁 Repetir este examen</button>
+      <button onclick="renderJlpt()" class="btn btn-secondary" style="width:100%;padding:0.8rem;margin-top:0.5rem">📋 Elegir otro examen</button>
     </div>`;
 }
 
@@ -29104,5 +29218,7 @@ updateHUD();
 </script>
 <!-- 会話練習（Reto）台本データ -->
 <script src="data/conversation_scripts.js"></script>
+<script src="data/jlpt_exams.js"></script>
+<script src="data/jlpt_exams_b.js"></script>
 </body>
 </html>

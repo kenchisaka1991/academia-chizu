@@ -11,6 +11,7 @@
 - **回帰テスト**（データ追加・修正後は必ず実行）:
   - 静的: `node scripts/verify_app_static.js`（依存なし・FAIL 0 が正常）
   - E2E（現在 23項目・23/23 pass）: `python C:/Users/LENOVO/.claude/skills/webapp-testing/scripts/with_server.py --server "python -m http.server 8899" --port 8899 -- python scripts/verify_app_e2e.py`（Playwright headless・**22項目・2026-07-10時点 22/22 pass**（WS5でT17〜T19・WS8でT20〜T21・**WS9でT22（nm_*同期マージ）追加**）。静的側は **[A19]（nm_*マージ関数・15アサーション）** をWS9で追加。稼働中サーバ再利用なら `PYTHONIOENCODING=utf-8 NM_PORT=8080 python scripts/verify_app_e2e.py` が確実。※`with_server.py` は NM_PORT を渡さないと 8899 既定になるので、別ポート時は `NM_PORT=<port>` を必ず前置。8899/with_server が ERR_EMPTY_RESPONSE で不安定なら `python -m http.server <port> &` を自前で立てて `NM_PORT=<port> python scripts/verify_app_e2e.py` が確実）
+  - **WS10 Bloque1（2026-10-13）**: 静的 **[A21]**（JLPT 5試験・140問・重複/explainEs検証）＋ E2E **T25**（25項目・25/25 pass）
   - 手動スニペット集: `scripts/verify_app_eval.md`（DevToolsコンソール用）
 - 永続化: `localStorage`（`chizu_scores` / `learnedChars` / `nm_*` キー群）
 - 認証: **Firebase Authentication**（メール/パスワード・Google 有効済み）
@@ -61,7 +62,7 @@ const firebaseConfig = {
 #roadmap   — ホーム（ロードマップ）。初期表示 class="section active"
 #unit      — ユニット詳細（Can-doカード一覧）
 #scenario  — シナリオ学習フロー（Escena→Gramática→[Trazar]→Práctica→[Escuchar]→[Lectura]→Reto。Escuchar/Lectura はデータがある Can-do のみ・ステップ見出しには出さずボタン遷移）
-#jlpt      — JLPT N5模擬試験（**実装済み**: 35問=語彙10+文法20+読解5・60%合格・+100XP・弱点誘導。現状ゲート未接続で無料開放）＋ **Práctica de Lectura ドリル**（2026-07-09実装: `lecturaDrillBank` 12パッセージ17問からランダム5パッセージ・60%合格・+20XP）
+#jlpt      — JLPT N5模擬試験（**5試験・WS10 Bloque1**: e1=既存35問+聴解8=43問／e2〜e5=語彙8+文法12+読解5+聴解8=33問・60%合格・各試験 初回+100XP/以降+20・Premium限定 `jlpt.mock`・選択画面 `.jlpt-exam-card`。データ `data/jlpt_exams.js`+`jlpt_exams_b.js`=`window.JLPT_EXAMS`、e1の本体は `jlptQuestionBank`）＋ **Práctica de Lectura ドリル**（2026-07-09実装: `lecturaDrillBank` 12パッセージ17問からランダム5パッセージ・60%合格・+20XP）
 #profile   — ユーザープロフィール（XP・ストリーク・プラン）
 #moji      — 文字（ひらがな・カタカナ・漢字）
 #grammar   — 文法（26タブ）
@@ -91,7 +92,7 @@ const firebaseConfig = {
 | `nm_cando_progress` | object | Can-do別進捗（status/stars/practiceScore/…）。**WS5追加** `xpAwarded:{practice,escuchar,lectura,done}`＝初回満額XP判定フラグ。**WS9でFirestore同期**（`users/{uid}.nm.cando`） |
 | `nm_xp` | object | `{total, today, lastUpdate}`。**WS9でFirestore同期**（total=maxマージ・today/lastUpdateはローカル当日優先） |
 | `nm_streak` | object | `{current, longest, lastActiveDate}`。**WS9でFirestore同期**（longest=max・current/lastActiveDateは新しい日付の端末採用） |
-| `nm_jlpt` | object | **WS5追加**: 模試初回合格管理。**WS9でFirestore同期**（passedOnce=OR・bestScore=max） |
+| `nm_jlpt` | object | **WS5追加**: 模試初回合格管理。**WS9でFirestore同期**（passedOnce=OR・bestScore=max）。**WS10追加** `exams:{e1..e5:{passed,best}}`（試験別・passed=OR・best=max。`passedOnce`は従来どおり「e1合格」の意味のみ）。旧形式同士のマージでは exams を付けない |
 | `nm_daily` | object | 日次カウンター（`{date, practiceCount, listeningPractice, lecturaDrill, …}`）。**WS5追加** `lecturaDrill`＝読解ドリル無料枠。**同期スコープ外**（端末ローカル） |
 | `nm_plan` | object | プランフラグ（`{tier, expiresAt, source}`）。`source:'teacher_code'`＝教師コード解放（180日Premium）。WS8で同期（読込のみ・`mergePlanFromServer`） |
 | `nm_challenge_quota` | object | 会話チャレンジ無料枠（週次）。**同期スコープ外**（端末ローカル） |
@@ -141,9 +142,9 @@ const firebaseConfig = {
 | `playScenarioAudio(path, text, btn)` | MP3優先→Web Speech APIフォールバック |
 | `speakFallback(text, btn)` | Web Speech API TTS（ja-JP、0.85倍速） |
 | `renderProfile()` | `#profile-content` にXP・ストリーク・プラン表示 |
-| `renderJlpt()` | `#jlpt-content` に模試イントロ＋**Práctica de Lectura エントリ** → `startJlptTest()` で35問実施（`jlptQuestionBank`・`showJlptResults()`）／ `startLecturaDrill()` で読解ドリル |
-| `startJlptTest()` | **WS5変更**: section1/2 の出題順シャッフル＋各問の選択肢シャッフル＋answer追従（浅コピー・元データ非破壊）。section3（読解・同一パッセージ参照）は順序固定 |
-| `showJlptResults()` | **WS5変更**: セクション別集計を `_jlptQuestions[i].section` ベース化（シャッフル耐性）。XP＝**初回+100/以降+20**（`nm_jlpt`） |
+| `renderJlpt()` | `#jlpt-content` に模試イントロ＋**Práctica de Lectura エントリ** → 5試験カード（`jlptBuildExam(id)`）→ `startJlptTest(examId)`／ `startLecturaDrill()` で読解ドリル |
+| `startJlptTest(examId)` | **WS10**: examId(e1〜e5)・聴解=section4（`jlptPlayListening`で2回まで再生・`audio/jlpt_{id}_l{n}.opus`→TTS）・誤答時 explainEs＋Siguiente。**WS5**: section1/2/4 の出題順シャッフル＋各問の選択肢シャッフル＋answer追従（浅コピー・元データ非破壊）。section3（読解・同一パッセージ参照）は順序固定 |
+| `showJlptResults()` | **WS5変更**: セクション別集計を `_jlptQuestions[i].section` ベース化（シャッフル耐性）。XP＝**試験ごと 初回+100/以降+20**（`nm_jlpt.exams`）。**WS10**: 4セクション（語彙/文法/読解/聴解）の結果・弱点誘導 |
 
 ### Can-do データ構造
 ```javascript
@@ -406,6 +407,7 @@ playScenarioAudio("audio/u3_kanji_l1.opus", "なまえはマリアです。", bt
 - **方針確定（2026-10-13）: Spark（無料）のまま・Cloud Functions なし・Binance 自動課金なし。決済＝WhatsApp 手動（Bolivia=銀行QR Bs／海外=AirTM USD）**。Tarea 4（Binance Pay）は**実施しない**（Blaze 必須のため）。将来 Blaze にするなら `functions/` を作り直す（Binance webhook 等。`git show 2804df6` に admin 用 callable の実装履歴あり）。
 - **管理者・教師コード（Tarea 5/6・実装済み・未公開）— すべて `firestore.rules` が権限の唯一の根拠**: ①**管理者**＝`request.auth.token.email=='kenchisaka@academiachizu.com' && email_verified==true`（Google ログイン推奨）。`admin.html`（Firestore 直接・compat SDK・Functions なし）で: メール検索（`users` の `email` フィールド＝本人がログイン時に小文字で保存・`loadProgressFromCloud`/`saveProgressToCloud`・既存ユーザーは次回ログインで付与）→プラン有効化（Básico/Premium・1〜366日・**同プラン有効中は満了日から延長／別プラン・失効は今日から**・`plan={tier,source:'admin',expiresAt:Timestamp,grantedBy}`・transaction）・プラン削除・教師コード作成/一覧/有効無効（`teacherCodes/{CODE}`＝{code,tier,days,maxUses,uses,active,createdAt,createdBy}・コード省略で `CHIZU-XXXXXXXX`）・全操作を `adminLog` に記録。②**ユーザーの教師コード交換**＝`redeemTeacherCode(code,msgId)`（ログイン必須）が **1バッチ3書込**: `users/{uid}.plan={tier,source:'teacher_code',code,expiresAt:Timestamp}` ＋ `teacherCodes/{CODE}.uses +1`(FieldValue.increment) ＋ `teacherCodes/{CODE}/redemptions/{uid}`。ルールが「コード有効・usesに空き・tier一致・期限≤days+1日・同一ユーザー再交換不可・uses+1と ficha 作成が同一バッチ」を検証（`redeemOk()`）。ソース内のコード/SHA-256 ハッシュは**撤去済み**（旧 `CHIZU-KEN2026` は無効・旧ローカル付与は次回ログインで消える）。既存プラン（同等以上・有効中）は上書きしない（'haveplan'）。③`withNetwork(fn)`＝Firestore ネットワークの参照カウント（enable/disable の競合防止・save/load/verify/redeem 共通）。④`planExpiryMs` は Firestore Timestamp（`toMillis`/`seconds`）対応。⑤`mergePlanFromServer` から教師コードのローカル例外を**削除**（サーバが唯一の正）。⑥`index.html`/`admin.html` は `localhost?emulator` のときのみ Auth(9099)/Firestore(8085) エミュレータへ接続（本番無影響）。**テスト**: `tests/rules`（19/19: 一般ユーザーplan書込不可・admin 判定（未verified/他メール拒否）・コード作成バリデーション・交換の正常/二重/枯渇/無効/tier・days偽装/他人名義/uses水増し）／`scripts/verify_admin_ui.py`（admin.html UI 16/16・375px）／`scripts/verify_app_redeem.py`（実アプリ+実ルール+エミュレータ 16/16）。実行: Java21 を PATH 先頭に置き `firebase emulators:exec --only firestore "npm --prefix tests/rules test"` ／ `--only auth,firestore "python scripts/verify_admin_ui.py"`（静的サーバ :8080 必要）。**⚠️ 本番反映は未実施**: **公開順序は必ず ①`firestore.rules` を Firebase Console で先に公開 → ②dev→main で Web を公開**（逆順だと新Webの保存に `email` が含まれ、旧ルールが拒否して進捗保存が全滅する。旧Webは新ルール下でも無害）。③Google で kenchisaka@academiachizu.com にログインして admin.html を開く。**admin はメール固定のため、管理者メールを変えたら rules と admin.html の ADMIN_EMAIL を両方修正**
 - **Tarea 7 完了（2026-10-13・dev）— 利用規約/プライバシー全面書換**: `legalContent` は getter（`terms`/`privacy`）で**開く時に生成**＝プラン一覧・価格は `PLANS`（`legalPlansHtml()`/`planBenefits`）から自動。内容: 3プラン・月額前払い30日・**自動更新なし**・解約＝更新しないだけ（Inicialに戻る・進捗は保持）・**返金方針＝有効化後は返金なし（二重請求/当方ミスのみ返金）**・決済手段（Bolivia=QR Bs／海外=カード[Takenosリンク]・AirTM・Binance USDT・全て WhatsApp 手動）・教師コード・保存データ（email/名前/進捗/プラン/コード・**カード番号は保存しない**）・Firebase(Google)・Google Fonts・アカウント削除依頼（メール/WhatsApp・15日以内目安）・未成年・連絡先 kenchisaka@academiachizu.com / +591 76083176・日付 `LEGAL_DATE`。⚠️ **弁護士の確認は未実施（テンプレ・要レビュー）**。**バグ修正**: 法務モーダルが `#app-container`（ログイン前は非表示）内にありログイン画面（z-index 9999）の下に隠れ、**ログイン前に規約リンクを押しても見えなかった** → app-container の外へ移動し `#legal-modal{z-index:10001}`。E2E **T24**（24項目）追加。アカウント削除は現状**手動**（rules が delete 禁止＝オーナーが Firebase Console で削除）
+- **本番反映済み（2026-10-13）**: ①`firestore.rules` を Console で公開 → ②dev→main をPRマージ（Pages=main）。公開サイトの自動確認は `python scripts/verify_live.py [URL]`（ログイン不要・12/12: 規約・3プランUSD・375px・admin.html・Reto読込・コンソールエラー0）。**ログインが必要な最終確認はユーザー実施**: admin.html に Google ログイン→テストユーザー検索→プラン有効化／教師コード作成→別アカウントで交換／コンソールから plan 書込が permission-denied。既存ユーザーは次回ログインで `email` が users に付与され admin 検索可能になる
 - ビルド・テスト・lint なし。動作確認は `python -m http.server 8080`
 - 実装完了後は必ず未実装リストを `✅完了` に更新すること
 
