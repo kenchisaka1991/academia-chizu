@@ -14500,7 +14500,9 @@ function planExpiryMs(p) {
  * Lee nm_plan (caché local del plan de Firestore + canje de código de profesor).
  * Un plan de pago vencido o desconocido cuenta como 'inicial'.
  */
+let _planServerVerified = false;  // true solo tras leer Firestore en ESTA carga de página (no se puede fijar editando localStorage)
 function planTier() {
+  if (!_planServerVerified) return 'inicial';  // nm_plan es solo caché: sin confirmación del servidor no se concede nada
   const p = nmGetPlan();
   if (!p || !planExists(p.tier) || PLANS[p.tier].level < 1) return 'inicial';
   const exp = planExpiryMs(p);
@@ -14568,6 +14570,7 @@ function planBenefits(tier) {
  * @param {Object|undefined} serverPlan - Firestore の users/{uid}.plan
  */
 function mergePlanFromServer(serverPlan) {
+  _planServerVerified = true;
   const activeMs = (p) => {
     if (!p || !planExists(p.tier) || PLANS[p.tier].level < 1) return 0;
     const e = planExpiryMs(p);
@@ -14781,6 +14784,7 @@ async function redeemTeacherCode(rawCode, msgElId) {
     localStorage.setItem('nm_plan', JSON.stringify({
       tier: result.tier, source: 'teacher_code', expiresAt: result.expMs, lastVerifiedAt: new Date().toISOString()
     }));
+    _planServerVerified = true;
     setMsg(`✅ ¡Código válido! Plan ${PLANS[result.tier].name} activado por ${result.days} días.`, true);
     updateHUD();
     return true;
