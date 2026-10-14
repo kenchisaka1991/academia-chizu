@@ -1201,6 +1201,8 @@
         .btn-speak::after{content:"";position:absolute;top:50%;left:50%;width:44px;height:44px;transform:translate(-50%,-50%)}
         .btn-speak:hover{background:rgba(230,57,70,0.18);transform:scale(1.12)}
         .btn-speak.speaking{background:rgba(230,57,70,0.25);animation:pulse-speak 0.6s ease infinite alternate}
+        .audio-unavailable{position:fixed;z-index:1000;left:50%;bottom:72px;transform:translateX(-50%);width:min(32rem,calc(100vw - 2rem));box-sizing:border-box;background:var(--night);color:#fff;border-radius:var(--radius-md);padding:0.75rem 1rem;font-size:0.86rem;line-height:1.4;box-shadow:0 8px 24px rgba(20,33,61,0.24)}
+        .audio-unavailable[hidden]{display:none}
         @keyframes pulse-speak{from{transform:scale(1)}to{transform:scale(1.18)}}
         .vocab-q-word{font-family:'Noto Sans JP';font-size:2rem;font-weight:700;color:var(--primary-ink);text-align:center;margin-bottom:0.5rem}
         .btn-audio-play{display:inline-flex;align-items:center;gap:0.5rem;padding:0.75rem 2rem;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-xl);font-size:1.1rem;font-weight:700;cursor:pointer;transition:all 0.18s;font-family:'Outfit',sans-serif}
@@ -1561,6 +1563,7 @@
     </style>
 </head>
 <body>
+    <div id="audio-unavailable" class="audio-unavailable" role="status" aria-live="polite" hidden></div>
     <!-- ===== LOGIN SCREEN ===== -->
     <div class="login-screen" id="login-screen">
         <div class="login-box">
@@ -16705,38 +16708,62 @@ function completeCandoDone(opts) {
 
 // ------------------------------------------------------------
 // シナリオ音声再生（MP3優先 → Web Speech API フォールバック）
-// VOICEVOX MP3 が揃ったら audio/*.mp3 を配置するだけで自動的に切り替わる
+// 録音済みの Opus を audio/ に配置すると自動的に切り替わる
 // ------------------------------------------------------------
 
 /**
  * シナリオ行の音声を再生する
- * @param {string} audioPath - "audio/u3_c1_l1_A.mp3" 形式
- * @param {string} jaPlain   - MP3 がない場合の TTS テキスト
+ * @param {string} audioPath - "audio/u3_c1_l1.opus" 形式
+ * @param {string} jaPlain   - 音声ファイルがない場合の TTS テキスト
  * @param {HTMLElement} [btnEl] - 再生中スタイルを付けるボタン要素
  */
 function playScenarioAudio(audioPath, jaPlain, btnEl) {
   if (btnEl) btnEl.classList.add('speaking');
   const done = () => { if (btnEl) btnEl.classList.remove('speaking'); };
+  let didFallback = false;
+  const fallback = () => {
+    if (didFallback) return;
+    didFallback = true;
+    showAudioUnavailable();
+    speakFallback(jaPlain, btnEl);
+  };
 
   const audio = new Audio(audioPath);
   audio.oncanplaythrough = () => {
-    audio.play();
+    audio.play().catch(fallback);
     audio.onended = done;
-    audio.onerror = done;
+    audio.onerror = fallback;
   };
   audio.onerror = () => {
-    // 音声ファイル（audio/{id}_l{n}.opus）が無い／非対応 → Web Speech API にフォールバック
-    speakFallback(jaPlain, btnEl);
+    // 音声ファイルがない／非対応なら、利用者に知らせてから TTS を試す。
+    fallback();
   };
   // load() を呼ぶことで onerror が即時トリガーされる
   audio.load();
 }
 
+/** 録音済み音声が無いことを、動きに頼らず明示する。 */
+function showAudioUnavailable() {
+  const note = document.getElementById('audio-unavailable');
+  if (!note) return;
+  note.textContent = 'El audio de este ejercicio todavía no está disponible. Intentamos usar la voz japonesa de tu dispositivo.';
+  note.hidden = false;
+  clearTimeout(window._audioUnavailableTimer);
+  window._audioUnavailableTimer = setTimeout(() => { note.hidden = true; }, 6500);
+}
+
 /** Web Speech API による日本語 TTS（フォールバック用） */
 function speakFallback(text, btnEl) {
   if (!window.speechSynthesis) {
+    const note = document.getElementById('audio-unavailable');
+    if (note) note.textContent = 'El audio todavía no está disponible y este dispositivo no tiene una voz japonesa lista para usar.';
     if (btnEl) btnEl.classList.remove('speaking');
     return;
+  }
+  const hasJapaneseVoice = speechSynthesis.getVoices().some(voice => /^ja(?:-|_)/i.test(voice.lang));
+  if (!hasJapaneseVoice) {
+    const note = document.getElementById('audio-unavailable');
+    if (note) note.textContent = 'El audio todavía no está disponible. No encontramos una voz japonesa instalada en este dispositivo.';
   }
   speechSynthesis.cancel();
   document.querySelectorAll('.btn-speak.speaking').forEach(b => b.classList.remove('speaking'));
@@ -17461,7 +17488,6 @@ window.canDoData.push({
         jaPlain: "はじめまして。田中です。おなまえは？",
         romaji: "Hajimemashite. Tanaka desu. Onamae wa?",
         es: "Mucho gusto. Soy Tanaka. ¿Cómo te llamas?",
-        audio: "audio/u3_c1_l1_A.mp3",
         highlight: ["desu"]
       },
       {
@@ -17470,7 +17496,6 @@ window.canDoData.push({
         jaPlain: "はじめまして。私はカルロスです。",
         romaji: "Hajimemashite. Watashi wa Karurosu desu.",
         es: "Mucho gusto. Yo soy Carlos.",
-        audio: "audio/u3_c1_l2_B.mp3",
         highlight: ["desu"]
       },
       {
@@ -17479,7 +17504,6 @@ window.canDoData.push({
         jaPlain: "カルロスさんは何人ですか？",
         romaji: "Karurosu-san wa nani-jin desu ka?",
         es: "Carlos, ¿de qué nacionalidad eres?",
-        audio: "audio/u3_c1_l3_A.mp3",
         highlight: ["gimon"]
       },
       {
@@ -17488,7 +17512,6 @@ window.canDoData.push({
         jaPlain: "ボリビア人です。田中さんは日本人ですか？",
         romaji: "Boribia-jin desu. Tanaka-san wa Nihon-jin desu ka?",
         es: "Soy boliviano. Tanaka, ¿tú eres japonés?",
-        audio: "audio/u3_c1_l4_B.mp3",
         highlight: ["desu","kuni"]
       },
       {
@@ -17497,7 +17520,6 @@ window.canDoData.push({
         jaPlain: "はい、日本人です。どうぞよろしく。",
         romaji: "Hai, Nihon-jin desu. Douzo yoroshiku.",
         es: "Sí, soy japonés. Encantado.",
-        audio: "audio/u3_c1_l5_A.mp3",
         highlight: ["desu"]
       }
     ]
@@ -17663,7 +17685,6 @@ window.canDoData.push({
         jaPlain: "カルロスさんはがくせいですか。",
         romaji: "Karurosu-san wa gakusei desu ka.",
         es: "Sr. Carlos, ¿es usted estudiante?",
-        audio: "audio/u3_c2_l1_A.mp3",
         highlight: ["desu","gakusei"]
       },
       {
@@ -17672,7 +17693,6 @@ window.canDoData.push({
         jaPlain: "いいえ、がくせいじゃありません。かいしゃいんです。",
         romaji: "Iie, gakusei ja arimasen. Kaishain desu.",
         es: "No, no soy estudiante. Soy empleado de empresa.",
-        audio: "audio/u3_c2_l2_B.mp3",
         highlight: ["janai","kaishain"]
       },
       {
@@ -17681,7 +17701,6 @@ window.canDoData.push({
         jaPlain: "そうですか。エンジニアですか。",
         romaji: "Sou desu ka. Enjinia desu ka.",
         es: "Ah, ¿sí? ¿Es ingeniero?",
-        audio: "audio/u3_c2_l3_A.mp3",
         highlight: ["desuka"]
       },
       {
@@ -17690,7 +17709,6 @@ window.canDoData.push({
         jaPlain: "はい、エンジニアです。どうぞよろしくおねがいします。",
         romaji: "Hai, enjinia desu. Douzo yoroshiku onegaishimasu.",
         es: "Sí, soy ingeniero. Mucho gusto, por favor.",
-        audio: "audio/u3_c2_l4_B.mp3",
         highlight: ["desu"]
       }
     ]
@@ -17876,7 +17894,6 @@ window.canDoData.push({
         jaPlain: "マリアさんはなんさいですか。",
         romaji: "Maria-san wa nan-sai desu ka.",
         es: "María, ¿cuántos años tienes?",
-        audio: "audio/u3_c3_l1_A.mp3",
         highlight: ["nansai","desuka"]
       },
       {
@@ -17885,7 +17902,6 @@ window.canDoData.push({
         jaPlain: "わたしははたちです。ケンジさんは？",
         romaji: "Watashi wa hatachi desu. Kenji-san wa?",
         es: "Yo tengo 20 años. ¿Y tú, Kenji?",
-        audio: "audio/u3_c3_l2_B.mp3",
         highlight: ["hatachi","desu"]
       },
       {
@@ -17894,7 +17910,6 @@ window.canDoData.push({
         jaPlain: "わたしはにじゅうごさいです。",
         romaji: "Watashi wa nijuugo-sai desu.",
         es: "Yo tengo 25 años.",
-        audio: "audio/u3_c3_l3_A.mp3",
         highlight: ["sai","desu"]
       },
       {
@@ -17903,7 +17918,6 @@ window.canDoData.push({
         jaPlain: "そうですか。ちかいですね。",
         romaji: "Sou desu ka. Chikai desu ne.",
         es: "Ah, ¿sí? Estamos cerca en edad, ¿no?",
-        audio: "audio/u3_c3_l4_B.mp3",
         highlight: ["desune"]
       }
     ]
@@ -18157,7 +18171,6 @@ window.canDoData.push({
         jaPlain: "アナさんはまいにちなにをしますか。",
         romaji: "Ana-san wa mainichi nani o shimasu ka.",
         es: "Ana, ¿qué haces todos los días?",
-        audio: "audio/u3_c4_l1_A.mp3",
         highlight: ["mainichi","shimasu"]
       },
       {
@@ -18166,7 +18179,6 @@ window.canDoData.push({
         jaPlain: "あさパンをたべます。コーヒーをのみます。",
         romaji: "Asa pan o tabemasu. Koohii o nomimasu.",
         es: "Por la mañana como pan. Tomo café.",
-        audio: "audio/u3_c4_l2_B.mp3",
         highlight: ["tabemasu","nomimasu"]
       },
       {
@@ -18175,7 +18187,6 @@ window.canDoData.push({
         jaPlain: "ばんごはんはうちでたべますか。",
         romaji: "Bangohan wa uchi de tabemasu ka.",
         es: "¿Cenas en casa?",
-        audio: "audio/u3_c4_l3_A.mp3",
         highlight: ["tabemasuka"]
       },
       {
@@ -18184,7 +18195,6 @@ window.canDoData.push({
         jaPlain: "いいえ、うちではたべません。レストランでたべます。",
         romaji: "Iie, uchi de wa tabemasen. Resutoran de tabemasu.",
         es: "No, no como en casa. Como en un restaurante.",
-        audio: "audio/u3_c4_l4_B.mp3",
         highlight: ["tabemasen"]
       },
       {
@@ -18193,7 +18203,6 @@ window.canDoData.push({
         jaPlain: "そうですか。まいにちべんきょうしますか。",
         romaji: "Sou desu ka. Mainichi benkyou shimasu ka.",
         es: "Ah, ¿sí? ¿Estudias todos los días?",
-        audio: "audio/u3_c4_l5_A.mp3",
         highlight: ["benkyoushimasu"]
       }
     ]
@@ -18375,7 +18384,6 @@ window.canDoData.push({
         jaPlain: "では、カルロスさん、じこしょうかいをおねがいします。",
         romaji: "Dewa, Karurosu-san, jikoshoukai o onegaishimasu.",
         es: "Bien, Sr. Carlos, por favor preséntese.",
-        audio: "audio/u3_c5_l1_A.mp3",
         highlight: ["onegaishimasu"]
       },
       {
@@ -18384,7 +18392,6 @@ window.canDoData.push({
         jaPlain: "はじめまして。カルロス・ロペスです。ボリビアじんです。ラパスからきました。",
         romaji: "Hajimemashite. Karurosu Ropesu desu. Boribia-jin desu. Rapasu kara kimashita.",
         es: "Mucho gusto. Soy Carlos López. Soy boliviano. Vengo de La Paz.",
-        audio: "audio/u3_c5_l2_B.mp3",
         highlight: ["desu","jin"]
       },
       {
@@ -18393,7 +18400,6 @@ window.canDoData.push({
         jaPlain: "にじゅうごさいです。かいしゃいんです。エンジニアです。",
         romaji: "Nijuugo-sai desu. Kaishain desu. Enjinia desu.",
         es: "Tengo 25 años. Soy empleado de empresa. Soy ingeniero.",
-        audio: "audio/u3_c5_l3_B.mp3",
         highlight: ["sai","desu"]
       },
       {
@@ -18402,7 +18408,6 @@ window.canDoData.push({
         jaPlain: "まいにちにほんごをべんきょうします。しゅみはサッカーです。",
         romaji: "Mainichi nihongo o benkyou shimasu. Shumi wa sakkaa desu.",
         es: "Todos los días estudio japonés. Mi pasatiempo es el fútbol.",
-        audio: "audio/u3_c5_l4_B.mp3",
         highlight: ["masu","desu"]
       },
       {
@@ -18411,7 +18416,6 @@ window.canDoData.push({
         jaPlain: "どうぞよろしくおねがいします。",
         romaji: "Douzo yoroshiku onegaishimasu.",
         es: "Mucho gusto, encantado de conocerlos.",
-        audio: "audio/u3_c5_l5_B.mp3",
         highlight: ["yoroshiku"]
       }
     ]
@@ -18708,7 +18712,6 @@ window.canDoData.push({
         jaPlain: "いらっしゃいませ。",
         romaji: "Irasshaimase.",
         es: "¡Bienvenidos!",
-        audio: "audio/u4_c1_l1_A.mp3",
         highlight: []
       },
       {
@@ -18717,7 +18720,6 @@ window.canDoData.push({
         jaPlain: "コーヒーをふたつください。",
         romaji: "Kōhī o futatsu kudasai.",
         es: "Dos cafés, por favor.",
-        audio: "audio/u4_c1_l2_B.mp3",
         highlight: ["gimon"]
       },
       {
@@ -18726,7 +18728,6 @@ window.canDoData.push({
         jaPlain: "ふたつですね。ケーキもいかがですか。",
         romaji: "Futatsu desu ne. Kēki mo ikaga desu ka.",
         es: "Dos, ¿verdad? ¿Quieren pastel también?",
-        audio: "audio/u4_c1_l3_A.mp3",
         highlight: []
       },
       {
@@ -18735,7 +18736,6 @@ window.canDoData.push({
         jaPlain: "はい、ケーキをみっつおねがいします。",
         romaji: "Hai, kēki o mittsu onegaishimasu.",
         es: "Sí, tres pasteles, por favor.",
-        audio: "audio/u4_c1_l4_B.mp3",
         highlight: ["gimon"]
       },
       {
@@ -18744,7 +18744,6 @@ window.canDoData.push({
         jaPlain: "コーヒーふたつとケーキみっつですね。",
         romaji: "Kōhī futatsu to kēki mittsu desu ne.",
         es: "Dos cafés y tres pasteles, ¿verdad?",
-        audio: "audio/u4_c1_l5_A.mp3",
         highlight: ["gimon"]
       }
     ]
@@ -18886,7 +18885,6 @@ window.canDoData.push({
         jaPlain: "いらっしゃいませ。",
         romaji: "Irasshaimase.",
         es: "¡Bienvenido!",
-        audio: "audio/u4_c2_l1_A.mp3",
         highlight: []
       },
       {
@@ -18895,7 +18893,6 @@ window.canDoData.push({
         jaPlain: "すみません、おちゃはいくらですか。",
         romaji: "Sumimasen, ocha wa ikura desu ka.",
         es: "Disculpe, ¿cuánto cuesta el té?",
-        audio: "audio/u4_c2_l2_B.mp3",
         highlight: ["gimon"]
       },
       {
@@ -18904,7 +18901,6 @@ window.canDoData.push({
         jaPlain: "ひゃくにじゅうえんです。",
         romaji: "Hyaku nijū en desu.",
         es: "Cuesta 120 yenes.",
-        audio: "audio/u4_c2_l3_A.mp3",
         highlight: ["gimon"]
       },
       {
@@ -18913,7 +18909,6 @@ window.canDoData.push({
         jaPlain: "おにぎりはいくらですか。",
         romaji: "Onigiri wa ikura desu ka.",
         es: "¿Cuánto cuesta el onigiri?",
-        audio: "audio/u4_c2_l4_B.mp3",
         highlight: ["gimon"]
       },
       {
@@ -18922,7 +18917,6 @@ window.canDoData.push({
         jaPlain: "ひゃくごじゅうえんです。",
         romaji: "Hyaku gojū en desu.",
         es: "Cuesta 150 yenes.",
-        audio: "audio/u4_c2_l5_A.mp3",
         highlight: ["gimon"]
       }
     ]
@@ -19064,7 +19058,6 @@ window.canDoData.push({
         jaPlain: "ケンジさん、いまなんじですか。",
         romaji: "Kenji-san, ima nanji desu ka.",
         es: "Kenji, ¿qué hora es ahora?",
-        audio: "audio/u4_c3_l1_B.mp3",
         highlight: ["gimon"]
       },
       {
@@ -19073,7 +19066,6 @@ window.canDoData.push({
         jaPlain: "いまくじはんです。",
         romaji: "Ima kuji han desu.",
         es: "Ahora son las 9:30.",
-        audio: "audio/u4_c3_l2_A.mp3",
         highlight: ["gimon"]
       },
       {
@@ -19082,7 +19074,6 @@ window.canDoData.push({
         jaPlain: "じゅぎょうはなんじからですか。",
         romaji: "Jugyō wa nanji kara desu ka.",
         es: "¿A qué hora empieza la clase?",
-        audio: "audio/u4_c3_l3_B.mp3",
         highlight: ["gimon"]
       },
       {
@@ -19091,7 +19082,6 @@ window.canDoData.push({
         jaPlain: "じゅうじからです。",
         romaji: "Jūji kara desu.",
         es: "Desde las 10.",
-        audio: "audio/u4_c3_l4_A.mp3",
         highlight: ["gimon"]
       },
       {
@@ -19100,7 +19090,6 @@ window.canDoData.push({
         jaPlain: "じゅうじですね。ありがとうございます。",
         romaji: "Jūji desu ne. Arigatō gozaimasu.",
         es: "A las 10, ¿verdad? Gracias.",
-        audio: "audio/u4_c3_l5_B.mp3",
         highlight: []
       }
     ]
@@ -19311,7 +19300,6 @@ window.canDoData.push({
         jaPlain: "すみません、これはなんですか。",
         romaji: "Sumimasen, kore wa nan desu ka.",
         es: "Disculpe, ¿qué es esto?",
-        audio: "audio/u4_c4_l1_B.mp3",
         highlight: ["shiji"]
       },
       {
@@ -19320,7 +19308,6 @@ window.canDoData.push({
         jaPlain: "それはせんすです。にほんのせんすです。",
         romaji: "Sore wa sensu desu. Nihon no sensu desu.",
         es: "Eso es un abanico. Es un abanico japonés.",
-        audio: "audio/u4_c4_l2_A.mp3",
         highlight: ["shiji"]
       },
       {
@@ -19329,7 +19316,6 @@ window.canDoData.push({
         jaPlain: "いいですね。あれはなんですか。",
         romaji: "Ii desu ne. Are wa nan desu ka.",
         es: "Qué bonito. ¿Y aquello qué es?",
-        audio: "audio/u4_c4_l3_B.mp3",
         highlight: ["shiji"]
       },
       {
@@ -19338,7 +19324,6 @@ window.canDoData.push({
         jaPlain: "あれはふうりんです。",
         romaji: "Are wa fūrin desu.",
         es: "Aquello es una campanilla de viento.",
-        audio: "audio/u4_c4_l4_A.mp3",
         highlight: ["shiji"]
       },
       {
@@ -19347,7 +19332,6 @@ window.canDoData.push({
         jaPlain: "じゃ、このせんすをください。",
         romaji: "Ja, kono sensu o kudasai.",
         es: "Entonces, este abanico, por favor.",
-        audio: "audio/u4_c4_l5_B.mp3",
         highlight: ["shiji"]
       }
     ]
@@ -19527,7 +19511,6 @@ window.canDoData.push({
         jaPlain: "マリアさん、パーティーにいきますか。",
         romaji: "Maria-san, pātī ni ikimasu ka.",
         es: "María, ¿vas a la fiesta?",
-        audio: "audio/u4_c5_l1_A.mp3",
         highlight: []
       },
       {
@@ -19536,7 +19519,6 @@ window.canDoData.push({
         jaPlain: "はい。いつですか。",
         romaji: "Hai. Itsu desu ka.",
         es: "Sí. ¿Cuándo es?",
-        audio: "audio/u4_c5_l2_B.mp3",
         highlight: ["gimon"]
       },
       {
@@ -19545,7 +19527,6 @@ window.canDoData.push({
         jaPlain: "どようびです。ごごさんじからです。",
         romaji: "Doyōbi desu. Gogo sanji kara desu.",
         es: "El sábado. Desde las 3 PM.",
-        audio: "audio/u4_c5_l3_A.mp3",
         highlight: ["gimon"]
       },
       {
@@ -19554,7 +19535,6 @@ window.canDoData.push({
         jaPlain: "どこですか。",
         romaji: "Doko desu ka.",
         es: "¿Dónde es?",
-        audio: "audio/u4_c5_l4_B.mp3",
         highlight: ["gimon"]
       },
       {
@@ -19563,7 +19543,6 @@ window.canDoData.push({
         jaPlain: "がっこうです。ケンジさんとたなかせんせいもきます。",
         romaji: "Gakkō desu. Kenji-san to Tanaka-sensei mo kimasu.",
         es: "En la escuela. Kenji y la profesora Tanaka también vienen.",
-        audio: "audio/u4_c5_l5_A.mp3",
         highlight: []
       }
     ]
@@ -19781,7 +19760,6 @@ window.canDoData.push({
         jaPlain: "すみません、ぎんこうはどこですか。",
         romaji: "Sumimasen, ginkō wa doko desu ka.",
         es: "Disculpe, ¿dónde está el banco?",
-        audio: "audio/u5_c1_l1_S.mp3",
         highlight: ["ぎんこう","どこ"]
       },
       {
@@ -19790,7 +19768,6 @@ window.canDoData.push({
         jaPlain: "えきのまえにあります。",
         romaji: "Eki no mae ni arimasu.",
         es: "Está delante de la estación.",
-        audio: "audio/u5_c1_l2_E.mp3",
         highlight: ["まえ","に","あります"]
       },
       {
@@ -19799,7 +19776,6 @@ window.canDoData.push({
         jaPlain: "ありがとうございます。",
         romaji: "Arigatō gozaimasu.",
         es: "Muchas gracias.",
-        audio: "audio/u5_c1_l3_S.mp3",
         highlight: []
       },
       {
@@ -19808,7 +19784,6 @@ window.canDoData.push({
         jaPlain: "どうぞ。",
         romaji: "Dōzo.",
         es: "De nada. / Adelante.",
-        audio: "audio/u5_c1_l4_E.mp3",
         highlight: []
       }
     ]
@@ -20014,7 +19989,6 @@ window.canDoData.push({
         jaPlain: "こうえんにこどもがいます。",
         romaji: "Kōen ni kodomo ga imasu.",
         es: "Hay niños en el parque.",
-        audio: "audio/u5_c2_l1_C.mp3",
         highlight: ["います","こども"]
       },
       {
@@ -20023,7 +19997,6 @@ window.canDoData.push({
         jaPlain: "ねこもいますね。",
         romaji: "Neko mo imasu ne.",
         es: "También hay un gato, ¿verdad?",
-        audio: "audio/u5_c2_l2_M.mp3",
         highlight: ["います","ねこ"]
       },
       {
@@ -20032,7 +20005,6 @@ window.canDoData.push({
         jaPlain: "あ、あそこにベンチがあります。",
         romaji: "A, asoko ni benchi ga arimasu.",
         es: "Ah, allí hay un banco (de sentarse).",
-        audio: "audio/u5_c2_l3_C.mp3",
         highlight: ["あります","ベンチ"]
       },
       {
@@ -20041,7 +20013,6 @@ window.canDoData.push({
         jaPlain: "きれいなこうえんですね。",
         romaji: "Kirei na kōen desu ne.",
         es: "Es un parque bonito, ¿verdad?",
-        audio: "audio/u5_c2_l4_M.mp3",
         highlight: []
       }
     ]
@@ -20257,7 +20228,6 @@ window.canDoData.push({
         jaPlain: "せんせい、かばんはどこですか。",
         romaji: "Sensei, kaban wa doko desu ka.",
         es: "Profesor, ¿dónde está mi mochila?",
-        audio: "audio/u5_c3_l1_A.mp3",
         highlight: ["どこ"]
       },
       {
@@ -20266,7 +20236,6 @@ window.canDoData.push({
         jaPlain: "つくえのしたにあります。",
         romaji: "Tsukue no shita ni arimasu.",
         es: "Está debajo del escritorio.",
-        audio: "audio/u5_c3_l2_T.mp3",
         highlight: ["した","にあります"]
       },
       {
@@ -20275,7 +20244,6 @@ window.canDoData.push({
         jaPlain: "ノートは？",
         romaji: "Nōto wa?",
         es: "¿Y el cuaderno?",
-        audio: "audio/u5_c3_l3_A.mp3",
         highlight: []
       },
       {
@@ -20284,7 +20252,6 @@ window.canDoData.push({
         jaPlain: "いすのうえにあります。",
         romaji: "Isu no ue ni arimasu.",
         es: "Está encima de la silla.",
-        audio: "audio/u5_c3_l4_T.mp3",
         highlight: ["うえ","にあります"]
       },
       {
@@ -20293,7 +20260,6 @@ window.canDoData.push({
         jaPlain: "ありがとうございます！",
         romaji: "Arigatō gozaimasu!",
         es: "¡Muchas gracias!",
-        audio: "audio/u5_c3_l5_A.mp3",
         highlight: []
       }
     ]
@@ -20575,7 +20541,6 @@ window.canDoData.push({
         jaPlain: "どこでひるごはんをたべますか。",
         romaji: "Doko de hiru-gohan o tabemasu ka.",
         es: "¿Dónde almuerzas?",
-        audio: "audio/u5_c4_l1_T.mp3",
         highlight: ["で","どこ"]
       },
       {
@@ -20584,7 +20549,6 @@ window.canDoData.push({
         jaPlain: "コンビニでたべます。",
         romaji: "Konbini de tabemasu.",
         es: "Como en el konbini.",
-        audio: "audio/u5_c4_l2_F.mp3",
         highlight: ["で"]
       },
       {
@@ -20593,7 +20557,6 @@ window.canDoData.push({
         jaPlain: "そのあと、どこへいきますか。",
         romaji: "Sono ato, doko e ikimasu ka.",
         es: "Después, ¿a dónde vas?",
-        audio: "audio/u5_c4_l3_T.mp3",
         highlight: ["へ","どこ"]
       },
       {
@@ -20602,7 +20565,6 @@ window.canDoData.push({
         jaPlain: "がっこうへいきます。",
         romaji: "Gakkō e ikimasu.",
         es: "Voy a la escuela.",
-        audio: "audio/u5_c4_l4_F.mp3",
         highlight: ["へ","いきます"]
       },
       {
@@ -20611,7 +20573,6 @@ window.canDoData.push({
         jaPlain: "そうですか。",
         romaji: "Sō desu ka.",
         es: "Ah, ya veo.",
-        audio: "audio/u5_c4_l5_T.mp3",
         highlight: []
       }
     ]
@@ -20824,7 +20785,6 @@ window.canDoData.push({
         jaPlain: "マリアさんはまいあさなにをしますか。",
         romaji: "Maria-san wa maiasa nani o shimasu ka.",
         es: "María, ¿qué haces cada mañana?",
-        audio: "audio/u5_c6_l1_T.mp3",
         highlight: ["毎朝","何"]
       },
       {
@@ -20833,7 +20793,6 @@ window.canDoData.push({
         jaPlain: "わたしはまいあさ8じにバスでがっこうにいきます。",
         romaji: "Watashi wa maiasa hachi-ji ni basu de gakkō ni ikimasu.",
         es: "Cada mañana voy a la escuela en autobús a las 8.",
-        audio: "audio/u5_c6_l2_M.mp3",
         highlight: ["8時に","バスで","学校に"]
       },
       {
@@ -20842,7 +20801,6 @@ window.canDoData.push({
         jaPlain: "がっこうでなにをべんきょうしますか。",
         romaji: "Gakkō de nani o benkyō shimasu ka.",
         es: "¿Qué estudias en la escuela?",
-        audio: "audio/u5_c6_l3_T.mp3",
         highlight: ["学校で","勉強"]
       },
       {
@@ -20851,7 +20809,6 @@ window.canDoData.push({
         jaPlain: "がっこうでにほんごをべんきょうします。",
         romaji: "Gakkō de nihongo o benkyō shimasu.",
         es: "En la escuela estudio japonés.",
-        audio: "audio/u5_c6_l4_M.mp3",
         highlight: ["学校で","日本語を"]
       },
       {
@@ -20860,7 +20817,6 @@ window.canDoData.push({
         jaPlain: "しゅうまつはなにをしますか。",
         romaji: "Shūmatsu wa nani o shimasu ka.",
         es: "¿Y los fines de semana?",
-        audio: "audio/u5_c6_l5_T.mp3",
         highlight: ["週末"]
       },
       {
@@ -20869,7 +20825,6 @@ window.canDoData.push({
         jaPlain: "こうえんでジョギングします。それからとしょかんでほんをよみます。",
         romaji: "Kōen de jogingu shimasu. Sorekara toshokan de hon o yomimasu.",
         es: "Hago jogging en el parque. Luego leo libros en la biblioteca.",
-        audio: "audio/u5_c6_l6_M.mp3",
         highlight: ["公園で","図書館で","本を"]
       }
     ]
@@ -21107,7 +21062,6 @@ window.canDoData.push({
         jaPlain: "すみません、としょかんはどこですか。",
         romaji: "Sumimasen, toshokan wa doko desu ka.",
         es: "Disculpe, ¿dónde está la biblioteca?",
-        audio: "audio/u5_c5_l1_L.mp3",
         highlight: ["どこ","としょかん"]
       },
       {
@@ -21116,7 +21070,6 @@ window.canDoData.push({
         jaPlain: "ぎんこうのとなりにあります。",
         romaji: "Ginkō no tonari ni arimasu.",
         es: "Está junto al banco.",
-        audio: "audio/u5_c5_l2_O.mp3",
         highlight: ["となり","にあります"]
       },
       {
@@ -21125,7 +21078,6 @@ window.canDoData.push({
         jaPlain: "ここからとおいですか。",
         romaji: "Koko kara tōi desu ka.",
         es: "¿Está lejos de aquí?",
-        audio: "audio/u5_c5_l3_L.mp3",
         highlight: ["とおい","から"]
       },
       {
@@ -21134,7 +21086,6 @@ window.canDoData.push({
         jaPlain: "いいえ、ちかくにあります。バスでいけますよ。",
         romaji: "Iie, chikaku ni arimasu. Basu de ikemasu yo.",
         es: "No, está cerca. Puedes ir en autobús.",
-        audio: "audio/u5_c5_l4_O.mp3",
         highlight: ["ちかく","で","いけます"]
       },
       {
@@ -21143,7 +21094,6 @@ window.canDoData.push({
         jaPlain: "ありがとうございます。",
         romaji: "Arigatō gozaimasu.",
         es: "Muchas gracias.",
-        audio: "audio/u5_c5_l5_L.mp3",
         highlight: []
       }
     ]
@@ -21419,7 +21369,6 @@ window.canDoData.push({
         jaPlain: "すみません、このあかいりんごはたかいですか。",
         romaji: "Sumimasen, kono akai ringo wa takai desu ka.",
         es: "Disculpe, ¿estas manzanas rojas son caras?",
-        audio: "audio/u6_c1_l1_A.mp3",
         highlight: ["たかい","りんご"]
       },
       {
@@ -21428,7 +21377,6 @@ window.canDoData.push({
         jaPlain: "いいえ、やすいですよ。ひとつごえんです。",
         romaji: "Iie, yasui desu yo. Hitotsu go-en desu.",
         es: "No, son baratas. Cinco bolivianos cada una.",
-        audio: "audio/u6_c1_l2_T.mp3",
         highlight: ["やすい","ごえん"]
       },
       {
@@ -21437,7 +21385,6 @@ window.canDoData.push({
         jaPlain: "わあ、おおきくておいしそうですね。あのパンはあたらしいですか。",
         romaji: "Waa, ookikute oishisou desu ne. Ano pan wa atarashii desu ka.",
         es: "¡Wow, son grandes y se ven deliciosas! ¿Aquel pan es nuevo (fresco)?",
-        audio: "audio/u6_c1_l3_A.mp3",
         highlight: ["おおきい","おいしい","あたらしい"]
       },
       {
@@ -21446,7 +21393,6 @@ window.canDoData.push({
         jaPlain: "はい、きょうのパンです。とてもおいしいですよ。",
         romaji: "Hai, kyou no pan desu. Totemo oishii desu yo.",
         es: "Sí, es el pan de hoy. Está muy delicioso.",
-        audio: "audio/u6_c1_l4_T.mp3",
         highlight: ["きょう","おいしい"]
       },
       {
@@ -21455,7 +21401,6 @@ window.canDoData.push({
         jaPlain: "じゃあ、りんごをみっつとパンをひとつください。",
         romaji: "Jaa, ringo o mittsu to pan o hitotsu kudasai.",
         es: "Entonces, deme tres manzanas y un pan por favor.",
-        audio: "audio/u6_c1_l5_A.mp3",
         highlight: ["みっつ","ひとつ","ください"]
       }
     ]
@@ -21661,7 +21606,6 @@ window.canDoData.push({
         jaPlain: "このスーパーはきれいでべんりですね。",
         romaji: "Kono suupaa wa kirei de benri desu ne.",
         es: "Este supermercado es bonito y conveniente, ¿verdad?",
-        audio: "audio/u6_c2_l1_T.mp3",
         highlight: ["きれい","べんり"]
       },
       {
@@ -21670,7 +21614,6 @@ window.canDoData.push({
         jaPlain: "はい、それにゆうめいなスーパーです。やさいがすきですか。",
         romaji: "Hai, sore ni yuumei na suupaa desu. Yasai ga suki desu ka.",
         es: "Sí, además es un supermercado famoso. ¿Te gustan las verduras?",
-        audio: "audio/u6_c2_l2_M.mp3",
         highlight: ["ゆうめい","やさい","すき"]
       },
       {
@@ -21679,7 +21622,6 @@ window.canDoData.push({
         jaPlain: "やさいはすきですが、さかなはちょっときらいです。",
         romaji: "Yasai wa suki desu ga, sakana wa chotto kirai desu.",
         es: "Me gustan las verduras, pero el pescado no me gusta mucho.",
-        audio: "audio/u6_c2_l3_T.mp3",
         highlight: ["すき","きらい","さかな"]
       },
       {
@@ -21688,7 +21630,6 @@ window.canDoData.push({
         jaPlain: "そうですか。あのカフェはしずかできれいです。あとでいきましょう。",
         romaji: "Sou desu ka. Ano kafe wa shizuka de kirei desu. Ato de ikimashou.",
         es: "Ah, ya veo. Ese café es tranquilo y bonito. Vamos después.",
-        audio: "audio/u6_c2_l4_M.mp3",
         highlight: ["しずか","きれい"]
       },
       {
@@ -21697,7 +21638,6 @@ window.canDoData.push({
         jaPlain: "いいですね。たいせつなじかんですね。",
         romaji: "Ii desu ne. Taisetsu na jikan desu ne.",
         es: "Qué bien. Es un tiempo importante (precioso).",
-        audio: "audio/u6_c2_l5_T.mp3",
         highlight: ["たいせつ","じかん"]
       }
     ]
@@ -21903,7 +21843,6 @@ window.canDoData.push({
         jaPlain: "このりょうりはどうですか。",
         romaji: "Kono ryouri wa dou desu ka.",
         es: "¿Qué tal este plato?",
-        audio: "audio/u6_c3_l1_S.mp3",
         highlight: ["りょうり","どう"]
       },
       {
@@ -21912,7 +21851,6 @@ window.canDoData.push({
         jaPlain: "とてもおいしいです。すしはどうですか。",
         romaji: "Totemo oishii desu. Sushi wa dou desu ka.",
         es: "Está muy delicioso. ¿Y el sushi qué tal?",
-        audio: "audio/u6_c3_l2_F.mp3",
         highlight: ["とても","おいしい","すし"]
       },
       {
@@ -21921,7 +21859,6 @@ window.canDoData.push({
         jaPlain: "すしもおいしいです。でも、ちょっとからいです。",
         romaji: "Sushi mo oishii desu. Demo, chotto karai desu.",
         es: "El sushi también está delicioso. Pero está un poco picante.",
-        audio: "audio/u6_c3_l3_S.mp3",
         highlight: ["ちょっと","からい"]
       },
       {
@@ -21930,7 +21867,6 @@ window.canDoData.push({
         jaPlain: "そうですか。じゃあ、このコーヒーはどうですか。",
         romaji: "Sou desu ka. Jaa, kono koohii wa dou desu ka.",
         es: "¿Ah sí? Entonces, ¿qué tal este café?",
-        audio: "audio/u6_c3_l4_F.mp3",
         highlight: ["コーヒー","どう"]
       },
       {
@@ -21939,7 +21875,6 @@ window.canDoData.push({
         jaPlain: "コーヒーはあまりおいしくないです。ちょっとつめたいです。",
         romaji: "Koohii wa amari oishikunai desu. Chotto tsumetai desu.",
         es: "El café no está muy delicioso. Está un poco frío.",
-        audio: "audio/u6_c3_l5_S.mp3",
         highlight: ["あまり","つめたい"]
       },
       {
@@ -21948,7 +21883,6 @@ window.canDoData.push({
         jaPlain: "じゃあ、デザートはどうですか。あまいケーキがありますよ。",
         romaji: "Jaa, dezaato wa dou desu ka. Amai keeki ga arimasu yo.",
         es: "Entonces, ¿qué tal el postre? Hay un pastel dulce.",
-        audio: "audio/u6_c3_l6_F.mp3",
         highlight: ["デザート","あまい","ケーキ"]
       }
     ]
@@ -22225,7 +22159,6 @@ window.canDoData.push({
         jaPlain: "カルロス、りんごとオレンジ、どちらがやすいですか。",
         romaji: "Carlos, ringo to orenji, dochira ga yasui desu ka.",
         es: "Carlos, ¿qué es más barato, las manzanas o las naranjas?",
-        audio: "audio/u6_c4_l1_M.mp3",
         highlight: ["どちら","やすい"]
       },
       {
@@ -22234,7 +22167,6 @@ window.canDoData.push({
         jaPlain: "りんごよりオレンジのほうがやすいです。",
         romaji: "Ringo yori orenji no hou ga yasui desu.",
         es: "Las naranjas son más baratas que las manzanas.",
-        audio: "audio/u6_c4_l2_C.mp3",
         highlight: ["より","ほう","やすい"]
       },
       {
@@ -22243,7 +22175,6 @@ window.canDoData.push({
         jaPlain: "そうですか。じゃあ、バナナとりんごでは、どちらがおおきいですか。",
         romaji: "Sou desu ka. Jaa, banana to ringo de wa, dochira ga ookii desu ka.",
         es: "Ya veo. Entonces, entre la banana y la manzana, ¿cuál es más grande?",
-        audio: "audio/u6_c4_l3_M.mp3",
         highlight: ["バナナ","おおきい"]
       },
       {
@@ -22252,7 +22183,6 @@ window.canDoData.push({
         jaPlain: "りんごよりバナナのほうがおおきいです。",
         romaji: "Ringo yori banana no hou ga ookii desu.",
         es: "La banana es más grande que la manzana.",
-        audio: "audio/u6_c4_l4_C.mp3",
         highlight: ["より","ほう","おおきい"]
       },
       {
@@ -22261,7 +22191,6 @@ window.canDoData.push({
         jaPlain: "でも、わたしはりんごのほうがすきです。",
         romaji: "Demo, watashi wa ringo no hou ga suki desu.",
         es: "Pero a mí me gustan más las manzanas.",
-        audio: "audio/u6_c4_l5_M.mp3",
         highlight: ["ほう","すき"]
       }
     ]
@@ -22504,7 +22433,6 @@ window.canDoData.push({
         jaPlain: "にほんのたべもののなかで、なにがいちばんすきですか。",
         romaji: "Nihon no tabemono no naka de, nani ga ichiban suki desu ka.",
         es: "Entre las comidas japonesas, ¿cuál te gusta más?",
-        audio: "audio/u6_c5_l1_L.mp3",
         highlight: ["なか","いちばん","すき"]
       },
       {
@@ -22513,7 +22441,6 @@ window.canDoData.push({
         jaPlain: "わたしはすしがいちばんすきです。リアさんは？",
         romaji: "Watashi wa sushi ga ichiban suki desu. Lia-san wa?",
         es: "A mí lo que más me gusta es el sushi. ¿Y tú, Lía?",
-        audio: "audio/u6_c5_l2_F.mp3",
         highlight: ["すし","いちばん"]
       },
       {
@@ -22522,7 +22449,6 @@ window.canDoData.push({
         jaPlain: "わたしはラーメンがいちばんおいしいとおもいます。",
         romaji: "Watashi wa raamen ga ichiban oishii to omoimasu.",
         es: "Yo creo que el ramen es lo más delicioso.",
-        audio: "audio/u6_c5_l3_L.mp3",
         highlight: ["ラーメン","いちばん","おいしい"]
       },
       {
@@ -22531,7 +22457,6 @@ window.canDoData.push({
         jaPlain: "じゃあ、くだもののなかでは？",
         romaji: "Jaa, kudamono no naka de wa?",
         es: "Entonces, ¿y entre las frutas?",
-        audio: "audio/u6_c5_l4_F.mp3",
         highlight: ["くだもの","なか"]
       },
       {
@@ -22540,7 +22465,6 @@ window.canDoData.push({
         jaPlain: "りんごがいちばんすきです。やすくておいしいです。",
         romaji: "Ringo ga ichiban suki desu. Yasukute oishii desu.",
         es: "Las manzanas son las que más me gustan. Son baratas y deliciosas.",
-        audio: "audio/u6_c5_l5_L.mp3",
         highlight: ["りんご","いちばん","やすい","おいしい"]
       },
       {
@@ -22549,7 +22473,6 @@ window.canDoData.push({
         jaPlain: "そうですね。りんごはとてもべんりなくだものですね。",
         romaji: "Sou desu ne. Ringo wa totemo benri na kudamono desu ne.",
         es: "Tienes razón. La manzana es una fruta muy conveniente.",
-        audio: "audio/u6_c5_l6_F.mp3",
         highlight: ["べんり","くだもの"]
       }
     ]
@@ -22828,7 +22751,6 @@ window.canDoData.push({
         jaPlain: "カルロスさん、いっしょにひるごはんをたべましょう。",
         romaji: "Karurosu-san, issho ni hiru-gohan o tabemashou.",
         es: "Carlos, comamos juntos el almuerzo.",
-        audio: "audio/u7_c1_l1_A.mp3",
         highlight: ["たべましょう"]
       },
       {
@@ -22837,7 +22759,6 @@ window.canDoData.push({
         jaPlain: "いいですね。しょくどうにいきましょう。",
         romaji: "Ii desu ne. Shokudou ni ikimashou.",
         es: "Qué buena idea. Vamos al comedor.",
-        audio: "audio/u7_c1_l2_C.mp3",
         highlight: ["いきましょう"]
       },
       {
@@ -22846,7 +22767,6 @@ window.canDoData.push({
         jaPlain: "たべたあとで、コーヒーをのみましょうか。",
         romaji: "Tabeta ato de, koohii o nomimashou ka.",
         es: "¿Tomamos café después de comer?",
-        audio: "audio/u7_c1_l3_A.mp3",
         highlight: ["のみましょうか"]
       },
       {
@@ -22855,7 +22775,6 @@ window.canDoData.push({
         jaPlain: "はい、のみましょう。にもつをもちましょうか。",
         romaji: "Hai, nomimashou. Nimotsu o mochimashou ka.",
         es: "Sí, tomemos. ¿Llevo tu equipaje?",
-        audio: "audio/u7_c1_l4_C.mp3",
         highlight: ["のみましょう","もちましょうか"]
       }
     ]
@@ -23061,7 +22980,6 @@ window.canDoData.push({
         jaPlain: "ソフィアさん、しゅうまつになにをしたいですか。",
         romaji: "Sofia-san, shuumatsu ni nani o shitai desu ka.",
         es: "Sofía, ¿qué quieres hacer el fin de semana?",
-        audio: "audio/u7_c2_l1_L.mp3",
         highlight: ["したい"]
       },
       {
@@ -23070,7 +22988,6 @@ window.canDoData.push({
         jaPlain: "えいがをみたいです。あたらしいえいががありますよ。",
         romaji: "Eiga o mitai desu. Atarashii eiga ga arimasu yo.",
         es: "Quiero ver una película. Hay una nueva.",
-        audio: "audio/u7_c2_l2_S.mp3",
         highlight: ["みたい"]
       },
       {
@@ -23079,7 +22996,6 @@ window.canDoData.push({
         jaPlain: "いいですね！わたしはうみにもいきたいです。",
         romaji: "Ii desu ne! Watashi wa umi ni mo ikitai desu.",
         es: "¡Qué bien! Yo también quiero ir al mar.",
-        audio: "audio/u7_c2_l3_L.mp3",
         highlight: ["いきたい"]
       },
       {
@@ -23088,7 +23004,6 @@ window.canDoData.push({
         jaPlain: "うみはいいですね。でもやまはちょっと…いきたくないです。",
         romaji: "Umi wa ii desu ne. Demo yama wa chotto… ikitakunai desu.",
         es: "El mar está bien. Pero la montaña… no quiero ir.",
-        audio: "audio/u7_c2_l4_S.mp3",
         highlight: ["いきたくない"]
       }
     ]
@@ -23294,7 +23209,6 @@ window.canDoData.push({
         jaPlain: "これからスーパーにやさいをかいにいきます。",
         romaji: "Kore kara suupaa ni yasai o kai ni ikimasu.",
         es: "Ahora voy al supermercado a comprar verduras.",
-        audio: "audio/u7_c3_l1_T.mp3",
         highlight: ["かいにいきます"]
       },
       {
@@ -23303,7 +23217,6 @@ window.canDoData.push({
         jaPlain: "わたしもデパートにふくをみにいきます。",
         romaji: "Watashi mo depaato ni fuku o mi ni ikimasu.",
         es: "Yo también voy al centro comercial a ver ropa.",
-        audio: "audio/u7_c3_l2_M.mp3",
         highlight: ["みにいきます"]
       },
       {
@@ -23312,7 +23225,6 @@ window.canDoData.push({
         jaPlain: "ごご、としょかんにべんきょうしにいきませんか。",
         romaji: "Gogo, toshokan ni benkyou shi ni ikimasen ka.",
         es: "¿Vamos a la biblioteca a estudiar por la tarde?",
-        audio: "audio/u7_c3_l3_T.mp3",
         highlight: ["べんきょうしにいきませんか"]
       },
       {
@@ -23321,7 +23233,6 @@ window.canDoData.push({
         jaPlain: "いいですね。そのあと、うちにあそびにきませんか。",
         romaji: "Ii desu ne. Sono ato, uchi ni asobi ni kimasen ka.",
         es: "Buena idea. Después, ¿vienes a mi casa a jugar?",
-        audio: "audio/u7_c3_l4_M.mp3",
         highlight: ["あそびにきませんか"]
       },
       {
@@ -23330,7 +23241,6 @@ window.canDoData.push({
         jaPlain: "はい、いきます！なにをたべにいきましょうか。",
         romaji: "Hai, ikimasu! Nani o tabe ni ikimashou ka.",
         es: "¡Sí, voy! ¿A dónde vamos a comer?",
-        audio: "audio/u7_c3_l5_T.mp3",
         highlight: ["たべにいきましょうか"]
       }
     ]
@@ -23607,7 +23517,6 @@ window.canDoData.push({
         jaPlain: "あさごはんのまえに、シャワーをあびます。",
         romaji: "Asa-gohan no mae ni, shawaa o abimasu.",
         es: "Antes del desayuno, me ducho.",
-        audio: "audio/u7_c4_l1_S.mp3",
         highlight: ["まえに"]
       },
       {
@@ -23616,7 +23525,6 @@ window.canDoData.push({
         jaPlain: "シャワーのまえになにをしますか。",
         romaji: "Shawaa no mae ni nani o shimasu ka.",
         es: "¿Qué haces antes de ducharte?",
-        audio: "audio/u7_c4_l2_F.mp3",
         highlight: ["まえに"]
       },
       {
@@ -23625,7 +23533,6 @@ window.canDoData.push({
         jaPlain: "かおをあらいます。それから、あさごはんのあとで、はみがきをします。",
         romaji: "Kao o araimasu. Sore kara, asa-gohan no ato de, hamigaki o shimasu.",
         es: "Me lavo la cara. Y después del desayuno, me cepillo los dientes.",
-        audio: "audio/u7_c4_l3_S.mp3",
         highlight: ["あとで"]
       },
       {
@@ -23634,7 +23541,6 @@ window.canDoData.push({
         jaPlain: "じゅぎょうのあとで、なにをしますか。",
         romaji: "Jugyou no ato de, nani o shimasu ka.",
         es: "¿Qué haces después de clases?",
-        audio: "audio/u7_c4_l4_F.mp3",
         highlight: ["あとで"]
       }
     ]
@@ -23878,7 +23784,6 @@ window.canDoData.push({
         jaPlain: "あさごはんのまえに、さんぽしにいきたいです。",
         romaji: "Asa-gohan no mae ni, sanpo shi ni ikitai desu.",
         es: "Antes del desayuno, quiero ir a pasear.",
-        audio: "audio/u7_c5_l1_C.mp3",
         highlight: ["まえに","いきたい"]
       },
       {
@@ -23887,7 +23792,6 @@ window.canDoData.push({
         jaPlain: "わたしはあさごはんのあとで、としょかんにべんきょうしにいきます。",
         romaji: "Watashi wa asa-gohan no ato de, toshokan ni benkyou shi ni ikimasu.",
         es: "Yo, después del desayuno, voy a la biblioteca a estudiar.",
-        audio: "audio/u7_c5_l2_A.mp3",
         highlight: ["あとで","べんきょうしにいきます"]
       },
       {
@@ -23896,7 +23800,6 @@ window.canDoData.push({
         jaPlain: "じゃあ、ひるごはんをいっしょにたべましょう。",
         romaji: "Jaa, hiru-gohan o issho ni tabemashou.",
         es: "Entonces, comamos juntos el almuerzo.",
-        audio: "audio/u7_c5_l3_C.mp3",
         highlight: ["たべましょう"]
       },
       {
@@ -23905,7 +23808,6 @@ window.canDoData.push({
         jaPlain: "いいですね。ごごはえいがをみにいきたいです。",
         romaji: "Ii desu ne. Gogo wa eiga o mi ni ikitai desu.",
         es: "Buena idea. Por la tarde quiero ir a ver una película.",
-        audio: "audio/u7_c5_l4_A.mp3",
         highlight: ["みにいきたい"]
       },
       {
@@ -23914,7 +23816,6 @@ window.canDoData.push({
         jaPlain: "ばんごはんのまえに、かいものにいきましょうか。",
         romaji: "Ban-gohan no mae ni, kaimono ni ikimashou ka.",
         es: "¿Vamos de compras antes de la cena?",
-        audio: "audio/u7_c5_l5_C.mp3",
         highlight: ["まえに","いきましょうか"]
       }
     ]
@@ -24189,7 +24090,6 @@ window.canDoData.push({
         jaPlain: "このまちはおおきくて、にぎやかですね。",
         romaji: "Kono machi wa ookikute, nigiyaka desu ne.",
         es: "Esta ciudad es grande y animada, ¿verdad?",
-        audio: "audio/u8_c1_l1_A.mp3",
         highlight: ["おおきくて"]
       },
       {
@@ -24198,7 +24098,6 @@ window.canDoData.push({
         jaPlain: "そうですね。きれいで、しずかなところもありますよ。",
         romaji: "Sou desu ne. Kirei de, shizuka na tokoro mo arimasu yo.",
         es: "Sí. También hay lugares bonitos y tranquilos.",
-        audio: "audio/u8_c1_l2_L.mp3",
         highlight: ["きれいで"]
       },
       {
@@ -24207,7 +24106,6 @@ window.canDoData.push({
         jaPlain: "ホテルはあたらしくて、べんりでした。",
         romaji: "Hoteru wa atarashikute, benri deshita.",
         es: "El hotel era nuevo y conveniente.",
-        audio: "audio/u8_c1_l3_A.mp3",
         highlight: ["あたらしくて"]
       },
       {
@@ -24216,7 +24114,6 @@ window.canDoData.push({
         jaPlain: "たべものもおいしくて、やすかったです。",
         romaji: "Tabemono mo oishikute, yasukatta desu.",
         es: "La comida también era deliciosa y barata.",
-        audio: "audio/u8_c1_l4_L.mp3",
         highlight: ["おいしくて"]
       }
     ]
@@ -24423,7 +24320,6 @@ window.canDoData.push({
         jaPlain: "さいきん、あたたかくなりましたね。",
         romaji: "Saikin, atatakaku narimashita ne.",
         es: "Últimamente se ha vuelto cálido, ¿verdad?",
-        audio: "audio/u8_c2_l1_S.mp3",
         highlight: ["あたたかくなりました"]
       },
       {
@@ -24432,7 +24328,6 @@ window.canDoData.push({
         jaPlain: "そうですね。ひがながくなりました。",
         romaji: "Sou desu ne. Hi ga nagaku narimashita.",
         es: "Sí. Los días se han alargado.",
-        audio: "audio/u8_c2_l2_C.mp3",
         highlight: ["ながくなりました"]
       },
       {
@@ -24441,7 +24336,6 @@ window.canDoData.push({
         jaPlain: "はるはまちがきれいになりますね。",
         romaji: "Haru wa machi ga kirei ni narimasu ne.",
         es: "En primavera la ciudad se vuelve bonita, ¿no?",
-        audio: "audio/u8_c2_l3_S.mp3",
         highlight: ["きれいになります"]
       },
       {
@@ -24450,7 +24344,6 @@ window.canDoData.push({
         jaPlain: "はい。こうえんもにぎやかになります。",
         romaji: "Hai. Kouen mo nigiyaka ni narimasu.",
         es: "Sí. Los parques también se vuelven animados.",
-        audio: "audio/u8_c2_l4_C.mp3",
         highlight: ["にぎやかになります"]
       }
     ]
@@ -24657,7 +24550,6 @@ window.canDoData.push({
         jaPlain: "このみせのりょうりはおいしいとおもいます。",
         romaji: "Kono mise no ryouri wa oishii to omoimasu.",
         es: "Creo que la comida de este restaurante es deliciosa.",
-        audio: "audio/u8_c3_l1_T.mp3",
         highlight: ["おいしいとおもいます"]
       },
       {
@@ -24666,7 +24558,6 @@ window.canDoData.push({
         jaPlain: "わたしもそうおもいます。でも、ちょっとたかいとおもいます。",
         romaji: "Watashi mo sou omoimasu. Demo, chotto takai to omoimasu.",
         es: "Yo también lo creo. Pero creo que es un poco caro.",
-        audio: "audio/u8_c3_l2_M.mp3",
         highlight: ["たかいとおもいます"]
       },
       {
@@ -24675,7 +24566,6 @@ window.canDoData.push({
         jaPlain: "このケーキはきれいだとおもいます。たべましょう。",
         romaji: "Kono keeki wa kirei da to omoimasu. Tabemashou.",
         es: "Creo que este pastel es bonito. Comámoslo.",
-        audio: "audio/u8_c3_l3_T.mp3",
         highlight: ["きれいだとおもいます"]
       },
       {
@@ -24684,7 +24574,6 @@ window.canDoData.push({
         jaPlain: "おいしいですね！このみせはいいとおもいます。",
         romaji: "Oishii desu ne! Kono mise wa ii to omoimasu.",
         es: "¡Está delicioso! Creo que este restaurante es bueno.",
-        audio: "audio/u8_c3_l4_M.mp3",
         highlight: ["いいとおもいます"]
       },
       {
@@ -24693,7 +24582,6 @@ window.canDoData.push({
         jaPlain: "そうですね。とてもたのしいとおもいます。またきましょう。",
         romaji: "Sou desu ne. Totemo tanoshii to omoimasu. Mata kimashou.",
         es: "Sí. Creo que es muy divertido. Volvamos otra vez.",
-        audio: "audio/u8_c3_l5_T.mp3",
         highlight: ["たのしいとおもいます"]
       }
     ]
@@ -24971,7 +24859,6 @@ window.canDoData.push({
         jaPlain: "りょこうのしゃしんです。てんきはあまりあつくなかったです。",
         romaji: "Ryokou no shashin desu. Tenki wa amari atsuku nakatta desu.",
         es: "Son fotos del viaje. El clima no fue muy caluroso.",
-        audio: "audio/u8_c4_l1_T.mp3",
         highlight: ["あつくなかったです"]
       },
       {
@@ -24980,7 +24867,6 @@ window.canDoData.push({
         jaPlain: "そうですか。たべものはおいしかったですか。",
         romaji: "Sou desu ka. Tabemono wa oishikatta desu ka.",
         es: "¿Ah sí? ¿La comida estuvo deliciosa?",
-        audio: "audio/u8_c4_l2_S.mp3",
         highlight: ["おいしかったですか"]
       },
       {
@@ -24989,7 +24875,6 @@ window.canDoData.push({
         jaPlain: "はい、とてもおいしかったです。でもホテルはあまりきれいじゃなかったです。",
         romaji: "Hai, totemo oishikatta desu. Demo hoteru wa amari kirei ja nakatta desu.",
         es: "Sí, estaba muy deliciosa. Pero el hotel no era muy bonito.",
-        audio: "audio/u8_c4_l3_T.mp3",
         highlight: ["おいしかったです","きれいじゃなかったです"]
       },
       {
@@ -24998,7 +24883,6 @@ window.canDoData.push({
         jaPlain: "そうですか。たかかったですか。",
         romaji: "Sou desu ka. Takakatta desu ka.",
         es: "¿Ah sí? ¿Fue caro?",
-        audio: "audio/u8_c4_l4_S.mp3",
         highlight: ["たかかったですか"]
       }
     ]
@@ -25242,7 +25126,6 @@ window.canDoData.push({
         jaPlain: "りょこうはたのしかったですね。まちはきれいで、しずかでした。",
         romaji: "Ryokou wa tanoshikatta desu ne. Machi wa kirei de, shizuka deshita.",
         es: "El viaje fue divertido, ¿verdad? La ciudad era bonita y tranquila.",
-        audio: "audio/u8_c5_l1_C.mp3",
         highlight: ["きれいで","しずかでした"]
       },
       {
@@ -25251,7 +25134,6 @@ window.canDoData.push({
         jaPlain: "そうですね。たべものもおいしくて、やすかったです。",
         romaji: "Sou desu ne. Tabemono mo oishikute, yasukatta desu.",
         es: "Sí. La comida también era deliciosa y barata.",
-        audio: "audio/u8_c5_l2_L.mp3",
         highlight: ["おいしくて","やすかったです"]
       },
       {
@@ -25260,7 +25142,6 @@ window.canDoData.push({
         jaPlain: "さいきん、あたたかくなりましたね。いいてんきだとおもいます。",
         romaji: "Saikin, atatakaku narimashita ne. Ii tenki da to omoimasu.",
         es: "Últimamente se volvió cálido. Creo que hace buen tiempo.",
-        audio: "audio/u8_c5_l3_C.mp3",
         highlight: ["あたたかくなりました","いいてんきだとおもいます"]
       },
       {
@@ -25269,7 +25150,6 @@ window.canDoData.push({
         jaPlain: "でも、あしたはいそがしくて、たいへんです。",
         romaji: "Demo, ashita wa isogashikute, taihen desu.",
         es: "Pero mañana estoy ocupada y va a ser duro.",
-        audio: "audio/u8_c5_l4_L.mp3",
         highlight: ["いそがしくて"]
       },
       {
@@ -25278,7 +25158,6 @@ window.canDoData.push({
         jaPlain: "そうですね。でもたのしいとおもいます。がんばりましょう。",
         romaji: "Sou desu ne. Demo tanoshii to omoimasu. Ganbarimashou.",
         es: "Sí. Pero creo que será divertido. ¡Ánimo!",
-        audio: "audio/u8_c5_l5_C.mp3",
         highlight: ["たのしいとおもいます"]
       }
     ]
@@ -25556,7 +25435,6 @@ window.canDoData.push({
         jaPlain: "マリアさんのかぞくはなんにんですか。",
         romaji: "Maria-san no kazoku wa nan-nin desu ka.",
         es: "María, ¿cuántos sois en tu familia?",
-        audio: "audio/u9_c1_l1_T.mp3",
         highlight: ["何人"]
       },
       {
@@ -25565,7 +25443,6 @@ window.canDoData.push({
         jaPlain: "ごにんです。ちちとははとあにといもうととわたしです。",
         romaji: "Go-nin desu. Chichi to haha to ani to imouto to watashi desu.",
         es: "Somos cinco: mi padre, mi madre, mi hermano mayor, mi hermana menor y yo.",
-        audio: "audio/u9_c1_l2_M.mp3",
         highlight: ["五人","父","母","兄","妹"]
       },
       {
@@ -25574,7 +25451,6 @@ window.canDoData.push({
         jaPlain: "いいですね。きょうだいはなんにんいますか。",
         romaji: "Ii desu ne. Kyoudai wa nan-nin imasu ka.",
         es: "Qué bien. ¿Cuántos hermanos tenéis?",
-        audio: "audio/u9_c1_l3_T.mp3",
         highlight: ["何人"]
       },
       {
@@ -25583,7 +25459,6 @@ window.canDoData.push({
         jaPlain: "あにがひとりといもうとがひとりいます。",
         romaji: "Ani ga hitori to imouto ga hitori imasu.",
         es: "Tengo un hermano mayor y una hermana menor.",
-        audio: "audio/u9_c1_l4_M.mp3",
         highlight: ["兄","一人","妹","一人"]
       },
       {
@@ -25592,7 +25467,6 @@ window.canDoData.push({
         jaPlain: "わたしはさんにんかぞくです。ちちとははとわたしです。",
         romaji: "Watashi wa san-nin kazoku desu. Chichi to haha to watashi desu.",
         es: "En mi casa somos tres: mi padre, mi madre y yo.",
-        audio: "audio/u9_c1_l5_T.mp3",
         highlight: ["三人","父","母"]
       }
     ]
@@ -25793,7 +25667,6 @@ window.canDoData.push({
         jaPlain: "マリアさんのちち…あ、おとうさんはなにをしていますか。",
         romaji: "Maria-san no chichi… a, otou-san wa nani o shite imasu ka.",
         es: "El padre de María… ah, ¿a qué se dedica tu padre?",
-        audio: "audio/u9_c2_l1_T.mp3",
         highlight: []
       },
       {
@@ -25802,7 +25675,6 @@ window.canDoData.push({
         jaPlain: "ちちはいしゃです。とてもやさしいです。",
         romaji: "Chichi wa isha desu. Totemo yasashii desu.",
         es: "Mi padre es médico. Es muy amable.",
-        audio: "audio/u9_c2_l2_M.mp3",
         highlight: ["父","医者"]
       },
       {
@@ -25811,7 +25683,6 @@ window.canDoData.push({
         jaPlain: "おかあさんは？",
         romaji: "Okaa-san wa?",
         es: "¿Y tu madre?",
-        audio: "audio/u9_c2_l3_T.mp3",
         highlight: []
       },
       {
@@ -25820,7 +25691,6 @@ window.canDoData.push({
         jaPlain: "ははかんごしです。りょうりがじょうずです。",
         romaji: "Haha wa kangoshi desu. Ryouri ga jouzu desu.",
         es: "Mi madre es enfermera. Cocina muy bien.",
-        audio: "audio/u9_c2_l4_M.mp3",
         highlight: ["母","看護師","料理","上手"]
       },
       {
@@ -25829,7 +25699,6 @@ window.canDoData.push({
         jaPlain: "あにはだいがくせいで、おとうとはこうこうせいです。",
         romaji: "Ani wa daigakusei de, otouto wa koukousei desu.",
         es: "Mi hermano mayor es universitario y mi hermano menor es estudiante de preparatoria.",
-        audio: "audio/u9_c2_l5_M.mp3",
         highlight: ["兄","弟"]
       }
     ]
@@ -26030,7 +25899,6 @@ window.canDoData.push({
         jaPlain: "ちちはせんせいです。ははかんごしです。",
         romaji: "Chichi wa sensei desu. Haha wa kangoshi desu.",
         es: "Mi padre es profesor. Mi madre es enfermera.",
-        audio: "audio/u9_c3_l1_M.mp3",
         highlight: ["父","母"]
       },
       {
@@ -26039,7 +25907,6 @@ window.canDoData.push({
         jaPlain: "そうですか。わたしのちちはかいしゃいんです。",
         romaji: "Sou desu ka. Watashi no chichi wa kaishain desu.",
         es: "Ya veo. Mi padre es oficinista.",
-        audio: "audio/u9_c3_l2_T.mp3",
         highlight: ["父"]
       },
       {
@@ -26048,7 +25915,6 @@ window.canDoData.push({
         jaPlain: "たなかさんのおかあさんは？",
         romaji: "Tanaka-san no okaa-san wa?",
         es: "¿Y la madre de Tanaka-san?",
-        audio: "audio/u9_c3_l3_M.mp3",
         highlight: ["お母さん"]
       },
       {
@@ -26057,7 +25923,6 @@ window.canDoData.push({
         jaPlain: "ははしゅふです。マリアさんのおにいさんはがくせいですか。",
         romaji: "Haha wa shufu desu. Maria-san no onii-san wa gakusei desu ka.",
         es: "Mi madre es ama de casa. ¿Tu hermano mayor es estudiante, María?",
-        audio: "audio/u9_c3_l4_T.mp3",
         highlight: ["母","お兄さん"]
       },
       {
@@ -26066,7 +25931,6 @@ window.canDoData.push({
         jaPlain: "はい、あにはだいがくせいです。たなかさんのおとうとさんはげんきですか。",
         romaji: "Hai, ani wa daigakusei desu. Tanaka-san no otouto-san wa genki desu ka.",
         es: "Sí, mi hermano mayor es universitario. ¿Tu hermano menor está bien, Tanaka-san?",
-        audio: "audio/u9_c3_l5_M.mp3",
         highlight: ["兄","弟さん"]
       }
     ]
@@ -26337,7 +26201,6 @@ window.canDoData.push({
         jaPlain: "たなかさん、ごかぞくはなんにんですか。",
         romaji: "Tanaka-san, go-kazoku wa nan-nin desu ka.",
         es: "Tanaka-san, ¿cuántos sois en tu familia?",
-        audio: "audio/u9_c4_l1_M.mp3",
         highlight: ["何人"]
       },
       {
@@ -26346,7 +26209,6 @@ window.canDoData.push({
         jaPlain: "よにんです。ちちとははとおとうととわたしです。",
         romaji: "Yo-nin desu. Chichi to haha to otouto to watashi desu.",
         es: "Somos cuatro: mi padre, mi madre, mi hermano menor y yo.",
-        audio: "audio/u9_c4_l2_T.mp3",
         highlight: ["四人","父","母","弟"]
       },
       {
@@ -26355,7 +26217,6 @@ window.canDoData.push({
         jaPlain: "おとうさんはなんさいですか。",
         romaji: "Otou-san wa nan-sai desu ka.",
         es: "¿Cuántos años tiene tu padre?",
-        audio: "audio/u9_c4_l3_M.mp3",
         highlight: ["お父さん","何歳"]
       },
       {
@@ -26364,7 +26225,6 @@ window.canDoData.push({
         jaPlain: "ちちはごじゅうにさいです。",
         romaji: "Chichi wa gojuu-ni-sai desu.",
         es: "Mi padre tiene 52 años.",
-        audio: "audio/u9_c4_l4_T.mp3",
         highlight: ["父","五十二歳"]
       },
       {
@@ -26373,7 +26233,6 @@ window.canDoData.push({
         jaPlain: "おかあさんはどんなひとですか。",
         romaji: "Okaa-san wa donna hito desu ka.",
         es: "¿Cómo es tu madre?",
-        audio: "audio/u9_c4_l5_M.mp3",
         highlight: ["お母さん","どんな人"]
       },
       {
@@ -26382,7 +26241,6 @@ window.canDoData.push({
         jaPlain: "ははやさしくて、りょうりがじょうずです。",
         romaji: "Haha wa yasashikute, ryouri ga jouzu desu.",
         es: "Mi madre es amable y cocina muy bien.",
-        audio: "audio/u9_c4_l6_T.mp3",
         highlight: ["母","やさしくて"]
       }
     ]
@@ -26620,7 +26478,6 @@ window.canDoData.push({
         jaPlain: "これはわたしのかぞくのしゃしんです。ごにんかぞくです。",
         romaji: "Kore wa watashi no kazoku no shashin desu. Go-nin kazoku desu.",
         es: "Esta es la foto de mi familia. Somos cinco.",
-        audio: "audio/u9_c5_l1_M.mp3",
         highlight: ["家族","五人"]
       },
       {
@@ -26629,7 +26486,6 @@ window.canDoData.push({
         jaPlain: "ちちはかいしゃいんで、まじめです。ははかんごしで、やさしいです。",
         romaji: "Chichi wa kaishain de, majime desu. Haha wa kangoshi de, yasashii desu.",
         es: "Mi padre es oficinista y serio. Mi madre es enfermera y amable.",
-        audio: "audio/u9_c5_l2_M.mp3",
         highlight: ["父","会社員","母","看護師"]
       },
       {
@@ -26638,7 +26494,6 @@ window.canDoData.push({
         jaPlain: "あにはにじゅうさんさいで、だいがくせいです。おとうとはじゅうごさいで、こうこうせいです。",
         romaji: "Ani wa nijuusan-sai de, daigakusei desu. Otouto wa juugo-sai de, koukousei desu.",
         es: "Mi hermano mayor tiene 23 años y es universitario. Mi hermano menor tiene 15 y es de prepa.",
-        audio: "audio/u9_c5_l3_M.mp3",
         highlight: ["兄","弟"]
       },
       {
@@ -26647,7 +26502,6 @@ window.canDoData.push({
         jaPlain: "すてきですね！わたしはよにんかぞくです。",
         romaji: "Suteki desu ne! Watashi wa yo-nin kazoku desu.",
         es: "¡Qué bonita familia! Nosotros somos cuatro.",
-        audio: "audio/u9_c5_l4_T.mp3",
         highlight: ["四人"]
       },
       {
@@ -26656,7 +26510,6 @@ window.canDoData.push({
         jaPlain: "ちちはいしゃで、きびしいですが、やさしいです。ははしゅふで、りょうりがじょうずです。",
         romaji: "Chichi wa isha de, kibishii desu ga, yasashii desu. Haha wa shufu de, ryouri ga jouzu desu.",
         es: "Mi padre es médico, estricto pero amable. Mi madre es ama de casa y cocina muy bien.",
-        audio: "audio/u9_c5_l5_T.mp3",
         highlight: ["父","医者","母","主婦","料理","上手"]
       },
       {
@@ -26665,7 +26518,6 @@ window.canDoData.push({
         jaPlain: "おとうさんはなんさいですか。",
         romaji: "Otou-san wa nan-sai desu ka.",
         es: "¿Cuántos años tiene tu padre?",
-        audio: "audio/u9_c5_l6_M.mp3",
         highlight: ["お父さん","何歳"]
       },
       {
@@ -26674,7 +26526,6 @@ window.canDoData.push({
         jaPlain: "ちちはごじっさいで、ははよんじゅうはっさいです。",
         romaji: "Chichi wa gojis-sai de, haha wa yonjuuhas-sai desu.",
         es: "Mi padre tiene 50 años y mi madre 48.",
-        audio: "audio/u9_c5_l7_T.mp3",
         highlight: ["父","母"]
       }
     ]
@@ -26943,12 +26794,12 @@ window.canDoData.push({
     title: "Mi rutina de la mañana",
     contextEs: "María cuenta a Tanaka cómo es su rutina matutina paso a paso, usando 〜てから para ordenar las acciones.",
     lines: [
-      { speaker: "T", ja: "マリアさん、<ruby>毎朝<rt>まいあさ</rt></ruby> <ruby>何時<rt>なんじ</rt></ruby>に <ruby>起<rt>お</rt></ruby>きますか。", jaPlain: "マリアさん、まいあさ なんじに おきますか。", romaji: "Maria-san, maiasa nanji ni okimasu ka.", es: "María, ¿a qué hora te levantas cada mañana?", audio: "audio/u10_c1_l1_T.mp3" },
-      { speaker: "M", ja: "<ruby>6時<rt>ろくじ</rt></ruby>に <ruby>起<rt>お</rt></ruby>きます。<ruby>起<rt>お</rt></ruby>きてから、シャワーを <ruby>浴<rt>あ</rt></ruby>びます。", jaPlain: "6時に おきます。おきてから、シャワーを あびます。", romaji: "Rokuji ni okimasu. Okite kara, shawaa o abimasu.", es: "Me levanto a las 6. Después de levantarme, me ducho.", audio: "audio/u10_c1_l2_M.mp3", highlight: "おきてから" },
-      { speaker: "T", ja: "シャワーを <ruby>浴<rt>あ</rt></ruby>びてから、<ruby>何<rt>なに</rt></ruby>を しますか。", jaPlain: "シャワーを あびてから、なにを しますか。", romaji: "Shawaa o abite kara, nani o shimasu ka.", es: "Después de ducharte, ¿qué haces?", audio: "audio/u10_c1_l3_T.mp3", highlight: "あびてから" },
-      { speaker: "M", ja: "<ruby>歯<rt>は</rt></ruby>を <ruby>磨<rt>みが</rt></ruby>いてから、<ruby>朝<rt>あさ</rt></ruby>ごはんを <ruby>食<rt>た</rt></ruby>べます。", jaPlain: "はを みがいてから、あさごはんを たべます。", romaji: "Ha o migaite kara, asagohan o tabemasu.", es: "Después de cepillarme los dientes, desayuno.", audio: "audio/u10_c1_l4_M.mp3", highlight: "みがいてから" },
-      { speaker: "T", ja: "<ruby>朝<rt>あさ</rt></ruby>ごはんを <ruby>食<rt>た</rt></ruby>べてから、すぐ <ruby>学校<rt>がっこう</rt></ruby>へ <ruby>行<rt>い</rt></ruby>きますか。", jaPlain: "あさごはんを たべてから、すぐ がっこうへ いきますか。", romaji: "Asagohan o tabete kara, sugu gakkou e ikimasu ka.", es: "Después de desayunar, ¿vas inmediatamente a la escuela?", audio: "audio/u10_c1_l5_T.mp3", highlight: "たべてから" },
-      { speaker: "M", ja: "いいえ。コーヒーを <ruby>飲<rt>の</rt></ruby>んでから、<ruby>学校<rt>がっこう</rt></ruby>へ <ruby>行<rt>い</rt></ruby>きます。", jaPlain: "いいえ。コーヒーを のんでから、がっこうへ いきます。", romaji: "Iie. Koohii o nonde kara, gakkou e ikimasu.", es: "No. Después de beber café, voy a la escuela.", audio: "audio/u10_c1_l6_M.mp3", highlight: "のんでから" }
+      { speaker: "T", ja: "マリアさん、<ruby>毎朝<rt>まいあさ</rt></ruby> <ruby>何時<rt>なんじ</rt></ruby>に <ruby>起<rt>お</rt></ruby>きますか。", jaPlain: "マリアさん、まいあさ なんじに おきますか。", romaji: "Maria-san, maiasa nanji ni okimasu ka.", es: "María, ¿a qué hora te levantas cada mañana?", },
+      { speaker: "M", ja: "<ruby>6時<rt>ろくじ</rt></ruby>に <ruby>起<rt>お</rt></ruby>きます。<ruby>起<rt>お</rt></ruby>きてから、シャワーを <ruby>浴<rt>あ</rt></ruby>びます。", jaPlain: "6時に おきます。おきてから、シャワーを あびます。", romaji: "Rokuji ni okimasu. Okite kara, shawaa o abimasu.", es: "Me levanto a las 6. Después de levantarme, me ducho.", highlight: "おきてから" },
+      { speaker: "T", ja: "シャワーを <ruby>浴<rt>あ</rt></ruby>びてから、<ruby>何<rt>なに</rt></ruby>を しますか。", jaPlain: "シャワーを あびてから、なにを しますか。", romaji: "Shawaa o abite kara, nani o shimasu ka.", es: "Después de ducharte, ¿qué haces?", highlight: "あびてから" },
+      { speaker: "M", ja: "<ruby>歯<rt>は</rt></ruby>を <ruby>磨<rt>みが</rt></ruby>いてから、<ruby>朝<rt>あさ</rt></ruby>ごはんを <ruby>食<rt>た</rt></ruby>べます。", jaPlain: "はを みがいてから、あさごはんを たべます。", romaji: "Ha o migaite kara, asagohan o tabemasu.", es: "Después de cepillarme los dientes, desayuno.", highlight: "みがいてから" },
+      { speaker: "T", ja: "<ruby>朝<rt>あさ</rt></ruby>ごはんを <ruby>食<rt>た</rt></ruby>べてから、すぐ <ruby>学校<rt>がっこう</rt></ruby>へ <ruby>行<rt>い</rt></ruby>きますか。", jaPlain: "あさごはんを たべてから、すぐ がっこうへ いきますか。", romaji: "Asagohan o tabete kara, sugu gakkou e ikimasu ka.", es: "Después de desayunar, ¿vas inmediatamente a la escuela?", highlight: "たべてから" },
+      { speaker: "M", ja: "いいえ。コーヒーを <ruby>飲<rt>の</rt></ruby>んでから、<ruby>学校<rt>がっこう</rt></ruby>へ <ruby>行<rt>い</rt></ruby>きます。", jaPlain: "いいえ。コーヒーを のんでから、がっこうへ いきます。", romaji: "Iie. Koohii o nonde kara, gakkou e ikimasu.", es: "No. Después de beber café, voy a la escuela.", highlight: "のんでから" }
     ]
   },
   explain: {
@@ -27011,12 +26862,12 @@ window.canDoData.push({
     title: "Hablando de experiencias",
     contextEs: "María cuenta a Tanaka qué experiencias ha tenido en Japón y qué hizo después de algunas actividades.",
     lines: [
-      { speaker: "T", ja: "マリアさん、<ruby>日本<rt>にほん</rt></ruby>の <ruby>映画<rt>えいが</rt></ruby>を <ruby>見<rt>み</rt></ruby>た ことが ありますか。", jaPlain: "マリアさん、にほんの えいがを みた ことが ありますか。", romaji: "Maria-san, Nihon no eiga o mita koto ga arimasu ka.", es: "María, ¿alguna vez has visto una película japonesa?", audio: "audio/u10_c2_l1_T.mp3", highlight: "見たことがありますか" },
-      { speaker: "M", ja: "はい、あります。<ruby>先週<rt>せんしゅう</rt></ruby> <ruby>映画<rt>えいが</rt></ruby>を <ruby>見<rt>み</rt></ruby>た あとで、ともだちと ごはんを <ruby>食<rt>た</rt></ruby>べました。", jaPlain: "はい、あります。せんしゅう えいがを みた あとで、ともだちと ごはんを たべました。", romaji: "Hai, arimasu. Senshuu eiga o mita ato de, tomodachi to gohan o tabemashita.", es: "Sí. La semana pasada, después de ver una película, comí con amigos.", audio: "audio/u10_c2_l2_M.mp3", highlight: "見たあとで" },
-      { speaker: "T", ja: "いいですね。<ruby>京都<rt>きょうと</rt></ruby>へ <ruby>行<rt>い</rt></ruby>った ことが ありますか。", jaPlain: "いいですね。きょうとへ いった ことが ありますか。", romaji: "Ii desu ne. Kyouto e itta koto ga arimasu ka.", es: "Qué bien. ¿Has ido a Kioto?", audio: "audio/u10_c2_l3_T.mp3", highlight: "行ったことがありますか" },
-      { speaker: "M", ja: "いいえ、<ruby>行<rt>い</rt></ruby>った ことが ありません。でも、おすしを <ruby>食<rt>た</rt></ruby>べた ことが あります。", jaPlain: "いいえ、いった ことが ありません。でも、おすしを たべた ことが あります。", romaji: "Iie, itta koto ga arimasen. Demo, osushi o tabeta koto ga arimasu.", es: "No, no he ido. Pero he comido sushi.", audio: "audio/u10_c2_l4_M.mp3", highlight: "行ったことがありません" },
-      { speaker: "T", ja: "おすしを <ruby>食<rt>た</rt></ruby>べた あとで、<ruby>何<rt>なに</rt></ruby>を しましたか。", jaPlain: "おすしを たべた あとで、なにを しましたか。", romaji: "Osushi o tabeta ato de, nani o shimashita ka.", es: "Después de comer sushi, ¿qué hiciste?", audio: "audio/u10_c2_l5_T.mp3", highlight: "食べたあとで" },
-      { speaker: "M", ja: "ともだちと <ruby>映画<rt>えいが</rt></ruby>を <ruby>見<rt>み</rt></ruby>に <ruby>行<rt>い</rt></ruby>きました。とても <ruby>楽<rt>たの</rt></ruby>しかったです。", jaPlain: "ともだちと えいがを みに いきました。とても たのしかったです。", romaji: "Tomodachi to eiga o mi ni ikimashita. Totemo tanoshikatta desu.", es: "Fui a ver una película con amigos. Fue muy divertido.", audio: "audio/u10_c2_l6_M.mp3" }
+      { speaker: "T", ja: "マリアさん、<ruby>日本<rt>にほん</rt></ruby>の <ruby>映画<rt>えいが</rt></ruby>を <ruby>見<rt>み</rt></ruby>た ことが ありますか。", jaPlain: "マリアさん、にほんの えいがを みた ことが ありますか。", romaji: "Maria-san, Nihon no eiga o mita koto ga arimasu ka.", es: "María, ¿alguna vez has visto una película japonesa?", highlight: "見たことがありますか" },
+      { speaker: "M", ja: "はい、あります。<ruby>先週<rt>せんしゅう</rt></ruby> <ruby>映画<rt>えいが</rt></ruby>を <ruby>見<rt>み</rt></ruby>た あとで、ともだちと ごはんを <ruby>食<rt>た</rt></ruby>べました。", jaPlain: "はい、あります。せんしゅう えいがを みた あとで、ともだちと ごはんを たべました。", romaji: "Hai, arimasu. Senshuu eiga o mita ato de, tomodachi to gohan o tabemashita.", es: "Sí. La semana pasada, después de ver una película, comí con amigos.", highlight: "見たあとで" },
+      { speaker: "T", ja: "いいですね。<ruby>京都<rt>きょうと</rt></ruby>へ <ruby>行<rt>い</rt></ruby>った ことが ありますか。", jaPlain: "いいですね。きょうとへ いった ことが ありますか。", romaji: "Ii desu ne. Kyouto e itta koto ga arimasu ka.", es: "Qué bien. ¿Has ido a Kioto?", highlight: "行ったことがありますか" },
+      { speaker: "M", ja: "いいえ、<ruby>行<rt>い</rt></ruby>った ことが ありません。でも、おすしを <ruby>食<rt>た</rt></ruby>べた ことが あります。", jaPlain: "いいえ、いった ことが ありません。でも、おすしを たべた ことが あります。", romaji: "Iie, itta koto ga arimasen. Demo, osushi o tabeta koto ga arimasu.", es: "No, no he ido. Pero he comido sushi.", highlight: "行ったことがありません" },
+      { speaker: "T", ja: "おすしを <ruby>食<rt>た</rt></ruby>べた あとで、<ruby>何<rt>なに</rt></ruby>を しましたか。", jaPlain: "おすしを たべた あとで、なにを しましたか。", romaji: "Osushi o tabeta ato de, nani o shimashita ka.", es: "Después de comer sushi, ¿qué hiciste?", highlight: "食べたあとで" },
+      { speaker: "M", ja: "ともだちと <ruby>映画<rt>えいが</rt></ruby>を <ruby>見<rt>み</rt></ruby>に <ruby>行<rt>い</rt></ruby>きました。とても <ruby>楽<rt>たの</rt></ruby>しかったです。", jaPlain: "ともだちと えいがを みに いきました。とても たのしかったです。", romaji: "Tomodachi to eiga o mi ni ikimashita. Totemo tanoshikatta desu.", es: "Fui a ver una película con amigos. Fue muy divertido.", }
     ]
   },
   explain: {
@@ -27081,13 +26932,13 @@ window.canDoData.push({
     title: "Las reglas de la escuela",
     contextEs: "María visita una escuela de japonés y Tanaka le explica las reglas: qué no se puede hacer, qué hay que hacer y qué no es necesario hacer.",
     lines: [
-      { speaker: "T", ja: "マリアさん、<ruby>教室<rt>きょうしつ</rt></ruby>で <ruby>話<rt>はな</rt></ruby>さないで ください。", jaPlain: "マリアさん、きょうしつで はなさないで ください。", romaji: "Maria-san, kyoushitsu de hanasanaide kudasai.", es: "María, por favor no hable en el aula.", audio: "audio/u10_c3_l1_T.mp3", highlight: "話さないでください" },
-      { speaker: "M", ja: "はい、わかりました。<ruby>写真<rt>しゃしん</rt></ruby>を <ruby>撮<rt>と</rt></ruby>っても いいですか。", jaPlain: "はい、わかりました。しゃしんを とっても いいですか。", romaji: "Hai, wakarimashita. Shashin o tottemo ii desu ka.", es: "Sí, entendido. ¿Puedo tomar fotos?", audio: "audio/u10_c3_l2_M.mp3" },
-      { speaker: "T", ja: "いいえ、<ruby>写真<rt>しゃしん</rt></ruby>を <ruby>撮<rt>と</rt></ruby>らないで ください。それから、<ruby>毎日<rt>まいにち</rt></ruby> <ruby>勉強<rt>べんきょう</rt></ruby>しなければ なりません。", jaPlain: "いいえ、しゃしんを とらないで ください。それから、まいにち べんきょうしなければ なりません。", romaji: "Iie, shashin o toranaide kudasai. Sorekara, mainichi benkyou shinakereba narimasen.", es: "No, por favor no tome fotos. Además, debe estudiar todos los días.", audio: "audio/u10_c3_l3_T.mp3", highlight: "勉強しなければなりません" },
-      { speaker: "M", ja: "そうですか。<ruby>毎日<rt>まいにち</rt></ruby> <ruby>来<rt>こ</rt></ruby>なければ なりませんか。", jaPlain: "そうですか。まいにち こなければ なりませんか。", romaji: "Sou desu ka. Mainichi konakereba narimasen ka.", es: "Ya veo. ¿Tengo que venir todos los días?", audio: "audio/u10_c3_l4_M.mp3", highlight: "来なければなりませんか" },
-      { speaker: "T", ja: "<ruby>土曜日<rt>どようび</rt></ruby>は <ruby>来<rt>こ</rt></ruby>なくても いいです。やすみです。", jaPlain: "どようびは こなくても いいです。やすみです。", romaji: "Doyoubi wa konakutemo ii desu. Yasumi desu.", es: "El sábado no es necesario venir. Es día libre.", audio: "audio/u10_c3_l5_T.mp3", highlight: "来なくてもいいです" },
-      { speaker: "M", ja: "わかりました。しゅくだいは <ruby>毎日<rt>まいにち</rt></ruby> しなければ なりませんか。", jaPlain: "わかりました。しゅくだいは まいにち しなければ なりませんか。", romaji: "Wakarimashita. Shukudai wa mainichi shinakereba narimasen ka.", es: "Entendido. ¿Tengo que hacer la tarea todos los días?", audio: "audio/u10_c3_l6_M.mp3" },
-      { speaker: "T", ja: "はい、しゅくだいは <ruby>毎日<rt>まいにち</rt></ruby> しなければ なりません。でも <ruby>長<rt>なが</rt></ruby>く しなくても いいです。", jaPlain: "はい、しゅくだいは まいにち しなければ なりません。でも ながく しなくても いいです。", romaji: "Hai, shukudai wa mainichi shinakereba narimasen. Demo nagaku shinakutemo ii desu.", es: "Sí, la tarea debe hacerla todos los días. Pero no es necesario hacerla por mucho tiempo.", audio: "audio/u10_c3_l7_T.mp3" }
+      { speaker: "T", ja: "マリアさん、<ruby>教室<rt>きょうしつ</rt></ruby>で <ruby>話<rt>はな</rt></ruby>さないで ください。", jaPlain: "マリアさん、きょうしつで はなさないで ください。", romaji: "Maria-san, kyoushitsu de hanasanaide kudasai.", es: "María, por favor no hable en el aula.", highlight: "話さないでください" },
+      { speaker: "M", ja: "はい、わかりました。<ruby>写真<rt>しゃしん</rt></ruby>を <ruby>撮<rt>と</rt></ruby>っても いいですか。", jaPlain: "はい、わかりました。しゃしんを とっても いいですか。", romaji: "Hai, wakarimashita. Shashin o tottemo ii desu ka.", es: "Sí, entendido. ¿Puedo tomar fotos?", },
+      { speaker: "T", ja: "いいえ、<ruby>写真<rt>しゃしん</rt></ruby>を <ruby>撮<rt>と</rt></ruby>らないで ください。それから、<ruby>毎日<rt>まいにち</rt></ruby> <ruby>勉強<rt>べんきょう</rt></ruby>しなければ なりません。", jaPlain: "いいえ、しゃしんを とらないで ください。それから、まいにち べんきょうしなければ なりません。", romaji: "Iie, shashin o toranaide kudasai. Sorekara, mainichi benkyou shinakereba narimasen.", es: "No, por favor no tome fotos. Además, debe estudiar todos los días.", highlight: "勉強しなければなりません" },
+      { speaker: "M", ja: "そうですか。<ruby>毎日<rt>まいにち</rt></ruby> <ruby>来<rt>こ</rt></ruby>なければ なりませんか。", jaPlain: "そうですか。まいにち こなければ なりませんか。", romaji: "Sou desu ka. Mainichi konakereba narimasen ka.", es: "Ya veo. ¿Tengo que venir todos los días?", highlight: "来なければなりませんか" },
+      { speaker: "T", ja: "<ruby>土曜日<rt>どようび</rt></ruby>は <ruby>来<rt>こ</rt></ruby>なくても いいです。やすみです。", jaPlain: "どようびは こなくても いいです。やすみです。", romaji: "Doyoubi wa konakutemo ii desu. Yasumi desu.", es: "El sábado no es necesario venir. Es día libre.", highlight: "来なくてもいいです" },
+      { speaker: "M", ja: "わかりました。しゅくだいは <ruby>毎日<rt>まいにち</rt></ruby> しなければ なりませんか。", jaPlain: "わかりました。しゅくだいは まいにち しなければ なりませんか。", romaji: "Wakarimashita. Shukudai wa mainichi shinakereba narimasen ka.", es: "Entendido. ¿Tengo que hacer la tarea todos los días?", },
+      { speaker: "T", ja: "はい、しゅくだいは <ruby>毎日<rt>まいにち</rt></ruby> しなければ なりません。でも <ruby>長<rt>なが</rt></ruby>く しなくても いいです。", jaPlain: "はい、しゅくだいは まいにち しなければ なりません。でも ながく しなくても いいです。", romaji: "Hai, shukudai wa mainichi shinakereba narimasen. Demo nagaku shinakutemo ii desu.", es: "Sí, la tarea debe hacerla todos los días. Pero no es necesario hacerla por mucho tiempo.", }
     ]
   },
   explain: {
@@ -27126,14 +26977,14 @@ window.canDoData.push({
   },
   escuchar: {
     items: [
-      { type: "audio_meaning", text: "ここで <ruby>写真<rt>しゃしん</rt></ruby>を <ruby>撮<rt>と</rt></ruby>らないで ください。", audio: "audio/u10_c3_e1.mp3", promptEs: "¿Qué dice el audio?", options: [{ja:"<ruby>写真<rt>しゃしん</rt></ruby>を <ruby>撮<rt>と</rt></ruby>らないで ください", es:"Por favor no tome fotos aquí."}, {ja:"<ruby>写真<rt>しゃしん</rt></ruby>を <ruby>撮<rt>と</rt></ruby>っても いいです", es:"Puede tomar fotos."}, {ja:"<ruby>写真<rt>しゃしん</rt></ruby>を <ruby>撮<rt>と</rt></ruby>らなければ なりません", es:"Debe tomar fotos."}, {ja:"<ruby>写真<rt>しゃしん</rt></ruby>を <ruby>撮<rt>と</rt></ruby>りません", es:"No tomo fotos."}], answer: 0 },
-      { type: "audio_meaning", text: "<ruby>毎日<rt>まいにち</rt></ruby> <ruby>勉強<rt>べんきょう</rt></ruby>しなければ なりません。", audio: "audio/u10_c3_e2.mp3", promptEs: "¿Qué dice el audio?", options: [{ja:"<ruby>勉強<rt>べんきょう</rt></ruby>しなければ なりません", es:"Debo estudiar todos los días."}, {ja:"<ruby>勉強<rt>べんきょう</rt></ruby>しないで ください", es:"Por favor no estudie."}, {ja:"<ruby>勉強<rt>べんきょう</rt></ruby>しなくても いいです", es:"No es necesario estudiar."}, {ja:"<ruby>勉強<rt>べんきょう</rt></ruby>します", es:"Estudio."}], answer: 0 },
-      { type: "audio_meaning", text: "<ruby>今日<rt>きょう</rt></ruby>は <ruby>来<rt>こ</rt></ruby>なくても いいです。", audio: "audio/u10_c3_e3.mp3", promptEs: "¿Qué dice el audio?", options: [{ja:"<ruby>来<rt>こ</rt></ruby>なくても いいです", es:"Hoy no es necesario venir."}, {ja:"<ruby>来<rt>こ</rt></ruby>ないで ください", es:"Por favor no venga."}, {ja:"<ruby>来<rt>こ</rt></ruby>なければ なりません", es:"Debe venir."}, {ja:"<ruby>来<rt>き</rt></ruby>ます", es:"Vengo."}], answer: 0 },
-      { type: "audio_meaning", text: "おそく <ruby>来<rt>こ</rt></ruby>ないで ください。", audio: "audio/u10_c3_e4.mp3", promptEs: "¿Qué dice el audio?", options: [{ja:"おそく <ruby>来<rt>こ</rt></ruby>ないで ください", es:"Por favor no llegue tarde."}, {ja:"はやく <ruby>来<rt>き</rt></ruby>ます", es:"Vengo temprano."}, {ja:"<ruby>来<rt>こ</rt></ruby>なくても いいです", es:"No es necesario venir."}, {ja:"<ruby>来<rt>こ</rt></ruby>なければ なりません", es:"Debe venir."}], answer: 0 },
-      { type: "audio_match", text: "<ruby>教室<rt>きょうしつ</rt></ruby>で <ruby>話<rt>はな</rt></ruby>さないで ください。しずかに して ください。", audio: "audio/u10_c3_e5.mp3", promptEs: "¿En qué situación se diría esto?", options: ["En una biblioteca o aula durante un examen.", "En una fiesta con amigos.", "En una conversación informal.", "En el supermercado."], answer: 0 },
-      { type: "audio_match", text: "<ruby>毎日<rt>まいにち</rt></ruby> しゅくだいを しなければ なりません。", audio: "audio/u10_c3_e6.mp3", promptEs: "¿Qué expresa esta frase?", options: ["Una obligación diaria.", "Una prohibición.", "Una opción libre.", "Un deseo personal."], answer: 0 },
-      { type: "audio_match", text: "<ruby>土曜日<rt>どようび</rt></ruby>は <ruby>学校<rt>がっこう</rt></ruby>へ <ruby>来<rt>こ</rt></ruby>なくても いいです。", audio: "audio/u10_c3_e7.mp3", promptEs: "¿Qué información nos da el hablante?", options: ["El sábado no es necesario venir a la escuela.", "El sábado hay que venir a la escuela.", "El sábado está prohibido venir.", "El sábado hay examen."], answer: 0 },
-      { type: "audio_match", text: "ここで タバコを <ruby>吸<rt>す</rt></ruby>わないで ください。", audio: "audio/u10_c3_e8.mp3", promptEs: "¿Qué está haciendo el hablante?", options: ["Pidiendo que no fume.", "Ofreciendo un cigarrillo.", "Diciendo que es obligatorio fumar.", "Pidiendo fuego."], answer: 0 }
+      { type: "audio_meaning", text: "ここで <ruby>写真<rt>しゃしん</rt></ruby>を <ruby>撮<rt>と</rt></ruby>らないで ください。", promptEs: "¿Qué dice el audio?", options: [{ja:"<ruby>写真<rt>しゃしん</rt></ruby>を <ruby>撮<rt>と</rt></ruby>らないで ください", es:"Por favor no tome fotos aquí."}, {ja:"<ruby>写真<rt>しゃしん</rt></ruby>を <ruby>撮<rt>と</rt></ruby>っても いいです", es:"Puede tomar fotos."}, {ja:"<ruby>写真<rt>しゃしん</rt></ruby>を <ruby>撮<rt>と</rt></ruby>らなければ なりません", es:"Debe tomar fotos."}, {ja:"<ruby>写真<rt>しゃしん</rt></ruby>を <ruby>撮<rt>と</rt></ruby>りません", es:"No tomo fotos."}], answer: 0 },
+      { type: "audio_meaning", text: "<ruby>毎日<rt>まいにち</rt></ruby> <ruby>勉強<rt>べんきょう</rt></ruby>しなければ なりません。", promptEs: "¿Qué dice el audio?", options: [{ja:"<ruby>勉強<rt>べんきょう</rt></ruby>しなければ なりません", es:"Debo estudiar todos los días."}, {ja:"<ruby>勉強<rt>べんきょう</rt></ruby>しないで ください", es:"Por favor no estudie."}, {ja:"<ruby>勉強<rt>べんきょう</rt></ruby>しなくても いいです", es:"No es necesario estudiar."}, {ja:"<ruby>勉強<rt>べんきょう</rt></ruby>します", es:"Estudio."}], answer: 0 },
+      { type: "audio_meaning", text: "<ruby>今日<rt>きょう</rt></ruby>は <ruby>来<rt>こ</rt></ruby>なくても いいです。", promptEs: "¿Qué dice el audio?", options: [{ja:"<ruby>来<rt>こ</rt></ruby>なくても いいです", es:"Hoy no es necesario venir."}, {ja:"<ruby>来<rt>こ</rt></ruby>ないで ください", es:"Por favor no venga."}, {ja:"<ruby>来<rt>こ</rt></ruby>なければ なりません", es:"Debe venir."}, {ja:"<ruby>来<rt>き</rt></ruby>ます", es:"Vengo."}], answer: 0 },
+      { type: "audio_meaning", text: "おそく <ruby>来<rt>こ</rt></ruby>ないで ください。", promptEs: "¿Qué dice el audio?", options: [{ja:"おそく <ruby>来<rt>こ</rt></ruby>ないで ください", es:"Por favor no llegue tarde."}, {ja:"はやく <ruby>来<rt>き</rt></ruby>ます", es:"Vengo temprano."}, {ja:"<ruby>来<rt>こ</rt></ruby>なくても いいです", es:"No es necesario venir."}, {ja:"<ruby>来<rt>こ</rt></ruby>なければ なりません", es:"Debe venir."}], answer: 0 },
+      { type: "audio_match", text: "<ruby>教室<rt>きょうしつ</rt></ruby>で <ruby>話<rt>はな</rt></ruby>さないで ください。しずかに して ください。", promptEs: "¿En qué situación se diría esto?", options: ["En una biblioteca o aula durante un examen.", "En una fiesta con amigos.", "En una conversación informal.", "En el supermercado."], answer: 0 },
+      { type: "audio_match", text: "<ruby>毎日<rt>まいにち</rt></ruby> しゅくだいを しなければ なりません。", promptEs: "¿Qué expresa esta frase?", options: ["Una obligación diaria.", "Una prohibición.", "Una opción libre.", "Un deseo personal."], answer: 0 },
+      { type: "audio_match", text: "<ruby>土曜日<rt>どようび</rt></ruby>は <ruby>学校<rt>がっこう</rt></ruby>へ <ruby>来<rt>こ</rt></ruby>なくても いいです。", promptEs: "¿Qué información nos da el hablante?", options: ["El sábado no es necesario venir a la escuela.", "El sábado hay que venir a la escuela.", "El sábado está prohibido venir.", "El sábado hay examen."], answer: 0 },
+      { type: "audio_match", text: "ここで タバコを <ruby>吸<rt>す</rt></ruby>わないで ください。", promptEs: "¿Qué está haciendo el hablante?", options: ["Pidiendo que no fume.", "Ofreciendo un cigarrillo.", "Diciendo que es obligatorio fumar.", "Pidiendo fuego."], answer: 0 }
     ]
   },
   challenge: {
@@ -27165,12 +27016,12 @@ window.canDoData.push({
     title: "Razones y contrastes",
     contextEs: "María cuenta a Tanaka cómo ha sido su día, conectando ideas con だから, でも, そして, それから, それに.",
     lines: [
-      { speaker: "T", ja: "マリアさん、<ruby>今日<rt>きょう</rt></ruby>は どうでしたか。", jaPlain: "マリアさん、きょうは どうでしたか。", romaji: "Maria-san, kyou wa dou deshita ka.", es: "María, ¿qué tal hoy?", audio: "audio/u10_c4_l1_T.mp3" },
-      { speaker: "M", ja: "あしたは しけんが あります。だから、<ruby>今日<rt>きょう</rt></ruby>は <ruby>勉強<rt>べんきょう</rt></ruby>しました。", jaPlain: "あしたは しけんが あります。だから、きょうは べんきょうしました。", romaji: "Ashita wa shiken ga arimasu. Dakara, kyou wa benkyou shimashita.", es: "Mañana tengo examen. Por eso, hoy estudié.", audio: "audio/u10_c4_l2_M.mp3", highlight: "だから" },
-      { speaker: "T", ja: "そうですか。<ruby>疲<rt>つか</rt></ruby>れましたか。", jaPlain: "そうですか。つかれましたか。", romaji: "Sou desu ka. Tsukaremashita ka.", es: "Ya veo. ¿Estás cansada?", audio: "audio/u10_c4_l3_T.mp3" },
-      { speaker: "M", ja: "はい、<ruby>疲<rt>つか</rt></ruby>れました。でも、もう <ruby>少<rt>すこ</rt></ruby>し <ruby>頑張<rt>がんば</rt></ruby>ります。それに、しけんは とても <ruby>大切<rt>たいせつ</rt></ruby>です。", jaPlain: "はい、つかれました。でも、もう すこし がんばります。それに、しけんは とても たいせつです。", romaji: "Hai, tsukaremashita. Demo, mou sukoshi ganbarimasu. Soreni, shiken wa totemo taisetsu desu.", es: "Sí, estoy cansada. Pero voy a esforzarme un poco más. Además, el examen es muy importante.", audio: "audio/u10_c4_l4_M.mp3", highlight: "でも / それに" },
-      { speaker: "T", ja: "<ruby>明日<rt>あした</rt></ruby> しけんが <ruby>終<rt>お</rt></ruby>わってから、<ruby>何<rt>なに</rt></ruby>を しますか。", jaPlain: "あした しけんが おわってから、なにを しますか。", romaji: "Ashita shiken ga owatte kara, nani o shimasu ka.", es: "Después de que termine el examen mañana, ¿qué harás?", audio: "audio/u10_c4_l5_T.mp3" },
-      { speaker: "M", ja: "ともだちと <ruby>映画<rt>えいが</rt></ruby>を <ruby>見<rt>み</rt></ruby>ます。そして、ごはんを <ruby>食<rt>た</rt></ruby>べます。それから、うちへ <ruby>帰<rt>かえ</rt></ruby>ります。", jaPlain: "ともだちと えいがを みます。そして、ごはんを たべます。それから、うちへ かえります。", romaji: "Tomodachi to eiga o mimasu. Soshite, gohan o tabemasu. Sorekara, uchi e kaerimasu.", es: "Voy a ver una película con amigos. Y luego comeré. Después de eso, volveré a casa.", audio: "audio/u10_c4_l6_M.mp3", highlight: "そして / それから" }
+      { speaker: "T", ja: "マリアさん、<ruby>今日<rt>きょう</rt></ruby>は どうでしたか。", jaPlain: "マリアさん、きょうは どうでしたか。", romaji: "Maria-san, kyou wa dou deshita ka.", es: "María, ¿qué tal hoy?", },
+      { speaker: "M", ja: "あしたは しけんが あります。だから、<ruby>今日<rt>きょう</rt></ruby>は <ruby>勉強<rt>べんきょう</rt></ruby>しました。", jaPlain: "あしたは しけんが あります。だから、きょうは べんきょうしました。", romaji: "Ashita wa shiken ga arimasu. Dakara, kyou wa benkyou shimashita.", es: "Mañana tengo examen. Por eso, hoy estudié.", highlight: "だから" },
+      { speaker: "T", ja: "そうですか。<ruby>疲<rt>つか</rt></ruby>れましたか。", jaPlain: "そうですか。つかれましたか。", romaji: "Sou desu ka. Tsukaremashita ka.", es: "Ya veo. ¿Estás cansada?", },
+      { speaker: "M", ja: "はい、<ruby>疲<rt>つか</rt></ruby>れました。でも、もう <ruby>少<rt>すこ</rt></ruby>し <ruby>頑張<rt>がんば</rt></ruby>ります。それに、しけんは とても <ruby>大切<rt>たいせつ</rt></ruby>です。", jaPlain: "はい、つかれました。でも、もう すこし がんばります。それに、しけんは とても たいせつです。", romaji: "Hai, tsukaremashita. Demo, mou sukoshi ganbarimasu. Soreni, shiken wa totemo taisetsu desu.", es: "Sí, estoy cansada. Pero voy a esforzarme un poco más. Además, el examen es muy importante.", highlight: "でも / それに" },
+      { speaker: "T", ja: "<ruby>明日<rt>あした</rt></ruby> しけんが <ruby>終<rt>お</rt></ruby>わってから、<ruby>何<rt>なに</rt></ruby>を しますか。", jaPlain: "あした しけんが おわってから、なにを しますか。", romaji: "Ashita shiken ga owatte kara, nani o shimasu ka.", es: "Después de que termine el examen mañana, ¿qué harás?", },
+      { speaker: "M", ja: "ともだちと <ruby>映画<rt>えいが</rt></ruby>を <ruby>見<rt>み</rt></ruby>ます。そして、ごはんを <ruby>食<rt>た</rt></ruby>べます。それから、うちへ <ruby>帰<rt>かえ</rt></ruby>ります。", jaPlain: "ともだちと えいがを みます。そして、ごはんを たべます。それから、うちへ かえります。", romaji: "Tomodachi to eiga o mimasu. Soshite, gohan o tabemasu. Sorekara, uchi e kaerimasu.", es: "Voy a ver una película con amigos. Y luego comeré. Después de eso, volveré a casa.", highlight: "そして / それから" }
     ]
   },
   explain: {
@@ -27231,12 +27082,12 @@ window.canDoData.push({
     title: "宿題を教えてもらう",
     contextEs: "Tanaka le pide a María que le ayude con la tarea de japonés. Usan 〜てください para hacer peticiones y 〜ています para describir lo que están haciendo.",
     lines: [
-      { speaker: "T", ja: "マリアさん、この <ruby>漢字<rt>かんじ</rt></ruby>を <ruby>教<rt>おし</rt></ruby>えて ください。", jaPlain: "マリアさん、この かんじを おしえて ください。", romaji: "Maria-san, kono kanji o oshiete kudasai.", es: "María, por favor enséñame este kanji.", audio: "audio/u10_c6_l1_T.mp3", highlight: ["おしえてください"] },
-      { speaker: "M", ja: "いま <ruby>辞書<rt>じしょ</rt></ruby>を <ruby>調<rt>しら</rt></ruby>べています。ちょっと まって ください。", jaPlain: "いま じしょを しらべています。ちょっと まって ください。", romaji: "Ima jisho o shirabete imasu. Chotto matte kudasai.", es: "Ahora estoy consultando el diccionario. Espera un momento, por favor.", audio: "audio/u10_c6_l2_M.mp3", highlight: ["しらべています", "まってください"] },
-      { speaker: "T", ja: "ありがとう。もう <ruby>少<rt>すこ</rt></ruby>し ゆっくり <ruby>話<rt>はな</rt></ruby>して ください。", jaPlain: "ありがとう。もう すこし ゆっくり はなして ください。", romaji: "Arigatou. Mou sukoshi yukkuri hanashite kudasai.", es: "Gracias. Por favor habla un poco más despacio.", audio: "audio/u10_c6_l3_T.mp3", highlight: ["はなしてください"] },
-      { speaker: "M", ja: "わかりました。マリアは <ruby>毎日<rt>まいにち</rt></ruby> <ruby>日本語<rt>にほんご</rt></ruby>を <ruby>練習<rt>れんしゅう</rt></ruby>しています。", jaPlain: "わかりました。マリアは まいにち にほんごを れんしゅうしています。", romaji: "Wakarimashita. Maria wa mainichi Nihongo o renshuu shite imasu.", es: "Entendido. María practica japonés todos los días.", audio: "audio/u10_c6_l4_M.mp3", highlight: ["れんしゅうしています"] },
-      { speaker: "T", ja: "すごいですね。<ruby>今<rt>いま</rt></ruby>は <ruby>何<rt>なに</rt></ruby>を <ruby>勉強<rt>べんきょう</rt></ruby>していますか。", jaPlain: "すごいですね。いまは なにを べんきょうしていますか。", romaji: "Sugoi desu ne. Ima wa nani o benkyou shite imasu ka.", es: "¡Qué bien! ¿Qué estás estudiando ahora?", audio: "audio/u10_c6_l5_T.mp3" },
-      { speaker: "M", ja: "<ruby>漢字<rt>かんじ</rt></ruby>を <ruby>勉強<rt>べんきょう</rt></ruby>しています。<ruby>難<rt>むずか</rt></ruby>しいですが、がんばっています。", jaPlain: "かんじを べんきょうしています。むずかしいですが、がんばっています。", romaji: "Kanji o benkyou shite imasu. Muzukashii desu ga, ganbatte imasu.", es: "Estoy estudiando kanji. Es difícil, pero me estoy esforzando.", audio: "audio/u10_c6_l6_M.mp3", highlight: ["べんきょうしています", "がんばっています"] }
+      { speaker: "T", ja: "マリアさん、この <ruby>漢字<rt>かんじ</rt></ruby>を <ruby>教<rt>おし</rt></ruby>えて ください。", jaPlain: "マリアさん、この かんじを おしえて ください。", romaji: "Maria-san, kono kanji o oshiete kudasai.", es: "María, por favor enséñame este kanji.", highlight: ["おしえてください"] },
+      { speaker: "M", ja: "いま <ruby>辞書<rt>じしょ</rt></ruby>を <ruby>調<rt>しら</rt></ruby>べています。ちょっと まって ください。", jaPlain: "いま じしょを しらべています。ちょっと まって ください。", romaji: "Ima jisho o shirabete imasu. Chotto matte kudasai.", es: "Ahora estoy consultando el diccionario. Espera un momento, por favor.", highlight: ["しらべています", "まってください"] },
+      { speaker: "T", ja: "ありがとう。もう <ruby>少<rt>すこ</rt></ruby>し ゆっくり <ruby>話<rt>はな</rt></ruby>して ください。", jaPlain: "ありがとう。もう すこし ゆっくり はなして ください。", romaji: "Arigatou. Mou sukoshi yukkuri hanashite kudasai.", es: "Gracias. Por favor habla un poco más despacio.", highlight: ["はなしてください"] },
+      { speaker: "M", ja: "わかりました。マリアは <ruby>毎日<rt>まいにち</rt></ruby> <ruby>日本語<rt>にほんご</rt></ruby>を <ruby>練習<rt>れんしゅう</rt></ruby>しています。", jaPlain: "わかりました。マリアは まいにち にほんごを れんしゅうしています。", romaji: "Wakarimashita. Maria wa mainichi Nihongo o renshuu shite imasu.", es: "Entendido. María practica japonés todos los días.", highlight: ["れんしゅうしています"] },
+      { speaker: "T", ja: "すごいですね。<ruby>今<rt>いま</rt></ruby>は <ruby>何<rt>なに</rt></ruby>を <ruby>勉強<rt>べんきょう</rt></ruby>していますか。", jaPlain: "すごいですね。いまは なにを べんきょうしていますか。", romaji: "Sugoi desu ne. Ima wa nani o benkyou shite imasu ka.", es: "¡Qué bien! ¿Qué estás estudiando ahora?", },
+      { speaker: "M", ja: "<ruby>漢字<rt>かんじ</rt></ruby>を <ruby>勉強<rt>べんきょう</rt></ruby>しています。<ruby>難<rt>むずか</rt></ruby>しいですが、がんばっています。", jaPlain: "かんじを べんきょうしています。むずかしいですが、がんばっています。", romaji: "Kanji o benkyou shite imasu. Muzukashii desu ga, ganbatte imasu.", es: "Estoy estudiando kanji. Es difícil, pero me estoy esforzando.", highlight: ["べんきょうしています", "がんばっています"] }
     ]
   },
   explain: {
@@ -27287,12 +27138,12 @@ window.canDoData.push({
     title: "図書館で",
     contextEs: "María visita una biblioteca con Tanaka. María pregunta qué puede y no puede hacer.",
     lines: [
-      { speaker: "M", ja: "すみません、ここで <ruby>写真<rt>しゃしん</rt></ruby>を <ruby>撮<rt>と</rt></ruby>っても いいですか。", jaPlain: "すみません、ここで しゃしんを とっても いいですか。", romaji: "Sumimasen, koko de shashin o tottemo ii desu ka.", es: "Disculpa, ¿puedo tomar fotos aquí?", audio: "audio/u10_c7_l1_M.mp3", highlight: ["とってもいいですか"] },
-      { speaker: "T", ja: "いいえ、<ruby>写真<rt>しゃしん</rt></ruby>を <ruby>撮<rt>と</rt></ruby>っては いけません。ここは としょかんです。", jaPlain: "いいえ、しゃしんを とっては いけません。ここは としょかんです。", romaji: "Iie, shashin o totte wa ikemasen. Koko wa toshokan desu.", es: "No, no está permitido tomar fotos. Aquí es una biblioteca.", audio: "audio/u10_c7_l2_T.mp3", highlight: ["とってはいけません"] },
-      { speaker: "M", ja: "そうですか。<ruby>携帯<rt>けいたい</rt></ruby>を つかっても いいですか。", jaPlain: "そうですか。けいたいを つかっても いいですか。", romaji: "Sou desu ka. Keitai o tsukattemo ii desu ka.", es: "Ya veo. ¿Puedo usar el celular?", audio: "audio/u10_c7_l3_M.mp3", highlight: ["つかってもいいですか"] },
-      { speaker: "T", ja: "<ruby>携帯<rt>けいたい</rt></ruby>を つかっては いけません。でも、<ruby>本<rt>ほん</rt></ruby>を <ruby>読<rt>よ</rt></ruby>んでも いいです。", jaPlain: "けいたいを つかっては いけません。でも、ほんを よんでも いいです。", romaji: "Keitai o tsukatte wa ikemasen. Demo, hon o yondemo ii desu.", es: "No se puede usar el celular. Pero sí se puede leer libros.", audio: "audio/u10_c7_l4_T.mp3", highlight: ["つかってはいけません", "よんでもいいです"] },
-      { speaker: "M", ja: "ここで <ruby>食<rt>た</rt></ruby>べても いいですか。", jaPlain: "ここで たべても いいですか。", romaji: "Koko de tabetemo ii desu ka.", es: "¿Puedo comer aquí?", audio: "audio/u10_c7_l5_M.mp3" },
-      { speaker: "T", ja: "いいえ、ここで <ruby>食<rt>た</rt></ruby>べては いけません。でも、<ruby>水<rt>みず</rt></ruby>を <ruby>飲<rt>の</rt></ruby>んでも いいです。", jaPlain: "いいえ、ここで たべては いけません。でも、みずを のんでも いいです。", romaji: "Iie, koko de tabete wa ikemasen. Demo, mizu o nondemo ii desu.", es: "No, no se puede comer aquí. Pero sí se puede beber agua.", audio: "audio/u10_c7_l6_T.mp3", highlight: ["たべてはいけません", "のんでもいいです"] }
+      { speaker: "M", ja: "すみません、ここで <ruby>写真<rt>しゃしん</rt></ruby>を <ruby>撮<rt>と</rt></ruby>っても いいですか。", jaPlain: "すみません、ここで しゃしんを とっても いいですか。", romaji: "Sumimasen, koko de shashin o tottemo ii desu ka.", es: "Disculpa, ¿puedo tomar fotos aquí?", highlight: ["とってもいいですか"] },
+      { speaker: "T", ja: "いいえ、<ruby>写真<rt>しゃしん</rt></ruby>を <ruby>撮<rt>と</rt></ruby>っては いけません。ここは としょかんです。", jaPlain: "いいえ、しゃしんを とっては いけません。ここは としょかんです。", romaji: "Iie, shashin o totte wa ikemasen. Koko wa toshokan desu.", es: "No, no está permitido tomar fotos. Aquí es una biblioteca.", highlight: ["とってはいけません"] },
+      { speaker: "M", ja: "そうですか。<ruby>携帯<rt>けいたい</rt></ruby>を つかっても いいですか。", jaPlain: "そうですか。けいたいを つかっても いいですか。", romaji: "Sou desu ka. Keitai o tsukattemo ii desu ka.", es: "Ya veo. ¿Puedo usar el celular?", highlight: ["つかってもいいですか"] },
+      { speaker: "T", ja: "<ruby>携帯<rt>けいたい</rt></ruby>を つかっては いけません。でも、<ruby>本<rt>ほん</rt></ruby>を <ruby>読<rt>よ</rt></ruby>んでも いいです。", jaPlain: "けいたいを つかっては いけません。でも、ほんを よんでも いいです。", romaji: "Keitai o tsukatte wa ikemasen. Demo, hon o yondemo ii desu.", es: "No se puede usar el celular. Pero sí se puede leer libros.", highlight: ["つかってはいけません", "よんでもいいです"] },
+      { speaker: "M", ja: "ここで <ruby>食<rt>た</rt></ruby>べても いいですか。", jaPlain: "ここで たべても いいですか。", romaji: "Koko de tabetemo ii desu ka.", es: "¿Puedo comer aquí?", },
+      { speaker: "T", ja: "いいえ、ここで <ruby>食<rt>た</rt></ruby>べては いけません。でも、<ruby>水<rt>みず</rt></ruby>を <ruby>飲<rt>の</rt></ruby>んでも いいです。", jaPlain: "いいえ、ここで たべては いけません。でも、みずを のんでも いいです。", romaji: "Iie, koko de tabete wa ikemasen. Demo, mizu o nondemo ii desu.", es: "No, no se puede comer aquí. Pero sí se puede beber agua.", highlight: ["たべてはいけません", "のんでもいいです"] }
     ]
   },
   explain: {
@@ -27343,13 +27194,13 @@ window.canDoData.push({
     title: "Cómo paso el fin de semana",
     contextEs: "María y Tanaka hablan sobre lo que suelen hacer los fines de semana. Usan 〜たり〜たりします para enumerar actividades y 〜ています para hábitos.",
     lines: [
-      { speaker: "T", ja: "マリアさん、<ruby>週末<rt>しゅうまつ</rt></ruby>は <ruby>何<rt>なに</rt></ruby>を しますか。", jaPlain: "マリアさん、しゅうまつは なにを しますか。", romaji: "Maria-san, shuumatsu wa nani o shimasu ka.", es: "María, ¿qué haces los fines de semana?", audio: "audio/u10_c8_l1_T.mp3" },
-      { speaker: "M", ja: "<ruby>映画<rt>えいが</rt></ruby>を <ruby>見<rt>み</rt></ruby>たり、<ruby>本<rt>ほん</rt></ruby>を <ruby>読<rt>よ</rt></ruby>んだり します。", jaPlain: "えいがを みたり、ほんを よんだり します。", romaji: "Eiga o mitari, hon o yondari shimasu.", es: "Veo películas, leo libros, ese tipo de cosas.", audio: "audio/u10_c8_l2_M.mp3", highlight: ["みたり", "よんだりします"] },
-      { speaker: "T", ja: "いいですね。<ruby>毎朝<rt>まいあさ</rt></ruby>は <ruby>何<rt>なに</rt></ruby>を していますか。", jaPlain: "いいですね。まいあさは なにを していますか。", romaji: "Ii desu ne. Maiasa wa nani o shite imasu ka.", es: "Qué bien. ¿Qué sueles hacer cada mañana?", audio: "audio/u10_c8_l3_T.mp3" },
-      { speaker: "M", ja: "<ruby>毎朝<rt>まいあさ</rt></ruby> ジョギングを しています。それから、コーヒーを <ruby>飲<rt>の</rt></ruby>んでいます。", jaPlain: "まいあさ ジョギングを しています。それから、コーヒーを のんでいます。", romaji: "Maiasa jogingu o shite imasu. Sorekara, koohii o nonde imasu.", es: "Cada mañana hago jogging (hábito). Luego bebo café.", audio: "audio/u10_c8_l4_M.mp3", highlight: ["しています", "のんでいます"] },
-      { speaker: "T", ja: "<ruby>田中<rt>たなか</rt></ruby>は <ruby>週末<rt>しゅうまつ</rt></ruby>に <ruby>料理<rt>りょうり</rt></ruby>を したり、<ruby>散歩<rt>さんぽ</rt></ruby>したり します。", jaPlain: "たなかは しゅうまつに りょうりを したり、さんぽしたり します。", romaji: "Tanaka wa shuumatsu ni ryouri o shitari, sanpo shitari shimasu.", es: "Tanaka cocina, pasea, ese tipo de cosas los fines de semana.", audio: "audio/u10_c8_l5_T.mp3", highlight: ["したり", "さんぽしたりします"] },
-      { speaker: "M", ja: "いいですね。<ruby>田中<rt>たなか</rt></ruby>さんも <ruby>毎日<rt>まいにち</rt></ruby> <ruby>運動<rt>うんどう</rt></ruby>を していますか。", jaPlain: "いいですね。たなかさんも まいにち うんどうを していますか。", romaji: "Ii desu ne. Tanaka-san mo mainichi undou o shite imasu ka.", es: "Qué bueno. ¿Tú también haces ejercicio todos los días?", audio: "audio/u10_c8_l6_M.mp3" },
-      { speaker: "T", ja: "いいえ、<ruby>週末<rt>しゅうまつ</rt></ruby>だけです。<ruby>平日<rt>へいじつ</rt></ruby>は <ruby>仕事<rt>しごと</rt></ruby>を しています。", jaPlain: "いいえ、しゅうまつだけです。へいじつは しごとを しています。", romaji: "Iie, shuumatsu dake desu. Heijitsu wa shigoto o shite imasu.", es: "No, solo los fines de semana. Entre semana estoy trabajando (hábito).", audio: "audio/u10_c8_l7_T.mp3", highlight: ["しています"] }
+      { speaker: "T", ja: "マリアさん、<ruby>週末<rt>しゅうまつ</rt></ruby>は <ruby>何<rt>なに</rt></ruby>を しますか。", jaPlain: "マリアさん、しゅうまつは なにを しますか。", romaji: "Maria-san, shuumatsu wa nani o shimasu ka.", es: "María, ¿qué haces los fines de semana?", },
+      { speaker: "M", ja: "<ruby>映画<rt>えいが</rt></ruby>を <ruby>見<rt>み</rt></ruby>たり、<ruby>本<rt>ほん</rt></ruby>を <ruby>読<rt>よ</rt></ruby>んだり します。", jaPlain: "えいがを みたり、ほんを よんだり します。", romaji: "Eiga o mitari, hon o yondari shimasu.", es: "Veo películas, leo libros, ese tipo de cosas.", highlight: ["みたり", "よんだりします"] },
+      { speaker: "T", ja: "いいですね。<ruby>毎朝<rt>まいあさ</rt></ruby>は <ruby>何<rt>なに</rt></ruby>を していますか。", jaPlain: "いいですね。まいあさは なにを していますか。", romaji: "Ii desu ne. Maiasa wa nani o shite imasu ka.", es: "Qué bien. ¿Qué sueles hacer cada mañana?", },
+      { speaker: "M", ja: "<ruby>毎朝<rt>まいあさ</rt></ruby> ジョギングを しています。それから、コーヒーを <ruby>飲<rt>の</rt></ruby>んでいます。", jaPlain: "まいあさ ジョギングを しています。それから、コーヒーを のんでいます。", romaji: "Maiasa jogingu o shite imasu. Sorekara, koohii o nonde imasu.", es: "Cada mañana hago jogging (hábito). Luego bebo café.", highlight: ["しています", "のんでいます"] },
+      { speaker: "T", ja: "<ruby>田中<rt>たなか</rt></ruby>は <ruby>週末<rt>しゅうまつ</rt></ruby>に <ruby>料理<rt>りょうり</rt></ruby>を したり、<ruby>散歩<rt>さんぽ</rt></ruby>したり します。", jaPlain: "たなかは しゅうまつに りょうりを したり、さんぽしたり します。", romaji: "Tanaka wa shuumatsu ni ryouri o shitari, sanpo shitari shimasu.", es: "Tanaka cocina, pasea, ese tipo de cosas los fines de semana.", highlight: ["したり", "さんぽしたりします"] },
+      { speaker: "M", ja: "いいですね。<ruby>田中<rt>たなか</rt></ruby>さんも <ruby>毎日<rt>まいにち</rt></ruby> <ruby>運動<rt>うんどう</rt></ruby>を していますか。", jaPlain: "いいですね。たなかさんも まいにち うんどうを していますか。", romaji: "Ii desu ne. Tanaka-san mo mainichi undou o shite imasu ka.", es: "Qué bueno. ¿Tú también haces ejercicio todos los días?", },
+      { speaker: "T", ja: "いいえ、<ruby>週末<rt>しゅうまつ</rt></ruby>だけです。<ruby>平日<rt>へいじつ</rt></ruby>は <ruby>仕事<rt>しごと</rt></ruby>を しています。", jaPlain: "いいえ、しゅうまつだけです。へいじつは しごとを しています。", romaji: "Iie, shuumatsu dake desu. Heijitsu wa shigoto o shite imasu.", es: "No, solo los fines de semana. Entre semana estoy trabajando (hábito).", highlight: ["しています"] }
     ]
   },
   explain: {
@@ -27443,13 +27294,13 @@ window.canDoData.push({
     title: "El horario de un día",
     contextEs: "María y Tanaka comparan sus rutinas diarias. Usan 〜てから, 〜たことがある, formas ない y conjunciones.",
     lines: [
-      { speaker: "T", ja: "マリアさん、<ruby>毎日<rt>まいにち</rt></ruby>の スケジュールを <ruby>教<rt>おし</rt></ruby>えて ください。", jaPlain: "マリアさん、まいにちの スケジュールを おしえて ください。", romaji: "Maria-san, mainichi no sukejuuru o oshiete kudasai.", es: "María, cuéntame tu horario diario.", audio: "audio/u10_c5_l1_T.mp3" },
-      { speaker: "M", ja: "<ruby>毎朝<rt>まいあさ</rt></ruby> <ruby>6時<rt>ろくじ</rt></ruby>に <ruby>起<rt>お</rt></ruby>きてから、ジョギングを します。それから、シャワーを <ruby>浴<rt>あ</rt></ruby>びます。", jaPlain: "まいあさ 6時に おきてから、ジョギングを します。それから、シャワーを あびます。", romaji: "Maiasa rokuji ni okite kara, jogingu o shimasu. Sorekara, shawaa o abimasu.", es: "Cada mañana, después de levantarme a las 6, hago jogging. Luego me ducho.", audio: "audio/u10_c5_l2_M.mp3", highlight: "起きてから / それから" },
-      { speaker: "T", ja: "すごいですね。<ruby>運動<rt>うんどう</rt></ruby>を した ことが あまり ありません。", jaPlain: "すごいですね。うんどうを した ことが あまり ありません。", romaji: "Sugoi desu ne. Undou o shita koto ga amari arimasen.", es: "¡Qué bien! Yo casi nunca he hecho ejercicio.", audio: "audio/u10_c5_l3_T.mp3", highlight: "したことがあまりありません" },
-      { speaker: "M", ja: "<ruby>田中<rt>たなか</rt></ruby>さんは <ruby>朝<rt>あさ</rt></ruby> <ruby>何<rt>なに</rt></ruby>を しますか。", jaPlain: "たなかさんは あさ なにを しますか。", romaji: "Tanaka-san wa asa nani o shimasu ka.", es: "Tanaka, ¿qué hace por la mañana?", audio: "audio/u10_c5_l4_M.mp3" },
-      { speaker: "T", ja: "<ruby>朝<rt>あさ</rt></ruby>ごはんを <ruby>食<rt>た</rt></ruby>べてから、コーヒーを <ruby>飲<rt>の</rt></ruby>みます。でも、<ruby>今日<rt>きょう</rt></ruby>は しけんが あるから、コーヒーを <ruby>飲<rt>の</rt></ruby>まなければ なりません。", jaPlain: "あさごはんを たべてから、コーヒーを のみます。でも、きょうは しけんが あるから、コーヒーを のまなければ なりません。", romaji: "Asagohan o tabete kara, koohii o nomimasu. Demo, kyou wa shiken ga aru kara, koohii o nomanakereba narimasen.", es: "Después de desayunar, bebo café. Pero hoy hay examen, así que debo beber café.", audio: "audio/u10_c5_l5_T.mp3", highlight: "食べてから / でも / なければなりません" },
-      { speaker: "M", ja: "わたしも しけんが ありますか。", jaPlain: "わたしも しけんが ありますか。", romaji: "Watashi mo shiken ga arimasu ka.", es: "¿Yo también tengo examen?", audio: "audio/u10_c5_l6_M.mp3" },
-      { speaker: "T", ja: "いいえ、マリアさんは <ruby>今日<rt>きょう</rt></ruby>は <ruby>来<rt>こ</rt></ruby>なくても いいです。やすんで ください。", jaPlain: "いいえ、マリアさんは きょうは こなくても いいです。やすんで ください。", romaji: "Iie, Maria-san wa kyou wa konakutemo ii desu. Yasunde kudasai.", es: "No, María, hoy no es necesario que vengas. Descansa, por favor.", audio: "audio/u10_c5_l7_T.mp3", highlight: "来なくてもいいです" }
+      { speaker: "T", ja: "マリアさん、<ruby>毎日<rt>まいにち</rt></ruby>の スケジュールを <ruby>教<rt>おし</rt></ruby>えて ください。", jaPlain: "マリアさん、まいにちの スケジュールを おしえて ください。", romaji: "Maria-san, mainichi no sukejuuru o oshiete kudasai.", es: "María, cuéntame tu horario diario.", },
+      { speaker: "M", ja: "<ruby>毎朝<rt>まいあさ</rt></ruby> <ruby>6時<rt>ろくじ</rt></ruby>に <ruby>起<rt>お</rt></ruby>きてから、ジョギングを します。それから、シャワーを <ruby>浴<rt>あ</rt></ruby>びます。", jaPlain: "まいあさ 6時に おきてから、ジョギングを します。それから、シャワーを あびます。", romaji: "Maiasa rokuji ni okite kara, jogingu o shimasu. Sorekara, shawaa o abimasu.", es: "Cada mañana, después de levantarme a las 6, hago jogging. Luego me ducho.", highlight: "起きてから / それから" },
+      { speaker: "T", ja: "すごいですね。<ruby>運動<rt>うんどう</rt></ruby>を した ことが あまり ありません。", jaPlain: "すごいですね。うんどうを した ことが あまり ありません。", romaji: "Sugoi desu ne. Undou o shita koto ga amari arimasen.", es: "¡Qué bien! Yo casi nunca he hecho ejercicio.", highlight: "したことがあまりありません" },
+      { speaker: "M", ja: "<ruby>田中<rt>たなか</rt></ruby>さんは <ruby>朝<rt>あさ</rt></ruby> <ruby>何<rt>なに</rt></ruby>を しますか。", jaPlain: "たなかさんは あさ なにを しますか。", romaji: "Tanaka-san wa asa nani o shimasu ka.", es: "Tanaka, ¿qué hace por la mañana?", },
+      { speaker: "T", ja: "<ruby>朝<rt>あさ</rt></ruby>ごはんを <ruby>食<rt>た</rt></ruby>べてから、コーヒーを <ruby>飲<rt>の</rt></ruby>みます。でも、<ruby>今日<rt>きょう</rt></ruby>は しけんが あるから、コーヒーを <ruby>飲<rt>の</rt></ruby>まなければ なりません。", jaPlain: "あさごはんを たべてから、コーヒーを のみます。でも、きょうは しけんが あるから、コーヒーを のまなければ なりません。", romaji: "Asagohan o tabete kara, koohii o nomimasu. Demo, kyou wa shiken ga aru kara, koohii o nomanakereba narimasen.", es: "Después de desayunar, bebo café. Pero hoy hay examen, así que debo beber café.", highlight: "食べてから / でも / なければなりません" },
+      { speaker: "M", ja: "わたしも しけんが ありますか。", jaPlain: "わたしも しけんが ありますか。", romaji: "Watashi mo shiken ga arimasu ka.", es: "¿Yo también tengo examen?", },
+      { speaker: "T", ja: "いいえ、マリアさんは <ruby>今日<rt>きょう</rt></ruby>は <ruby>来<rt>こ</rt></ruby>なくても いいです。やすんで ください。", jaPlain: "いいえ、マリアさんは きょうは こなくても いいです。やすんで ください。", romaji: "Iie, Maria-san wa kyou wa konakutemo ii desu. Yasunde kudasai.", es: "No, María, hoy no es necesario que vengas. Descansa, por favor.", highlight: "来なくてもいいです" }
     ]
   },
   explain: {
@@ -27487,14 +27338,14 @@ window.canDoData.push({
   },
   escuchar: {
     items: [
-      { type: "audio_meaning", text: "<ruby>毎朝<rt>まいあさ</rt></ruby> <ruby>起<rt>お</rt></ruby>きてから、ジョギングを します。", audio: "audio/u10_c5_e1.mp3", promptEs: "¿Qué dice el audio?", options: [{ja:"<ruby>起<rt>お</rt></ruby>きてから、ジョギングを します", es:"Después de levantarme, hago jogging cada mañana."}, {ja:"<ruby>起<rt>お</rt></ruby>きないで ください", es:"Por favor no se levante."}, {ja:"ジョギングを しません", es:"No hago jogging."}, {ja:"<ruby>起<rt>お</rt></ruby>きなければ なりません", es:"Debo levantarme."}], answer: 0 },
-      { type: "audio_meaning", text: "<ruby>日本<rt>にほん</rt></ruby>へ <ruby>行<rt>い</rt></ruby>った ことが ありますが、<ruby>京都<rt>きょうと</rt></ruby>へは <ruby>行<rt>い</rt></ruby>った ことが ありません。", audio: "audio/u10_c5_e2.mp3", promptEs: "¿Qué dice el audio?", options: [{ja:"<ruby>日本<rt>にほん</rt></ruby>へ <ruby>行<rt>い</rt></ruby>った ことが あります", es:"He ido a Japón, pero nunca he ido a Kioto."}, {ja:"<ruby>日本<rt>にほん</rt></ruby>へ <ruby>行<rt>い</rt></ruby>かなければ なりません", es:"Debo ir a Japón."}, {ja:"<ruby>京都<rt>きょうと</rt></ruby>へ <ruby>行<rt>い</rt></ruby>った ことが あります", es:"He ido a Kioto."}, {ja:"<ruby>日本<rt>にほん</rt></ruby>へ <ruby>行<rt>い</rt></ruby>きません", es:"No voy a Japón."}], answer: 0 },
-      { type: "audio_meaning", text: "しけんが あるから、<ruby>今日<rt>きょう</rt></ruby>は <ruby>勉強<rt>べんきょう</rt></ruby>しなければ なりません。", audio: "audio/u10_c5_e3.mp3", promptEs: "¿Qué dice el audio?", options: [{ja:"<ruby>勉強<rt>べんきょう</rt></ruby>しなければ なりません", es:"Como hay examen, hoy debo estudiar."}, {ja:"<ruby>勉強<rt>べんきょう</rt></ruby>しないで ください", es:"Por favor no estudie."}, {ja:"<ruby>勉強<rt>べんきょう</rt></ruby>しなくても いいです", es:"No es necesario estudiar."}, {ja:"しけんが ありません", es:"No hay examen."}], answer: 0 },
-      { type: "audio_meaning", text: "<ruby>映画<rt>えいが</rt></ruby>を <ruby>見<rt>み</rt></ruby>た あとで、ともだちと ごはんを <ruby>食<rt>た</rt></ruby>べました。", audio: "audio/u10_c5_e4.mp3", promptEs: "¿Qué dice el audio?", options: [{ja:"<ruby>映画<rt>えいが</rt></ruby>を <ruby>見<rt>み</rt></ruby>た あとで、<ruby>食<rt>た</rt></ruby>べました", es:"Después de ver la película, comí con amigos."}, {ja:"<ruby>映画<rt>えいが</rt></ruby>を <ruby>見<rt>み</rt></ruby>ません", es:"No veo películas."}, {ja:"ごはんを <ruby>食<rt>た</rt></ruby>べる まえに <ruby>映画<rt>えいが</rt></ruby>を <ruby>見<rt>み</rt></ruby>ました", es:"Vi la película antes de comer."}, {ja:"<ruby>食<rt>た</rt></ruby>べないで ください", es:"Por favor no coma."}], answer: 0 },
-      { type: "audio_match", text: "<ruby>毎朝<rt>まいあさ</rt></ruby> <ruby>6時<rt>ろくじ</rt></ruby>に <ruby>起<rt>お</rt></ruby>きてから、ジョギングを します。それから、シャワーを <ruby>浴<rt>あ</rt></ruby>びて、<ruby>朝<rt>あさ</rt></ruby>ごはんを <ruby>食<rt>た</rt></ruby>べます。", audio: "audio/u10_c5_e5.mp3", promptEs: "¿Cuál es el orden correcto de la rutina de María?", options: ["levantarse → jogging → ducharse → desayunar", "desayunar → ducharse → jogging → levantarse", "ducharse → levantarse → desayunar → jogging", "jogging → desayunar → levantarse → ducharse"], answer: 0 },
-      { type: "audio_match", text: "<ruby>日本<rt>にほん</rt></ruby>へ <ruby>行<rt>い</rt></ruby>った ことが あります。でも、<ruby>京都<rt>きょうと</rt></ruby>へは <ruby>行<rt>い</rt></ruby>った ことが ありません。", audio: "audio/u10_c5_e6.mp3", promptEs: "¿Qué experiencias ha tenido el hablante?", options: ["Ha ido a Japón pero no a Kioto.", "Ha ido a Kioto pero no a Japón.", "Ha ido a ambos lugares.", "No ha ido a ningún lugar."], answer: 0 },
-      { type: "audio_match", text: "<ruby>今日<rt>きょう</rt></ruby>は しけんが あるから、コーヒーを <ruby>飲<rt>の</rt></ruby>まなければ なりません。でも、マリアさんは <ruby>来<rt>こ</rt></ruby>なくても いいです。", audio: "audio/u10_c5_e7.mp3", promptEs: "¿Qué debe hacer cada persona?", options: ["Tanaka debe beber café; María no necesita venir.", "Tanaka no necesita beber café; María debe venir.", "Ambos deben venir.", "Ninguno debe hacer nada."], answer: 0 },
-      { type: "audio_match", text: "<ruby>映画<rt>えいが</rt></ruby>を <ruby>見<rt>み</rt></ruby>た あとで、ごはんを <ruby>食<rt>た</rt></ruby>べました。それから、うちへ <ruby>帰<rt>かえ</rt></ruby>りました。", audio: "audio/u10_c5_e8.mp3", promptEs: "¿Cuál es la secuencia de acciones?", options: ["película → comer → volver a casa", "comer → película → volver a casa", "volver a casa → película → comer", "película → volver a casa → comer"], answer: 0 }
+      { type: "audio_meaning", text: "<ruby>毎朝<rt>まいあさ</rt></ruby> <ruby>起<rt>お</rt></ruby>きてから、ジョギングを します。", promptEs: "¿Qué dice el audio?", options: [{ja:"<ruby>起<rt>お</rt></ruby>きてから、ジョギングを します", es:"Después de levantarme, hago jogging cada mañana."}, {ja:"<ruby>起<rt>お</rt></ruby>きないで ください", es:"Por favor no se levante."}, {ja:"ジョギングを しません", es:"No hago jogging."}, {ja:"<ruby>起<rt>お</rt></ruby>きなければ なりません", es:"Debo levantarme."}], answer: 0 },
+      { type: "audio_meaning", text: "<ruby>日本<rt>にほん</rt></ruby>へ <ruby>行<rt>い</rt></ruby>った ことが ありますが、<ruby>京都<rt>きょうと</rt></ruby>へは <ruby>行<rt>い</rt></ruby>った ことが ありません。", promptEs: "¿Qué dice el audio?", options: [{ja:"<ruby>日本<rt>にほん</rt></ruby>へ <ruby>行<rt>い</rt></ruby>った ことが あります", es:"He ido a Japón, pero nunca he ido a Kioto."}, {ja:"<ruby>日本<rt>にほん</rt></ruby>へ <ruby>行<rt>い</rt></ruby>かなければ なりません", es:"Debo ir a Japón."}, {ja:"<ruby>京都<rt>きょうと</rt></ruby>へ <ruby>行<rt>い</rt></ruby>った ことが あります", es:"He ido a Kioto."}, {ja:"<ruby>日本<rt>にほん</rt></ruby>へ <ruby>行<rt>い</rt></ruby>きません", es:"No voy a Japón."}], answer: 0 },
+      { type: "audio_meaning", text: "しけんが あるから、<ruby>今日<rt>きょう</rt></ruby>は <ruby>勉強<rt>べんきょう</rt></ruby>しなければ なりません。", promptEs: "¿Qué dice el audio?", options: [{ja:"<ruby>勉強<rt>べんきょう</rt></ruby>しなければ なりません", es:"Como hay examen, hoy debo estudiar."}, {ja:"<ruby>勉強<rt>べんきょう</rt></ruby>しないで ください", es:"Por favor no estudie."}, {ja:"<ruby>勉強<rt>べんきょう</rt></ruby>しなくても いいです", es:"No es necesario estudiar."}, {ja:"しけんが ありません", es:"No hay examen."}], answer: 0 },
+      { type: "audio_meaning", text: "<ruby>映画<rt>えいが</rt></ruby>を <ruby>見<rt>み</rt></ruby>た あとで、ともだちと ごはんを <ruby>食<rt>た</rt></ruby>べました。", promptEs: "¿Qué dice el audio?", options: [{ja:"<ruby>映画<rt>えいが</rt></ruby>を <ruby>見<rt>み</rt></ruby>た あとで、<ruby>食<rt>た</rt></ruby>べました", es:"Después de ver la película, comí con amigos."}, {ja:"<ruby>映画<rt>えいが</rt></ruby>を <ruby>見<rt>み</rt></ruby>ません", es:"No veo películas."}, {ja:"ごはんを <ruby>食<rt>た</rt></ruby>べる まえに <ruby>映画<rt>えいが</rt></ruby>を <ruby>見<rt>み</rt></ruby>ました", es:"Vi la película antes de comer."}, {ja:"<ruby>食<rt>た</rt></ruby>べないで ください", es:"Por favor no coma."}], answer: 0 },
+      { type: "audio_match", text: "<ruby>毎朝<rt>まいあさ</rt></ruby> <ruby>6時<rt>ろくじ</rt></ruby>に <ruby>起<rt>お</rt></ruby>きてから、ジョギングを します。それから、シャワーを <ruby>浴<rt>あ</rt></ruby>びて、<ruby>朝<rt>あさ</rt></ruby>ごはんを <ruby>食<rt>た</rt></ruby>べます。", promptEs: "¿Cuál es el orden correcto de la rutina de María?", options: ["levantarse → jogging → ducharse → desayunar", "desayunar → ducharse → jogging → levantarse", "ducharse → levantarse → desayunar → jogging", "jogging → desayunar → levantarse → ducharse"], answer: 0 },
+      { type: "audio_match", text: "<ruby>日本<rt>にほん</rt></ruby>へ <ruby>行<rt>い</rt></ruby>った ことが あります。でも、<ruby>京都<rt>きょうと</rt></ruby>へは <ruby>行<rt>い</rt></ruby>った ことが ありません。", promptEs: "¿Qué experiencias ha tenido el hablante?", options: ["Ha ido a Japón pero no a Kioto.", "Ha ido a Kioto pero no a Japón.", "Ha ido a ambos lugares.", "No ha ido a ningún lugar."], answer: 0 },
+      { type: "audio_match", text: "<ruby>今日<rt>きょう</rt></ruby>は しけんが あるから、コーヒーを <ruby>飲<rt>の</rt></ruby>まなければ なりません。でも、マリアさんは <ruby>来<rt>こ</rt></ruby>なくても いいです。", promptEs: "¿Qué debe hacer cada persona?", options: ["Tanaka debe beber café; María no necesita venir.", "Tanaka no necesita beber café; María debe venir.", "Ambos deben venir.", "Ninguno debe hacer nada."], answer: 0 },
+      { type: "audio_match", text: "<ruby>映画<rt>えいが</rt></ruby>を <ruby>見<rt>み</rt></ruby>た あとで、ごはんを <ruby>食<rt>た</rt></ruby>べました。それから、うちへ <ruby>帰<rt>かえ</rt></ruby>りました。", promptEs: "¿Cuál es la secuencia de acciones?", options: ["película → comer → volver a casa", "comer → película → volver a casa", "volver a casa → película → comer", "película → volver a casa → comer"], answer: 0 }
     ]
   },
   challenge: {

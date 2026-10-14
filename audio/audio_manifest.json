@@ -1,0 +1,4626 @@
+[
+  {
+    "id": "u1_c1",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "あ、い、う、え、お。",
+    "file": "u1_c1_l1.opus"
+  },
+  {
+    "id": "u1_c1",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "いえ。",
+    "file": "u1_c1_l2.opus"
+  },
+  {
+    "id": "u1_c1",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "あお。",
+    "file": "u1_c1_l3.opus"
+  },
+  {
+    "id": "u1_c1",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "B",
+    "text": "いいえ、うえ。",
+    "file": "u1_c1_l4.opus"
+  },
+  {
+    "id": "u1_c2",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "か、き、く、け、こ。",
+    "file": "u1_c2_l1.opus"
+  },
+  {
+    "id": "u1_c2",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "かお。",
+    "file": "u1_c2_l2.opus"
+  },
+  {
+    "id": "u1_c2",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "えき。",
+    "file": "u1_c2_l3.opus"
+  },
+  {
+    "id": "u1_c2",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "B",
+    "text": "こえ、いか。",
+    "file": "u1_c2_l4.opus"
+  },
+  {
+    "id": "u1_c3",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "さ、し、す、せ、そ。",
+    "file": "u1_c3_l1.opus"
+  },
+  {
+    "id": "u1_c3",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "すし。",
+    "file": "u1_c3_l2.opus"
+  },
+  {
+    "id": "u1_c3",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "かさ。",
+    "file": "u1_c3_l3.opus"
+  },
+  {
+    "id": "u1_c3",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "B",
+    "text": "あさ、いす。",
+    "file": "u1_c3_l4.opus"
+  },
+  {
+    "id": "u1_c4",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "た、ち、つ、て、と。",
+    "file": "u1_c4_l1.opus"
+  },
+  {
+    "id": "u1_c4",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "とけい。",
+    "file": "u1_c4_l2.opus"
+  },
+  {
+    "id": "u1_c4",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "くつ。",
+    "file": "u1_c4_l3.opus"
+  },
+  {
+    "id": "u1_c4",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "B",
+    "text": "たこ、つくえ。",
+    "file": "u1_c4_l4.opus"
+  },
+  {
+    "id": "u1_c5",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "な、に、ぬ、ね、の。",
+    "file": "u1_c5_l1.opus"
+  },
+  {
+    "id": "u1_c5",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "ねこ。",
+    "file": "u1_c5_l2.opus"
+  },
+  {
+    "id": "u1_c5",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "いぬ。",
+    "file": "u1_c5_l3.opus"
+  },
+  {
+    "id": "u1_c5",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "B",
+    "text": "なつ、さかな。",
+    "file": "u1_c5_l4.opus"
+  },
+  {
+    "id": "u1_c6",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "は、ひ、ふ、へ、ほ。",
+    "file": "u1_c6_l1.opus"
+  },
+  {
+    "id": "u1_c6",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "はな。",
+    "file": "u1_c6_l2.opus"
+  },
+  {
+    "id": "u1_c6",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "ふね。",
+    "file": "u1_c6_l3.opus"
+  },
+  {
+    "id": "u1_c6",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "B",
+    "text": "ひと、ほし。",
+    "file": "u1_c6_l4.opus"
+  },
+  {
+    "id": "u1_c7",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "ま、み、む、め、も。",
+    "file": "u1_c7_l1.opus"
+  },
+  {
+    "id": "u1_c7",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "あめ。",
+    "file": "u1_c7_l2.opus"
+  },
+  {
+    "id": "u1_c7",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "むし。",
+    "file": "u1_c7_l3.opus"
+  },
+  {
+    "id": "u1_c7",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "B",
+    "text": "なまえ、もも。",
+    "file": "u1_c7_l4.opus"
+  },
+  {
+    "id": "u1_c8",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "や、ゆ、よ。",
+    "file": "u1_c8_l1.opus"
+  },
+  {
+    "id": "u1_c8",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "やま。",
+    "file": "u1_c8_l2.opus"
+  },
+  {
+    "id": "u1_c8",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "ゆき。",
+    "file": "u1_c8_l3.opus"
+  },
+  {
+    "id": "u1_c8",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "B",
+    "text": "やさい、ゆめ。",
+    "file": "u1_c8_l4.opus"
+  },
+  {
+    "id": "u1_c9",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "ら、り、る、れ、ろ。",
+    "file": "u1_c9_l1.opus"
+  },
+  {
+    "id": "u1_c9",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "さる。",
+    "file": "u1_c9_l2.opus"
+  },
+  {
+    "id": "u1_c9",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "とり。",
+    "file": "u1_c9_l3.opus"
+  },
+  {
+    "id": "u1_c9",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "B",
+    "text": "くるま、そら。",
+    "file": "u1_c9_l4.opus"
+  },
+  {
+    "id": "u1_c10",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "わ、を、ん。",
+    "file": "u1_c10_l1.opus"
+  },
+  {
+    "id": "u1_c10",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "ほん。",
+    "file": "u1_c10_l2.opus"
+  },
+  {
+    "id": "u1_c10",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "わたし は ほん を よむ。",
+    "file": "u1_c10_l3.opus"
+  },
+  {
+    "id": "u1_c10",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "B",
+    "text": "にほん、みかん。",
+    "file": "u1_c10_l4.opus"
+  },
+  {
+    "id": "u1_c11",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "が、ざ、だ、ば、ぱ。",
+    "file": "u1_c11_l1.opus"
+  },
+  {
+    "id": "u1_c11",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "みず。",
+    "file": "u1_c11_l2.opus"
+  },
+  {
+    "id": "u1_c11",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "でんわ。",
+    "file": "u1_c11_l3.opus"
+  },
+  {
+    "id": "u1_c11",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "B",
+    "text": "ぱん、えんぴつ。",
+    "file": "u1_c11_l4.opus"
+  },
+  {
+    "id": "u1_c12",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "きゃ、きゅ、きょ。",
+    "file": "u1_c12_l1.opus"
+  },
+  {
+    "id": "u1_c12",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "おちゃ。",
+    "file": "u1_c12_l2.opus"
+  },
+  {
+    "id": "u1_c12",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "きって。",
+    "file": "u1_c12_l3.opus"
+  },
+  {
+    "id": "u1_c12",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "B",
+    "text": "がっこう、でんしゃ。",
+    "file": "u1_c12_l4.opus"
+  },
+  {
+    "id": "u1_c12",
+    "kind": "escuchar",
+    "line": 1,
+    "speaker": "esc",
+    "text": "あめ",
+    "file": "u1_c12_esc1.opus"
+  },
+  {
+    "id": "u1_c12",
+    "kind": "escuchar",
+    "line": 2,
+    "speaker": "esc",
+    "text": "ねこ",
+    "file": "u1_c12_esc2.opus"
+  },
+  {
+    "id": "u1_c12",
+    "kind": "escuchar",
+    "line": 3,
+    "speaker": "esc",
+    "text": "さくら",
+    "file": "u1_c12_esc3.opus"
+  },
+  {
+    "id": "u1_c12",
+    "kind": "escuchar",
+    "line": 4,
+    "speaker": "esc",
+    "text": "ともだち",
+    "file": "u1_c12_esc4.opus"
+  },
+  {
+    "id": "u1_c12",
+    "kind": "escuchar",
+    "line": 5,
+    "speaker": "esc",
+    "text": "おはよう",
+    "file": "u1_c12_esc5.opus"
+  },
+  {
+    "id": "u1_c12",
+    "kind": "escuchar",
+    "line": 6,
+    "speaker": "esc",
+    "text": "ありがとう ございます。",
+    "file": "u1_c12_esc6.opus"
+  },
+  {
+    "id": "u1_c12",
+    "kind": "escuchar",
+    "line": 7,
+    "speaker": "esc",
+    "text": "にほんご が すき です。",
+    "file": "u1_c12_esc7.opus"
+  },
+  {
+    "id": "u1_c12",
+    "kind": "escuchar",
+    "line": 8,
+    "speaker": "esc",
+    "text": "せんせい、おはよう ございます。",
+    "file": "u1_c12_esc8.opus"
+  },
+  {
+    "id": "u1_c12",
+    "kind": "escuchar",
+    "line": 9,
+    "speaker": "esc",
+    "text": "さようなら",
+    "file": "u1_c12_esc9.opus"
+  },
+  {
+    "id": "u1_c12",
+    "kind": "escuchar",
+    "line": 10,
+    "speaker": "esc",
+    "text": "ともだち",
+    "file": "u1_c12_esc10.opus"
+  },
+  {
+    "id": "u2_c1",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "ア、イ、ウ、エ、オ。",
+    "file": "u2_c1_l1.opus"
+  },
+  {
+    "id": "u2_c1",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "エア。",
+    "file": "u2_c1_l2.opus"
+  },
+  {
+    "id": "u2_c1",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "アオ。",
+    "file": "u2_c1_l3.opus"
+  },
+  {
+    "id": "u2_c1",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "B",
+    "text": "ウエ、アイ。",
+    "file": "u2_c1_l4.opus"
+  },
+  {
+    "id": "u2_c2",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "カ、キ、ク、ケ、コ。",
+    "file": "u2_c2_l1.opus"
+  },
+  {
+    "id": "u2_c2",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "カカオ。",
+    "file": "u2_c2_l2.opus"
+  },
+  {
+    "id": "u2_c2",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "キウイ。",
+    "file": "u2_c2_l3.opus"
+  },
+  {
+    "id": "u2_c2",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "B",
+    "text": "エコ、イカ。",
+    "file": "u2_c2_l4.opus"
+  },
+  {
+    "id": "u2_c3",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "サ、シ、ス、セ、ソ。",
+    "file": "u2_c3_l1.opus"
+  },
+  {
+    "id": "u2_c3",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "アイス。",
+    "file": "u2_c3_l2.opus"
+  },
+  {
+    "id": "u2_c3",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "スイカ。",
+    "file": "u2_c3_l3.opus"
+  },
+  {
+    "id": "u2_c3",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "B",
+    "text": "オアシス、キス。",
+    "file": "u2_c3_l4.opus"
+  },
+  {
+    "id": "u2_c4",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "タ、チ、ツ、テ、ト。",
+    "file": "u2_c4_l1.opus"
+  },
+  {
+    "id": "u2_c4",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "テスト。",
+    "file": "u2_c4_l2.opus"
+  },
+  {
+    "id": "u2_c4",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "カツ。",
+    "file": "u2_c4_l3.opus"
+  },
+  {
+    "id": "u2_c4",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "B",
+    "text": "タコ、タイ。",
+    "file": "u2_c4_l4.opus"
+  },
+  {
+    "id": "u2_c5",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "ナ、ニ、ヌ、ネ、ノ。",
+    "file": "u2_c5_l1.opus"
+  },
+  {
+    "id": "u2_c5",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "テニス。",
+    "file": "u2_c5_l2.opus"
+  },
+  {
+    "id": "u2_c5",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "カニ。",
+    "file": "u2_c5_l3.opus"
+  },
+  {
+    "id": "u2_c5",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "B",
+    "text": "ナス、ナイス。",
+    "file": "u2_c5_l4.opus"
+  },
+  {
+    "id": "u2_c6",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "ハ、ヒ、フ、ヘ、ホ。",
+    "file": "u2_c6_l1.opus"
+  },
+  {
+    "id": "u2_c6",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "ナイフ。",
+    "file": "u2_c6_l2.opus"
+  },
+  {
+    "id": "u2_c6",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "ハイ。",
+    "file": "u2_c6_l3.opus"
+  },
+  {
+    "id": "u2_c6",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "B",
+    "text": "フエ、ヒフ。",
+    "file": "u2_c6_l4.opus"
+  },
+  {
+    "id": "u2_c7",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "マ、ミ、ム、メ、モ。",
+    "file": "u2_c7_l1.opus"
+  },
+  {
+    "id": "u2_c7",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "トマト。",
+    "file": "u2_c7_l2.opus"
+  },
+  {
+    "id": "u2_c7",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "メモ。",
+    "file": "u2_c7_l3.opus"
+  },
+  {
+    "id": "u2_c7",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "B",
+    "text": "ハム、マスク。",
+    "file": "u2_c7_l4.opus"
+  },
+  {
+    "id": "u2_c8",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "ヤ、ユ、ヨ。",
+    "file": "u2_c8_l1.opus"
+  },
+  {
+    "id": "u2_c8",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "タイヤ。",
+    "file": "u2_c8_l2.opus"
+  },
+  {
+    "id": "u2_c8",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "ヤシ。",
+    "file": "u2_c8_l3.opus"
+  },
+  {
+    "id": "u2_c8",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "B",
+    "text": "ヨコ、マユ。",
+    "file": "u2_c8_l4.opus"
+  },
+  {
+    "id": "u2_c9",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "ラ、リ、ル、レ、ロ。",
+    "file": "u2_c9_l1.opus"
+  },
+  {
+    "id": "u2_c9",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "カメラ。",
+    "file": "u2_c9_l2.opus"
+  },
+  {
+    "id": "u2_c9",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "リス。",
+    "file": "u2_c9_l3.opus"
+  },
+  {
+    "id": "u2_c9",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "B",
+    "text": "ロシア、サル。",
+    "file": "u2_c9_l4.opus"
+  },
+  {
+    "id": "u2_c10",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "ワ、ヲ、ン。",
+    "file": "u2_c10_l1.opus"
+  },
+  {
+    "id": "u2_c10",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "ワイン。",
+    "file": "u2_c10_l2.opus"
+  },
+  {
+    "id": "u2_c10",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "レストラン。",
+    "file": "u2_c10_l3.opus"
+  },
+  {
+    "id": "u2_c10",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "B",
+    "text": "レモン、メロン。",
+    "file": "u2_c10_l4.opus"
+  },
+  {
+    "id": "u2_c11",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "ガ、ザ、ダ、バ、パ。",
+    "file": "u2_c11_l1.opus"
+  },
+  {
+    "id": "u2_c11",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "テレビ。",
+    "file": "u2_c11_l2.opus"
+  },
+  {
+    "id": "u2_c11",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "バナナ。",
+    "file": "u2_c11_l3.opus"
+  },
+  {
+    "id": "u2_c11",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "B",
+    "text": "パン、ペン。",
+    "file": "u2_c11_l4.opus"
+  },
+  {
+    "id": "u2_c12",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "キャ、シャ、チャ ＋ ー ＋ ッ。",
+    "file": "u2_c12_l1.opus"
+  },
+  {
+    "id": "u2_c12",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "コーヒー。",
+    "file": "u2_c12_l2.opus"
+  },
+  {
+    "id": "u2_c12",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "ジュース。",
+    "file": "u2_c12_l3.opus"
+  },
+  {
+    "id": "u2_c12",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "B",
+    "text": "サッカー、キャンプ。",
+    "file": "u2_c12_l4.opus"
+  },
+  {
+    "id": "u2_c12",
+    "kind": "escuchar",
+    "line": 1,
+    "speaker": "esc",
+    "text": "テレビ",
+    "file": "u2_c12_esc1.opus"
+  },
+  {
+    "id": "u2_c12",
+    "kind": "escuchar",
+    "line": 2,
+    "speaker": "esc",
+    "text": "アイスクリーム",
+    "file": "u2_c12_esc2.opus"
+  },
+  {
+    "id": "u2_c12",
+    "kind": "escuchar",
+    "line": 3,
+    "speaker": "esc",
+    "text": "ボリビア",
+    "file": "u2_c12_esc3.opus"
+  },
+  {
+    "id": "u2_c12",
+    "kind": "escuchar",
+    "line": 4,
+    "speaker": "esc",
+    "text": "コンピューター",
+    "file": "u2_c12_esc4.opus"
+  },
+  {
+    "id": "u2_c12",
+    "kind": "escuchar",
+    "line": 5,
+    "speaker": "esc",
+    "text": "スペイン",
+    "file": "u2_c12_esc5.opus"
+  },
+  {
+    "id": "u2_c12",
+    "kind": "escuchar",
+    "line": 6,
+    "speaker": "esc",
+    "text": "テレビ を みます。",
+    "file": "u2_c12_esc6.opus"
+  },
+  {
+    "id": "u2_c12",
+    "kind": "escuchar",
+    "line": 7,
+    "speaker": "esc",
+    "text": "ハンバーガー と アイスクリーム が すき です。",
+    "file": "u2_c12_esc7.opus"
+  },
+  {
+    "id": "u2_c12",
+    "kind": "escuchar",
+    "line": 8,
+    "speaker": "esc",
+    "text": "わたし は ボリビアじん です。",
+    "file": "u2_c12_esc8.opus"
+  },
+  {
+    "id": "u2_c12",
+    "kind": "escuchar",
+    "line": 9,
+    "speaker": "esc",
+    "text": "テレビ",
+    "file": "u2_c12_esc9.opus"
+  },
+  {
+    "id": "u2_c12",
+    "kind": "escuchar",
+    "line": 10,
+    "speaker": "esc",
+    "text": "ボリビア",
+    "file": "u2_c12_esc10.opus"
+  },
+  {
+    "id": "u3_c1",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "はじめまして。田中です。おなまえは？",
+    "file": "u3_c1_l1.opus"
+  },
+  {
+    "id": "u3_c1",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "はじめまして。私はカルロスです。",
+    "file": "u3_c1_l2.opus"
+  },
+  {
+    "id": "u3_c1",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "カルロスさんは何人ですか？",
+    "file": "u3_c1_l3.opus"
+  },
+  {
+    "id": "u3_c1",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "B",
+    "text": "ボリビア人です。田中さんは日本人ですか？",
+    "file": "u3_c1_l4.opus"
+  },
+  {
+    "id": "u3_c1",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "A",
+    "text": "はい、日本人です。どうぞよろしく。",
+    "file": "u3_c1_l5.opus"
+  },
+  {
+    "id": "u3_c2",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "カルロスさんはがくせいですか。",
+    "file": "u3_c2_l1.opus"
+  },
+  {
+    "id": "u3_c2",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "いいえ、がくせいじゃありません。かいしゃいんです。",
+    "file": "u3_c2_l2.opus"
+  },
+  {
+    "id": "u3_c2",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "そうですか。エンジニアですか。",
+    "file": "u3_c2_l3.opus"
+  },
+  {
+    "id": "u3_c2",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "B",
+    "text": "はい、エンジニアです。どうぞよろしくおねがいします。",
+    "file": "u3_c2_l4.opus"
+  },
+  {
+    "id": "u3_c3",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "マリアさんはなんさいですか。",
+    "file": "u3_c3_l1.opus"
+  },
+  {
+    "id": "u3_c3",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "わたしははたちです。ケンジさんは？",
+    "file": "u3_c3_l2.opus"
+  },
+  {
+    "id": "u3_c3",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "わたしはにじゅうごさいです。",
+    "file": "u3_c3_l3.opus"
+  },
+  {
+    "id": "u3_c3",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "B",
+    "text": "そうですか。ちかいですね。",
+    "file": "u3_c3_l4.opus"
+  },
+  {
+    "id": "u3_c3",
+    "kind": "escuchar",
+    "line": 1,
+    "speaker": "esc",
+    "text": "わたしははたちです。",
+    "file": "u3_c3_esc1.opus"
+  },
+  {
+    "id": "u3_c3",
+    "kind": "escuchar",
+    "line": 2,
+    "speaker": "esc",
+    "text": "マリアさんはなんさいですか。",
+    "file": "u3_c3_esc2.opus"
+  },
+  {
+    "id": "u3_c3",
+    "kind": "escuchar",
+    "line": 3,
+    "speaker": "esc",
+    "text": "わたしはにじゅうごさいです。",
+    "file": "u3_c3_esc3.opus"
+  },
+  {
+    "id": "u3_c3",
+    "kind": "escuchar",
+    "line": 4,
+    "speaker": "esc",
+    "text": "せんせいじゃありません。がくせいです。",
+    "file": "u3_c3_esc4.opus"
+  },
+  {
+    "id": "u3_c3",
+    "kind": "escuchar",
+    "line": 5,
+    "speaker": "esc",
+    "text": "わたしはにじゅうさんさいです。だいがくせいです。",
+    "file": "u3_c3_esc5.opus"
+  },
+  {
+    "id": "u3_c3",
+    "kind": "escuchar",
+    "line": 6,
+    "speaker": "esc",
+    "text": "ケンジさんはさんじゅうさいです。いしゃです。",
+    "file": "u3_c3_esc6.opus"
+  },
+  {
+    "id": "u3_c3",
+    "kind": "escuchar",
+    "line": 7,
+    "speaker": "esc",
+    "text": "カルロスさんはがくせいじゃありません。かいしゃいんです。にじゅうはっさいです。",
+    "file": "u3_c3_esc7.opus"
+  },
+  {
+    "id": "u3_c3",
+    "kind": "escuchar",
+    "line": 8,
+    "speaker": "esc",
+    "text": "たなかせんせいはよんじゅうごさいです。にほんごのせんせいです。",
+    "file": "u3_c3_esc8.opus"
+  },
+  {
+    "id": "u3_c4",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "アナさんはまいにちなにをしますか。",
+    "file": "u3_c4_l1.opus"
+  },
+  {
+    "id": "u3_c4",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "あさパンをたべます。コーヒーをのみます。",
+    "file": "u3_c4_l2.opus"
+  },
+  {
+    "id": "u3_c4",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "ばんごはんはうちでたべますか。",
+    "file": "u3_c4_l3.opus"
+  },
+  {
+    "id": "u3_c4",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "B",
+    "text": "いいえ、うちではたべません。レストランでたべます。",
+    "file": "u3_c4_l4.opus"
+  },
+  {
+    "id": "u3_c4",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "A",
+    "text": "そうですか。まいにちべんきょうしますか。",
+    "file": "u3_c4_l5.opus"
+  },
+  {
+    "id": "u3_c5",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "では、カルロスさん、じこしょうかいをおねがいします。",
+    "file": "u3_c5_l1.opus"
+  },
+  {
+    "id": "u3_c5",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "はじめまして。カルロス・ロペスです。ボリビアじんです。ラパスからきました。",
+    "file": "u3_c5_l2.opus"
+  },
+  {
+    "id": "u3_c5",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "B",
+    "text": "にじゅうごさいです。かいしゃいんです。エンジニアです。",
+    "file": "u3_c5_l3.opus"
+  },
+  {
+    "id": "u3_c5",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "B",
+    "text": "まいにちにほんごをべんきょうします。しゅみはサッカーです。",
+    "file": "u3_c5_l4.opus"
+  },
+  {
+    "id": "u3_c5",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "B",
+    "text": "どうぞよろしくおねがいします。",
+    "file": "u3_c5_l5.opus"
+  },
+  {
+    "id": "u3_c5",
+    "kind": "escuchar",
+    "line": 1,
+    "speaker": "esc",
+    "text": "はじめまして。カルロス・ロペスです。",
+    "file": "u3_c5_esc1.opus"
+  },
+  {
+    "id": "u3_c5",
+    "kind": "escuchar",
+    "line": 2,
+    "speaker": "esc",
+    "text": "ボリビアじんです。ラパスからきました。",
+    "file": "u3_c5_esc2.opus"
+  },
+  {
+    "id": "u3_c5",
+    "kind": "escuchar",
+    "line": 3,
+    "speaker": "esc",
+    "text": "まいにちにほんごをべんきょうします。",
+    "file": "u3_c5_esc3.opus"
+  },
+  {
+    "id": "u3_c5",
+    "kind": "escuchar",
+    "line": 4,
+    "speaker": "esc",
+    "text": "どうぞよろしくおねがいします。",
+    "file": "u3_c5_esc4.opus"
+  },
+  {
+    "id": "u3_c5",
+    "kind": "escuchar",
+    "line": 5,
+    "speaker": "esc",
+    "text": "はじめまして。マリアです。ボリビアじんです。にじゅうさいです。",
+    "file": "u3_c5_esc5.opus"
+  },
+  {
+    "id": "u3_c5",
+    "kind": "escuchar",
+    "line": 6,
+    "speaker": "esc",
+    "text": "にじゅうごさいです。かいしゃいんです。エンジニアです。",
+    "file": "u3_c5_esc6.opus"
+  },
+  {
+    "id": "u3_c5",
+    "kind": "escuchar",
+    "line": 7,
+    "speaker": "esc",
+    "text": "わたしはたなかです。にほんじんです。せんせいです。まいにちにほんごをおしえます。",
+    "file": "u3_c5_esc7.opus"
+  },
+  {
+    "id": "u3_c5",
+    "kind": "escuchar",
+    "line": 8,
+    "speaker": "esc",
+    "text": "カルロスです。がくせいじゃありません。かいしゃいんです。しゅみはサッカーです。",
+    "file": "u3_c5_esc8.opus"
+  },
+  {
+    "id": "u4_c1",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "いらっしゃいませ。",
+    "file": "u4_c1_l1.opus"
+  },
+  {
+    "id": "u4_c1",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "コーヒーをふたつください。",
+    "file": "u4_c1_l2.opus"
+  },
+  {
+    "id": "u4_c1",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "ふたつですね。ケーキもいかがですか。",
+    "file": "u4_c1_l3.opus"
+  },
+  {
+    "id": "u4_c1",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "B",
+    "text": "はい、ケーキをみっつおねがいします。",
+    "file": "u4_c1_l4.opus"
+  },
+  {
+    "id": "u4_c1",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "A",
+    "text": "コーヒーふたつとケーキみっつですね。",
+    "file": "u4_c1_l5.opus"
+  },
+  {
+    "id": "u4_c2",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "いらっしゃいませ。",
+    "file": "u4_c2_l1.opus"
+  },
+  {
+    "id": "u4_c2",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "すみません、おちゃはいくらですか。",
+    "file": "u4_c2_l2.opus"
+  },
+  {
+    "id": "u4_c2",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "ひゃくにじゅうえんです。",
+    "file": "u4_c2_l3.opus"
+  },
+  {
+    "id": "u4_c2",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "B",
+    "text": "おにぎりはいくらですか。",
+    "file": "u4_c2_l4.opus"
+  },
+  {
+    "id": "u4_c2",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "A",
+    "text": "ひゃくごじゅうえんです。",
+    "file": "u4_c2_l5.opus"
+  },
+  {
+    "id": "u4_c3",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "B",
+    "text": "ケンジさん、いまなんじですか。",
+    "file": "u4_c3_l1.opus"
+  },
+  {
+    "id": "u4_c3",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "A",
+    "text": "いまくじはんです。",
+    "file": "u4_c3_l2.opus"
+  },
+  {
+    "id": "u4_c3",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "B",
+    "text": "じゅぎょうはなんじからですか。",
+    "file": "u4_c3_l3.opus"
+  },
+  {
+    "id": "u4_c3",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "A",
+    "text": "じゅうじからです。",
+    "file": "u4_c3_l4.opus"
+  },
+  {
+    "id": "u4_c3",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "B",
+    "text": "じゅうじですね。ありがとうございます。",
+    "file": "u4_c3_l5.opus"
+  },
+  {
+    "id": "u4_c3",
+    "kind": "escuchar",
+    "line": 1,
+    "speaker": "esc",
+    "text": "いまさんじです。",
+    "file": "u4_c3_esc1.opus"
+  },
+  {
+    "id": "u4_c3",
+    "kind": "escuchar",
+    "line": 2,
+    "speaker": "esc",
+    "text": "ごぜんくじはんです。",
+    "file": "u4_c3_esc2.opus"
+  },
+  {
+    "id": "u4_c3",
+    "kind": "escuchar",
+    "line": 3,
+    "speaker": "esc",
+    "text": "いまじゅうにじです。おひるです。",
+    "file": "u4_c3_esc3.opus"
+  },
+  {
+    "id": "u4_c3",
+    "kind": "escuchar",
+    "line": 4,
+    "speaker": "esc",
+    "text": "しちじにおきます。",
+    "file": "u4_c3_esc4.opus"
+  },
+  {
+    "id": "u4_c3",
+    "kind": "escuchar",
+    "line": 5,
+    "speaker": "esc",
+    "text": "ごごよじじゅうごふんです。",
+    "file": "u4_c3_esc5.opus"
+  },
+  {
+    "id": "u4_c3",
+    "kind": "escuchar",
+    "line": 6,
+    "speaker": "esc",
+    "text": "がっこうはごぜんはちじからです。",
+    "file": "u4_c3_esc6.opus"
+  },
+  {
+    "id": "u4_c3",
+    "kind": "escuchar",
+    "line": 7,
+    "speaker": "esc",
+    "text": "いまなんじですか。— くじはんです。",
+    "file": "u4_c3_esc7.opus"
+  },
+  {
+    "id": "u4_c3",
+    "kind": "escuchar",
+    "line": 8,
+    "speaker": "esc",
+    "text": "じゅぎょうはなんじからですか。— ごぜんじゅうじからです。",
+    "file": "u4_c3_esc8.opus"
+  },
+  {
+    "id": "u4_c4",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "B",
+    "text": "すみません、これはなんですか。",
+    "file": "u4_c4_l1.opus"
+  },
+  {
+    "id": "u4_c4",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "A",
+    "text": "それはせんすです。にほんのせんすです。",
+    "file": "u4_c4_l2.opus"
+  },
+  {
+    "id": "u4_c4",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "B",
+    "text": "いいですね。あれはなんですか。",
+    "file": "u4_c4_l3.opus"
+  },
+  {
+    "id": "u4_c4",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "A",
+    "text": "あれはふうりんです。",
+    "file": "u4_c4_l4.opus"
+  },
+  {
+    "id": "u4_c4",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "B",
+    "text": "じゃ、このせんすをください。",
+    "file": "u4_c4_l5.opus"
+  },
+  {
+    "id": "u4_c5",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "マリアさん、パーティーにいきますか。",
+    "file": "u4_c5_l1.opus"
+  },
+  {
+    "id": "u4_c5",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "はい。いつですか。",
+    "file": "u4_c5_l2.opus"
+  },
+  {
+    "id": "u4_c5",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "どようびです。ごごさんじからです。",
+    "file": "u4_c5_l3.opus"
+  },
+  {
+    "id": "u4_c5",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "B",
+    "text": "どこですか。",
+    "file": "u4_c5_l4.opus"
+  },
+  {
+    "id": "u4_c5",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "A",
+    "text": "がっこうです。ケンジさんとたなかせんせいもきます。",
+    "file": "u4_c5_l5.opus"
+  },
+  {
+    "id": "u4_c5",
+    "kind": "escuchar",
+    "line": 1,
+    "speaker": "esc",
+    "text": "あしたはなんようびですか。",
+    "file": "u4_c5_esc1.opus"
+  },
+  {
+    "id": "u4_c5",
+    "kind": "escuchar",
+    "line": 2,
+    "speaker": "esc",
+    "text": "にちようびにサッカーをします。",
+    "file": "u4_c5_esc2.opus"
+  },
+  {
+    "id": "u4_c5",
+    "kind": "escuchar",
+    "line": 3,
+    "speaker": "esc",
+    "text": "あのひとはだれですか。",
+    "file": "u4_c5_esc3.opus"
+  },
+  {
+    "id": "u4_c5",
+    "kind": "escuchar",
+    "line": 4,
+    "speaker": "esc",
+    "text": "えきはどこですか。",
+    "file": "u4_c5_esc4.opus"
+  },
+  {
+    "id": "u4_c5",
+    "kind": "escuchar",
+    "line": 5,
+    "speaker": "esc",
+    "text": "しけんはいつですか。— きんようびです。",
+    "file": "u4_c5_esc5.opus"
+  },
+  {
+    "id": "u4_c5",
+    "kind": "escuchar",
+    "line": 6,
+    "speaker": "esc",
+    "text": "パーティーはどこですか。— がっこうです。",
+    "file": "u4_c5_esc6.opus"
+  },
+  {
+    "id": "u4_c5",
+    "kind": "escuchar",
+    "line": 7,
+    "speaker": "esc",
+    "text": "あのひとはだれですか。— たなかせんせいです。",
+    "file": "u4_c5_esc7.opus"
+  },
+  {
+    "id": "u4_c5",
+    "kind": "escuchar",
+    "line": 8,
+    "speaker": "esc",
+    "text": "どようびになにをしますか。— カラオケにいきます。",
+    "file": "u4_c5_esc8.opus"
+  },
+  {
+    "id": "u5_c1",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "Sofía",
+    "text": "すみません、ぎんこうはどこですか。",
+    "file": "u5_c1_l1.opus"
+  },
+  {
+    "id": "u5_c1",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "駅員",
+    "text": "えきのまえにあります。",
+    "file": "u5_c1_l2.opus"
+  },
+  {
+    "id": "u5_c1",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "Sofía",
+    "text": "ありがとうございます。",
+    "file": "u5_c1_l3.opus"
+  },
+  {
+    "id": "u5_c1",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "駅員",
+    "text": "どうぞ。",
+    "file": "u5_c1_l4.opus"
+  },
+  {
+    "id": "u5_c2",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "Carlos",
+    "text": "こうえんにこどもがいます。",
+    "file": "u5_c2_l1.opus"
+  },
+  {
+    "id": "u5_c2",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "María",
+    "text": "ねこもいますね。",
+    "file": "u5_c2_l2.opus"
+  },
+  {
+    "id": "u5_c2",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "Carlos",
+    "text": "あ、あそこにベンチがあります。",
+    "file": "u5_c2_l3.opus"
+  },
+  {
+    "id": "u5_c2",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "María",
+    "text": "きれいなこうえんですね。",
+    "file": "u5_c2_l4.opus"
+  },
+  {
+    "id": "u5_c3",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "Ana",
+    "text": "せんせい、かばんはどこですか。",
+    "file": "u5_c3_l1.opus"
+  },
+  {
+    "id": "u5_c3",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "先生",
+    "text": "つくえのしたにあります。",
+    "file": "u5_c3_l2.opus"
+  },
+  {
+    "id": "u5_c3",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "Ana",
+    "text": "ノートは？",
+    "file": "u5_c3_l3.opus"
+  },
+  {
+    "id": "u5_c3",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "先生",
+    "text": "いすのうえにあります。",
+    "file": "u5_c3_l4.opus"
+  },
+  {
+    "id": "u5_c3",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "Ana",
+    "text": "ありがとうございます！",
+    "file": "u5_c3_l5.opus"
+  },
+  {
+    "id": "u5_c3",
+    "kind": "escuchar",
+    "line": 1,
+    "speaker": "esc",
+    "text": "かばんはつくえのしたにあります。",
+    "file": "u5_c3_esc1.opus"
+  },
+  {
+    "id": "u5_c3",
+    "kind": "escuchar",
+    "line": 2,
+    "speaker": "esc",
+    "text": "ノートはいすのうえにあります。",
+    "file": "u5_c3_esc2.opus"
+  },
+  {
+    "id": "u5_c3",
+    "kind": "escuchar",
+    "line": 3,
+    "speaker": "esc",
+    "text": "ねこははこのなかにいます。",
+    "file": "u5_c3_esc3.opus"
+  },
+  {
+    "id": "u5_c3",
+    "kind": "escuchar",
+    "line": 4,
+    "speaker": "esc",
+    "text": "くるまはビルのうしろにあります。",
+    "file": "u5_c3_esc4.opus"
+  },
+  {
+    "id": "u5_c3",
+    "kind": "escuchar",
+    "line": 5,
+    "speaker": "esc",
+    "text": "ほんはつくえのうえにあります。",
+    "file": "u5_c3_esc5.opus"
+  },
+  {
+    "id": "u5_c3",
+    "kind": "escuchar",
+    "line": 6,
+    "speaker": "esc",
+    "text": "いぬはいすのしたにいます。",
+    "file": "u5_c3_esc6.opus"
+  },
+  {
+    "id": "u5_c3",
+    "kind": "escuchar",
+    "line": 7,
+    "speaker": "esc",
+    "text": "こうえんはえきのまえにあります。",
+    "file": "u5_c3_esc7.opus"
+  },
+  {
+    "id": "u5_c3",
+    "kind": "escuchar",
+    "line": 8,
+    "speaker": "esc",
+    "text": "ぎんこうはびょういんのよこにあります。",
+    "file": "u5_c3_esc8.opus"
+  },
+  {
+    "id": "u5_c4",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "Tomás",
+    "text": "どこでひるごはんをたべますか。",
+    "file": "u5_c4_l1.opus"
+  },
+  {
+    "id": "u5_c4",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "友人",
+    "text": "コンビニでたべます。",
+    "file": "u5_c4_l2.opus"
+  },
+  {
+    "id": "u5_c4",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "Tomás",
+    "text": "そのあと、どこへいきますか。",
+    "file": "u5_c4_l3.opus"
+  },
+  {
+    "id": "u5_c4",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "友人",
+    "text": "がっこうへいきます。",
+    "file": "u5_c4_l4.opus"
+  },
+  {
+    "id": "u5_c4",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "Tomás",
+    "text": "そうですか。",
+    "file": "u5_c4_l5.opus"
+  },
+  {
+    "id": "u5_c6",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "Tanaka",
+    "text": "マリアさんはまいあさなにをしますか。",
+    "file": "u5_c6_l1.opus"
+  },
+  {
+    "id": "u5_c6",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "María",
+    "text": "わたしはまいあさ8じにバスでがっこうにいきます。",
+    "file": "u5_c6_l2.opus"
+  },
+  {
+    "id": "u5_c6",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "Tanaka",
+    "text": "がっこうでなにをべんきょうしますか。",
+    "file": "u5_c6_l3.opus"
+  },
+  {
+    "id": "u5_c6",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "María",
+    "text": "がっこうでにほんごをべんきょうします。",
+    "file": "u5_c6_l4.opus"
+  },
+  {
+    "id": "u5_c6",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "Tanaka",
+    "text": "しゅうまつはなにをしますか。",
+    "file": "u5_c6_l5.opus"
+  },
+  {
+    "id": "u5_c6",
+    "kind": "scenario",
+    "line": 6,
+    "speaker": "María",
+    "text": "こうえんでジョギングします。それからとしょかんでほんをよみます。",
+    "file": "u5_c6_l6.opus"
+  },
+  {
+    "id": "u5_c5",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "Lía",
+    "text": "すみません、としょかんはどこですか。",
+    "file": "u5_c5_l1.opus"
+  },
+  {
+    "id": "u5_c5",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "男性",
+    "text": "ぎんこうのとなりにあります。",
+    "file": "u5_c5_l2.opus"
+  },
+  {
+    "id": "u5_c5",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "Lía",
+    "text": "ここからとおいですか。",
+    "file": "u5_c5_l3.opus"
+  },
+  {
+    "id": "u5_c5",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "男性",
+    "text": "いいえ、ちかくにあります。バスでいけますよ。",
+    "file": "u5_c5_l4.opus"
+  },
+  {
+    "id": "u5_c5",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "Lía",
+    "text": "ありがとうございます。",
+    "file": "u5_c5_l5.opus"
+  },
+  {
+    "id": "u5_c5",
+    "kind": "escuchar",
+    "line": 1,
+    "speaker": "esc",
+    "text": "としょかんはぎんこうのとなりにあります。",
+    "file": "u5_c5_esc1.opus"
+  },
+  {
+    "id": "u5_c5",
+    "kind": "escuchar",
+    "line": 2,
+    "speaker": "esc",
+    "text": "えきからバスでいけます。",
+    "file": "u5_c5_esc2.opus"
+  },
+  {
+    "id": "u5_c5",
+    "kind": "escuchar",
+    "line": 3,
+    "speaker": "esc",
+    "text": "びょういんはこうえんのちかくにあります。",
+    "file": "u5_c5_esc3.opus"
+  },
+  {
+    "id": "u5_c5",
+    "kind": "escuchar",
+    "line": 4,
+    "speaker": "esc",
+    "text": "スーパーはえきのまえにあります。",
+    "file": "u5_c5_esc4.opus"
+  },
+  {
+    "id": "u5_c5",
+    "kind": "escuchar",
+    "line": 5,
+    "speaker": "esc",
+    "text": "としょかんはどこですか。— ぎんこうのとなりにあります。",
+    "file": "u5_c5_esc5.opus"
+  },
+  {
+    "id": "u5_c5",
+    "kind": "escuchar",
+    "line": 6,
+    "speaker": "esc",
+    "text": "ホテルはとおいですか。— いいえ、ちかくにあります。",
+    "file": "u5_c5_esc6.opus"
+  },
+  {
+    "id": "u5_c5",
+    "kind": "escuchar",
+    "line": 7,
+    "speaker": "esc",
+    "text": "えきへはバスでいけますか。— はい、いけますよ。",
+    "file": "u5_c5_esc7.opus"
+  },
+  {
+    "id": "u5_c5",
+    "kind": "escuchar",
+    "line": 8,
+    "speaker": "esc",
+    "text": "レストランはどこですか。— こうえんのまえにあります。",
+    "file": "u5_c5_esc8.opus"
+  },
+  {
+    "id": "u6_c1",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "Ana",
+    "text": "すみません、このあかいりんごはたかいですか。",
+    "file": "u6_c1_l1.opus"
+  },
+  {
+    "id": "u6_c1",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "店員",
+    "text": "いいえ、やすいですよ。ひとつごえんです。",
+    "file": "u6_c1_l2.opus"
+  },
+  {
+    "id": "u6_c1",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "Ana",
+    "text": "わあ、おおきくておいしそうですね。あのパンはあたらしいですか。",
+    "file": "u6_c1_l3.opus"
+  },
+  {
+    "id": "u6_c1",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "店員",
+    "text": "はい、きょうのパンです。とてもおいしいですよ。",
+    "file": "u6_c1_l4.opus"
+  },
+  {
+    "id": "u6_c1",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "Ana",
+    "text": "じゃあ、りんごをみっつとパンをひとつください。",
+    "file": "u6_c1_l5.opus"
+  },
+  {
+    "id": "u6_c2",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "Tomás",
+    "text": "このスーパーはきれいでべんりですね。",
+    "file": "u6_c2_l1.opus"
+  },
+  {
+    "id": "u6_c2",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "María",
+    "text": "はい、それにゆうめいなスーパーです。やさいがすきですか。",
+    "file": "u6_c2_l2.opus"
+  },
+  {
+    "id": "u6_c2",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "Tomás",
+    "text": "やさいはすきですが、さかなはちょっときらいです。",
+    "file": "u6_c2_l3.opus"
+  },
+  {
+    "id": "u6_c2",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "María",
+    "text": "そうですか。あのカフェはしずかできれいです。あとでいきましょう。",
+    "file": "u6_c2_l4.opus"
+  },
+  {
+    "id": "u6_c2",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "Tomás",
+    "text": "いいですね。たいせつなじかんですね。",
+    "file": "u6_c2_l5.opus"
+  },
+  {
+    "id": "u6_c3",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "Sofía",
+    "text": "このりょうりはどうですか。",
+    "file": "u6_c3_l1.opus"
+  },
+  {
+    "id": "u6_c3",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "友人",
+    "text": "とてもおいしいです。すしはどうですか。",
+    "file": "u6_c3_l2.opus"
+  },
+  {
+    "id": "u6_c3",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "Sofía",
+    "text": "すしもおいしいです。でも、ちょっとからいです。",
+    "file": "u6_c3_l3.opus"
+  },
+  {
+    "id": "u6_c3",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "友人",
+    "text": "そうですか。じゃあ、このコーヒーはどうですか。",
+    "file": "u6_c3_l4.opus"
+  },
+  {
+    "id": "u6_c3",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "Sofía",
+    "text": "コーヒーはあまりおいしくないです。ちょっとつめたいです。",
+    "file": "u6_c3_l5.opus"
+  },
+  {
+    "id": "u6_c3",
+    "kind": "scenario",
+    "line": 6,
+    "speaker": "友人",
+    "text": "じゃあ、デザートはどうですか。あまいケーキがありますよ。",
+    "file": "u6_c3_l6.opus"
+  },
+  {
+    "id": "u6_c3",
+    "kind": "escuchar",
+    "line": 1,
+    "speaker": "esc",
+    "text": "このすしはとてもおいしいです。",
+    "file": "u6_c3_esc1.opus"
+  },
+  {
+    "id": "u6_c3",
+    "kind": "escuchar",
+    "line": 2,
+    "speaker": "esc",
+    "text": "このコーヒーはちょっとつめたいです。",
+    "file": "u6_c3_esc2.opus"
+  },
+  {
+    "id": "u6_c3",
+    "kind": "escuchar",
+    "line": 3,
+    "speaker": "esc",
+    "text": "このケーキはあまりあまくないです。",
+    "file": "u6_c3_esc3.opus"
+  },
+  {
+    "id": "u6_c3",
+    "kind": "escuchar",
+    "line": 4,
+    "speaker": "esc",
+    "text": "このりょうりはからいですが、おいしいです。",
+    "file": "u6_c3_esc4.opus"
+  },
+  {
+    "id": "u6_c3",
+    "kind": "escuchar",
+    "line": 5,
+    "speaker": "esc",
+    "text": "このりょうりはどうですか。— とてもおいしいです。",
+    "file": "u6_c3_esc5.opus"
+  },
+  {
+    "id": "u6_c3",
+    "kind": "escuchar",
+    "line": 6,
+    "speaker": "esc",
+    "text": "このコーヒーはどうですか。— あまりおいしくないです。",
+    "file": "u6_c3_esc6.opus"
+  },
+  {
+    "id": "u6_c3",
+    "kind": "escuchar",
+    "line": 7,
+    "speaker": "esc",
+    "text": "このすしはどうですか。— ちょっとからいです。",
+    "file": "u6_c3_esc7.opus"
+  },
+  {
+    "id": "u6_c3",
+    "kind": "escuchar",
+    "line": 8,
+    "speaker": "esc",
+    "text": "このケーキはどうですか。— とてもあまいです。",
+    "file": "u6_c3_esc8.opus"
+  },
+  {
+    "id": "u6_c4",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "María",
+    "text": "カルロス、りんごとオレンジ、どちらがやすいですか。",
+    "file": "u6_c4_l1.opus"
+  },
+  {
+    "id": "u6_c4",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "Carlos",
+    "text": "りんごよりオレンジのほうがやすいです。",
+    "file": "u6_c4_l2.opus"
+  },
+  {
+    "id": "u6_c4",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "María",
+    "text": "そうですか。じゃあ、バナナとりんごでは、どちらがおおきいですか。",
+    "file": "u6_c4_l3.opus"
+  },
+  {
+    "id": "u6_c4",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "Carlos",
+    "text": "りんごよりバナナのほうがおおきいです。",
+    "file": "u6_c4_l4.opus"
+  },
+  {
+    "id": "u6_c4",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "María",
+    "text": "でも、わたしはりんごのほうがすきです。",
+    "file": "u6_c4_l5.opus"
+  },
+  {
+    "id": "u6_c5",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "Lía",
+    "text": "にほんのたべもののなかで、なにがいちばんすきですか。",
+    "file": "u6_c5_l1.opus"
+  },
+  {
+    "id": "u6_c5",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "友人",
+    "text": "わたしはすしがいちばんすきです。リアさんは？",
+    "file": "u6_c5_l2.opus"
+  },
+  {
+    "id": "u6_c5",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "Lía",
+    "text": "わたしはラーメンがいちばんおいしいとおもいます。",
+    "file": "u6_c5_l3.opus"
+  },
+  {
+    "id": "u6_c5",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "友人",
+    "text": "じゃあ、くだもののなかでは？",
+    "file": "u6_c5_l4.opus"
+  },
+  {
+    "id": "u6_c5",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "Lía",
+    "text": "りんごがいちばんすきです。やすくておいしいです。",
+    "file": "u6_c5_l5.opus"
+  },
+  {
+    "id": "u6_c5",
+    "kind": "scenario",
+    "line": 6,
+    "speaker": "友人",
+    "text": "そうですね。りんごはとてもべんりなくだものですね。",
+    "file": "u6_c5_l6.opus"
+  },
+  {
+    "id": "u6_c5",
+    "kind": "escuchar",
+    "line": 1,
+    "speaker": "esc",
+    "text": "くだもののなかでりんごがいちばんすきです。",
+    "file": "u6_c5_esc1.opus"
+  },
+  {
+    "id": "u6_c5",
+    "kind": "escuchar",
+    "line": 2,
+    "speaker": "esc",
+    "text": "にほんりょうりのなかですしがいちばんおいしいです。",
+    "file": "u6_c5_esc2.opus"
+  },
+  {
+    "id": "u6_c5",
+    "kind": "escuchar",
+    "line": 3,
+    "speaker": "esc",
+    "text": "のみもののなかでコーヒーがいちばんすきです。",
+    "file": "u6_c5_esc3.opus"
+  },
+  {
+    "id": "u6_c5",
+    "kind": "escuchar",
+    "line": 4,
+    "speaker": "esc",
+    "text": "りんごよりオレンジのほうがやすいです。",
+    "file": "u6_c5_esc4.opus"
+  },
+  {
+    "id": "u6_c5",
+    "kind": "escuchar",
+    "line": 5,
+    "speaker": "esc",
+    "text": "くだもののなかでなにがいちばんすきですか。— りんごがいちばんすきです。",
+    "file": "u6_c5_esc5.opus"
+  },
+  {
+    "id": "u6_c5",
+    "kind": "escuchar",
+    "line": 6,
+    "speaker": "esc",
+    "text": "このケーキはどうですか。— とてもあまくておいしいです。",
+    "file": "u6_c5_esc6.opus"
+  },
+  {
+    "id": "u6_c5",
+    "kind": "escuchar",
+    "line": 7,
+    "speaker": "esc",
+    "text": "にくとさかな、どちらがすきですか。— さかなのほうがすきです。",
+    "file": "u6_c5_esc7.opus"
+  },
+  {
+    "id": "u6_c5",
+    "kind": "escuchar",
+    "line": 8,
+    "speaker": "esc",
+    "text": "にほんりょうりのなかでなにがいちばんおいしいですか。— ラーメンがいちばんおいしいです。",
+    "file": "u6_c5_esc8.opus"
+  },
+  {
+    "id": "u7_c1",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "Ana",
+    "text": "カルロスさん、いっしょにひるごはんをたべましょう。",
+    "file": "u7_c1_l1.opus"
+  },
+  {
+    "id": "u7_c1",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "Carlos",
+    "text": "いいですね。しょくどうにいきましょう。",
+    "file": "u7_c1_l2.opus"
+  },
+  {
+    "id": "u7_c1",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "Ana",
+    "text": "たべたあとで、コーヒーをのみましょうか。",
+    "file": "u7_c1_l3.opus"
+  },
+  {
+    "id": "u7_c1",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "Carlos",
+    "text": "はい、のみましょう。にもつをもちましょうか。",
+    "file": "u7_c1_l4.opus"
+  },
+  {
+    "id": "u7_c2",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "Lía",
+    "text": "ソフィアさん、しゅうまつになにをしたいですか。",
+    "file": "u7_c2_l1.opus"
+  },
+  {
+    "id": "u7_c2",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "Sofía",
+    "text": "えいがをみたいです。あたらしいえいががありますよ。",
+    "file": "u7_c2_l2.opus"
+  },
+  {
+    "id": "u7_c2",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "Lía",
+    "text": "いいですね！わたしはうみにもいきたいです。",
+    "file": "u7_c2_l3.opus"
+  },
+  {
+    "id": "u7_c2",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "Sofía",
+    "text": "うみはいいですね。でもやまはちょっと…いきたくないです。",
+    "file": "u7_c2_l4.opus"
+  },
+  {
+    "id": "u7_c3",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "Tomás",
+    "text": "これからスーパーにやさいをかいにいきます。",
+    "file": "u7_c3_l1.opus"
+  },
+  {
+    "id": "u7_c3",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "María",
+    "text": "わたしもデパートにふくをみにいきます。",
+    "file": "u7_c3_l2.opus"
+  },
+  {
+    "id": "u7_c3",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "Tomás",
+    "text": "ごご、としょかんにべんきょうしにいきませんか。",
+    "file": "u7_c3_l3.opus"
+  },
+  {
+    "id": "u7_c3",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "María",
+    "text": "いいですね。そのあと、うちにあそびにきませんか。",
+    "file": "u7_c3_l4.opus"
+  },
+  {
+    "id": "u7_c3",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "Tomás",
+    "text": "はい、いきます！なにをたべにいきましょうか。",
+    "file": "u7_c3_l5.opus"
+  },
+  {
+    "id": "u7_c3",
+    "kind": "escuchar",
+    "line": 1,
+    "speaker": "esc",
+    "text": "スーパーにやさいをかいにいきます。",
+    "file": "u7_c3_esc1.opus"
+  },
+  {
+    "id": "u7_c3",
+    "kind": "escuchar",
+    "line": 2,
+    "speaker": "esc",
+    "text": "レストランにたべにいきましょう。",
+    "file": "u7_c3_esc2.opus"
+  },
+  {
+    "id": "u7_c3",
+    "kind": "escuchar",
+    "line": 3,
+    "speaker": "esc",
+    "text": "としょかんにべんきょうしにいきます。",
+    "file": "u7_c3_esc3.opus"
+  },
+  {
+    "id": "u7_c3",
+    "kind": "escuchar",
+    "line": 4,
+    "speaker": "esc",
+    "text": "うちにあそびにきませんか。",
+    "file": "u7_c3_esc4.opus"
+  },
+  {
+    "id": "u7_c3",
+    "kind": "escuchar",
+    "line": 5,
+    "speaker": "esc",
+    "text": "デパートにふくをみにいきます。",
+    "file": "u7_c3_esc5.opus"
+  },
+  {
+    "id": "u7_c3",
+    "kind": "escuchar",
+    "line": 6,
+    "speaker": "esc",
+    "text": "こうえんにさんぽしにいきます。",
+    "file": "u7_c3_esc6.opus"
+  },
+  {
+    "id": "u7_c3",
+    "kind": "escuchar",
+    "line": 7,
+    "speaker": "esc",
+    "text": "ともだちがうちにあそびにきます。",
+    "file": "u7_c3_esc7.opus"
+  },
+  {
+    "id": "u7_c3",
+    "kind": "escuchar",
+    "line": 8,
+    "speaker": "esc",
+    "text": "にほんにすしをたべにいきたいです。",
+    "file": "u7_c3_esc8.opus"
+  },
+  {
+    "id": "u7_c4",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "Sofía",
+    "text": "あさごはんのまえに、シャワーをあびます。",
+    "file": "u7_c4_l1.opus"
+  },
+  {
+    "id": "u7_c4",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "友人",
+    "text": "シャワーのまえになにをしますか。",
+    "file": "u7_c4_l2.opus"
+  },
+  {
+    "id": "u7_c4",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "Sofía",
+    "text": "かおをあらいます。それから、あさごはんのあとで、はみがきをします。",
+    "file": "u7_c4_l3.opus"
+  },
+  {
+    "id": "u7_c4",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "友人",
+    "text": "じゅぎょうのあとで、なにをしますか。",
+    "file": "u7_c4_l4.opus"
+  },
+  {
+    "id": "u7_c5",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "Carlos",
+    "text": "あさごはんのまえに、さんぽしにいきたいです。",
+    "file": "u7_c5_l1.opus"
+  },
+  {
+    "id": "u7_c5",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "Ana",
+    "text": "わたしはあさごはんのあとで、としょかんにべんきょうしにいきます。",
+    "file": "u7_c5_l2.opus"
+  },
+  {
+    "id": "u7_c5",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "Carlos",
+    "text": "じゃあ、ひるごはんをいっしょにたべましょう。",
+    "file": "u7_c5_l3.opus"
+  },
+  {
+    "id": "u7_c5",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "Ana",
+    "text": "いいですね。ごごはえいがをみにいきたいです。",
+    "file": "u7_c5_l4.opus"
+  },
+  {
+    "id": "u7_c5",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "Carlos",
+    "text": "ばんごはんのまえに、かいものにいきましょうか。",
+    "file": "u7_c5_l5.opus"
+  },
+  {
+    "id": "u7_c5",
+    "kind": "escuchar",
+    "line": 1,
+    "speaker": "esc",
+    "text": "あさごはんのまえに、さんぽしにいきます。",
+    "file": "u7_c5_esc1.opus"
+  },
+  {
+    "id": "u7_c5",
+    "kind": "escuchar",
+    "line": 2,
+    "speaker": "esc",
+    "text": "じゅぎょうのあとで、いっしょにたべましょう。",
+    "file": "u7_c5_esc2.opus"
+  },
+  {
+    "id": "u7_c5",
+    "kind": "escuchar",
+    "line": 3,
+    "speaker": "esc",
+    "text": "しゅうまつにえいがをみにいきたいです。",
+    "file": "u7_c5_esc3.opus"
+  },
+  {
+    "id": "u7_c5",
+    "kind": "escuchar",
+    "line": 4,
+    "speaker": "esc",
+    "text": "ばんごはんのまえに、かいものにいきましょうか。",
+    "file": "u7_c5_esc4.opus"
+  },
+  {
+    "id": "u7_c5",
+    "kind": "escuchar",
+    "line": 5,
+    "speaker": "esc",
+    "text": "あさごはんのあとで、としょかんにべんきょうしにいきます。",
+    "file": "u7_c5_esc5.opus"
+  },
+  {
+    "id": "u7_c5",
+    "kind": "escuchar",
+    "line": 6,
+    "speaker": "esc",
+    "text": "ひるごはんをいっしょにたべましょう。そのあとで、さんぽしましょう。",
+    "file": "u7_c5_esc6.opus"
+  },
+  {
+    "id": "u7_c5",
+    "kind": "escuchar",
+    "line": 7,
+    "speaker": "esc",
+    "text": "しごとのまえに、コーヒーをのみたいです。",
+    "file": "u7_c5_esc7.opus"
+  },
+  {
+    "id": "u7_c5",
+    "kind": "escuchar",
+    "line": 8,
+    "speaker": "esc",
+    "text": "にちようびにうみにいきたいです。いっしょにいきましょう。",
+    "file": "u7_c5_esc8.opus"
+  },
+  {
+    "id": "u8_c1",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "Ana",
+    "text": "このまちはおおきくて、にぎやかですね。",
+    "file": "u8_c1_l1.opus"
+  },
+  {
+    "id": "u8_c1",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "Lía",
+    "text": "そうですね。きれいで、しずかなところもありますよ。",
+    "file": "u8_c1_l2.opus"
+  },
+  {
+    "id": "u8_c1",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "Ana",
+    "text": "ホテルはあたらしくて、べんりでした。",
+    "file": "u8_c1_l3.opus"
+  },
+  {
+    "id": "u8_c1",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "Lía",
+    "text": "たべものもおいしくて、やすかったです。",
+    "file": "u8_c1_l4.opus"
+  },
+  {
+    "id": "u8_c2",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "Sofía",
+    "text": "さいきん、あたたかくなりましたね。",
+    "file": "u8_c2_l1.opus"
+  },
+  {
+    "id": "u8_c2",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "Carlos",
+    "text": "そうですね。ひがながくなりました。",
+    "file": "u8_c2_l2.opus"
+  },
+  {
+    "id": "u8_c2",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "Sofía",
+    "text": "はるはまちがきれいになりますね。",
+    "file": "u8_c2_l3.opus"
+  },
+  {
+    "id": "u8_c2",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "Carlos",
+    "text": "はい。こうえんもにぎやかになります。",
+    "file": "u8_c2_l4.opus"
+  },
+  {
+    "id": "u8_c3",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "Tomás",
+    "text": "このみせのりょうりはおいしいとおもいます。",
+    "file": "u8_c3_l1.opus"
+  },
+  {
+    "id": "u8_c3",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "María",
+    "text": "わたしもそうおもいます。でも、ちょっとたかいとおもいます。",
+    "file": "u8_c3_l2.opus"
+  },
+  {
+    "id": "u8_c3",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "Tomás",
+    "text": "このケーキはきれいだとおもいます。たべましょう。",
+    "file": "u8_c3_l3.opus"
+  },
+  {
+    "id": "u8_c3",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "María",
+    "text": "おいしいですね！このみせはいいとおもいます。",
+    "file": "u8_c3_l4.opus"
+  },
+  {
+    "id": "u8_c3",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "Tomás",
+    "text": "そうですね。とてもたのしいとおもいます。またきましょう。",
+    "file": "u8_c3_l5.opus"
+  },
+  {
+    "id": "u8_c3",
+    "kind": "escuchar",
+    "line": 1,
+    "speaker": "esc",
+    "text": "このりょうりはおいしいとおもいます。",
+    "file": "u8_c3_esc1.opus"
+  },
+  {
+    "id": "u8_c3",
+    "kind": "escuchar",
+    "line": 2,
+    "speaker": "esc",
+    "text": "このまちはきれいだとおもいます。",
+    "file": "u8_c3_esc2.opus"
+  },
+  {
+    "id": "u8_c3",
+    "kind": "escuchar",
+    "line": 3,
+    "speaker": "esc",
+    "text": "にほんごはたのしいとおもいます。",
+    "file": "u8_c3_esc3.opus"
+  },
+  {
+    "id": "u8_c3",
+    "kind": "escuchar",
+    "line": 4,
+    "speaker": "esc",
+    "text": "あのみせはたかいとおもいます。",
+    "file": "u8_c3_esc4.opus"
+  },
+  {
+    "id": "u8_c3",
+    "kind": "escuchar",
+    "line": 5,
+    "speaker": "esc",
+    "text": "このケーキはおいしいとおもいます。たべましょう。",
+    "file": "u8_c3_esc5.opus"
+  },
+  {
+    "id": "u8_c3",
+    "kind": "escuchar",
+    "line": 6,
+    "speaker": "esc",
+    "text": "このまちはきれいで、いいとおもいます。",
+    "file": "u8_c3_esc6.opus"
+  },
+  {
+    "id": "u8_c3",
+    "kind": "escuchar",
+    "line": 7,
+    "speaker": "esc",
+    "text": "このりょうりはたかいとおもいます。でもおいしいです。",
+    "file": "u8_c3_esc7.opus"
+  },
+  {
+    "id": "u8_c3",
+    "kind": "escuchar",
+    "line": 8,
+    "speaker": "esc",
+    "text": "にほんのりょこうはたのしいとおもいます。",
+    "file": "u8_c3_esc8.opus"
+  },
+  {
+    "id": "u8_c4",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "Tomás",
+    "text": "りょこうのしゃしんです。てんきはあまりあつくなかったです。",
+    "file": "u8_c4_l1.opus"
+  },
+  {
+    "id": "u8_c4",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "Sofía",
+    "text": "そうですか。たべものはおいしかったですか。",
+    "file": "u8_c4_l2.opus"
+  },
+  {
+    "id": "u8_c4",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "Tomás",
+    "text": "はい、とてもおいしかったです。でもホテルはあまりきれいじゃなかったです。",
+    "file": "u8_c4_l3.opus"
+  },
+  {
+    "id": "u8_c4",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "Sofía",
+    "text": "そうですか。たかかったですか。",
+    "file": "u8_c4_l4.opus"
+  },
+  {
+    "id": "u8_c5",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "Carlos",
+    "text": "りょこうはたのしかったですね。まちはきれいで、しずかでした。",
+    "file": "u8_c5_l1.opus"
+  },
+  {
+    "id": "u8_c5",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "Lía",
+    "text": "そうですね。たべものもおいしくて、やすかったです。",
+    "file": "u8_c5_l2.opus"
+  },
+  {
+    "id": "u8_c5",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "Carlos",
+    "text": "さいきん、あたたかくなりましたね。いいてんきだとおもいます。",
+    "file": "u8_c5_l3.opus"
+  },
+  {
+    "id": "u8_c5",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "Lía",
+    "text": "でも、あしたはいそがしくて、たいへんです。",
+    "file": "u8_c5_l4.opus"
+  },
+  {
+    "id": "u8_c5",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "Carlos",
+    "text": "そうですね。でもたのしいとおもいます。がんばりましょう。",
+    "file": "u8_c5_l5.opus"
+  },
+  {
+    "id": "u8_c5",
+    "kind": "escuchar",
+    "line": 1,
+    "speaker": "esc",
+    "text": "まちはきれいで、しずかでした。",
+    "file": "u8_c5_esc1.opus"
+  },
+  {
+    "id": "u8_c5",
+    "kind": "escuchar",
+    "line": 2,
+    "speaker": "esc",
+    "text": "さいきん、あたたかくなりましたね。",
+    "file": "u8_c5_esc2.opus"
+  },
+  {
+    "id": "u8_c5",
+    "kind": "escuchar",
+    "line": 3,
+    "speaker": "esc",
+    "text": "このりょうりはおいしいとおもいます。",
+    "file": "u8_c5_esc3.opus"
+  },
+  {
+    "id": "u8_c5",
+    "kind": "escuchar",
+    "line": 4,
+    "speaker": "esc",
+    "text": "あしたはいそがしくて、たいへんです。",
+    "file": "u8_c5_esc4.opus"
+  },
+  {
+    "id": "u8_c5",
+    "kind": "escuchar",
+    "line": 5,
+    "speaker": "esc",
+    "text": "たべものはおいしくて、やすかったです。",
+    "file": "u8_c5_esc5.opus"
+  },
+  {
+    "id": "u8_c5",
+    "kind": "escuchar",
+    "line": 6,
+    "speaker": "esc",
+    "text": "こどもがげんきになりました。",
+    "file": "u8_c5_esc6.opus"
+  },
+  {
+    "id": "u8_c5",
+    "kind": "escuchar",
+    "line": 7,
+    "speaker": "esc",
+    "text": "このまちはいいとおもいます。",
+    "file": "u8_c5_esc7.opus"
+  },
+  {
+    "id": "u8_c5",
+    "kind": "escuchar",
+    "line": 8,
+    "speaker": "esc",
+    "text": "きのうはさむくなかったです。",
+    "file": "u8_c5_esc8.opus"
+  },
+  {
+    "id": "u9_c1",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "田中",
+    "text": "マリアさんのかぞくはなんにんですか。",
+    "file": "u9_c1_l1.opus"
+  },
+  {
+    "id": "u9_c1",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "マリア",
+    "text": "ごにんです。ちちとははとあにといもうととわたしです。",
+    "file": "u9_c1_l2.opus"
+  },
+  {
+    "id": "u9_c1",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "田中",
+    "text": "いいですね。きょうだいはなんにんいますか。",
+    "file": "u9_c1_l3.opus"
+  },
+  {
+    "id": "u9_c1",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "マリア",
+    "text": "あにがひとりといもうとがひとりいます。",
+    "file": "u9_c1_l4.opus"
+  },
+  {
+    "id": "u9_c1",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "田中",
+    "text": "わたしはさんにんかぞくです。ちちとははとわたしです。",
+    "file": "u9_c1_l5.opus"
+  },
+  {
+    "id": "u9_c2",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "田中",
+    "text": "マリアさんのちち…あ、おとうさんはなにをしていますか。",
+    "file": "u9_c2_l1.opus"
+  },
+  {
+    "id": "u9_c2",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "マリア",
+    "text": "ちちはいしゃです。とてもやさしいです。",
+    "file": "u9_c2_l2.opus"
+  },
+  {
+    "id": "u9_c2",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "田中",
+    "text": "おかあさんは？",
+    "file": "u9_c2_l3.opus"
+  },
+  {
+    "id": "u9_c2",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "マリア",
+    "text": "ははかんごしです。りょうりがじょうずです。",
+    "file": "u9_c2_l4.opus"
+  },
+  {
+    "id": "u9_c2",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "マリア",
+    "text": "あにはだいがくせいで、おとうとはこうこうせいです。",
+    "file": "u9_c2_l5.opus"
+  },
+  {
+    "id": "u9_c3",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "マリア",
+    "text": "ちちはせんせいです。ははかんごしです。",
+    "file": "u9_c3_l1.opus"
+  },
+  {
+    "id": "u9_c3",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "田中",
+    "text": "そうですか。わたしのちちはかいしゃいんです。",
+    "file": "u9_c3_l2.opus"
+  },
+  {
+    "id": "u9_c3",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "マリア",
+    "text": "たなかさんのおかあさんは？",
+    "file": "u9_c3_l3.opus"
+  },
+  {
+    "id": "u9_c3",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "田中",
+    "text": "ははしゅふです。マリアさんのおにいさんはがくせいですか。",
+    "file": "u9_c3_l4.opus"
+  },
+  {
+    "id": "u9_c3",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "マリア",
+    "text": "はい、あにはだいがくせいです。たなかさんのおとうとさんはげんきですか。",
+    "file": "u9_c3_l5.opus"
+  },
+  {
+    "id": "u9_c3",
+    "kind": "escuchar",
+    "line": 1,
+    "speaker": "esc",
+    "text": "ちちはせんせいです。ははかんごしです。",
+    "file": "u9_c3_esc1.opus"
+  },
+  {
+    "id": "u9_c3",
+    "kind": "escuchar",
+    "line": 2,
+    "speaker": "esc",
+    "text": "たなかさんのおとうさんはかいしゃいんです。",
+    "file": "u9_c3_esc2.opus"
+  },
+  {
+    "id": "u9_c3",
+    "kind": "escuchar",
+    "line": 3,
+    "speaker": "esc",
+    "text": "あにはだいがくせいで、いもうとはこうこうせいです。",
+    "file": "u9_c3_esc3.opus"
+  },
+  {
+    "id": "u9_c3",
+    "kind": "escuchar",
+    "line": 4,
+    "speaker": "esc",
+    "text": "やまださんのおねえさんはやさしくて、きれいです。",
+    "file": "u9_c3_esc4.opus"
+  },
+  {
+    "id": "u9_c3",
+    "kind": "escuchar",
+    "line": 5,
+    "speaker": "esc",
+    "text": "ちちはいしゃです。たなかさんのおとうさんもいしゃです。",
+    "file": "u9_c3_esc5.opus"
+  },
+  {
+    "id": "u9_c3",
+    "kind": "escuchar",
+    "line": 6,
+    "speaker": "esc",
+    "text": "ははしゅふです。たなかさんのおかあさんはせんせいです。",
+    "file": "u9_c3_esc6.opus"
+  },
+  {
+    "id": "u9_c3",
+    "kind": "escuchar",
+    "line": 7,
+    "speaker": "esc",
+    "text": "おとうとはがくせいです。やまださんのおとうとさんもがくせいです。",
+    "file": "u9_c3_esc7.opus"
+  },
+  {
+    "id": "u9_c3",
+    "kind": "escuchar",
+    "line": 8,
+    "speaker": "esc",
+    "text": "あねはかんごしです。マリアさんのおねえさんはいしゃです。",
+    "file": "u9_c3_esc8.opus"
+  },
+  {
+    "id": "u9_c4",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "マリア",
+    "text": "たなかさん、ごかぞくはなんにんですか。",
+    "file": "u9_c4_l1.opus"
+  },
+  {
+    "id": "u9_c4",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "田中",
+    "text": "よにんです。ちちとははとおとうととわたしです。",
+    "file": "u9_c4_l2.opus"
+  },
+  {
+    "id": "u9_c4",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "マリア",
+    "text": "おとうさんはなんさいですか。",
+    "file": "u9_c4_l3.opus"
+  },
+  {
+    "id": "u9_c4",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "田中",
+    "text": "ちちはごじゅうにさいです。",
+    "file": "u9_c4_l4.opus"
+  },
+  {
+    "id": "u9_c4",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "マリア",
+    "text": "おかあさんはどんなひとですか。",
+    "file": "u9_c4_l5.opus"
+  },
+  {
+    "id": "u9_c4",
+    "kind": "scenario",
+    "line": 6,
+    "speaker": "田中",
+    "text": "ははやさしくて、りょうりがじょうずです。",
+    "file": "u9_c4_l6.opus"
+  },
+  {
+    "id": "u9_c5",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "マリア",
+    "text": "これはわたしのかぞくのしゃしんです。ごにんかぞくです。",
+    "file": "u9_c5_l1.opus"
+  },
+  {
+    "id": "u9_c5",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "マリア",
+    "text": "ちちはかいしゃいんで、まじめです。ははかんごしで、やさしいです。",
+    "file": "u9_c5_l2.opus"
+  },
+  {
+    "id": "u9_c5",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "マリア",
+    "text": "あにはにじゅうさんさいで、だいがくせいです。おとうとはじゅうごさいで、こうこうせいです。",
+    "file": "u9_c5_l3.opus"
+  },
+  {
+    "id": "u9_c5",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "田中",
+    "text": "すてきですね！わたしはよにんかぞくです。",
+    "file": "u9_c5_l4.opus"
+  },
+  {
+    "id": "u9_c5",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "田中",
+    "text": "ちちはいしゃで、きびしいですが、やさしいです。ははしゅふで、りょうりがじょうずです。",
+    "file": "u9_c5_l5.opus"
+  },
+  {
+    "id": "u9_c5",
+    "kind": "scenario",
+    "line": 6,
+    "speaker": "マリア",
+    "text": "おとうさんはなんさいですか。",
+    "file": "u9_c5_l6.opus"
+  },
+  {
+    "id": "u9_c5",
+    "kind": "scenario",
+    "line": 7,
+    "speaker": "田中",
+    "text": "ちちはごじっさいで、ははよんじゅうはっさいです。",
+    "file": "u9_c5_l7.opus"
+  },
+  {
+    "id": "u9_c5",
+    "kind": "escuchar",
+    "line": 1,
+    "speaker": "esc",
+    "text": "わたしはごにんかぞくです。ちちはかいしゃいんで、ははかんごしです。",
+    "file": "u9_c5_esc1.opus"
+  },
+  {
+    "id": "u9_c5",
+    "kind": "escuchar",
+    "line": 2,
+    "speaker": "esc",
+    "text": "あにはにじゅうさんさいで、だいがくせいです。おとうとはじゅうごさいです。",
+    "file": "u9_c5_esc2.opus"
+  },
+  {
+    "id": "u9_c5",
+    "kind": "escuchar",
+    "line": 3,
+    "speaker": "esc",
+    "text": "たなかさんのおかあさんはしゅふで、りょうりがじょうずです。",
+    "file": "u9_c5_esc3.opus"
+  },
+  {
+    "id": "u9_c5",
+    "kind": "escuchar",
+    "line": 4,
+    "speaker": "esc",
+    "text": "ちちはいしゃで、きびしいですが、やさしいです。",
+    "file": "u9_c5_esc4.opus"
+  },
+  {
+    "id": "u9_c5",
+    "kind": "escuchar",
+    "line": 5,
+    "speaker": "esc",
+    "text": "マリアさんのかぞくはごにんです。ちちはかいしゃいんで、ははかんごしです。あにはだいがくせいです。",
+    "file": "u9_c5_esc5.opus"
+  },
+  {
+    "id": "u9_c5",
+    "kind": "escuchar",
+    "line": 6,
+    "speaker": "esc",
+    "text": "たなかさんのおとうさんはいしゃで、ごじっさいです。おかあさんはしゅふです。",
+    "file": "u9_c5_esc6.opus"
+  },
+  {
+    "id": "u9_c5",
+    "kind": "escuchar",
+    "line": 7,
+    "speaker": "esc",
+    "text": "ちちはまじめで、ははやさしいです。あにはげんきで、おもしろいです。",
+    "file": "u9_c5_esc7.opus"
+  },
+  {
+    "id": "u9_c5",
+    "kind": "escuchar",
+    "line": 8,
+    "speaker": "esc",
+    "text": "マリアさんのおにいさんはにじゅうさんさいで、やさしいひとです。",
+    "file": "u9_c5_esc8.opus"
+  },
+  {
+    "id": "u10_c1",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "T",
+    "text": "マリアさん、まいあさ なんじに おきますか。",
+    "file": "u10_c1_l1.opus"
+  },
+  {
+    "id": "u10_c1",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "M",
+    "text": "6時に おきます。おきてから、シャワーを あびます。",
+    "file": "u10_c1_l2.opus"
+  },
+  {
+    "id": "u10_c1",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "T",
+    "text": "シャワーを あびてから、なにを しますか。",
+    "file": "u10_c1_l3.opus"
+  },
+  {
+    "id": "u10_c1",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "M",
+    "text": "はを みがいてから、あさごはんを たべます。",
+    "file": "u10_c1_l4.opus"
+  },
+  {
+    "id": "u10_c1",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "T",
+    "text": "あさごはんを たべてから、すぐ がっこうへ いきますか。",
+    "file": "u10_c1_l5.opus"
+  },
+  {
+    "id": "u10_c1",
+    "kind": "scenario",
+    "line": 6,
+    "speaker": "M",
+    "text": "いいえ。コーヒーを のんでから、がっこうへ いきます。",
+    "file": "u10_c1_l6.opus"
+  },
+  {
+    "id": "u10_c2",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "T",
+    "text": "マリアさん、にほんの えいがを みた ことが ありますか。",
+    "file": "u10_c2_l1.opus"
+  },
+  {
+    "id": "u10_c2",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "M",
+    "text": "はい、あります。せんしゅう えいがを みた あとで、ともだちと ごはんを たべました。",
+    "file": "u10_c2_l2.opus"
+  },
+  {
+    "id": "u10_c2",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "T",
+    "text": "いいですね。きょうとへ いった ことが ありますか。",
+    "file": "u10_c2_l3.opus"
+  },
+  {
+    "id": "u10_c2",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "M",
+    "text": "いいえ、いった ことが ありません。でも、おすしを たべた ことが あります。",
+    "file": "u10_c2_l4.opus"
+  },
+  {
+    "id": "u10_c2",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "T",
+    "text": "おすしを たべた あとで、なにを しましたか。",
+    "file": "u10_c2_l5.opus"
+  },
+  {
+    "id": "u10_c2",
+    "kind": "scenario",
+    "line": 6,
+    "speaker": "M",
+    "text": "ともだちと えいがを みに いきました。とても たのしかったです。",
+    "file": "u10_c2_l6.opus"
+  },
+  {
+    "id": "u10_c3",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "T",
+    "text": "マリアさん、きょうしつで はなさないで ください。",
+    "file": "u10_c3_l1.opus"
+  },
+  {
+    "id": "u10_c3",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "M",
+    "text": "はい、わかりました。しゃしんを とっても いいですか。",
+    "file": "u10_c3_l2.opus"
+  },
+  {
+    "id": "u10_c3",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "T",
+    "text": "いいえ、しゃしんを とらないで ください。それから、まいにち べんきょうしなければ なりません。",
+    "file": "u10_c3_l3.opus"
+  },
+  {
+    "id": "u10_c3",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "M",
+    "text": "そうですか。まいにち こなければ なりませんか。",
+    "file": "u10_c3_l4.opus"
+  },
+  {
+    "id": "u10_c3",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "T",
+    "text": "どようびは こなくても いいです。やすみです。",
+    "file": "u10_c3_l5.opus"
+  },
+  {
+    "id": "u10_c3",
+    "kind": "scenario",
+    "line": 6,
+    "speaker": "M",
+    "text": "わかりました。しゅくだいは まいにち しなければ なりませんか。",
+    "file": "u10_c3_l6.opus"
+  },
+  {
+    "id": "u10_c3",
+    "kind": "scenario",
+    "line": 7,
+    "speaker": "T",
+    "text": "はい、しゅくだいは まいにち しなければ なりません。でも ながく しなくても いいです。",
+    "file": "u10_c3_l7.opus"
+  },
+  {
+    "id": "u10_c3",
+    "kind": "escuchar",
+    "line": 1,
+    "speaker": "esc",
+    "text": "ここで <ruby>写真<rt>しゃしん</rt></ruby>を <ruby>撮<rt>と</rt></ruby>らないで ください。",
+    "file": "u10_c3_esc1.opus"
+  },
+  {
+    "id": "u10_c3",
+    "kind": "escuchar",
+    "line": 2,
+    "speaker": "esc",
+    "text": "<ruby>毎日<rt>まいにち</rt></ruby> <ruby>勉強<rt>べんきょう</rt></ruby>しなければ なりません。",
+    "file": "u10_c3_esc2.opus"
+  },
+  {
+    "id": "u10_c3",
+    "kind": "escuchar",
+    "line": 3,
+    "speaker": "esc",
+    "text": "<ruby>今日<rt>きょう</rt></ruby>は <ruby>来<rt>こ</rt></ruby>なくても いいです。",
+    "file": "u10_c3_esc3.opus"
+  },
+  {
+    "id": "u10_c3",
+    "kind": "escuchar",
+    "line": 4,
+    "speaker": "esc",
+    "text": "おそく <ruby>来<rt>こ</rt></ruby>ないで ください。",
+    "file": "u10_c3_esc4.opus"
+  },
+  {
+    "id": "u10_c3",
+    "kind": "escuchar",
+    "line": 5,
+    "speaker": "esc",
+    "text": "<ruby>教室<rt>きょうしつ</rt></ruby>で <ruby>話<rt>はな</rt></ruby>さないで ください。しずかに して ください。",
+    "file": "u10_c3_esc5.opus"
+  },
+  {
+    "id": "u10_c3",
+    "kind": "escuchar",
+    "line": 6,
+    "speaker": "esc",
+    "text": "<ruby>毎日<rt>まいにち</rt></ruby> しゅくだいを しなければ なりません。",
+    "file": "u10_c3_esc6.opus"
+  },
+  {
+    "id": "u10_c3",
+    "kind": "escuchar",
+    "line": 7,
+    "speaker": "esc",
+    "text": "<ruby>土曜日<rt>どようび</rt></ruby>は <ruby>学校<rt>がっこう</rt></ruby>へ <ruby>来<rt>こ</rt></ruby>なくても いいです。",
+    "file": "u10_c3_esc7.opus"
+  },
+  {
+    "id": "u10_c3",
+    "kind": "escuchar",
+    "line": 8,
+    "speaker": "esc",
+    "text": "ここで タバコを <ruby>吸<rt>す</rt></ruby>わないで ください。",
+    "file": "u10_c3_esc8.opus"
+  },
+  {
+    "id": "u10_c4",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "T",
+    "text": "マリアさん、きょうは どうでしたか。",
+    "file": "u10_c4_l1.opus"
+  },
+  {
+    "id": "u10_c4",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "M",
+    "text": "あしたは しけんが あります。だから、きょうは べんきょうしました。",
+    "file": "u10_c4_l2.opus"
+  },
+  {
+    "id": "u10_c4",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "T",
+    "text": "そうですか。つかれましたか。",
+    "file": "u10_c4_l3.opus"
+  },
+  {
+    "id": "u10_c4",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "M",
+    "text": "はい、つかれました。でも、もう すこし がんばります。それに、しけんは とても たいせつです。",
+    "file": "u10_c4_l4.opus"
+  },
+  {
+    "id": "u10_c4",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "T",
+    "text": "あした しけんが おわってから、なにを しますか。",
+    "file": "u10_c4_l5.opus"
+  },
+  {
+    "id": "u10_c4",
+    "kind": "scenario",
+    "line": 6,
+    "speaker": "M",
+    "text": "ともだちと えいがを みます。そして、ごはんを たべます。それから、うちへ かえります。",
+    "file": "u10_c4_l6.opus"
+  },
+  {
+    "id": "u10_c8",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "T",
+    "text": "マリアさん、しゅうまつは なにを しますか。",
+    "file": "u10_c8_l1.opus"
+  },
+  {
+    "id": "u10_c8",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "M",
+    "text": "えいがを みたり、ほんを よんだり します。",
+    "file": "u10_c8_l2.opus"
+  },
+  {
+    "id": "u10_c8",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "T",
+    "text": "いいですね。まいあさは なにを していますか。",
+    "file": "u10_c8_l3.opus"
+  },
+  {
+    "id": "u10_c8",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "M",
+    "text": "まいあさ ジョギングを しています。それから、コーヒーを のんでいます。",
+    "file": "u10_c8_l4.opus"
+  },
+  {
+    "id": "u10_c8",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "T",
+    "text": "たなかは しゅうまつに りょうりを したり、さんぽしたり します。",
+    "file": "u10_c8_l5.opus"
+  },
+  {
+    "id": "u10_c8",
+    "kind": "scenario",
+    "line": 6,
+    "speaker": "M",
+    "text": "いいですね。たなかさんも まいにち うんどうを していますか。",
+    "file": "u10_c8_l6.opus"
+  },
+  {
+    "id": "u10_c8",
+    "kind": "scenario",
+    "line": 7,
+    "speaker": "T",
+    "text": "いいえ、しゅうまつだけです。へいじつは しごとを しています。",
+    "file": "u10_c8_l7.opus"
+  },
+  {
+    "id": "u10_c5",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "T",
+    "text": "マリアさん、まいにちの スケジュールを おしえて ください。",
+    "file": "u10_c5_l1.opus"
+  },
+  {
+    "id": "u10_c5",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "M",
+    "text": "まいあさ 6時に おきてから、ジョギングを します。それから、シャワーを あびます。",
+    "file": "u10_c5_l2.opus"
+  },
+  {
+    "id": "u10_c5",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "T",
+    "text": "すごいですね。うんどうを した ことが あまり ありません。",
+    "file": "u10_c5_l3.opus"
+  },
+  {
+    "id": "u10_c5",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "M",
+    "text": "たなかさんは あさ なにを しますか。",
+    "file": "u10_c5_l4.opus"
+  },
+  {
+    "id": "u10_c5",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "T",
+    "text": "あさごはんを たべてから、コーヒーを のみます。でも、きょうは しけんが あるから、コーヒーを のまなければ なりません。",
+    "file": "u10_c5_l5.opus"
+  },
+  {
+    "id": "u10_c5",
+    "kind": "scenario",
+    "line": 6,
+    "speaker": "M",
+    "text": "わたしも しけんが ありますか。",
+    "file": "u10_c5_l6.opus"
+  },
+  {
+    "id": "u10_c5",
+    "kind": "scenario",
+    "line": 7,
+    "speaker": "T",
+    "text": "いいえ、マリアさんは きょうは こなくても いいです。やすんで ください。",
+    "file": "u10_c5_l7.opus"
+  },
+  {
+    "id": "u10_c5",
+    "kind": "escuchar",
+    "line": 1,
+    "speaker": "esc",
+    "text": "<ruby>毎朝<rt>まいあさ</rt></ruby> <ruby>起<rt>お</rt></ruby>きてから、ジョギングを します。",
+    "file": "u10_c5_esc1.opus"
+  },
+  {
+    "id": "u10_c5",
+    "kind": "escuchar",
+    "line": 2,
+    "speaker": "esc",
+    "text": "<ruby>日本<rt>にほん</rt></ruby>へ <ruby>行<rt>い</rt></ruby>った ことが ありますが、<ruby>京都<rt>きょうと</rt></ruby>へは <ruby>行<rt>い</rt></ruby>った ことが ありません。",
+    "file": "u10_c5_esc2.opus"
+  },
+  {
+    "id": "u10_c5",
+    "kind": "escuchar",
+    "line": 3,
+    "speaker": "esc",
+    "text": "しけんが あるから、<ruby>今日<rt>きょう</rt></ruby>は <ruby>勉強<rt>べんきょう</rt></ruby>しなければ なりません。",
+    "file": "u10_c5_esc3.opus"
+  },
+  {
+    "id": "u10_c5",
+    "kind": "escuchar",
+    "line": 4,
+    "speaker": "esc",
+    "text": "<ruby>映画<rt>えいが</rt></ruby>を <ruby>見<rt>み</rt></ruby>た あとで、ともだちと ごはんを <ruby>食<rt>た</rt></ruby>べました。",
+    "file": "u10_c5_esc4.opus"
+  },
+  {
+    "id": "u10_c5",
+    "kind": "escuchar",
+    "line": 5,
+    "speaker": "esc",
+    "text": "<ruby>毎朝<rt>まいあさ</rt></ruby> <ruby>6時<rt>ろくじ</rt></ruby>に <ruby>起<rt>お</rt></ruby>きてから、ジョギングを します。それから、シャワーを <ruby>浴<rt>あ</rt></ruby>びて、<ruby>朝<rt>あさ</rt></ruby>ごはんを <ruby>食<rt>た</rt></ruby>べます。",
+    "file": "u10_c5_esc5.opus"
+  },
+  {
+    "id": "u10_c5",
+    "kind": "escuchar",
+    "line": 6,
+    "speaker": "esc",
+    "text": "<ruby>日本<rt>にほん</rt></ruby>へ <ruby>行<rt>い</rt></ruby>った ことが あります。でも、<ruby>京都<rt>きょうと</rt></ruby>へは <ruby>行<rt>い</rt></ruby>った ことが ありません。",
+    "file": "u10_c5_esc6.opus"
+  },
+  {
+    "id": "u10_c5",
+    "kind": "escuchar",
+    "line": 7,
+    "speaker": "esc",
+    "text": "<ruby>今日<rt>きょう</rt></ruby>は しけんが あるから、コーヒーを <ruby>飲<rt>の</rt></ruby>まなければ なりません。でも、マリアさんは <ruby>来<rt>こ</rt></ruby>なくても いいです。",
+    "file": "u10_c5_esc7.opus"
+  },
+  {
+    "id": "u10_c5",
+    "kind": "escuchar",
+    "line": 8,
+    "speaker": "esc",
+    "text": "<ruby>映画<rt>えいが</rt></ruby>を <ruby>見<rt>み</rt></ruby>た あとで、ごはんを <ruby>食<rt>た</rt></ruby>べました。それから、うちへ <ruby>帰<rt>かえ</rt></ruby>りました。",
+    "file": "u10_c5_esc8.opus"
+  },
+  {
+    "id": "u3_kanji",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "なまえはマリアです。",
+    "file": "u3_kanji_l1.opus"
+  },
+  {
+    "id": "u3_kanji",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "にほんごのせんせいです。",
+    "file": "u3_kanji_l2.opus"
+  },
+  {
+    "id": "u3_kanji",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "わたしはがくせいです。",
+    "file": "u3_kanji_l3.opus"
+  },
+  {
+    "id": "u4_kanji",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "さんじじゅっぷんです。",
+    "file": "u4_kanji_l1.opus"
+  },
+  {
+    "id": "u4_kanji",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "きょうはげつようびです。",
+    "file": "u4_kanji_l2.opus"
+  },
+  {
+    "id": "u4_kanji",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "いち、に、さん…ひゃくまでかぞえます。",
+    "file": "u4_kanji_l3.opus"
+  },
+  {
+    "id": "u5_kanji",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "えきはどこですか。",
+    "file": "u5_kanji_l1.opus"
+  },
+  {
+    "id": "u5_kanji",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "とうきょうえきのしたにみせがあります。",
+    "file": "u5_kanji_l2.opus"
+  },
+  {
+    "id": "u5_kanji",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "がっこうのへやのつくえのうえです。",
+    "file": "u5_kanji_l3.opus"
+  },
+  {
+    "id": "u6_kanji",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "このみせはやすいです。",
+    "file": "u6_kanji_l1.opus"
+  },
+  {
+    "id": "u6_kanji",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "あたらしいくるまはたかいです。",
+    "file": "u6_kanji_l2.opus"
+  },
+  {
+    "id": "u6_kanji",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "おおきいのをたべて、ちいさいのをのみます。",
+    "file": "u6_kanji_l3.opus"
+  },
+  {
+    "id": "u7_kanji",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "でんしゃでいきます。",
+    "file": "u7_kanji_l1.opus"
+  },
+  {
+    "id": "u7_kanji",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "ひこうきできます。",
+    "file": "u7_kanji_l2.opus"
+  },
+  {
+    "id": "u7_kanji",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "テレビをみたり、おんがくをきいたり、てがみをかいたりします。",
+    "file": "u7_kanji_l3.opus"
+  },
+  {
+    "id": "u8_kanji",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "きょうはさむいです。",
+    "file": "u8_kanji_l1.opus"
+  },
+  {
+    "id": "u8_kanji",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "なつはあつくて、あめがおおいです。",
+    "file": "u8_kanji_l2.opus"
+  },
+  {
+    "id": "u8_kanji",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "つかれたので、びょういんへいきます。",
+    "file": "u8_kanji_l3.opus"
+  },
+  {
+    "id": "u9_kanji",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "これはわたしのちちとははです。",
+    "file": "u9_kanji_l1.opus"
+  },
+  {
+    "id": "u9_kanji",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "あにがひとりと、おとうとがふたりいます。",
+    "file": "u9_kanji_l2.opus"
+  },
+  {
+    "id": "u9_kanji",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "あねといもうともいます。",
+    "file": "u9_kanji_l3.opus"
+  },
+  {
+    "id": "u10_kanji",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "こんしゅうはまいにちいそがしいです。",
+    "file": "u10_kanji_l1.opus"
+  },
+  {
+    "id": "u10_kanji",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "うちへかえってから、ほんをよみます。",
+    "file": "u10_kanji_l2.opus"
+  },
+  {
+    "id": "u10_kanji",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "でかけてから、ともだちとはなしてやすみます。",
+    "file": "u10_kanji_l3.opus"
+  },
+  {
+    "id": "u7_c7",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "Compañero",
+    "text": "マリアさんはにほんごをはなすことができますか。",
+    "file": "u7_c7_l1.opus"
+  },
+  {
+    "id": "u7_c7",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "María",
+    "text": "はい、すこしはなすことができます。でもかんじをよむことができません。",
+    "file": "u7_c7_l2.opus"
+  },
+  {
+    "id": "u7_c7",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "Compañero",
+    "text": "わたしはギターをひくことができます。いもうとはおよぐのがじょうずです。",
+    "file": "u7_c7_l3.opus"
+  },
+  {
+    "id": "u8_c6",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "Carlos",
+    "text": "せんせいはなにといいましたか。",
+    "file": "u8_c6_l1.opus"
+  },
+  {
+    "id": "u8_c6",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "Lía",
+    "text": "せんせいは「あしたテストがあります」といいました。",
+    "file": "u8_c6_l2.opus"
+  },
+  {
+    "id": "u8_c6",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "Carlos",
+    "text": "そうですか。わたしはテストはむずかしいとおもいます。",
+    "file": "u8_c6_l3.opus"
+  },
+  {
+    "id": "u8_c7",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "María",
+    "text": "あしたのてんきはどうでしょうか。",
+    "file": "u8_c7_l1.opus"
+  },
+  {
+    "id": "u8_c7",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "Lía",
+    "text": "たぶんあしたはあめでしょう。さむいでしょう。",
+    "file": "u8_c7_l2.opus"
+  },
+  {
+    "id": "u8_c7",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "María",
+    "text": "そうですか。でもきょうははれです。いいてんきでしょう？",
+    "file": "u8_c7_l3.opus"
+  },
+  {
+    "id": "u8t_c1",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "Suzuki",
+    "text": "きょうは「てけい」をべんきょうします。だいじですよ。",
+    "file": "u8t_c1_l1.opus"
+  },
+  {
+    "id": "u8t_c1",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "Carlos",
+    "text": "せんせい、「たべる」はどうなりますか。",
+    "file": "u8t_c1_l2.opus"
+  },
+  {
+    "id": "u8t_c1",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "Suzuki",
+    "text": "「たべる」は「たべて」です。グループ2は「る」をとって「て」だけ。かんたんでしょう？",
+    "file": "u8t_c1_l3.opus"
+  },
+  {
+    "id": "u8t_c1",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "Carlos",
+    "text": "じゃあ「のむ」は？",
+    "file": "u8t_c1_l4.opus"
+  },
+  {
+    "id": "u8t_c1",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "Suzuki",
+    "text": "「のむ」は「のんで」。「む・ぶ・ぬ」はぜんぶ「んで」ですよ。",
+    "file": "u8t_c1_l5.opus"
+  },
+  {
+    "id": "u8t_c1",
+    "kind": "scenario",
+    "line": 6,
+    "speaker": "Suzuki",
+    "text": "リズムでおぼえましょう！「うつるって、むぶぬんで、くいて、ぐいで、すして」",
+    "file": "u8t_c1_l6.opus"
+  },
+  {
+    "id": "u8t_c2",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "Yamada",
+    "text": "カルロスさん、このしょるいをコピーしてください。",
+    "file": "u8t_c2_l1.opus"
+  },
+  {
+    "id": "u8t_c2",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "Carlos",
+    "text": "はい。すみません、もういちどいってください。",
+    "file": "u8t_c2_l2.opus"
+  },
+  {
+    "id": "u8t_c2",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "Yamada",
+    "text": "このしょるいをコピーして、つくえのうえにおいてください。",
+    "file": "u8t_c2_l3.opus"
+  },
+  {
+    "id": "u8t_c2",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "Carlos",
+    "text": "わかりました。ちょっとまってください。すぐします。",
+    "file": "u8t_c2_l4.opus"
+  },
+  {
+    "id": "u8t_c3",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "Aki",
+    "text": "カルロスさん、いまなにをしていますか。",
+    "file": "u8t_c3_l1.opus"
+  },
+  {
+    "id": "u8t_c3",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "Carlos",
+    "text": "いましりょうをつくっています。ちょっとまってください。",
+    "file": "u8t_c3_l2.opus"
+  },
+  {
+    "id": "u8t_c3",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "Aki",
+    "text": "そうですか。カルロスさんはまいにちはたらいていますね。",
+    "file": "u8t_c3_l3.opus"
+  },
+  {
+    "id": "u8t_c3",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "Carlos",
+    "text": "はい。それにまいにちにほんごをれんしゅうしています。",
+    "file": "u8t_c3_l4.opus"
+  },
+  {
+    "id": "u8t_c4",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "Carlos",
+    "text": "せんせい、ここでしゃしんをとってもいいですか。",
+    "file": "u8t_c4_l1.opus"
+  },
+  {
+    "id": "u8t_c4",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "Suzuki",
+    "text": "はい、しゃしんをとってもいいです。",
+    "file": "u8t_c4_l2.opus"
+  },
+  {
+    "id": "u8t_c4",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "Carlos",
+    "text": "ここでのみものをのんでもいいですか。",
+    "file": "u8t_c4_l3.opus"
+  },
+  {
+    "id": "u8t_c4",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "Suzuki",
+    "text": "いいえ、ここでのんではいけません。パソコンがありますから。",
+    "file": "u8t_c4_l4.opus"
+  },
+  {
+    "id": "u8t_c4",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "Carlos",
+    "text": "わかりました。けいたいをつかってもいいですか。",
+    "file": "u8t_c4_l5.opus"
+  },
+  {
+    "id": "u8t_c4",
+    "kind": "scenario",
+    "line": 6,
+    "speaker": "Suzuki",
+    "text": "じゅぎょうちゅうはつかってはいけません。やすみじかんはいいですよ。",
+    "file": "u8t_c4_l6.opus"
+  },
+  {
+    "id": "u8t_c4",
+    "kind": "escuchar",
+    "line": 1,
+    "speaker": "esc",
+    "text": "ここでしゃしんをとってもいいですか。",
+    "file": "u8t_c4_esc1.opus"
+  },
+  {
+    "id": "u8t_c4",
+    "kind": "escuchar",
+    "line": 2,
+    "speaker": "esc",
+    "text": "ここでたべてはいけません。",
+    "file": "u8t_c4_esc2.opus"
+  },
+  {
+    "id": "u8t_c4",
+    "kind": "escuchar",
+    "line": 3,
+    "speaker": "esc",
+    "text": "けいたいをつかってもいいですよ。",
+    "file": "u8t_c4_esc3.opus"
+  },
+  {
+    "id": "u8t_c4",
+    "kind": "escuchar",
+    "line": 4,
+    "speaker": "esc",
+    "text": "みずをのんでもいいです。",
+    "file": "u8t_c4_esc4.opus"
+  },
+  {
+    "id": "u8t_c4",
+    "kind": "escuchar",
+    "line": 5,
+    "speaker": "esc",
+    "text": "ここでたべてはいけません。でも、みずをのんでもいいです。",
+    "file": "u8t_c4_esc5.opus"
+  },
+  {
+    "id": "u8t_c4",
+    "kind": "escuchar",
+    "line": 6,
+    "speaker": "esc",
+    "text": "しゃしんをとってもいいです。でも、けいたいはつかってはいけません。",
+    "file": "u8t_c4_esc6.opus"
+  },
+  {
+    "id": "u8t_c4",
+    "kind": "escuchar",
+    "line": 7,
+    "speaker": "esc",
+    "text": "じゅぎょうちゅうはけいたいをつかってはいけません。やすみじかんはいいです。",
+    "file": "u8t_c4_esc7.opus"
+  },
+  {
+    "id": "u8t_c4",
+    "kind": "escuchar",
+    "line": 8,
+    "speaker": "esc",
+    "text": "としょかんにはいってもいいです。でも、ここでたべてはいけません。",
+    "file": "u8t_c4_esc8.opus"
+  },
+  {
+    "id": "u8t_c5",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "Tanaka",
+    "text": "マリアさん、はじめてのアルバイトですね。まず、このエプロンをつかってください。",
+    "file": "u8t_c5_l1.opus"
+  },
+  {
+    "id": "u8t_c5",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "María",
+    "text": "はい。あの、しゃしんをとってもいいですか。",
+    "file": "u8t_c5_l2.opus"
+  },
+  {
+    "id": "u8t_c5",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "Tanaka",
+    "text": "すみません、みせのなかではしゃしんをとってはいけません。",
+    "file": "u8t_c5_l3.opus"
+  },
+  {
+    "id": "u8t_c5",
+    "kind": "scenario",
+    "line": 4,
+    "speaker": "María",
+    "text": "わかりました。いま、なにをしていますか。",
+    "file": "u8t_c5_l4.opus"
+  },
+  {
+    "id": "u8t_c5",
+    "kind": "scenario",
+    "line": 5,
+    "speaker": "Tanaka",
+    "text": "いまコーヒーをつくっています。マリアさんはコップをあらってください。",
+    "file": "u8t_c5_l5.opus"
+  },
+  {
+    "id": "u8t_c5",
+    "kind": "scenario",
+    "line": 6,
+    "speaker": "María",
+    "text": "はい！ケータイをつかってもいいですか。",
+    "file": "u8t_c5_l6.opus"
+  },
+  {
+    "id": "u8t_c5",
+    "kind": "scenario",
+    "line": 7,
+    "speaker": "Tanaka",
+    "text": "しごとちゅうはつかってはいけません。やすみじかんはいいですよ。",
+    "file": "u8t_c5_l7.opus"
+  },
+  {
+    "id": "u8t_c5",
+    "kind": "escuchar",
+    "line": 1,
+    "speaker": "esc",
+    "text": "このエプロンをつかってください。",
+    "file": "u8t_c5_esc1.opus"
+  },
+  {
+    "id": "u8t_c5",
+    "kind": "escuchar",
+    "line": 2,
+    "speaker": "esc",
+    "text": "いまコーヒーをつくっています。",
+    "file": "u8t_c5_esc2.opus"
+  },
+  {
+    "id": "u8t_c5",
+    "kind": "escuchar",
+    "line": 3,
+    "speaker": "esc",
+    "text": "しゃしんをとってはいけません。",
+    "file": "u8t_c5_esc3.opus"
+  },
+  {
+    "id": "u8t_c5",
+    "kind": "escuchar",
+    "line": 4,
+    "speaker": "esc",
+    "text": "ケータイをつかってもいいですか。",
+    "file": "u8t_c5_esc4.opus"
+  },
+  {
+    "id": "u8t_c5",
+    "kind": "escuchar",
+    "line": 5,
+    "speaker": "esc",
+    "text": "みせのなかではしゃしんをとってはいけません。でも、そとではとってもいいです。",
+    "file": "u8t_c5_esc5.opus"
+  },
+  {
+    "id": "u8t_c5",
+    "kind": "escuchar",
+    "line": 6,
+    "speaker": "esc",
+    "text": "しごとちゅうはケータイをつかってはいけません。やすみじかんはつかってもいいです。",
+    "file": "u8t_c5_esc6.opus"
+  },
+  {
+    "id": "u8t_c5",
+    "kind": "escuchar",
+    "line": 7,
+    "speaker": "esc",
+    "text": "いまコーヒーをつくっています。マリアさんはコップをあらってください。",
+    "file": "u8t_c5_esc7.opus"
+  },
+  {
+    "id": "u8t_c5",
+    "kind": "escuchar",
+    "line": 8,
+    "speaker": "esc",
+    "text": "としょかんにはいってもいいです。でも、ここでたべてはいけません。",
+    "file": "u8t_c5_esc8.opus"
+  },
+  {
+    "id": "u8t_kanji",
+    "kind": "scenario",
+    "line": 1,
+    "speaker": "A",
+    "text": "しゃしんをとってはいけません。",
+    "file": "u8t_kanji_l1.opus"
+  },
+  {
+    "id": "u8t_kanji",
+    "kind": "scenario",
+    "line": 2,
+    "speaker": "B",
+    "text": "このエプロンをつかってください。",
+    "file": "u8t_kanji_l2.opus"
+  },
+  {
+    "id": "u8t_kanji",
+    "kind": "scenario",
+    "line": 3,
+    "speaker": "A",
+    "text": "てつだってください。コーヒーをつくっています。",
+    "file": "u8t_kanji_l3.opus"
+  },
+  {
+    "id": "jlpt_e1",
+    "kind": "jlpt",
+    "line": 1,
+    "speaker": "jlpt",
+    "text": "いま なんじですか。",
+    "file": "jlpt_e1_l1.opus"
+  },
+  {
+    "id": "jlpt_e1",
+    "kind": "jlpt",
+    "line": 2,
+    "speaker": "jlpt",
+    "text": "おげんきですか。",
+    "file": "jlpt_e1_l2.opus"
+  },
+  {
+    "id": "jlpt_e1",
+    "kind": "jlpt",
+    "line": 3,
+    "speaker": "jlpt",
+    "text": "わたしは まいあさ コーヒーを のみます。",
+    "file": "jlpt_e1_l3.opus"
+  },
+  {
+    "id": "jlpt_e1",
+    "kind": "jlpt",
+    "line": 4,
+    "speaker": "jlpt",
+    "text": "この かばんは わたしのじゃ ありません。",
+    "file": "jlpt_e1_l4.opus"
+  },
+  {
+    "id": "jlpt_e1",
+    "kind": "jlpt",
+    "line": 5,
+    "speaker": "jlpt",
+    "text": "あしたの テストは なんじからですか。九時からです。",
+    "file": "jlpt_e1_l5.opus"
+  },
+  {
+    "id": "jlpt_e1",
+    "kind": "jlpt",
+    "line": 6,
+    "speaker": "jlpt",
+    "text": "たんじょうびは いつですか。七月十日です。",
+    "file": "jlpt_e1_l6.opus"
+  },
+  {
+    "id": "jlpt_e1",
+    "kind": "jlpt",
+    "line": 7,
+    "speaker": "jlpt",
+    "text": "わたしは まいにち バスで がっこうへ いきます。",
+    "file": "jlpt_e1_l7.opus"
+  },
+  {
+    "id": "jlpt_e1",
+    "kind": "jlpt",
+    "line": 8,
+    "speaker": "jlpt",
+    "text": "なにを のみますか。おちゃを おねがいします。",
+    "file": "jlpt_e1_l8.opus"
+  },
+  {
+    "id": "jlpt_e2",
+    "kind": "jlpt",
+    "line": 1,
+    "speaker": "jlpt",
+    "text": "おなかが すきました。",
+    "file": "jlpt_e2_l1.opus"
+  },
+  {
+    "id": "jlpt_e2",
+    "kind": "jlpt",
+    "line": 2,
+    "speaker": "jlpt",
+    "text": "おなまえは なんですか。",
+    "file": "jlpt_e2_l2.opus"
+  },
+  {
+    "id": "jlpt_e2",
+    "kind": "jlpt",
+    "line": 3,
+    "speaker": "jlpt",
+    "text": "あした いっしょに えいがを みませんか。",
+    "file": "jlpt_e2_l3.opus"
+  },
+  {
+    "id": "jlpt_e2",
+    "kind": "jlpt",
+    "line": 4,
+    "speaker": "jlpt",
+    "text": "すみません、トイレは どこですか。あの かどを まがって、みぎです。",
+    "file": "jlpt_e2_l4.opus"
+  },
+  {
+    "id": "jlpt_e2",
+    "kind": "jlpt",
+    "line": 5,
+    "speaker": "jlpt",
+    "text": "この シャツは いくらですか。二千五百えんです。ちょっと たかいですね。",
+    "file": "jlpt_e2_l5.opus"
+  },
+  {
+    "id": "jlpt_e2",
+    "kind": "jlpt",
+    "line": 6,
+    "speaker": "jlpt",
+    "text": "でんしゃは はちじ じゅうごふんに でます。",
+    "file": "jlpt_e2_l6.opus"
+  },
+  {
+    "id": "jlpt_e2",
+    "kind": "jlpt",
+    "line": 7,
+    "speaker": "jlpt",
+    "text": "きのうは あめでしたから、うちで ほんを よみました。",
+    "file": "jlpt_e2_l7.opus"
+  },
+  {
+    "id": "jlpt_e2",
+    "kind": "jlpt",
+    "line": 8,
+    "speaker": "jlpt",
+    "text": "ここで しゃしんを とっては いけません。",
+    "file": "jlpt_e2_l8.opus"
+  },
+  {
+    "id": "jlpt_e3",
+    "kind": "jlpt",
+    "line": 1,
+    "speaker": "jlpt",
+    "text": "しゅくだいは おわりましたか。",
+    "file": "jlpt_e3_l1.opus"
+  },
+  {
+    "id": "jlpt_e3",
+    "kind": "jlpt",
+    "line": 2,
+    "speaker": "jlpt",
+    "text": "いってきます。",
+    "file": "jlpt_e3_l2.opus"
+  },
+  {
+    "id": "jlpt_e3",
+    "kind": "jlpt",
+    "line": 3,
+    "speaker": "jlpt",
+    "text": "あしたは やすみですから、ゆっくり おきます。",
+    "file": "jlpt_e3_l3.opus"
+  },
+  {
+    "id": "jlpt_e3",
+    "kind": "jlpt",
+    "line": 4,
+    "speaker": "jlpt",
+    "text": "ここで たばこを すっては いけません。",
+    "file": "jlpt_e3_l4.opus"
+  },
+  {
+    "id": "jlpt_e3",
+    "kind": "jlpt",
+    "line": 5,
+    "speaker": "jlpt",
+    "text": "なんにん かぞくですか。ごにんです。ちち、はは、あに、わたし、いもうとです。",
+    "file": "jlpt_e3_l5.opus"
+  },
+  {
+    "id": "jlpt_e3",
+    "kind": "jlpt",
+    "line": 6,
+    "speaker": "jlpt",
+    "text": "えきまで どのくらい かかりますか。バスで にじゅっぷんぐらいです。",
+    "file": "jlpt_e3_l6.opus"
+  },
+  {
+    "id": "jlpt_e3",
+    "kind": "jlpt",
+    "line": 7,
+    "speaker": "jlpt",
+    "text": "どんな スポーツが すきですか。テニスが すきです。サッカーは あまり すきじゃ ありません。",
+    "file": "jlpt_e3_l7.opus"
+  },
+  {
+    "id": "jlpt_e3",
+    "kind": "jlpt",
+    "line": 8,
+    "speaker": "jlpt",
+    "text": "きのう どこへ いきましたか。デパートへ いって、くつを かいました。",
+    "file": "jlpt_e3_l8.opus"
+  },
+  {
+    "id": "jlpt_e4",
+    "kind": "jlpt",
+    "line": 1,
+    "speaker": "jlpt",
+    "text": "コーヒーと おちゃと どちらが いいですか。",
+    "file": "jlpt_e4_l1.opus"
+  },
+  {
+    "id": "jlpt_e4",
+    "kind": "jlpt",
+    "line": 2,
+    "speaker": "jlpt",
+    "text": "いらっしゃいませ。なんめいさまですか。",
+    "file": "jlpt_e4_l2.opus"
+  },
+  {
+    "id": "jlpt_e4",
+    "kind": "jlpt",
+    "line": 3,
+    "speaker": "jlpt",
+    "text": "もう すこし ゆっくり はなして ください。",
+    "file": "jlpt_e4_l3.opus"
+  },
+  {
+    "id": "jlpt_e4",
+    "kind": "jlpt",
+    "line": 4,
+    "speaker": "jlpt",
+    "text": "あしたは あめでしょう。",
+    "file": "jlpt_e4_l4.opus"
+  },
+  {
+    "id": "jlpt_e4",
+    "kind": "jlpt",
+    "line": 5,
+    "speaker": "jlpt",
+    "text": "この ほんは いくらですか。せんにひゃくえんです。じゃ、これを ください。",
+    "file": "jlpt_e4_l5.opus"
+  },
+  {
+    "id": "jlpt_e4",
+    "kind": "jlpt",
+    "line": 6,
+    "speaker": "jlpt",
+    "text": "かいぎは なんじからですか。ごご いちじはんからです。",
+    "file": "jlpt_e4_l6.opus"
+  },
+  {
+    "id": "jlpt_e4",
+    "kind": "jlpt",
+    "line": 7,
+    "speaker": "jlpt",
+    "text": "せんしゅうの にちようびは なにを しましたか。うちで そうじを して、せんたくを しました。",
+    "file": "jlpt_e4_l7.opus"
+  },
+  {
+    "id": "jlpt_e4",
+    "kind": "jlpt",
+    "line": 8,
+    "speaker": "jlpt",
+    "text": "どこに すんでいますか。とうきょうに すんでいます。かいしゃは しんじゅくに あります。",
+    "file": "jlpt_e4_l8.opus"
+  },
+  {
+    "id": "jlpt_e5",
+    "kind": "jlpt",
+    "line": 1,
+    "speaker": "jlpt",
+    "text": "どうぞ よろしく おねがいします。",
+    "file": "jlpt_e5_l1.opus"
+  },
+  {
+    "id": "jlpt_e5",
+    "kind": "jlpt",
+    "line": 2,
+    "speaker": "jlpt",
+    "text": "ちょっと てつだって くれませんか。",
+    "file": "jlpt_e5_l2.opus"
+  },
+  {
+    "id": "jlpt_e5",
+    "kind": "jlpt",
+    "line": 3,
+    "speaker": "jlpt",
+    "text": "まだ しゅくだいが おわって いません。",
+    "file": "jlpt_e5_l3.opus"
+  },
+  {
+    "id": "jlpt_e5",
+    "kind": "jlpt",
+    "line": 4,
+    "speaker": "jlpt",
+    "text": "この みちを まっすぐ いって、ふたつめの かどを ひだりへ まがって ください。",
+    "file": "jlpt_e5_l4.opus"
+  },
+  {
+    "id": "jlpt_e5",
+    "kind": "jlpt",
+    "line": 5,
+    "speaker": "jlpt",
+    "text": "なんじの でんしゃに のりますか。じゅうじ にじゅっぷんの でんしゃです。",
+    "file": "jlpt_e5_l5.opus"
+  },
+  {
+    "id": "jlpt_e5",
+    "kind": "jlpt",
+    "line": 6,
+    "speaker": "jlpt",
+    "text": "どれが あなたの かさですか。あの あかい かさです。",
+    "file": "jlpt_e5_l6.opus"
+  },
+  {
+    "id": "jlpt_e5",
+    "kind": "jlpt",
+    "line": 7,
+    "speaker": "jlpt",
+    "text": "しゅうまつは なにを しましたか。どようびは ともだちと かいものを して、にちようびは うちで やすみました。",
+    "file": "jlpt_e5_l7.opus"
+  },
+  {
+    "id": "jlpt_e5",
+    "kind": "jlpt",
+    "line": 8,
+    "speaker": "jlpt",
+    "text": "すみません、この ちかくに ゆうびんきょくは ありますか。はい、あの ぎんこうの となりに あります。",
+    "file": "jlpt_e5_l8.opus"
+  }
+]
