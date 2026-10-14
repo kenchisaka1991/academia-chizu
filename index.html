@@ -1526,6 +1526,228 @@
         .word-chip { min-width: 44px; }
 
         /* ============================================================
+           UX/UI 2026 — NihongoMap, una ruta de estudio clara
+           Tokens semánticos: rojo = acción/progreso; verde = logro;
+           ámbar = aviso. Las reglas siguientes afinan el sistema
+           existente sin cambiar la lógica ni los datos académicos.
+           ============================================================ */
+        :root {
+            --nm-bg: #FAF8F3;
+            --nm-ink: #18324B;
+            --nm-action: #E04F5F;
+            --nm-success: #2E8B70;
+            --nm-warning: #E9A23B;
+            --nm-muted: #5C6B7A;
+            --nm-line: #DDE2E4;
+            --nm-surface: #FFFFFF;
+            --nm-space-1: 0.4rem;
+            --nm-space-2: 0.75rem;
+            --nm-space-3: 1rem;
+            --nm-space-4: 1.5rem;
+            --nm-radius-sm: 10px;
+            --nm-radius-md: 14px;
+            --nm-radius-lg: 18px;
+            --nm-shadow: 0 4px 14px rgba(24, 50, 75, 0.07);
+            --primary: var(--nm-action);
+            --primary-light: #F2A9B1;
+            --primary-ink: #B83E4C;
+            --accent: var(--nm-warning);
+            --accent-gold: var(--nm-warning);
+            --accent-ink: #8A5B12;
+            --ocean: var(--nm-success);
+            --ocean-light: #71B6A4;
+            --ocean-ink: #246F5B;
+            --sky: #DCE7EB;
+            --night: var(--nm-ink);
+            --night-light: #294A66;
+            --cream: var(--nm-bg);
+            --text: var(--nm-ink);
+            --text-light: var(--nm-muted);
+            --shadow-sm: var(--nm-shadow);
+            --shadow-md: 0 8px 24px rgba(24, 50, 75, 0.09);
+            --shadow-lg: 0 14px 36px rgba(24, 50, 75, 0.12);
+            --radius-sm: var(--nm-radius-sm);
+            --radius-md: var(--nm-radius-md);
+            --radius-lg: var(--nm-radius-lg);
+            --radius-xl: 22px;
+        }
+
+        body { background: var(--nm-bg); color: var(--nm-ink); }
+        .bg-pattern { display: none; }
+        .header { background: var(--nm-ink); padding: 0.8rem 1.15rem; border-bottom: 1px solid rgba(255,255,255,.12); }
+        .header::before, .header::after { display: none; }
+        .header-content { justify-content: space-between; max-width: 1000px; margin: 0 auto; }
+        .logo { width: 42px; height: 42px; border-radius: 11px; background: var(--nm-action); box-shadow: none; transform: none; }
+        .logo:hover { transform: none; }
+        .logo span { font-size: 1.35rem; }
+        .brand h1 { font-family: 'Zen Maru Gothic','DM Sans',sans-serif; letter-spacing: .02em; }
+        .brand p { color: #DCE7EB; }
+        .plans-header-btn { min-width: 44px; background: transparent; border-color: rgba(255,255,255,.32); border-radius: var(--nm-radius-sm); }
+        .plans-header-btn:hover { background: rgba(255,255,255,.1); }
+
+        .bottom-nav { border-top: 1px solid var(--nm-line); box-shadow: 0 -2px 10px rgba(24,50,75,.06); }
+        .nav-btn { min-height: 52px; color: var(--nm-muted); }
+        .nav-btn.active { color: var(--nm-action); }
+        .nav-btn:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
+            outline: 3px solid rgba(224,79,95,.32); outline-offset: 2px;
+        }
+        .hud { background: var(--nm-bg); border-bottom: 1px solid var(--nm-line); padding-block: .6rem; }
+        .hud-badge { box-shadow: none; border: 1px solid var(--nm-line); }
+        .hud-badge--xp .hud-badge__icon { background: #F8E8C9; }
+        .hud-badge--streak .hud-badge__icon { background: #F8DDE0; }
+        #hud-daily::-webkit-progress-value { background: var(--nm-action); }
+        #hud-daily::-moz-progress-bar { background: var(--nm-action); }
+        .main { max-width: 1000px; padding: 1rem; }
+        .section { animation-duration: .22s; }
+
+        .btn { border-radius: var(--nm-radius-sm); min-height: 44px; box-shadow: none; }
+        .btn:hover { transform: translateY(-1px); }
+        .btn-primary { background: var(--nm-action); box-shadow: none; }
+        .btn-primary:hover { background: #C94352; box-shadow: none; }
+        .btn-secondary { background: var(--nm-ink); box-shadow: none; }
+        .btn-back { opacity: 1; border-color: var(--nm-line); background: var(--nm-surface); }
+
+        .roadmap-wrap { max-width: 700px; padding: 1.25rem 0 3rem; }
+        .roadmap-header { text-align: left; display: grid; grid-template-columns: 1fr auto; gap: .35rem 1rem; align-items: center; margin-bottom: 1rem; }
+        .roadmap-header h2 { font-size: clamp(1.45rem, 5vw, 2rem); margin: 0; color: var(--nm-ink); }
+        .roadmap-header p { margin: 0; color: var(--nm-muted); opacity: 1; }
+        .roadmap-header .btn-placement { grid-column: 2; grid-row: 1 / span 2; margin: 0; }
+        .roadmap-header .btn-placement + .btn-placement { grid-column: 1 / -1; grid-row: auto; justify-self: start; }
+        .btn-placement { background: var(--nm-surface); color: var(--nm-ink); border: 1px solid var(--nm-line); box-shadow: none; border-radius: var(--nm-radius-sm); }
+        .btn-placement:hover { transform: none; border-color: var(--nm-ink); }
+        .continue-card { background: var(--nm-surface); border: 1px solid var(--nm-line); border-left: 5px solid var(--nm-action); border-radius: var(--nm-radius-lg); padding: 1rem; margin-bottom: 1.25rem; box-shadow: var(--nm-shadow); overflow: visible; }
+        .continue-card::before { display: none; }
+        .continue-card:hover { transform: translateY(-1px); }
+        .continue-card__pin { width: 42px; height: 42px; font-size: 1.25rem; background: #F8DDE0; animation: none; }
+        .continue-card__eyebrow { color: var(--nm-action); }
+        .continue-card__title { color: var(--nm-ink); font-size: 1rem; }
+        .continue-card__reward { display: block; margin-top: .25rem; color: var(--nm-muted); font: 600 .74rem 'DM Sans',sans-serif; }
+        .continue-card__cta { background: var(--nm-action); border-radius: var(--nm-radius-sm); }
+        .map-path { position: relative; padding-left: 2.1rem; gap: .75rem; }
+        .map-path::before { content: ''; position: absolute; left: .75rem; top: 1rem; bottom: 1rem; width: 3px; background: var(--nm-line); border-radius: 9px; }
+        .map-node { width: 100%; margin: 0 !important; padding: 1rem 1.1rem; border-radius: var(--nm-radius-md); background: var(--nm-surface) !important; color: var(--nm-ink) !important; border: 1px solid var(--nm-line) !important; box-shadow: none; }
+        .map-node::before { content: ''; position: absolute; left: -1.75rem; top: 1.25rem; width: 13px; height: 13px; border-radius: 50%; background: var(--nm-surface); border: 3px solid #B9C3C9; box-sizing: border-box; }
+        .map-node.done { border-left: 4px solid var(--nm-success) !important; }
+        .map-node.done::before { border-color: var(--nm-success); background: var(--nm-success); }
+        .map-node.inprogress, .map-node.current { border-left: 4px solid var(--nm-action) !important; box-shadow: 0 0 0 2px rgba(224,79,95,.1); }
+        .map-node.inprogress::before, .map-node.current::before { border-color: var(--nm-action); background: var(--nm-action); }
+        .map-node:hover { transform: translateY(-1px); box-shadow: var(--nm-shadow); }
+        .map-node__marker { display: none; }
+        .map-node.recommended::after { content: 'Recomendado'; top: .75rem; right: .75rem; background: #F8E8C9; color: #765019; border-radius: 999px; }
+        .node-unit-num, .map-node.notstarted .node-unit-num { color: var(--nm-muted); opacity: 1; }
+        .node-name, .map-node.notstarted .node-name { color: var(--nm-ink); opacity: 1; font-size: .95rem; }
+        .node-score-bar-bg, .map-node.notstarted .node-score-bar-bg { height: 7px; background: #E8ECEE; }
+        .node-score-bar, .map-node.notstarted .node-score-bar { height: 7px; background: var(--nm-action); opacity: 1; }
+        .map-node.done .node-score-bar { background: var(--nm-success); }
+        .node-score-pct, .map-node.notstarted .node-score-pct { color: var(--nm-muted); opacity: 1; }
+        .node-kanji-label, .node-kanji-link, .map-node.notstarted .node-kanji-label, .map-node.notstarted .node-kanji-link { color: var(--nm-muted); opacity: 1; }
+        .kanji-badge, .map-node.notstarted .kanji-badge { background: #EEF1F2; color: var(--nm-ink); }
+        .kanji-badge.learned, .map-node.notstarted .kanji-badge.learned { background: #DCEDE7; color: var(--nm-success); }
+        .map-connector { display: none; }
+
+        .unit-header, .scenario-header { border-bottom: 1px solid var(--nm-line); margin-bottom: 1rem; }
+        .unit-overview { display: grid; grid-template-columns: 1fr auto; gap: .4rem 1rem; align-items: center; background: var(--nm-surface); border: 1px solid var(--nm-line); border-radius: var(--nm-radius-md); padding: 1rem; margin-bottom: 1rem; }
+        .unit-overview__label { color: var(--nm-muted); font: 700 .72rem 'DM Sans',sans-serif; text-transform: uppercase; letter-spacing: .05em; }
+        .unit-overview__value { color: var(--nm-ink); font: 800 1rem 'DM Sans',sans-serif; }
+        .unit-overview__bar { grid-column: 1 / -1; height: 8px; background: #E8ECEE; border-radius: 99px; overflow: hidden; }
+        .unit-overview__bar > span { display: block; height: 100%; background: var(--nm-action); border-radius: inherit; }
+        .unit-overview__next { grid-column: 1 / -1; color: var(--nm-muted); font-size: .78rem; }
+        .cando-list { gap: .75rem; }
+        .cando-card { border: 1px solid var(--nm-line); border-radius: var(--nm-radius-md); padding: 1rem; box-shadow: none; }
+        .cando-card:hover { transform: translateY(-1px); box-shadow: var(--nm-shadow); }
+        .cando-card[data-status="done"] { border-left: 4px solid var(--nm-success); background: var(--nm-surface); }
+        .cando-card[data-status="inprogress"], .cando-card.is-next { border-left: 4px solid var(--nm-action); background: var(--nm-surface); }
+        .cando-card--extra { border-style: dashed; }
+        .cando-card__progress { color: var(--nm-success); letter-spacing: 1px; }
+        .cando-card__badge { color: var(--nm-muted); }
+        .cando-card__badge--extra { color: #765019; background: #F8E8C9; }
+        .cando-card__goal { opacity: 1; color: var(--nm-muted); }
+        .cando-card__parts { color: var(--nm-muted); opacity: 1; }
+        .cando-card__xp { color: var(--nm-muted); }
+        .cando-card:not(.is-next) .btn-primary { background: var(--nm-surface); color: var(--nm-ink); border: 1px solid var(--nm-line); }
+
+        .scenario-steps { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-block: .25rem; }
+        .scenario-steps::-webkit-scrollbar { display: none; }
+        .step { white-space: nowrap; border-radius: 999px; }
+        .step[data-active="true"] { background: var(--nm-action); }
+        .scenario-context, .prac-card, .profile-panel { background: var(--nm-surface); border: 1px solid var(--nm-line); box-shadow: none; border-radius: var(--nm-radius-md); }
+        .scenario-line { border: 1px solid var(--nm-line); border-radius: var(--nm-radius-md); box-shadow: none; }
+        .line-speaker { background: var(--nm-ink); }
+        .prac-bar-bg { height: 8px; background: #E8ECEE; }
+        .prac-bar { background: var(--nm-action) !important; }
+        .prac-card { padding: clamp(1rem, 4vw, 1.5rem); }
+        .placement-opt { min-height: 48px; border: 1px solid var(--nm-line); border-radius: var(--nm-radius-sm); }
+        .placement-opt:hover:not(:disabled) { border-color: var(--nm-action); background: #FFF7F8; }
+        .placement-opt.correct { border-color: var(--nm-success)!important; background: #E8F3EF; color: var(--ocean-ink); }
+        .placement-opt.wrong { border-color: var(--nm-warning)!important; background: #FFF4DE; color: #765019; }
+        .placement-exp { opacity: 1; border-left: 3px solid var(--nm-warning); }
+        .lectura-passage { background: #F1F6F4; border-left-color: var(--nm-success); }
+        .quiz-result, .grammar-result { background: var(--nm-surface); border: 1px solid var(--nm-line); border-radius: var(--nm-radius-md); }
+        .result-score, .gr-score { background: none; -webkit-text-fill-color: currentColor; color: var(--nm-success); }
+
+        .profile-wrap { max-width: 700px; padding: 1.25rem 0 3rem; }
+        .profile-title { color: var(--nm-ink); }
+        .passport-card { background: var(--nm-surface); color: var(--nm-ink); border: 1px solid var(--nm-line); border-left: 4px solid var(--nm-ink); box-shadow: none; border-radius: var(--nm-radius-md); }
+        .passport-card::before { display: none; }
+        .passport-card__avatar { background: #E8EEF2; border: 0; color: var(--nm-ink); }
+        .passport-card__name { color: var(--nm-ink); }
+        .passport-card__email { color: var(--nm-muted); }
+        .passport-card__badge { background: #E8EEF2; color: var(--nm-ink); }
+        .passport-card__badge.is-premium { background: #DCEDE7; color: var(--nm-success); }
+        .stamp-grid { gap: .75rem; }
+        .stamp { transform: none !important; border: 1px solid var(--nm-line); border-radius: var(--nm-radius-md); }
+        .stamp__value, .stamp--accent .stamp__value, .stamp--ocean .stamp__value { color: var(--nm-ink); }
+        .stamp--ocean .stamp__value { color: var(--nm-success); }
+        .profile-daily progress::-webkit-progress-value { background: var(--nm-action); }
+        .profile-daily progress::-moz-progress-bar { background: var(--nm-action); }
+        .profile-plan { color: var(--nm-ink); background: var(--nm-surface); border: 1px solid var(--nm-line); box-shadow: none; border-radius: var(--nm-radius-md); }
+        .profile-plan--active { border-left: 4px solid var(--nm-success); }
+        .profile-plan--upsell { border-left: 4px solid var(--nm-warning); }
+        .profile-plan button { background: var(--nm-action); }
+        .tutorial-reset { width: 100%; margin-top: 1rem; background: var(--nm-surface); color: var(--nm-ink); border: 1px solid var(--nm-line); }
+
+        .plans-grid { gap: .75rem; }
+        .plan-card, .plan-card.featured { background: var(--nm-surface); border: 1px solid var(--nm-line); border-radius: var(--nm-radius-md); box-shadow: none; }
+        .plan-card.featured { border-top: 4px solid var(--nm-action); }
+        .plan-badge { background: var(--nm-action); }
+        .plan-btn, .plan-btn.gold { background: var(--nm-ink); border-radius: var(--nm-radius-sm); }
+        .plan-card.featured .plan-btn.gold { background: var(--nm-action); }
+
+        /* Coach marks contextuales */
+        .nm-coach-overlay { position: fixed; inset: 0; z-index: 10000; background: rgba(24,50,75,.62); }
+        .nm-coach-target { position: relative !important; z-index: 10001 !important; box-shadow: 0 0 0 4px #fff, 0 0 0 8px var(--nm-action) !important; border-radius: var(--nm-radius-md) !important; }
+        .nm-coach-card { position: fixed; z-index: 10002; width: min(340px, calc(100vw - 2rem)); background: var(--nm-surface); border-radius: var(--nm-radius-lg); padding: 1rem; box-shadow: 0 16px 44px rgba(8,24,38,.28); }
+        .nm-coach-meta { display: flex; justify-content: space-between; gap: 1rem; color: var(--nm-muted); font: 700 .72rem 'DM Sans',sans-serif; text-transform: uppercase; letter-spacing: .05em; }
+        .nm-coach-card h3 { margin: .55rem 0 .35rem; color: var(--nm-ink); font: 800 1.08rem 'Zen Maru Gothic','DM Sans',sans-serif; }
+        .nm-coach-card p { margin: 0; color: var(--nm-muted); font-size: .88rem; line-height: 1.5; }
+        .nm-coach-actions { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-top: 1rem; }
+        .nm-coach-skip { min-height: 44px; padding: .4rem 0; border: 0; background: transparent; color: var(--nm-muted); font-weight: 700; cursor: pointer; }
+        .nm-coach-next { min-height: 44px; padding: .65rem 1rem; border: 0; border-radius: var(--nm-radius-sm); background: var(--nm-action); color: #fff; font-weight: 800; cursor: pointer; }
+
+        @media (min-width: 768px) {
+            .bottom-nav { width: 220px; border-right: 1px solid var(--nm-line); box-shadow: none; padding-top: 1rem; }
+            .nav-btn { flex: 0 0 auto; border-radius: var(--nm-radius-sm); margin-inline: .65rem; }
+            .nav-btn.active { color: var(--nm-action); background: #FFF1F3; box-shadow: inset 3px 0 0 var(--nm-action); }
+            .header, .hud, .main { margin-left: 220px; }
+            .main { padding: 1.5rem 2rem; }
+        }
+
+        @media (max-width: 620px) {
+            .roadmap-header { grid-template-columns: 1fr; }
+            .roadmap-header .btn-placement { grid-column: 1; grid-row: auto; width: 100%; }
+            .continue-card { align-items: flex-start; flex-wrap: wrap; }
+            .continue-card__body { min-width: calc(100% - 58px); }
+            .continue-card__cta { width: 100%; }
+            .map-path { padding-left: 1.7rem; }
+            .map-path::before { left: .55rem; }
+            .map-node::before { left: -1.48rem; }
+            .stamp-grid { grid-template-columns: 1fr 1fr; }
+            .stamp-grid .stamp:last-child { grid-column: 1 / -1; }
+            .header-content { gap: .5rem; }
+            .brand p { display: none; }
+        }
+
+        /* ============================================================
            A11y — prefers-reduced-motion
            El usuario pidió a su sistema menos movimiento: se detienen
            las animaciones/decorativas y las transiciones, pero NO se
@@ -1634,7 +1856,7 @@
         <div class="header-content">
             <div class="logo"><span>千</span></div>
             <div class="brand">
-                <h1>CHIZU</h1>
+                <h1>NihongoMap</h1>
                 <p>NihongoMap · N5</p>
             </div>
             <button class="plans-header-btn" onclick="openPlansModal()">⭐ Planes</button>
@@ -13581,8 +13803,9 @@ function renderRoadmap() {
             <div class="continue-card__body">
                 <span class="continue-card__eyebrow">${eyebrow}</span>
                 <h3 class="continue-card__title">${unit.icon} Unidad ${unit.id} · ${unit.es}</h3>
+                <span class="continue-card__reward">Completa la próxima lección y gana hasta 50 XP</span>
             </div>
-            <button class="continue-card__cta" onclick="event.stopPropagation();${nodeClick}">Empezar →</button>
+            <button class="continue-card__cta" onclick="event.stopPropagation();${nodeClick}">${nextMode === 'continue' ? 'Continuar' : 'Empezar'}</button>
         </div>`;
     }
 
@@ -13597,6 +13820,7 @@ function renderRoadmap() {
             ${continueHtml}
             <div class="map-path">${nodesHtml}</div>
         </div>`;
+    nmQueueTutorial('roadmap');
 }
 
 function openPlansModal() { renderPlansModal(); document.getElementById('plans-modal').classList.add('active'); }
@@ -15183,6 +15407,14 @@ function renderUnit(unitId) {
     return;
   }
 
+  const requiredCandos = candos.filter(cd => cd.desafioExtra !== true);
+  const doneCount = requiredCandos.filter(cd => getCanDoProgress(cd.id).status === 'done').length;
+  const unitPct = requiredCandos.length ? Math.round(doneCount / requiredCandos.length * 100) : 0;
+  const nextCanDo = candos.find(cd => {
+    const status = getCanDoProgress(cd.id).status;
+    return status === 'inprogress' || status === 'available';
+  }) || candos[0];
+
   let reqNum = 0;
   const cards = candos.map((cd) => {
     const prog = getCanDoProgress(cd.id);
@@ -15205,7 +15437,7 @@ function renderUnit(unitId) {
       : '';
     const ctaLabel = prog.status === 'done' ? 'Repasar' : (prog.status === 'inprogress' ? 'Continuar' : 'Empezar');
     return `
-      <article class="cando-card${isExtra ? ' cando-card--extra' : ''}" data-cando="${cd.id}" data-status="${prog.status}">
+      <article class="cando-card${isExtra ? ' cando-card--extra' : ''}${nextCanDo && nextCanDo.id === cd.id ? ' is-next' : ''}" data-cando="${cd.id}" data-status="${prog.status}">
         <header class="cando-card__head">
           ${badge}
           <span class="cando-card__progress">${stars}</span>
@@ -15237,7 +15469,14 @@ function renderUnit(unitId) {
       </div>`;
   }
 
-  document.getElementById('unit-content').innerHTML = `<div class="cando-list">${cards}</div>${mojiLinkHtml}`;
+  const overview = `<div class="unit-overview">
+    <span class="unit-overview__label">Tu avance en esta unidad</span>
+    <span class="unit-overview__value">${doneCount}/${requiredCandos.length} · ${unitPct}%</span>
+    <div class="unit-overview__bar" aria-label="${unitPct}% completado"><span style="width:${unitPct}%"></span></div>
+    <span class="unit-overview__next">${nextCanDo ? `Siguiente: ${nextCanDo.es} · hasta +50 XP` : 'Unidad completada. Puedes repasar cualquier lección.'}</span>
+  </div>`;
+  document.getElementById('unit-content').innerHTML = `${overview}<div class="cando-list">${cards}</div>${mojiLinkHtml}`;
+  nmQueueTutorial('unit');
 }
 
 // ------------------------------------------------------------
@@ -15352,8 +15591,9 @@ function renderScenarioView(cd) {
     </div>
     <div class="scenario-lines">${lines}</div>
     <div style="text-align:center;margin-top:1.5rem">
-      <button class="btn btn-primary" onclick="openExplainView()">Siguiente: Gramática →</button>
+      <button class="btn btn-primary" onclick="openExplainView()">Siguiente</button>
     </div>`;
+  nmQueueTutorial('scenario');
 }
 
 /** ヒント3段階トグル（0=なし, 1=ルビ, 2=ルビ+es） */
@@ -15714,6 +15954,7 @@ function renderPracticeItem() {
       ${jaDisplay}
       ${bodyHtml}
     </div>`;
+  nmQueueTutorial('practice');
 }
 
 function checkPracticeAnswer(idx) {
@@ -15975,6 +16216,8 @@ function renderEscucharItem() {
       ${bodyHtml}
     </div>`;
 
+  nmQueueTutorial('listening');
+
   // 描画後に自動再生
   speakEscucharItem(document.querySelector('.btn-speak'));
 }
@@ -16157,6 +16400,7 @@ function renderLecturaItem() {
       <p class="prac-prompt">${item.promptEs}</p>
       <div class="placement-opts">${opts}</div>
     </div>`;
+  nmQueueTutorial('reading');
 }
 
 function checkLecturaAnswer(idx) {
@@ -16522,6 +16766,7 @@ function renderChallengeStep() {
       </div>
       <div class="reto-fb" id="reto-fb"></div>
     </div>`;
+  nmQueueTutorial('challenge');
   const inp = document.getElementById('challenge-input'); if (inp) inp.focus();
   challengeSpeak(st.stepIdx);
 }
@@ -28804,11 +29049,15 @@ function renderProfile() {
         <button onclick="openPlansModal()">${daysLeft > 0 && daysLeft <= 3 ? 'Renovar plan' : 'Ver planes'}</button>
       </div>`}
 
+      <!-- Tutoriales: solo reinicia el estado de ayuda, nunca el progreso -->
+      <button class="btn tutorial-reset" onclick="resetNihongoMapTutorials()">Ver tutoriales otra vez</button>
+
       <!-- Cerrar sesión -->
       <div class="profile-logout">
         <button class="btn-back" onclick="authSignOut()">🚪 Cerrar sesión</button>
       </div>
     </div>`;
+  nmQueueTutorial('profile');
 }
 
 // ------------------------------------------------------------
@@ -29037,6 +29286,7 @@ function renderJlpt() {
         <button onclick="startLecturaDrill()" class="btn btn-secondary" style="width:100%;padding:0.85rem;font-size:1rem">📄 Practicar Lectura</button>
       </div>
     </div>`;
+  nmQueueTutorial('exam');
 }
 
 function startJlptTest(examId) {
@@ -29451,6 +29701,185 @@ function showLectDrillResults() {
       <button onclick="renderJlpt()" class="btn btn-secondary" style="width:100%;padding:0.8rem">← Volver al inicio</button>
     </div>`;
 }
+
+// ============================================================
+// Tutoriales contextuales — coach marks accesibles y no intrusivos
+// ============================================================
+const NM_TUTORIALS_KEY = 'nm_tutorials_seen';
+const NM_TUTORIAL_SESSION_KEY = 'nm_tutorials_paused';
+let _nmCoach = null;
+
+const NM_TUTORIALS = {
+  roadmap: [
+    { target: '.continue-card', title: 'Tu siguiente paso', text: 'Aquí ves qué unidad sigue y la recompensa de la próxima lección.' },
+    { target: '.map-path', title: 'Lee tu avance', text: 'La línea roja marca tu progreso actual. El verde indica unidades completadas.' }
+  ],
+  unit: [
+    { target: '.unit-overview', title: 'Una unidad, un objetivo', text: 'Este resumen muestra cuánto avanzaste y cuál es la próxima lección.' },
+    { target: '.cando-card.is-next', title: 'Empieza con un Can-do', text: 'Cada tarjeta enseña una habilidad útil. Toca Empezar o Continuar para entrar.' }
+  ],
+  scenario: [
+    { target: '.scenario-line .btn-hint', title: 'Usa una pista', text: 'Toca la bombilla para ver la lectura y luego la traducción.' },
+    { target: '.scenario-line .btn-speak', title: 'Escucha el diálogo', text: 'Toca el audio para oír la frase. Si no hay archivo, funciona la voz del dispositivo.' },
+    { target: '#scenario-content .btn-primary', title: 'Avanza cuando estés listo', text: 'Sigue a Gramática después de leer y escuchar la escena.' }
+  ],
+  practice: [
+    { target: '.prac-header', title: 'Mira tu progreso', text: 'La barra indica cuánto falta en esta ronda.' },
+    { target: '.prac-card .placement-opt, .prac-card .word-chip', title: 'Elige tu respuesta', text: 'Responde y revisa la explicación antes de la siguiente pregunta.' }
+  ],
+  listening: [
+    { target: '.prac-card .btn-speak', title: 'Escucha y repite', text: 'Puedes reproducir el audio otra vez antes de responder.' },
+    { target: '.prac-card .placement-opts, #esc-dictado-input', title: 'Responde lo que oíste', text: 'Concéntrate en la idea principal; no necesitas entender cada palabra.' }
+  ],
+  reading: [
+    { target: '.lectura-passage', title: 'Lee primero el texto', text: 'Busca nombres, horas y palabras conocidas antes de mirar las opciones.' },
+    { target: '.prac-card .placement-opts', title: 'Ahora responde', text: 'Elige la opción que el texto confirma, no la que solo parece familiar.' }
+  ],
+  challenge: [
+    { target: '.reto-task', title: 'Tu reto de conversación', text: 'Responde en japonés a la situación indicada. Se evalúa que comuniques la idea esperada.' },
+    { target: '.reto-input-row', title: 'Escribe o habla', text: 'Usa el teclado o el micrófono. Completar las conversaciones suma estrellas a la lección.' },
+    { target: '.reto-aux', title: 'Pide ayuda si la necesitas', text: 'La pista muestra apoyo gradual; también puedes ver la respuesta para aprender.' }
+  ],
+  exam: [
+    { target: '.jlpt-exam-card', title: 'Simulacro JLPT N5', text: 'Combina vocabulario, gramática, lectura y escucha. Necesitas 60% para aprobar.' },
+    { target: 'button[onclick="startLecturaDrill()"]', title: 'Práctica de lectura', text: 'Es una ronda corta con cinco textos al azar para entrenar sin hacer un examen completo.' }
+  ],
+  profile: [
+    { target: '.stamp-grid', title: 'Tu progreso', text: 'Aquí ves XP, racha y Can-dos completados.' },
+    { target: '.profile-plan', title: 'Tu plan', text: 'Consulta tu acceso actual y las opciones disponibles.' },
+    { target: '.tutorial-reset', title: 'Repite la ayuda cuando quieras', text: 'Este botón reinicia únicamente los tutoriales. Tu progreso no cambia.' }
+  ]
+};
+
+function nmTutorialSeen() {
+  try {
+    const value = JSON.parse(localStorage.getItem(NM_TUTORIALS_KEY) || '{}');
+    return value && typeof value === 'object' ? value : {};
+  } catch (_) { return {}; }
+}
+
+function nmSaveTutorialSeen(context) {
+  const seen = nmTutorialSeen();
+  seen[context] = new Date().toISOString();
+  localStorage.setItem(NM_TUTORIALS_KEY, JSON.stringify(seen));
+}
+
+function nmQueueTutorial(context) {
+  window.setTimeout(() => nmMaybeTutorial(context), 180);
+}
+
+function nmMaybeTutorial(context) {
+  if (_nmCoach || sessionStorage.getItem(NM_TUTORIAL_SESSION_KEY) === '1') return;
+  if (nmTutorialSeen()[context]) return;
+  const login = document.getElementById('login-screen');
+  if (login && !login.classList.contains('hidden')) return;
+  const source = NM_TUTORIALS[context] || [];
+  const steps = source.map(step => ({ ...step, element: document.querySelector(step.target) }))
+    .filter(step => step.element && step.element.offsetParent !== null);
+  if (!steps.length) return;
+  _nmCoach = { context, steps, index: 0, previousFocus: document.activeElement };
+  nmRenderCoachStep();
+}
+
+function nmRenderCoachStep() {
+  if (!_nmCoach) return;
+  document.querySelectorAll('.nm-coach-target').forEach(el => el.classList.remove('nm-coach-target'));
+  document.querySelector('.nm-coach-overlay')?.remove();
+  document.querySelector('.nm-coach-card')?.remove();
+
+  const { steps, index } = _nmCoach;
+  const step = steps[index];
+  step.element.scrollIntoView({ block: 'center', inline: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  step.element.classList.add('nm-coach-target');
+
+  const overlay = document.createElement('div');
+  overlay.className = 'nm-coach-overlay';
+  overlay.setAttribute('aria-hidden', 'true');
+  const card = document.createElement('div');
+  card.className = 'nm-coach-card';
+  card.setAttribute('role', 'dialog');
+  card.setAttribute('aria-modal', 'true');
+  card.setAttribute('aria-labelledby', 'nm-coach-title');
+  const last = index === steps.length - 1;
+  card.innerHTML = `
+    <div class="nm-coach-meta"><span>Guía rápida</span><span>${index + 1} de ${steps.length}</span></div>
+    <h3 id="nm-coach-title">${step.title}</h3>
+    <p>${step.text}</p>
+    <div class="nm-coach-actions">
+      <button class="nm-coach-skip" onclick="nmCloseTutorial(false)">Saltar tutorial</button>
+      <button class="nm-coach-next" onclick="nmNextTutorialStep()">${last ? 'Entendido' : 'Siguiente'}</button>
+    </div>`;
+  document.body.append(overlay, card);
+  requestAnimationFrame(() => {
+    nmPositionCoach();
+    card.querySelector('.nm-coach-next')?.focus();
+  });
+}
+
+function nmPositionCoach() {
+  if (!_nmCoach) return;
+  const card = document.querySelector('.nm-coach-card');
+  const step = _nmCoach.steps[_nmCoach.index];
+  if (!card || !step?.element) return;
+  const target = step.element.getBoundingClientRect();
+  const cardBox = card.getBoundingClientRect();
+  const gap = 14;
+  let top = target.bottom + gap;
+  if (top + cardBox.height > innerHeight - 12) top = target.top - cardBox.height - gap;
+  top = Math.max(12, Math.min(top, innerHeight - cardBox.height - 12));
+  let left = target.left + target.width / 2 - cardBox.width / 2;
+  left = Math.max(12, Math.min(left, innerWidth - cardBox.width - 12));
+  card.style.top = `${top}px`;
+  card.style.left = `${left}px`;
+}
+
+function nmNextTutorialStep() {
+  if (!_nmCoach) return;
+  if (_nmCoach.index < _nmCoach.steps.length - 1) {
+    _nmCoach.index++;
+    nmRenderCoachStep();
+  } else {
+    nmCloseTutorial(true);
+  }
+}
+
+function nmCloseTutorial(completed) {
+  if (!_nmCoach) return;
+  const { context, previousFocus } = _nmCoach;
+  document.querySelectorAll('.nm-coach-target').forEach(el => el.classList.remove('nm-coach-target'));
+  document.querySelector('.nm-coach-overlay')?.remove();
+  document.querySelector('.nm-coach-card')?.remove();
+  _nmCoach = null;
+  if (completed) nmSaveTutorialSeen(context);
+  else sessionStorage.setItem(NM_TUTORIAL_SESSION_KEY, '1');
+  if (previousFocus && typeof previousFocus.focus === 'function') previousFocus.focus();
+}
+
+function resetNihongoMapTutorials() {
+  if (_nmCoach) {
+    document.querySelectorAll('.nm-coach-target').forEach(el => el.classList.remove('nm-coach-target'));
+    document.querySelector('.nm-coach-overlay')?.remove();
+    document.querySelector('.nm-coach-card')?.remove();
+    _nmCoach = null;
+  }
+  localStorage.removeItem(NM_TUTORIALS_KEY);
+  sessionStorage.removeItem(NM_TUTORIAL_SESSION_KEY);
+  renderProfile();
+}
+
+window.addEventListener('resize', nmPositionCoach);
+document.addEventListener('keydown', event => {
+  if (!_nmCoach) return;
+  if (event.key === 'Escape') nmCloseTutorial(false);
+  if (event.key === 'Tab') {
+    const card = document.querySelector('.nm-coach-card');
+    const focusable = card ? [...card.querySelectorAll('button')] : [];
+    if (!focusable.length) return;
+    const first = focusable[0], last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+  }
+});
 
 // 起動時に日次リセット・HUD初期描画
 rolloverDailyIfNeeded();
