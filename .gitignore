@@ -17,12 +17,4 @@
 !functions/
 !functions/**
 !CLAUDE.md
-!audio/
-!audio/**
-!scripts/
-scripts/*
-!scripts/gen_audio_manifest.js
-!docs/
-docs/*
-!docs/grabacion_lista.md
 node_modules/
