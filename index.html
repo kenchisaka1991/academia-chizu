@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Academia Chizu - Aprende Japonés</title>
+    <title>Academia Chizu · NihongoMap — Aprende japonés N5</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -13,17 +13,20 @@
         :root {
             --primary: #E63946;
             --primary-light: #FF6B6B;
+            --primary-ink: #C1121F;
             --accent: #F4A261;
             --accent-gold: #E9C46A;
+            --accent-ink: #9A5A18;
             --ocean: #2A9D8F;
             --ocean-light: #40C9B5;
+            --ocean-ink: #1A6B5A;
             --sky: #A8DADC;
             --night: #1D3557;
             --night-light: #457B9D;
             --cream: #FDFBF7;
             --white: #FFFFFF;
             --text: #264653;
-            --text-light: #6B7B8C;
+            --text-light: #55677A;
             --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
             --shadow-md: 0 4px 20px rgba(0,0,0,0.1);
             --shadow-lg: 0 8px 40px rgba(0,0,0,0.15);
@@ -117,18 +120,27 @@
 
         .brand h1 {
             font-family: 'Outfit', sans-serif;
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             font-weight: 800;
             color: white;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .brand p {
-            font-size: 0.65rem;
+            font-size: 0.62rem;
             color: var(--sky);
-            letter-spacing: 2px;
+            letter-spacing: 0.6px;
             font-weight: 500;
+            /* los botones del header se agrandaron a 44px: el tagline no debe partirse en dos líneas */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
+
+        .brand { min-width: 0; }
 
         /* Navigation — bottom nav (mobile) / left sidebar (PC) */
         .bottom-nav {
@@ -140,8 +152,9 @@
             position: fixed;
             bottom: 0; left: 0; right: 0;
             z-index: 200;
-            height: 60px;
-            padding: 0 0 env(safe-area-inset-bottom, 0);
+            /* Safe-area: el inset suma a la altura, no la consume (box-sizing:border-box) */
+            height: calc(60px + env(safe-area-inset-bottom, 0px));
+            padding: 0 0 env(safe-area-inset-bottom, 0px);
         }
 
         .nav-btn {
@@ -162,11 +175,12 @@
             line-height: 1;
         }
 
-        .nav-btn span { font-size: 0.62rem; font-weight: 600; letter-spacing: 0.02em; }
-        .nav-btn.active { color: var(--primary); }
-        .nav-btn:hover { color: var(--primary); }
+        .nav-btn span { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.02em; }
+        .nav-btn.active { color: var(--primary-ink); }
+        .nav-btn:hover { color: var(--primary-ink); }
 
-        body { padding-bottom: 60px; }
+        /* Compensa la barra + safe-area y deja holgura para que el contenido no quede pegado */
+        body { padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px) + 0.75rem); }
 
         @media (min-width: 768px) {
             .bottom-nav {
@@ -190,13 +204,15 @@
                 margin: 0 0.5rem;
             }
             .nav-btn span { font-size: 0.88rem; }
-            .nav-btn.active { background: rgba(230,57,70,0.1); color: var(--primary); }
+            .nav-btn.active { background: rgba(230,57,70,0.1); color: var(--primary-ink); }
             body { padding-bottom: 0; }
             .header, .hud, .main { margin-left: 200px; }
         }
-        .btn-es { display: block; font-size: 0.62rem; font-weight: 500; opacity: 0.75; font-family: 'DM Sans', sans-serif; margin-top: 0.1rem; }
+        .btn-es { display: block; font-size: 0.75rem; font-weight: 500; opacity: 1; font-family: 'DM Sans', sans-serif; margin-top: 0.1rem; color: var(--text-light); }
         .moji-tab { display: inline-flex; flex-direction: column; align-items: center; line-height: 1.2; }
-        .lesson-tab { display: inline-flex; flex-direction: column; align-items: center; gap: 0.1rem; white-space: nowrap; }
+        .lesson-tab { display: inline-flex; flex-direction: column; align-items: center; gap: 0.1rem; white-space: nowrap; position: relative; }
+        /* タップターゲット拡大: 見た目そのままで当たり判定を44pxに（.btn-speak / .btn-hint と同パターン） */
+        .lesson-tab::after { content: ""; position: absolute; top: 50%; left: 50%; width: 44px; height: 44px; transform: translate(-50%, -50%); }
         .lesson-tab-jp { font-size: 0.6rem; opacity: 0.65; font-family: 'Noto Sans JP', sans-serif; font-weight: 500; letter-spacing: 0.02em; }
 
         /* Main Content */
@@ -335,7 +351,7 @@
             position: absolute;
             top: 3px; right: 5px;
             font-size: 0.6rem;
-            color: var(--ocean);
+            color: var(--ocean-ink);
             font-weight: 700;
         }
 
@@ -348,7 +364,7 @@
 
         .char-romaji {
             font-size: 0.65rem;
-            color: var(--primary);
+            color: var(--primary-ink);
             font-weight: 600;
             margin-top: 0.1rem;
         }
@@ -427,7 +443,7 @@
         .modal-close {
             position: absolute;
             top: 0.8rem; right: 0.8rem;
-            width: 32px; height: 32px;
+            width: 44px; height: 44px;
             border-radius: 50%;
             border: none;
             background: var(--cream);
@@ -452,7 +468,7 @@
             font-family: 'Outfit', sans-serif;
             font-size: 1.6rem;
             font-weight: 700;
-            color: var(--primary);
+            color: var(--primary-ink);
             margin: 0.3rem 0 0.8rem;
         }
 
@@ -484,7 +500,7 @@
         .vocab-text { flex: 1; }
         .vocab-jp { font-family: 'Noto Sans JP', sans-serif; font-size: 1.1rem; font-weight: 500; }
         .vocab-romaji { font-size: 0.7rem; color: var(--text-light); }
-        .vocab-es { font-size: 0.8rem; color: var(--primary); font-weight: 600; }
+        .vocab-es { font-size: 0.8rem; color: var(--primary-ink); font-weight: 600; }
 
         .btn-learn {
             width: 100%;
@@ -535,7 +551,7 @@
         }
 
         .level-btn.active { background: var(--night); color: white; }
-        .fc-type-btn { border-color: var(--accent); color: var(--accent); }
+        .fc-type-btn { border-color: var(--accent); color: var(--accent-ink); }
         .fc-type-btn.active { background: var(--accent); color: white; }
 
         .level-info {
@@ -759,6 +775,7 @@
 
         .fc-btn {
             padding: 0.7rem 1.3rem;
+            min-height: 44px;
             border: none;
             border-radius: var(--radius-md);
             font-weight: 600;
@@ -780,7 +797,15 @@
             font-size: 0.85rem;
         }
 
-        .footer a { color: var(--accent); text-decoration: none; font-weight: 600; }
+        /* Enlaces del pie y de contacto: son enlaces sueltos, no texto corrido.
+           `padding` vertical en un elemento `inline` NO toca el line box (a diferencia de
+           inline-block), así que sube el área de toque a 44px sin mover el layout.
+           0.9rem = 28.8px, o sea el enlace más corto (17px de alto) queda en 45.8px.
+           Ojo: `::after` con width:100% NO sirve aquí — sobre un containing block inline
+           Chromium computa width:0 (medido). Y `display:inline-block` sí rompe el
+           <p class="footer">: 34px → 51px (medido). */
+        .footer a { color: var(--accent); text-decoration: none; font-weight: 600; padding: 0.9rem 0; }
+        #plans-modal a { padding: 0.9rem 0; }
 
         @media (max-width: 550px) {
             .char-main { font-size: 1.4rem; }
@@ -896,7 +921,7 @@
         }
 
         .login-error {
-            color: var(--primary);
+            color: var(--primary-ink);
             font-size: 0.85rem;
             margin-top: 1rem;
             display: none;
@@ -927,7 +952,7 @@
             cursor: pointer;
             text-decoration: underline;
         }
-        .login-forgot:hover { color: var(--primary); }
+        .login-forgot:hover { color: var(--primary-ink); }
 
         .login-divider {
             display: flex;
@@ -983,11 +1008,11 @@
 
         /* Grammar - New Styles */
         .grammar-card{background:var(--white);border-radius:var(--radius-md);padding:1.2rem;margin-bottom:1rem;box-shadow:var(--shadow-sm)}
-        .grammar-title{font-family:'Noto Sans JP';font-size:1.8rem;color:var(--primary);font-weight:700;margin-bottom:0.3rem}
+        .grammar-title{font-family:'Noto Sans JP';font-size:1.8rem;color:var(--primary-ink);font-weight:700;margin-bottom:0.3rem}
         .grammar-subtitle{color:var(--text-light);font-size:0.95rem;font-style:italic;margin-bottom:1rem}
         .grammar-desc{font-size:0.95rem;color:var(--text);line-height:1.7;margin-bottom:1rem}
         .grammar-desc p{margin-bottom:0.6rem}
-        .grammar-desc strong{color:var(--primary)}
+        .grammar-desc strong{color:var(--primary-ink)}
         .grammar-point{background:linear-gradient(135deg,#FFF5F5,#FFF);padding:0.8rem;border-radius:var(--radius-sm);border-left:3px solid var(--primary);margin:0.8rem 0}
         .grammar-examples{margin-top:1rem}
         .grammar-examples h4{font-size:0.9rem;color:var(--text);margin-bottom:0.6rem}
@@ -995,20 +1020,20 @@
         .ex-jp{display:block;font-family:'Noto Sans JP';font-size:1.05rem;margin-bottom:0.2rem}
         .ex-jp ruby rt{font-size:0.6rem}
         .ex-ro{display:block;color:var(--text-light);font-size:0.8rem}
-        .ex-es{display:block;color:var(--ocean);font-weight:600;font-size:0.85rem;margin-top:0.2rem}
+        .ex-es{display:block;color:var(--ocean-ink);font-weight:600;font-size:0.85rem;margin-top:0.2rem}
         .grammar-mode-tabs{display:flex;gap:0.5rem;margin-bottom:1rem}
-        .mode-tab{flex:1;padding:0.8rem;border:2px solid var(--primary);border-radius:var(--radius-md);background:transparent;color:var(--primary);font-size:0.95rem;font-weight:600;cursor:pointer;transition:all 0.3s}
+        .mode-tab{flex:1;padding:0.8rem;border:2px solid var(--primary);border-radius:var(--radius-md);background:transparent;color:var(--primary-ink);font-size:0.95rem;font-weight:600;cursor:pointer;transition:all 0.3s}
         .mode-tab.active{background:var(--primary);color:white}
         .btn-practice{width:100%;padding:0.9rem;border:none;border-radius:var(--radius-md);background:linear-gradient(135deg,var(--ocean),var(--ocean-light));color:white;font-weight:600;font-size:1rem;cursor:pointer;margin-top:1rem;transition:all 0.3s}
         .btn-practice:hover{transform:scale(1.02);box-shadow:var(--shadow-md)}
         /* Reorder Quiz Styles */
         .reorder-box{background:var(--white);border-radius:var(--radius-md);padding:1.2rem;margin-top:1rem;box-shadow:var(--shadow-md)}
         .reorder-progress{font-size:0.85rem;color:var(--text-light);margin-bottom:0.8rem;text-align:center}
-        .reorder-hint{color:var(--ocean);font-size:0.95rem;margin-bottom:0.5rem;text-align:center;font-weight:500}
-        .hint-btn{background:none;border:1.5px solid var(--ocean);color:var(--ocean);border-radius:var(--radius-sm);padding:0.25rem 0.8rem;font-size:0.82rem;cursor:pointer;margin:0.3rem auto 0.5rem;display:block;transition:all 0.2s}
+        .reorder-hint{color:var(--ocean-ink);font-size:0.95rem;margin-bottom:0.5rem;text-align:center;font-weight:500}
+        .hint-btn{background:none;border:1.5px solid var(--ocean);color:var(--ocean-ink);border-radius:var(--radius-sm);padding:0.62rem 0.8rem;font-size:0.82rem;cursor:pointer;margin:0.3rem auto 0.5rem;display:block;transition:all 0.2s}
         .hint-btn:hover{background:var(--ocean);color:#fff}
         .romaji-hint{background:#e8f7f5;color:#1a7a6e;border-radius:var(--radius-sm);padding:0.35rem 0.8rem;font-size:0.9rem;margin:0 0 0.6rem;text-align:center;font-style:italic;letter-spacing:0.04em}
-        .word-romaji{display:none;font-size:0.65rem;color:var(--ocean);margin-top:2px;font-style:italic;letter-spacing:0.03em}
+        .word-romaji{display:none;font-size:0.65rem;color:var(--ocean-ink);margin-top:2px;font-style:italic;letter-spacing:0.03em}
         .word-btn-wrap{display:inline-flex;flex-direction:column;align-items:center;gap:2px}
         .word-btn.selected ~ .word-romaji{opacity:0.3}
         .pista-active .word-romaji{display:block!important}
@@ -1023,28 +1048,28 @@
         .btn-check{padding:0.7rem 1.5rem;border:none;border-radius:var(--radius-md);background:var(--night);color:white;font-weight:600;cursor:pointer;font-size:1rem}
         .btn-check:disabled{background:#CCC;cursor:not-allowed}
         .reorder-feedback{margin-top:1rem;padding:1rem;border-radius:var(--radius-sm);text-align:center}
-        .reorder-feedback.correct{background:#D5F5E3;color:var(--ocean)}
-        .reorder-feedback.wrong{background:#FADBD8;color:var(--primary)}
+        .reorder-feedback.correct{background:#D5F5E3;color:var(--ocean-ink)}
+        .reorder-feedback.wrong{background:#FADBD8;color:var(--primary-ink)}
         /* Results Styles */
         .grammar-result{text-align:center;padding:1.5rem;background:var(--white);border-radius:var(--radius-md);margin-top:1rem;box-shadow:var(--shadow-md)}
         .gr-score{font-family:'Outfit';font-size:3.5rem;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--ocean));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
         .gr-msg{font-size:1.3rem;font-weight:700;margin:0.5rem 0}
         .gr-detail{color:var(--text-light);font-size:0.95rem;margin-bottom:1rem}
         .error-review{text-align:left;margin-top:1.5rem;padding-top:1rem;border-top:1px solid #EEE}
-        .error-review h4{color:var(--primary);margin-bottom:1rem}
+        .error-review h4{color:var(--primary-ink);margin-bottom:1rem}
         .error-item{background:#FFF5F5;padding:1rem;border-radius:var(--radius-sm);margin-bottom:1rem;border-left:3px solid var(--primary)}
         .error-q{font-weight:600;margin-bottom:0.5rem}
-        .error-your{color:var(--primary);font-size:0.9rem}
-        .error-correct{color:var(--ocean);font-size:0.9rem;margin-bottom:0.5rem}
+        .error-your{color:var(--primary-ink);font-size:0.9rem}
+        .error-correct{color:var(--ocean-ink);font-size:0.9rem;margin-bottom:0.5rem}
         .error-explain{background:white;padding:0.8rem;border-radius:var(--radius-sm);font-size:0.85rem;line-height:1.5}
         /* Lesson tabs */
         .grammar-lesson-tabs{display:flex;gap:0.5rem;margin-bottom:0.5rem;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:0.2rem}
         .grammar-lesson-tabs::-webkit-scrollbar{display:none}
-        .lesson-tab{flex-shrink:0;padding:0.4rem 0.65rem;border:1.5px solid var(--ocean);border-radius:var(--radius-sm);background:transparent;color:var(--ocean);font-size:0.9rem;font-weight:700;cursor:pointer;transition:all 0.3s;font-family:'Noto Sans JP'}
+        .lesson-tab{flex-shrink:0;padding:0.4rem 0.65rem;border:1.5px solid var(--ocean);border-radius:var(--radius-sm);background:transparent;color:var(--ocean-ink);font-size:0.9rem;font-weight:700;cursor:pointer;transition:all 0.3s;font-family:'Noto Sans JP'}
         .lesson-tab.active{background:var(--ocean);color:white}
         /* Verb table styles */
         .verb-group{margin:1.5rem 0;padding:1rem;background:#FAFAFA;border-radius:var(--radius-sm)}
-        .verb-group h4{color:var(--primary);margin-bottom:0.3rem;font-size:1rem}
+        .verb-group h4{color:var(--primary-ink);margin-bottom:0.3rem;font-size:1rem}
         .group-rule{color:var(--text-light);font-size:0.85rem;margin-bottom:0.8rem}
         .verb-table-scroll{overflow-x:auto;margin:0 -0.5rem;padding:0 0.5rem}
         .verb-table{width:100%;border-collapse:collapse;font-size:0.8rem;min-width:600px}
@@ -1053,9 +1078,9 @@
         .verb-table td{font-family:'Noto Sans JP';background:white}
         .verb-table tr:hover td{background:#F5F5F5}
         /* Masu quiz styles */
-        .masu-q-verb{font-family:'Noto Sans JP';font-size:2rem;color:var(--primary);font-weight:700;text-align:center;margin-bottom:0.3rem}
+        .masu-q-verb{font-family:'Noto Sans JP';font-size:2rem;color:var(--primary-ink);font-weight:700;text-align:center;margin-bottom:0.3rem}
         .masu-q-form{font-size:1.1rem;color:var(--night);text-align:center;margin-bottom:0.2rem;font-weight:600}
-        .masu-q-form-jp{font-size:0.9rem;color:var(--ocean);text-align:center;margin-bottom:0.3rem;font-family:'Noto Sans JP'}
+        .masu-q-form-jp{font-size:0.9rem;color:var(--ocean-ink);text-align:center;margin-bottom:0.3rem;font-family:'Noto Sans JP'}
         .masu-q-meaning{color:var(--text-light);text-align:center;margin-bottom:1rem;font-size:0.9rem}
         .masu-options{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:1rem}
         .masu-opt{padding:0.8rem;border:2px solid #E8E8E8;border-radius:var(--radius-sm);background:white;font-family:'Noto Sans JP';font-size:1rem;cursor:pointer;transition:all 0.2s}
@@ -1064,38 +1089,38 @@
         .masu-opt.wrong{background:linear-gradient(135deg,#FADBD8,#F5B7B1);border-color:var(--primary);color:#9b1b1b;animation:wrongShake 0.45s ease forwards}
         /* Moji tabs */
         .moji-tabs{display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:1rem;padding:0 0.5rem}
-        .moji-tab{padding:0.5rem 0.8rem;border:2px solid var(--primary);border-radius:var(--radius-xl);background:transparent;color:var(--primary);font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.3s;font-family:'Noto Sans JP'}
+        .moji-tab{padding:0.5rem 0.8rem;border:2px solid var(--primary);border-radius:var(--radius-xl);background:transparent;color:var(--primary-ink);font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.3s;font-family:'Noto Sans JP'}
         .moji-tab.active{background:var(--primary);color:white}
         .moji-content{display:none}
         .moji-content.active{display:block}
         /* Joshi styles */
         .joshi-group-tabs{display:flex;flex-wrap:wrap;gap:0.3rem;margin-bottom:1rem}
-        .joshi-grp-tab{padding:0.4rem 0.6rem;border:1px solid var(--ocean);border-radius:var(--radius-sm);background:transparent;color:var(--ocean);font-size:0.75rem;cursor:pointer;transition:all 0.2s}
+        .joshi-grp-tab{padding:0.6rem 0.6rem;border:1px solid var(--ocean);border-radius:var(--radius-sm);background:transparent;color:var(--ocean-ink);font-size:0.75rem;cursor:pointer;transition:all 0.2s}
         .joshi-grp-tab.active{background:var(--ocean);color:white}
-        .joshi-grp-tab.matome{border-color:var(--accent);color:var(--accent)}
+        .joshi-grp-tab.matome{border-color:var(--accent);color:var(--accent-ink)}
         .joshi-grp-tab.matome.active{background:var(--accent);color:white}
         .joshi-item{display:flex;gap:1rem;padding:1rem;background:#FAFAFA;border-radius:var(--radius-sm);margin-bottom:0.8rem;align-items:flex-start}
-        .joshi-particle{font-size:2rem;font-weight:700;color:var(--primary);font-family:'Noto Sans JP';min-width:50px;text-align:center}
+        .joshi-particle{font-size:2rem;font-weight:700;color:var(--primary-ink);font-family:'Noto Sans JP';min-width:50px;text-align:center}
         .joshi-info{flex:1}
         .joshi-fn{font-weight:600;color:var(--night);margin-bottom:0.2rem}
         .joshi-desc{font-size:0.85rem;color:var(--text);margin-bottom:0.4rem}
         .joshi-ex{font-family:'Noto Sans JP';font-size:0.95rem;background:white;padding:0.4rem;border-radius:4px;margin-bottom:0.2rem}
-        .joshi-ex b{color:var(--primary)}
-        .joshi-tr{font-size:0.8rem;color:var(--ocean);font-style:italic}
+        .joshi-ex b{color:var(--primary-ink)}
+        .joshi-tr{font-size:0.8rem;color:var(--ocean-ink);font-style:italic}
         .joshi-note{background:linear-gradient(135deg,#FFF5F5,#FFF);padding:0.8rem;border-radius:var(--radius-sm);border-left:3px solid var(--primary);margin:1rem 0;font-size:0.85rem;line-height:1.5}
         .joshi-practice-tabs{display:flex;gap:0.5rem;justify-content:center;margin:1rem 0}
         .joshi-prac-tab{padding:0.5rem 1rem;border:2px solid var(--night);border-radius:var(--radius-sm);background:transparent;color:var(--night);font-size:0.85rem;cursor:pointer}
         .joshi-prac-tab.active{background:var(--night);color:white}
         .joshi-fill-q{font-family:'Noto Sans JP';font-size:1.3rem;text-align:center;margin-bottom:0.5rem}
-        .joshi-blank{color:var(--primary);font-weight:700}
+        .joshi-blank{color:var(--primary-ink);font-weight:700}
         /* Kanji styles */
         .kanji-mode-tabs{display:flex;gap:0.5rem;margin-bottom:1rem;justify-content:center}
-        .kanji-mode-tab{padding:0.5rem 1rem;border:2px solid var(--primary);border-radius:var(--radius-sm);background:transparent;color:var(--primary);font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s}
+        .kanji-mode-tab{padding:0.72rem 1rem;border:2px solid var(--primary);border-radius:var(--radius-sm);background:transparent;color:var(--primary-ink);font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s}
         .kanji-mode-tab.active{background:var(--primary);color:white}
         .kanji-cat-tabs{display:flex;flex-wrap:wrap;gap:0.3rem;margin-bottom:1rem}
-        .kanji-cat-tab{padding:0.4rem 0.6rem;border:1px solid var(--ocean);border-radius:var(--radius-sm);background:transparent;color:var(--ocean);font-size:0.75rem;cursor:pointer;transition:all 0.2s}
+        .kanji-cat-tab{padding:0.6rem 0.6rem;border:1px solid var(--ocean);border-radius:var(--radius-sm);background:transparent;color:var(--ocean-ink);font-size:0.75rem;cursor:pointer;transition:all 0.2s}
         .kanji-cat-tab.active{background:var(--ocean);color:white}
-        .kanji-cat-tab.matome{border-color:var(--accent);color:var(--accent)}
+        .kanji-cat-tab.matome{border-color:var(--accent);color:var(--accent-ink)}
         .kanji-cat-tab.matome.active{background:var(--accent);color:white}
         .kanji-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:0.5rem;margin-bottom:1rem}
         .kanji-card{background:white;border-radius:var(--radius-sm);padding:0.6rem;text-align:center;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,0.08);transition:all 0.2s}
@@ -1103,7 +1128,7 @@
         .kanji-card .kanji{font-family:'Noto Sans JP';font-size:1.8rem;font-weight:700;color:var(--night)}
         .kanji-card .reading{font-size:0.7rem;color:var(--text-light);margin-top:0.2rem}
         /* Kanji Modal */
-        .kanji-modal-char{font-family:'Noto Sans JP';font-size:4rem;font-weight:700;color:var(--primary);text-align:center}
+        .kanji-modal-char{font-family:'Noto Sans JP';font-size:4rem;font-weight:700;color:var(--primary-ink);text-align:center}
         .kanji-modal-info{margin:1rem 0}
         .kanji-info-row{display:flex;margin-bottom:0.5rem;font-size:0.9rem}
         .kanji-info-label{font-weight:600;color:var(--night);min-width:80px}
@@ -1117,23 +1142,23 @@
         .kanji-quiz-types{display:flex;gap:0.5rem;justify-content:center;margin:1rem 0}
         .kanji-quiz-type{padding:0.4rem 0.8rem;border:1px solid var(--night);border-radius:var(--radius-sm);background:transparent;color:var(--night);font-size:0.8rem;cursor:pointer}
         .kanji-quiz-type.active{background:var(--night);color:white}
-        .kanji-hint-btn{background:var(--cream);border:1.5px solid var(--accent);color:var(--night);border-radius:var(--radius-sm);padding:0.3rem 0.9rem;font-size:0.85rem;cursor:pointer;transition:all 0.2s}
+        .kanji-hint-btn{background:var(--cream);border:1.5px solid var(--accent);color:var(--night);border-radius:var(--radius-sm);padding:0.6rem 0.9rem;font-size:0.85rem;cursor:pointer;transition:all 0.2s}
         .kanji-hint-btn:hover:not(:disabled){background:var(--accent);color:white}
         .kanji-hint-btn:disabled{opacity:0.5;cursor:default}
         .kanji-hint-box{display:flex;gap:1rem;justify-content:center;font-family:'Noto Sans JP';font-size:0.9rem;color:var(--text-light);margin-bottom:0.6rem;min-height:1.2rem}
-        .kanji-q-char{font-family:'Noto Sans JP';font-size:3rem;font-weight:700;color:var(--primary);text-align:center;margin-bottom:0.5rem}
+        .kanji-q-char{font-family:'Noto Sans JP';font-size:3rem;font-weight:700;color:var(--primary-ink);text-align:center;margin-bottom:0.5rem}
         /* Plans modal */
         .plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.8rem}
         .plan-card{background:var(--cream);border-radius:var(--radius-md);padding:1rem;position:relative;border:2px solid transparent;display:flex;flex-direction:column}
         .plan-card.featured{background:white;border-color:var(--primary);box-shadow:var(--shadow-md)}
         .plan-badge{position:absolute;top:-0.6rem;left:50%;transform:translateX(-50%);background:var(--primary);color:white;font-size:0.6rem;font-weight:700;padding:0.15rem 0.6rem;border-radius:99px;white-space:nowrap}
         .plan-name{font-family:'Outfit';font-size:1rem;font-weight:700;margin-bottom:0.3rem}
-        .plan-price{font-family:'Outfit';font-size:1.5rem;font-weight:800;color:var(--primary);margin-bottom:0.8rem}
+        .plan-price{font-family:'Outfit';font-size:1.5rem;font-weight:800;color:var(--primary-ink);margin-bottom:0.8rem}
         .plan-price span{font-size:0.72rem;color:var(--text-light);font-weight:500}
         .plan-features{list-style:none;font-size:0.72rem;color:var(--text);margin-bottom:1rem;flex:1}
         .plan-features li{padding:0.25rem 0;border-bottom:1px solid rgba(0,0,0,0.05)}
         .plan-features li.off{color:var(--text-light);opacity:0.55}
-        .plan-btn{width:100%;padding:0.6rem;border:none;border-radius:var(--radius-sm);font-weight:600;font-size:0.78rem;cursor:pointer;background:var(--night);color:white;transition:all 0.2s}
+        .plan-btn{width:100%;padding:0.72rem;border:none;border-radius:var(--radius-sm);font-weight:600;font-size:0.78rem;cursor:pointer;background:var(--night);color:white;transition:all 0.2s}
         .plan-btn.current{background:#E8E8E8;color:var(--text-light);cursor:default}
         .plan-btn.gold{background:linear-gradient(135deg,var(--accent-gold),var(--accent));color:white}
         .plan-btn:not(.current):hover{opacity:0.85;transform:scale(1.02)}
@@ -1141,22 +1166,22 @@
         .plan-price-usd{font-size:0.74rem;color:var(--text-light);margin:-0.5rem 0 0.8rem}
         /* Header plans button */
         .header-content{justify-content:space-between}
-        .plans-header-btn{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;padding:0.4rem 0.9rem;border-radius:var(--radius-xl);font-size:0.75rem;font-weight:600;cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif}
+        .plans-header-btn{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;padding:0.56rem 0.7rem;border-radius:var(--radius-xl);font-size:0.72rem;font-weight:600;white-space:nowrap;cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif}
         .plans-header-btn:hover{background:rgba(255,255,255,0.28)}
         /* Kana practice sub-tabs */
         .kana-prac-tabs{display:flex;gap:0.5rem;margin-bottom:1rem;justify-content:center}
-        .kana-prac-tab{padding:0.5rem 1.5rem;border:2px solid var(--ocean);border-radius:var(--radius-md);background:transparent;color:var(--ocean);font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.3s}
+        .kana-prac-tab{padding:0.72rem 1.5rem;border:2px solid var(--ocean);border-radius:var(--radius-md);background:transparent;color:var(--ocean-ink);font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.3s}
         .kana-prac-tab.active{background:var(--ocean);color:white}
         /* Vocab styles */
         .vocab-mode-tabs{display:flex;gap:0.5rem;margin-bottom:1rem;justify-content:center}
-        .vocab-mode-tab{padding:0.5rem 1rem;border:2px solid var(--primary);border-radius:var(--radius-sm);background:transparent;color:var(--primary);font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s}
+        .vocab-mode-tab{padding:0.72rem 1rem;border:2px solid var(--primary);border-radius:var(--radius-sm);background:transparent;color:var(--primary-ink);font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s}
         .vocab-mode-tab.active{background:var(--primary);color:white}
         .vocab-cat-tabs{margin-bottom:1rem}
         .vocab-cat-group-label{font-size:0.68rem;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:0.08em;margin:0.5rem 0 0.25rem}
         .vocab-cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0.3rem;margin-bottom:0.2rem}
-        .vocab-cat-tab{height:2.1rem;padding:0 0.3rem;border:1px solid var(--ocean);border-radius:var(--radius-sm);background:transparent;color:var(--ocean);font-size:0.72rem;font-weight:500;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.2;width:100%}
+        .vocab-cat-tab{height:2.75rem;padding:0 0.3rem;border:1px solid var(--ocean);border-radius:var(--radius-sm);background:transparent;color:var(--ocean-ink);font-size:0.72rem;font-weight:500;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.2;width:100%}
         .vocab-cat-tab.active{background:var(--ocean);color:white}
-        .vocab-cat-tab.matome{border-color:var(--accent);color:var(--accent);width:100%;margin-top:0.4rem}
+        .vocab-cat-tab.matome{border-color:var(--accent);color:var(--accent-ink);width:100%;margin-top:0.4rem}
         .vocab-cat-tab.matome.active{background:var(--accent);color:white}
         .vocab-list{display:flex;flex-direction:column;gap:0.4rem}
         .vocab-item{display:flex;align-items:center;gap:0.8rem;padding:0.6rem 0.8rem;background:white;border-radius:var(--radius-sm);box-shadow:0 1px 3px rgba(0,0,0,0.08)}
@@ -1168,7 +1193,7 @@
         .verb-chip-meaning{font-size:0.72rem;font-weight:400;display:block;max-height:0;overflow:hidden;transition:max-height 0.2s}
         .verb-chip.revealed .verb-chip-meaning{max-height:2rem}
         .vocab-jp{font-family:'Noto Sans JP';font-size:1.1rem;font-weight:600;color:var(--night);min-width:80px}
-        .vocab-reading{display:none;font-size:0.85rem;color:var(--ocean);min-width:70px;font-style:italic}
+        .vocab-reading{display:none;font-size:0.85rem;color:var(--ocean-ink);min-width:70px;font-style:italic}
         .pista-active .vocab-reading{display:inline}
         .vocab-meaning{font-size:0.85rem;color:var(--text);flex:1}
         .btn-speak{position:relative;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:rgba(230,57,70,0.08);border:none;border-radius:50%;cursor:pointer;font-size:0.82rem;transition:all 0.18s;flex-shrink:0;vertical-align:middle}
@@ -1177,13 +1202,13 @@
         .btn-speak:hover{background:rgba(230,57,70,0.18);transform:scale(1.12)}
         .btn-speak.speaking{background:rgba(230,57,70,0.25);animation:pulse-speak 0.6s ease infinite alternate}
         @keyframes pulse-speak{from{transform:scale(1)}to{transform:scale(1.18)}}
-        .vocab-q-word{font-family:'Noto Sans JP';font-size:2rem;font-weight:700;color:var(--primary);text-align:center;margin-bottom:0.5rem}
+        .vocab-q-word{font-family:'Noto Sans JP';font-size:2rem;font-weight:700;color:var(--primary-ink);text-align:center;margin-bottom:0.5rem}
         .btn-audio-play{display:inline-flex;align-items:center;gap:0.5rem;padding:0.75rem 2rem;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-xl);font-size:1.1rem;font-weight:700;cursor:pointer;transition:all 0.18s;font-family:'Outfit',sans-serif}
         .btn-audio-play:hover{background:#c1121f;transform:scale(1.04)}
         .btn-audio-play.speaking{animation:pulse-speak 0.6s ease infinite alternate}
-        .btn-pista-aq{display:inline-flex;align-items:center;gap:0.3rem;padding:0.35rem 1rem;background:rgba(244,162,97,0.15);color:var(--accent);border:1.5px solid var(--accent);border-radius:var(--radius-xl);font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.18s}
-        .btn-pista-aq:hover{background:rgba(244,162,97,0.28)}
-        .pista-reveal{font-size:1rem;font-weight:600;color:var(--ocean);background:rgba(42,157,143,0.1);border-radius:var(--radius-md);padding:0.4rem 1rem}
+        .btn-pista-aq{display:inline-flex;align-items:center;gap:0.3rem;padding:0.65rem 1rem;background:rgba(244,162,97,0.15);color:var(--accent-ink);border:1.5px solid var(--accent);border-radius:var(--radius-xl);font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.18s}
+        .btn-pista-aq:hover{background:rgba(244,162,97,0.28);color:var(--accent-ink)}
+        .pista-reveal{font-size:1rem;font-weight:600;color:var(--ocean-ink);background:rgba(42,157,143,0.1);border-radius:var(--radius-md);padding:0.4rem 1rem}
 
         /* ===== ROADMAP ===== */
         .roadmap-wrap{max-width:480px;margin:0 auto;padding:1.5rem 1rem 3rem}
@@ -1202,7 +1227,7 @@
         .continue-card__body{flex:1;min-width:0;position:relative;z-index:1}
         .continue-card__eyebrow{display:block;font:700 0.66rem 'DM Sans',sans-serif;letter-spacing:0.06em;text-transform:uppercase;color:var(--sky);margin-bottom:0.2rem}
         .continue-card__title{font-family:'Zen Maru Gothic',sans-serif;font-size:1.02rem;font-weight:700;color:#fff;margin:0;line-height:1.35}
-        .continue-card__cta{flex-shrink:0;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-md);padding:0.55rem 1rem;font:700 0.82rem 'DM Sans',sans-serif;cursor:pointer;position:relative;z-index:1;white-space:nowrap}
+        .continue-card__cta{flex-shrink:0;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-md);padding:0.72rem 1rem;min-height:44px;font:700 0.82rem 'DM Sans',sans-serif;cursor:pointer;position:relative;z-index:1;white-space:nowrap}
 
         .map-path{display:flex;flex-direction:column;align-items:stretch;gap:0}
         .map-node{width:82%;border-radius:var(--radius-lg);padding:1.1rem 1.3rem;cursor:pointer;transition:transform 0.15s,box-shadow 0.15s;position:relative}
@@ -1235,46 +1260,57 @@
         .node-score-pct{font-size:0.7rem;opacity:0.8;margin-top:2px;font-family:'DM Sans',sans-serif}
         .node-kanji{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-top:0.4rem}
         .node-kanji-label{font-size:0.68rem;opacity:0.72;font-family:'DM Sans',sans-serif}
-        .kanji-badge{font-size:0.78rem;padding:1px 4px;border-radius:5px;background:rgba(255,255,255,0.18);cursor:pointer;transition:background 0.15s;font-family:'Noto Sans JP',sans-serif}
+        /* La fila de 漢字 va justo por debajo de la barra de progreso y ya mide ~44px de alto, así que
+           el área de toque se amplía con ::after en vez de con min-height (agrandar la insignia
+           empujaría los 11 caracteres de línea y rompería la tarjeta). El ::after sí invade a la
+           insignia vecina, pero da igual: toda la fila lleva al mismo destino (kanji de la unidad),
+           igual que .node-kanji-link. */
+        .node-kanji{min-height:44px}
+        .kanji-badge{font-size:0.78rem;padding:1px 4px;border-radius:5px;background:rgba(255,255,255,0.18);cursor:pointer;transition:background 0.15s;font-family:'Noto Sans JP',sans-serif;position:relative}
+        .kanji-badge::after{content:"";position:absolute;left:50%;top:50%;width:44px;height:44px;transform:translate(-50%,-50%)}
         .kanji-badge.learned{background:rgba(255,255,255,0.48);font-weight:700}
         .kanji-badge:hover{background:rgba(255,255,255,0.55)}
-        .node-kanji-link{font-size:0.68rem;opacity:0.72;margin-left:2px;cursor:pointer;text-decoration:underline;font-family:'DM Sans',sans-serif}
+        .node-kanji-link{font-size:0.68rem;opacity:0.72;margin-left:2px;cursor:pointer;text-decoration:underline;font-family:'DM Sans',sans-serif;position:relative}
+        .node-kanji-link::after{content:"";position:absolute;left:50%;top:50%;width:44px;height:44px;transform:translate(-50%,-50%)}
         .map-connector{width:0;height:30px;margin:0 auto;border-left:3px dashed rgba(29,53,87,0.25)}
 
         /* ===== PLACEMENT TEST ===== */
         .placement-wrap{max-width:480px;margin:0 auto;padding:1.5rem 1rem 3rem}
         .placement-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.8rem}
-        .placement-back{background:none;border:none;color:var(--night);font-size:0.85rem;cursor:pointer;font-family:'DM Sans',sans-serif;opacity:0.7;padding:0}
+        .placement-back{background:none;border:none;color:var(--night);font-size:0.85rem;cursor:pointer;font-family:'DM Sans',sans-serif;opacity:0.7;padding:0.6rem 0.6rem 0.6rem 0;min-height:44px}
         .placement-back:hover{opacity:1}
         .placement-title{font-family:'Zen Maru Gothic',sans-serif;font-weight:700;color:var(--night);font-size:1rem}
         .placement-progress-label{font-size:0.78rem;color:var(--night);opacity:0.55;font-family:'DM Sans',sans-serif}
         .placement-bar-bg{background:rgba(29,53,87,0.12);border-radius:20px;height:6px;margin-bottom:1.3rem}
         .placement-bar{background:var(--primary);border-radius:20px;height:6px;transition:width 0.3s}
-        .placement-level-tag{display:inline-block;font-size:0.7rem;color:var(--accent);font-weight:700;font-family:'DM Sans',sans-serif;background:rgba(244,162,97,0.15);padding:2px 8px;border-radius:20px;margin-bottom:0.6rem}
+        .placement-level-tag{display:inline-block;font-size:0.7rem;color:var(--accent-ink);font-weight:700;font-family:'DM Sans',sans-serif;background:rgba(244,162,97,0.15);padding:2px 8px;border-radius:20px;margin-bottom:0.6rem}
         .placement-q{font-family:'Noto Sans JP',sans-serif;font-size:0.97rem;color:var(--night);background:var(--cream);border-radius:var(--radius-md);padding:1rem 1.2rem;margin-bottom:1.2rem;line-height:1.8;border:2px solid rgba(29,53,87,0.1)}
         .placement-opts{display:flex;flex-direction:column;gap:0.55rem}
         .placement-opt{background:white;border:2px solid rgba(29,53,87,0.15);border-radius:var(--radius-md);padding:0.7rem 1rem;font-family:'Noto Sans JP',sans-serif;font-size:0.88rem;color:var(--night);cursor:pointer;text-align:left;transition:border-color 0.15s,background 0.15s;line-height:1.6}
         .placement-opt:hover:not(:disabled){border-color:var(--primary);background:rgba(230,57,70,0.04)}
         .placement-opt:disabled{cursor:default}
-        .placement-opt.correct{border-color:var(--ocean)!important;background:rgba(42,157,143,0.1);color:var(--ocean);font-weight:700}
-        .placement-opt.wrong{border-color:var(--primary)!important;background:rgba(230,57,70,0.07);color:var(--primary)}
+        /* El mismo feedback que .masu-opt / .quiz-opt: color + pulso/ temblor corto.
+           Las animaciones viven en el <style> principal (keyframes correctPulse/wrongShake),
+           así que el bloque prefers-reduced-motion de aquí abajo también las neutraliza. */
+        .placement-opt.correct{border-color:var(--ocean)!important;background:rgba(42,157,143,0.1);color:var(--ocean-ink);font-weight:700;animation:correctPulse 0.5s ease forwards}
+        .placement-opt.wrong{border-color:var(--primary)!important;background:rgba(230,57,70,0.07);color:var(--primary-ink);animation:wrongShake 0.45s ease forwards}
         .placement-exp{margin-top:0.75rem;font-size:0.8rem;color:var(--night);opacity:0.75;font-family:'DM Sans',sans-serif;padding:0.5rem 0.8rem;background:rgba(29,53,87,0.05);border-radius:var(--radius-sm);line-height:1.5}
         .placement-result{text-align:center;padding:2.5rem 1rem 1rem}
-        .pr-score{font-family:'Zen Maru Gothic',sans-serif;font-size:3.5rem;font-weight:700;color:var(--primary);line-height:1}
+        .pr-score{font-family:'Zen Maru Gothic',sans-serif;font-size:3.5rem;font-weight:700;color:var(--primary-ink);line-height:1}
         .pr-total{font-size:1rem;color:var(--night);opacity:0.45;font-family:'DM Sans',sans-serif;margin-bottom:0.8rem}
         .pr-level{font-size:1.1rem;font-weight:700;color:var(--night);font-family:'DM Sans',sans-serif;margin-bottom:1.2rem}
         .pr-rec{color:var(--night);font-family:'DM Sans',sans-serif;font-size:0.88rem;line-height:1.7;background:rgba(244,162,97,0.15);border-radius:var(--radius-md);padding:0.9rem 1.2rem;margin-bottom:1rem}
 
         /* ===== 汎用ボタン ===== */
-        .btn{display:inline-block;border:none;border-radius:var(--radius-md);padding:0.65rem 1.5rem;font:700 0.92rem 'DM Sans',sans-serif;cursor:pointer;transition:transform .15s,box-shadow .15s}
+        .btn{display:inline-block;border:none;border-radius:var(--radius-md);padding:0.75rem 1.5rem;min-height:44px;font:700 0.92rem 'DM Sans',sans-serif;cursor:pointer;transition:transform .15s,box-shadow .15s}
         .btn:hover{transform:translateY(-2px)}
-        .btn-primary{background:linear-gradient(135deg,var(--primary),#c1121f);color:#fff;box-shadow:0 4px 12px rgba(230,57,70,0.3)}
-        .btn-primary:hover{box-shadow:0 6px 16px rgba(230,57,70,0.4)}
-        .btn-secondary{background:linear-gradient(135deg,var(--ocean),#22b09e);color:#fff;box-shadow:0 4px 12px rgba(42,157,143,0.3)}
+        .btn-primary{background:var(--primary-ink);color:#fff;box-shadow:0 4px 12px rgba(230,57,70,0.3)}
+        .btn-primary:hover{box-shadow:0 6px 16px rgba(230,57,70,0.4);background:#A00E1A}
+        .btn-secondary{background:var(--ocean-ink);color:#fff;box-shadow:0 4px 12px rgba(42,157,143,0.3)}
 
         /* ===== Unit / Scenario セクション ===== */
         .unit-header,.scenario-header{display:flex;align-items:center;gap:1rem;padding:0.75rem 0 1rem;flex-wrap:wrap}
-        .btn-back{background:none;border:1.5px solid var(--night);color:var(--night);border-radius:var(--radius-sm);padding:0.35rem 0.9rem;font:600 0.82rem 'DM Sans',sans-serif;cursor:pointer;opacity:0.6;transition:opacity .15s}
+        .btn-back{background:none;border:1.5px solid var(--night);color:var(--night);border-radius:var(--radius-sm);padding:0.65rem 0.9rem;font:600 0.82rem 'DM Sans',sans-serif;cursor:pointer;opacity:0.6;transition:opacity .15s}
         .btn-back:hover{opacity:1}
         .unit-title{font-family:'Zen Maru Gothic',sans-serif;font-size:1.35rem;font-weight:700;color:var(--night);margin:0}
 
@@ -1293,14 +1329,16 @@
         .cando-card[data-status="available"]{border-color:rgba(29,53,87,0.14)}
         .cando-card[data-status="locked"]{opacity:0.55;pointer-events:none;border-style:dashed;box-shadow:none}
         .cando-card__head{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem}
-        .cando-card__badge{font:600 12px/1 'DM Sans',sans-serif;color:var(--primary)}
+        .cando-card__badge{font:600 12px/1 'DM Sans',sans-serif;color:var(--primary-ink)}
         .cando-card__badge--extra{color:#8a6d1a;background:rgba(244,162,97,0.18);padding:3px 8px;border-radius:999px}
         .cando-card--extra{border-style:dashed;border-color:rgba(244,162,97,0.6)}
         .cando-card__progress{font-size:1rem;letter-spacing:2px}
         .cando-card__title{font:700 1rem/1.4 'DM Sans',sans-serif;color:var(--night);margin:0 0 0.4rem}
         .cando-card__goal{font-family:'Noto Sans JP',sans-serif;font-size:0.88rem;color:var(--night);opacity:0.65;margin:0 0 0.9rem}
         .cando-card__foot{display:flex;justify-content:space-between;align-items:center}
-        .cando-card__xp{font:700 0.82rem 'DM Sans',sans-serif;color:var(--accent)}
+        .cando-card__xp{font:700 0.82rem 'DM Sans',sans-serif;color:var(--accent-ink)}
+        /* Anticipa el contenido de la lección: práctica / escucha / lectura / reto */
+        .cando-card__parts{font:600 0.74rem 'DM Sans',sans-serif;color:var(--night);opacity:0.72;margin:-0.5rem 0 0.9rem;padding-top:0.1rem}
 
         /* HUD — "tira de pasaporte" */
         .hud{display:flex;align-items:center;gap:0.6rem;padding:0.55rem 1rem;background:var(--cream);border-bottom:1px dashed rgba(29,53,87,0.16);font-family:'DM Sans',sans-serif;font-size:0.88rem}
@@ -1335,9 +1373,9 @@
         .stamp{background:#fff;border:2px dashed rgba(29,53,87,0.18);border-radius:var(--radius-md);padding:0.9rem 0.4rem;text-align:center;display:flex;flex-direction:column;gap:0.15rem;transform:rotate(-1.5deg)}
         .stamp:nth-child(2){transform:rotate(1.2deg)}
         .stamp:nth-child(3){transform:rotate(-1deg)}
-        .stamp__value{font:800 1.5rem 'Outfit',sans-serif;color:var(--primary)}
-        .stamp--accent .stamp__value{color:var(--accent)}
-        .stamp--ocean .stamp__value{color:var(--ocean)}
+        .stamp__value{font:800 1.5rem 'Outfit',sans-serif;color:var(--primary-ink)}
+        .stamp--accent .stamp__value{color:var(--accent-ink)}
+        .stamp--ocean .stamp__value{color:var(--ocean-ink)}
         .stamp__label{font-size:0.68rem;color:var(--text-light);font-weight:600}
 
         .profile-panel{background:#fff;border-radius:var(--radius-lg);padding:1.2rem 1.4rem;margin-bottom:1rem;box-shadow:var(--shadow-sm)}
@@ -1347,7 +1385,7 @@
         .profile-daily progress::-webkit-progress-bar{background:rgba(29,53,87,0.1);border-radius:99px}
         .profile-daily progress::-webkit-progress-value{background:linear-gradient(90deg,var(--ocean),var(--ocean-light));border-radius:99px}
         .profile-daily progress::-moz-progress-bar{background:linear-gradient(90deg,var(--ocean),var(--ocean-light));border-radius:99px}
-        .profile-daily span{font:700 0.85rem 'DM Sans',sans-serif;color:var(--primary);flex-shrink:0}
+        .profile-daily span{font:700 0.85rem 'DM Sans',sans-serif;color:var(--primary-ink);flex-shrink:0}
         .profile-panel__foot{margin:0.5rem 0 0;font-size:0.75rem;color:var(--text-light)}
 
         .profile-plan{border-radius:var(--radius-lg);padding:1.2rem 1.4rem;color:#fff;box-shadow:var(--shadow-md)}
@@ -1403,8 +1441,8 @@
         .explain-block--pitfall{background:rgba(230,57,70,0.05);border-left:3px solid var(--primary)}
         .pitfall-case{margin-bottom:0.5rem}
         .pitfall-case:last-child{margin-bottom:0}
-        .pitfall-wrong{color:var(--primary);font-weight:700;font-family:'Noto Sans JP',sans-serif}
-        .pitfall-right{color:var(--ocean);font-weight:700;font-family:'Noto Sans JP',sans-serif}
+        .pitfall-wrong{color:var(--primary-ink);font-weight:700;font-family:'Noto Sans JP',sans-serif}
+        .pitfall-right{color:var(--ocean-ink);font-weight:700;font-family:'Noto Sans JP',sans-serif}
         .pitfall-note{font-size:0.8rem;color:#666;margin-top:0.15rem}
         /* minipair */
         .explain-block--minipair{background:rgba(244,162,97,0.08);border-left:3px solid var(--accent)}
@@ -1415,11 +1453,11 @@
         /* mnemonic */
         .explain-block--mnemonic{background:rgba(244,162,97,0.15);border-left:3px solid var(--accent)}
         .explain-block--objetivo{background:linear-gradient(135deg,rgba(42,157,143,0.12),rgba(42,157,143,0.03));border-left:4px solid var(--ocean);font-weight:600}
-        .explain-block--objetivo .objetivo-label{display:inline-block;font:700 0.72rem/1 'DM Sans',sans-serif;text-transform:uppercase;letter-spacing:0.06em;color:var(--ocean)}
+        .explain-block--objetivo .objetivo-label{display:inline-block;font:700 0.72rem/1 'DM Sans',sans-serif;text-transform:uppercase;letter-spacing:0.06em;color:var(--ocean-ink)}
         /* grammar detour */
         .grammar-detour-wrap{margin-top:1.2rem;padding:0.9rem 1rem;background:rgba(42,157,143,0.06);border-radius:var(--radius-md);border:1px dashed rgba(42,157,143,0.3)}
         .grammar-detour-label{font-size:0.78rem;color:#888;margin:0 0 0.4rem;font-family:'DM Sans',sans-serif}
-        .btn-detour{display:block;width:100%;text-align:left;background:transparent;border:1.5px solid var(--ocean);color:var(--ocean);border-radius:var(--radius-sm);padding:0.5rem 0.9rem;font:700 0.85rem 'DM Sans',sans-serif;cursor:pointer;margin-bottom:0.4rem;transition:background 0.15s}
+        .btn-detour{display:block;width:100%;text-align:left;background:transparent;border:1.5px solid var(--ocean);color:var(--ocean-ink);border-radius:var(--radius-sm);padding:0.5rem 0.9rem;font:700 0.85rem 'DM Sans',sans-serif;cursor:pointer;margin-bottom:0.4rem;transition:background 0.15s}
         .btn-detour:last-child{margin-bottom:0}
         .btn-detour:hover{background:rgba(42,157,143,0.08)}
         /* return banner */
@@ -1434,6 +1472,8 @@
         .prac-prog{font:700 0.82rem 'DM Sans',sans-serif;color:var(--night);opacity:0.5;white-space:nowrap}
         .prac-bar-bg{flex:1;height:6px;background:#EEE;border-radius:3px;overflow:hidden}
         .prac-bar{height:100%;background:var(--ocean);border-radius:3px;transition:width .3s}
+        /* Umbral de aprobación: visible desde el inicio de la ronda */
+        .prac-meta{font:600 0.78rem 'DM Sans',sans-serif;color:var(--text-light);margin:-0.8rem 0 0.9rem;text-align:center}
         .prac-card{background:#fff;border-radius:var(--radius-lg);padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,.05)}
         .prac-prompt{font:600 1rem 'DM Sans',sans-serif;color:var(--night);margin:0 0 0.5rem;line-height:1.5}
         .prac-ja{font-family:'Noto Sans JP',sans-serif;font-size:1.1rem;color:var(--night);margin:0 0 1rem;padding:0.6rem 0.9rem;background:rgba(29,53,87,0.05);border-radius:var(--radius-sm);line-height:2}
@@ -1447,7 +1487,7 @@
         .prac-fill-prefix rt{font-size:0.55em;color:var(--night);opacity:0.7}
         .reorder-answer{min-height:44px;border:2px dashed #DDD;border-radius:var(--radius-md);padding:0.5rem;display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.6rem}
         .reorder-bank{display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.5rem}
-        .word-chip{background:var(--night);color:#fff;border:none;border-radius:var(--radius-sm);padding:0.4rem 0.8rem;font:600 0.9rem 'Noto Sans JP',sans-serif;cursor:pointer;transition:opacity .15s}
+        .word-chip{background:var(--night);color:#fff;border:none;border-radius:var(--radius-sm);padding:0.6rem 0.8rem;font:600 0.9rem 'Noto Sans JP',sans-serif;cursor:pointer;transition:opacity .15s}
         .word-chip:hover{opacity:0.8}
         .word-chip.used{opacity:0.25;cursor:default}
         .word-chip--selected{background:var(--ocean)}
@@ -1459,9 +1499,65 @@
         .conv-bubble-text{flex:1}
         .conv-bubble-text .conv-ja{font-family:'Noto Sans JP',sans-serif;font-size:1.05rem;font-weight:600;margin:0;line-height:1.7}
         .conv-bubble-text .conv-hint{font-size:0.78rem;opacity:0.65;margin:0.25rem 0 0;font-family:'DM Sans',sans-serif}
-        .conv-audio-btn{flex-shrink:0;background:rgba(255,255,255,0.12);border:none;border-radius:99px;width:36px;height:36px;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;align-self:center}
+        .conv-audio-btn{flex-shrink:0;background:rgba(255,255,255,0.12);border:none;border-radius:99px;width:44px;height:44px;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;align-self:center}
         .conv-audio-btn:hover{background:rgba(255,255,255,0.22)}
         .conv-respond-label{font:600 0.88rem 'DM Sans',sans-serif;color:#888;margin:0.9rem 0 0.5rem}
+
+        /* ============================================================
+           A11y — A3 · Touch targets
+           El padding de cada control depende de su line-height, así que
+           subir el padding "a ojo" no garantiza los 44px. Este bloque es
+           el piso real: ningún control interactivo queda por debajo.
+           Los controles de icono (.btn-speak / .btn-hint / .lesson-tab)
+           NO entran aquí: conservan su tamaño visual y amplían el área
+           de toque con ::after 44px, igual que ya venían haciendo.
+           ============================================================ */
+        .hint-btn, .btn-pista-aq, .kanji-hint-btn, .kanji-quiz-type,
+        .joshi-grp-tab, .kanji-cat-tab, .kanji-mode-tab,
+        .vocab-mode-tab, .vocab-cat-tab, .kana-prac-tab,
+        .plan-btn, .plans-header-btn, .btn-back, .placement-back,
+        .word-chip, .mode-tab, .moji-tab, .btn-placement,
+        .btn-detour, .btn-practice, .profile-plan button, .btn-card-nav,
+        #modal-teacher-code, #profile-teacher-code {
+            min-height: 44px;
+        }
+        /* Las fichas de palabra también tienen ancho: "です" mide 40px. El banco es una fila
+           flex con wrap, así que un min-width de 4px no descuadra nada. */
+        .word-chip { min-width: 44px; }
+
+        /* ============================================================
+           A11y — prefers-reduced-motion
+           El usuario pidió a su sistema menos movimiento: se detienen
+           las animaciones/decorativas y las transiciones, pero NO se
+           apaga el feedback de estado (audio/mic/correcto/incorrecto),
+           que es información, no decoración.
+           ============================================================ */
+        @media (prefers-reduced-motion: reduce) {
+            /* Decorativas: header, pin, mapa, retouch, waves */
+            .header::before,
+            .continue-card__pin,
+            .map-node.current .map-node__marker,
+            .reto-mic.listening,
+            .btn-audio-play.speaking {
+                animation: none !important;
+            }
+            /* Transiciones de hover/estado en todo el app */
+            *, *::before, *::after {
+                transition-duration: 0.01ms !important;
+                transition-delay: 0ms !important;
+            }
+            /* Feedback de acierto/error: se mantiene el color, sin movimiento */
+            .masu-opt.correct,
+            .placement-opt.correct,
+            .masu-opt.wrong,
+            .placement-opt.wrong { animation: none !important; }
+            /* Audio en curso: el pulso se sustituye por un estado estático
+               (seguir viendo "está sonando" es información, no decoración) */
+            .btn-speak.speaking { animation: none !important; box-shadow: 0 0 0 3px rgba(230,57,70,0.45); }
+            /* Entrada de modales y secciones sin escala/desplazamiento */
+            .modal,
+            .section { animation: none !important; }
+        }
     </style>
 </head>
 <body>
@@ -1471,11 +1567,11 @@
             <div class="login-logo">
                 <span>千</span>
             </div>
-            <h1 class="login-title">CHIZU</h1>
+            <h1 class="login-title">ACADEMIA CHIZU</h1>
 
             <!-- Vista principal de autenticación -->
             <div id="main-auth-view">
-                <p class="login-subtitle" id="login-subtitle">Acceso para estudiantes</p>
+                <p class="login-subtitle" id="login-subtitle">NihongoMap · Acceso para estudiantes</p>
                 <input
                     type="email"
                     class="login-input"
@@ -1494,7 +1590,7 @@
 
                 <p class="login-error" id="login-error"></p>
 
-                <p class="login-hint" id="auth-toggle" onclick="toggleAuthMode()" style="cursor:pointer;color:var(--ocean);text-decoration:underline">
+                <p class="login-hint" id="auth-toggle" onclick="toggleAuthMode()" style="cursor:pointer;color:var(--ocean-ink);text-decoration:underline">
                     ¿No tienes cuenta? Regístrate
                 </p>
                 <p class="login-forgot" onclick="showResetForm()">¿Olvidaste tu contraseña?</p>
@@ -1507,8 +1603,8 @@
                 </button>
 
                 <p class="login-tc">Al registrarte aceptas los
-                    <span onclick="showLegal('terms')" style="cursor:pointer;color:var(--ocean);text-decoration:underline">Términos de uso</span>
-                    y la <span onclick="showLegal('privacy')" style="cursor:pointer;color:var(--ocean);text-decoration:underline">Política de privacidad</span>
+                    <span onclick="showLegal('terms')" style="cursor:pointer;color:var(--ocean-ink);text-decoration:underline">Términos de uso</span>
+                    y la <span onclick="showLegal('privacy')" style="cursor:pointer;color:var(--ocean-ink);text-decoration:underline">Política de privacidad</span>
                 </p>
             </div>
 
@@ -1525,7 +1621,7 @@
                 >
                 <button class="login-btn" onclick="handleReset()">Enviar enlace 📧</button>
                 <p class="login-error" id="reset-msg"></p>
-                <p class="login-hint" onclick="backToLogin()" style="cursor:pointer;color:var(--ocean)">← Volver</p>
+                <p class="login-hint" onclick="backToLogin()" style="cursor:pointer;color:var(--ocean-ink)">← Volver</p>
             </div>
         </div>
     </div>
@@ -1539,7 +1635,7 @@
             <div class="logo"><span>千</span></div>
             <div class="brand">
                 <h1>CHIZU</h1>
-                <p>HABLEMOS JAPONÉS</p>
+                <p>NihongoMap · N5</p>
             </div>
             <button class="plans-header-btn" onclick="openPlansModal()">⭐ Planes</button>
             <button class="plans-header-btn" onclick="authSignOut()" id="logout-btn">🚪 Salir</button>
@@ -1596,6 +1692,10 @@
                     <span class="step" id="step-trazar" style="display:none">③ Trazar</span>
                     <span class="step-sep">›</span>
                     <span class="step" id="step-practice">③ Práctica</span>
+                    <span class="step-sep" id="step-sep-escuchar" style="display:none">›</span>
+                    <span class="step" id="step-escuchar" style="display:none">④ Escuchar</span>
+                    <span class="step-sep" id="step-sep-lectura" style="display:none">›</span>
+                    <span class="step" id="step-lectura" style="display:none">⑤ Lectura</span>
                     <span class="step-sep">›</span>
                     <span class="step" id="step-challenge">④ Reto</span>
                 </div>
@@ -1738,7 +1838,7 @@
                 <button onclick="submitTeacherCode('modal-teacher-code','modal-teacher-msg',()=>{renderProfile();closePlansModal();})" class="btn btn-secondary" style="width:100%;padding:0.6rem;font-size:0.9rem">Canjear código</button>
                 <p id="modal-teacher-msg" style="font-family:'DM Sans',sans-serif;font-size:0.8rem;margin:0.5rem 0 0;text-align:center"></p>
             </div>
-            <p style="font-size:0.72rem;color:var(--text-light);margin-top:1rem;text-align:center;">Contacto: <a href="https://wa.me/59176083176" style="color:var(--ocean);font-weight:600;">WhatsApp +591 76083176</a></p>
+            <p style="font-size:0.72rem;color:var(--text-light);margin-top:1rem;text-align:center;">Contacto: <a href="https://wa.me/59176083176" style="color:var(--ocean-ink);font-weight:600;">WhatsApp +591 76083176</a></p>
         </div>
     </div>
 
@@ -1882,7 +1982,7 @@ const LEGAL_WHATSAPP = '+591 76083176';
 function legalPlansHtml() {
     return PLAN_ORDER.map(t => {
         const p = PLANS[t];
-        const price = p.level > 0 ? `$${fmtUsd(p.priceUsd)} USD por 30 días` : 'Gratis';
+        const price = p.level > 0 ? `Bs ${p.priceBob} ($${fmtUsd(p.priceUsd)} USD) por 30 días` : 'Gratis';
         const incl = planBenefits(t).filter(b => b.ok).map(b => b.text).join('; ');
         return `<li style="margin-bottom:0.4rem"><strong>${p.name}</strong> — ${price}. Incluye: ${incl}.</li>`;
     }).join('');
@@ -1915,7 +2015,7 @@ const legalContent = {
         ${_H('5. Pagos')}
         ${_UL([
             '<strong>Pago mensual por adelantado.</strong> Cada pago activa el plan por 30 días. <strong>No hay renovación automática ni cobros recurrentes:</strong> nunca te cobramos sin que tú hagas un nuevo pago.',
-            '<strong>Los precios están en dólares (USD).</strong> En Bolivia se paga el equivalente en bolivianos al tipo de cambio de la plataforma de pago vigente el día del pago; te confirmamos el monto exacto por WhatsApp antes de que pagues.',
+            `<strong>Los precios están fijados en bolivianos (Bs).</strong> El monto en dólares que aparece junto a cada plan es solo una referencia, calculada con una tasa de ${fmtUsd(NM_BOB_PER_USD.toFixed(2))} Bs por dólar. En Bolivia pagas ese monto en Bs. por QR; el monto exacto se confirma por WhatsApp antes de que pagues.`,
             '<strong>Medios de pago:</strong> en Bolivia, QR (transferencia en bolivianos); en el extranjero, tarjeta mediante un enlace de pago, AirTM o Binance (en USDT/USD). Los pagos son manuales: nos escribes por WhatsApp, te enviamos los datos y, cuando confirmamos tu pago, activamos tu plan, normalmente en menos de 24 horas.',
             '<strong>Si ya tienes ese plan vigente y pagas de nuevo,</strong> los 30 días se suman a tu fecha de vencimiento. Si pagas otro plan, empieza a contar desde la activación.',
             'Los precios pueden cambiar. Un cambio de precio no afecta un período que ya pagaste.',
@@ -1963,7 +2063,7 @@ const legalContent = {
 
         ${_H('3. Dónde se guardan y quién los ve')}
         ${_UL([
-            '<strong>Firebase (Google):</strong> usamos Firebase Authentication y Firestore para el inicio de sesión y el almacenamiento. Los datos están en servidores de Google Cloud, que pueden estar fuera de tu país. Consulta la <a href="https://policies.google.com/privacy" target="_blank" rel="noopener" style="color:var(--ocean)">política de privacidad de Google</a>.',
+            '<strong>Firebase (Google):</strong> usamos Firebase Authentication y Firestore para el inicio de sesión y el almacenamiento. Los datos están en servidores de Google Cloud, que pueden estar fuera de tu país. Consulta la <a href="https://policies.google.com/privacy" target="_blank" rel="noopener" style="color:var(--ocean-ink)">política de privacidad de Google</a>.',
             '<strong>En tu dispositivo:</strong> la app guarda información en el almacenamiento del navegador (progreso y preferencias) para funcionar mejor. No usamos cookies de publicidad.',
             '<strong>Google Fonts:</strong> las tipografías se cargan desde Google, que puede registrar tu dirección IP.',
             '<strong>Administración:</strong> quien administra Academia Chizu puede ver tu correo, tu plan y tu progreso para activar planes y darte soporte.'
@@ -2474,12 +2574,12 @@ const unitKanji = {
 const roadmapUnits = [
     {id:1,  icon:'あ', es:'Hiragana',                       keys:['kana_hiragana'],                                           section:'moji',    tab:'hiragana', kanjiKey:null},
     {id:2,  icon:'ア', es:'Katakana',                       keys:['kana_katakana'],                                           section:'moji',    tab:'katakana', kanjiKey:null},
-    {id:3,  icon:'📝', es:'Autopresentación (です)',        keys:['desu','katsu'],                                            section:'grammar', tab:'desu',     kanjiKey:'desu'},
+    {id:3,  icon:'📝', es:'Autopresentación',               keys:['desu','katsu'],                                            section:'grammar', tab:'desu',     kanjiKey:'desu'},
     {id:4,  icon:'🔢', es:'Números, tiempo y fechas',       keys:['gimon','shiji'],                                           section:'grammar', tab:'gimon',    kanjiKey:'gimon'},
-    {id:5,  icon:'🏠', es:'Lugares y direcciones (どこ？)', keys:['aru','joshi'],                                             section:'grammar', tab:'aru',      kanjiKey:'aru'},
+    {id:5,  icon:'🏠', es:'Lugares y direcciones',          keys:['aru','joshi'],                                             section:'grammar', tab:'aru',      kanjiKey:'aru'},
     {id:6,  icon:'🛒', es:'Compras y comida',               keys:['keiyo_i','keiyo_na','keiyo_meishi_i','keiyo_meishi_na','dou','yori','ichiban'], section:'grammar', tab:'keiyo', kanjiKey:'keiyo'},
-    {id:7,  icon:'🏃', es:'Acciones cotidianas (ます形)',   keys:['masu','mashou','tai','niiku','maeni','dekiru'],            section:'grammar', tab:'mashou',   kanjiKey:'mashou'},
-    {id:8,  icon:'🖐️', es:'La forma て',                    keys:['te'],                                                      section:'grammar', tab:'te',       kanjiKey:'teform'},
+    {id:7,  icon:'🏃', es:'Acciones cotidianas',             keys:['masu','mashou','tai','niiku','maeni','dekiru'],            section:'grammar', tab:'mashou',   kanjiKey:'mashou'},
+    {id:8,  icon:'🖐️', es:'Expresar con て',                 keys:['te'],                                                      section:'grammar', tab:'te',       kanjiKey:'teform'},
     {id:9,  icon:'💬', es:'Describir con adjetivos',        keys:['kute','naru','omou','deshou','itta'],                      section:'grammar', tab:'kute',     kanjiKey:'kute'},
     {id:10, icon:'👨‍👩‍👧', es:'Familia y personas',           keys:['kazoku'],                                                  section:'grammar', tab:'kazoku',   kanjiKey:'kazoku'},
     {id:11, icon:'📅', es:'Horario diario',                 keys:['ta','nai','setsuzoku'],                                    section:'grammar', tab:'ta',       kanjiKey:'nichijou'},
@@ -4402,7 +4502,7 @@ function showTaiQuestion(){
         <div class="reorder-box">
             <div class="reorder-progress">${taiQuizIdx+1} / 5</div>
             <div class="masu-q-verb">${q.dict}</div>
-            <div class="masu-q-form">→ ${q.form} <span style="font-size:0.85em;color:var(--ocean)">${q.formJp}</span></div>
+            <div class="masu-q-form">→ ${q.form} <span style="font-size:0.85em;color:var(--ocean-ink)">${q.formJp}</span></div>
             <div class="masu-q-form-jp">${formNames[q.form]||''}</div>
             <div class="masu-q-meaning">(${q.meaning})</div>
             <div class="masu-options">
@@ -4933,7 +5033,7 @@ function renderKeiyoLearn(){
 ${meishiData.slice(0,6).map(d=>`<div style="background:var(--cream);border:1px solid #ddd;border-radius:var(--radius-sm);padding:0.5rem 0.8rem;font-size:0.9rem;"><span style="font-size:1.1rem;font-family:'Noto Sans JP'">${d.correct}</span><br><span style="color:var(--text-light);font-size:0.8rem;">${d.es}</span></div>`).join('')}
 </div></div>`
         : `<div class="grammar-point" style="margin-top:1.2rem;"><p>📌 <strong>② Uso antes de sustantivos:</strong></p>
-<p style="text-align:center;font-size:1rem;margin:0.5rem 0;"><strong>Adj-な ＋ <span style="color:var(--primary)">な</span> ＋ sustantivo</strong></p>
+<p style="text-align:center;font-size:1rem;margin:0.5rem 0;"><strong>Adj-な ＋ <span style="color:var(--primary-ink)">な</span> ＋ sustantivo</strong></p>
 <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.7rem;">
 ${meishiData.slice(0,6).map(d=>`<div style="background:var(--cream);border:1px solid #ddd;border-radius:var(--radius-sm);padding:0.5rem 0.8rem;font-size:0.9rem;"><span style="font-size:1.1rem;font-family:'Noto Sans JP'">${d.correct}</span><br><span style="color:var(--text-light);font-size:0.8rem;">${d.es}</span></div>`).join('')}
 </div></div>`;
@@ -5180,18 +5280,18 @@ function renderTeLearn(){
                 <tr style="background:var(--cream);">
                     <th style="padding:0.3rem 0.5rem;text-align:left;color:var(--text-light);">Grupo</th>
                     <th style="padding:0.3rem 0.5rem;text-align:left;color:var(--text-light);">Terminación</th>
-                    <th style="padding:0.3rem 0.5rem;text-align:left;color:var(--ocean);">て形</th>
+                    <th style="padding:0.3rem 0.5rem;text-align:left;color:var(--ocean-ink);">て形</th>
                     <th style="padding:0.3rem 0.5rem;text-align:left;color:var(--text-light);">Ejemplo</th>
                 </tr>
-                <tr><td style="padding:0.25rem 0.5rem;">G1</td><td>く</td><td style="color:var(--ocean);font-weight:700;">いて</td><td><ruby>書<rt>か</rt></ruby>く→<ruby>書<rt>か</rt></ruby>いて</td></tr>
-                <tr style="background:var(--cream);"><td style="padding:0.25rem 0.5rem;">G1</td><td>ぐ</td><td style="color:var(--ocean);font-weight:700;">いで</td><td><ruby>泳<rt>およ</rt></ruby>ぐ→<ruby>泳<rt>およ</rt></ruby>いで</td></tr>
-                <tr><td style="padding:0.25rem 0.5rem;">G1</td><td>す</td><td style="color:var(--ocean);font-weight:700;">して</td><td><ruby>話<rt>はな</rt></ruby>す→<ruby>話<rt>はな</rt></ruby>して</td></tr>
-                <tr style="background:var(--cream);"><td style="padding:0.25rem 0.5rem;">G1</td><td>む/ぶ/ぬ</td><td style="color:var(--ocean);font-weight:700;">んで</td><td><ruby>読<rt>よ</rt></ruby>む→<ruby>読<rt>よ</rt></ruby>んで</td></tr>
-                <tr><td style="padding:0.25rem 0.5rem;">G1</td><td>る/う/つ</td><td style="color:var(--ocean);font-weight:700;">って</td><td><ruby>買<rt>か</rt></ruby>う→<ruby>買<rt>か</rt></ruby>って</td></tr>
-                <tr style="background:var(--cream);"><td style="padding:0.25rem 0.5rem;">G2</td><td>る</td><td style="color:var(--ocean);font-weight:700;">て</td><td><ruby>食<rt>た</rt></ruby>べる→<ruby>食<rt>た</rt></ruby>べて</td></tr>
-                <tr><td style="padding:0.25rem 0.5rem;">G3</td><td>する</td><td style="color:var(--ocean);font-weight:700;">して</td><td><ruby>勉強<rt>べんきょう</rt></ruby>する→<ruby>勉強<rt>べんきょう</rt></ruby>して</td></tr>
-                <tr style="background:var(--cream);"><td style="padding:0.25rem 0.5rem;">G3</td><td>くる</td><td style="color:var(--ocean);font-weight:700;">きて</td><td><ruby>来<rt>く</rt></ruby>る→<ruby>来<rt>き</rt></ruby>て</td></tr>
-                <tr><td style="padding:0.25rem 0.5rem;color:#E07A00;font-weight:700;">⚠️例外</td><td><ruby>行<rt>い</rt></ruby>く</td><td style="color:var(--ocean);font-weight:700;"><ruby>行<rt>い</rt></ruby>って</td><td>—</td></tr>
+                <tr><td style="padding:0.25rem 0.5rem;">G1</td><td>く</td><td style="color:var(--ocean-ink);font-weight:700;">いて</td><td><ruby>書<rt>か</rt></ruby>く→<ruby>書<rt>か</rt></ruby>いて</td></tr>
+                <tr style="background:var(--cream);"><td style="padding:0.25rem 0.5rem;">G1</td><td>ぐ</td><td style="color:var(--ocean-ink);font-weight:700;">いで</td><td><ruby>泳<rt>およ</rt></ruby>ぐ→<ruby>泳<rt>およ</rt></ruby>いで</td></tr>
+                <tr><td style="padding:0.25rem 0.5rem;">G1</td><td>す</td><td style="color:var(--ocean-ink);font-weight:700;">して</td><td><ruby>話<rt>はな</rt></ruby>す→<ruby>話<rt>はな</rt></ruby>して</td></tr>
+                <tr style="background:var(--cream);"><td style="padding:0.25rem 0.5rem;">G1</td><td>む/ぶ/ぬ</td><td style="color:var(--ocean-ink);font-weight:700;">んで</td><td><ruby>読<rt>よ</rt></ruby>む→<ruby>読<rt>よ</rt></ruby>んで</td></tr>
+                <tr><td style="padding:0.25rem 0.5rem;">G1</td><td>る/う/つ</td><td style="color:var(--ocean-ink);font-weight:700;">って</td><td><ruby>買<rt>か</rt></ruby>う→<ruby>買<rt>か</rt></ruby>って</td></tr>
+                <tr style="background:var(--cream);"><td style="padding:0.25rem 0.5rem;">G2</td><td>る</td><td style="color:var(--ocean-ink);font-weight:700;">て</td><td><ruby>食<rt>た</rt></ruby>べる→<ruby>食<rt>た</rt></ruby>べて</td></tr>
+                <tr><td style="padding:0.25rem 0.5rem;">G3</td><td>する</td><td style="color:var(--ocean-ink);font-weight:700;">して</td><td><ruby>勉強<rt>べんきょう</rt></ruby>する→<ruby>勉強<rt>べんきょう</rt></ruby>して</td></tr>
+                <tr style="background:var(--cream);"><td style="padding:0.25rem 0.5rem;">G3</td><td>くる</td><td style="color:var(--ocean-ink);font-weight:700;">きて</td><td><ruby>来<rt>く</rt></ruby>る→<ruby>来<rt>き</rt></ruby>て</td></tr>
+                <tr><td style="padding:0.25rem 0.5rem;color:#E07A00;font-weight:700;">⚠️例外</td><td><ruby>行<rt>い</rt></ruby>く</td><td style="color:var(--ocean-ink);font-weight:700;"><ruby>行<rt>い</rt></ruby>って</td><td>—</td></tr>
             </table>
         </div>
         <div class="grammar-card" style="text-align:center;">
@@ -5202,8 +5302,8 @@ function renderTeLearn(){
             <div style="font-family:'Noto Sans JP';font-size:2.4rem;font-weight:700;color:var(--ocean);">${teRubyHtml(v.te,v.tr)}</div>
             <div style="color:var(--text-light);font-size:0.9rem;margin-top:0.4rem;">${v.es}</div>
             <div style="display:flex;justify-content:center;gap:1rem;margin-top:1rem;">
-                <button onclick="teCardIdx=Math.max(0,teCardIdx-1);renderTeLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid var(--ocean);border-radius:var(--radius-sm);background:white;color:var(--ocean);font-weight:700;cursor:pointer;">◀ Anterior</button>
-                <button onclick="teCardIdx=Math.min(teVerbPool.length-1,teCardIdx+1);renderTeLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid var(--ocean);border-radius:var(--radius-sm);background:white;color:var(--ocean);font-weight:700;cursor:pointer;">Siguiente ▶</button>
+                <button class="btn-card-nav" onclick="teCardIdx=Math.max(0,teCardIdx-1);renderTeLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid var(--ocean);border-radius:var(--radius-sm);background:white;color:var(--ocean-ink);font-weight:700;cursor:pointer;">◀ Anterior</button>
+                <button class="btn-card-nav" onclick="teCardIdx=Math.min(teVerbPool.length-1,teCardIdx+1);renderTeLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid var(--ocean);border-radius:var(--radius-sm);background:white;color:var(--ocean-ink);font-weight:700;cursor:pointer;">Siguiente ▶</button>
             </div>
         </div>
         <button class="btn-practice" onclick="setGrammarMode('practice')">🎯 Practicar</button>
@@ -5288,7 +5388,7 @@ function renderTeOuyouLearn(){
             <div style="font-size:0.8rem;color:var(--text-light);margin-bottom:0.4rem;">${teOuyouCardIdx+1} / ${cards.length}</div>
             <div style="display:inline-block;background:var(--ocean);color:white;border-radius:20px;padding:0.2rem 1rem;font-size:1rem;font-weight:700;font-family:'Noto Sans JP';margin-bottom:0.5rem;">${c.expr}</div>
             <div style="font-size:1.15rem;font-weight:700;color:var(--night);margin-bottom:0.3rem;">${c.title}</div>
-            <div style="font-size:0.85rem;background:var(--cream);border-radius:var(--radius-sm);padding:0.4rem 0.8rem;margin-bottom:0.5rem;color:var(--ocean);font-family:'Noto Sans JP';">${c.formation}</div>
+            <div style="font-size:0.85rem;background:var(--cream);border-radius:var(--radius-sm);padding:0.4rem 0.8rem;margin-bottom:0.5rem;color:var(--ocean-ink);font-family:'Noto Sans JP';">${c.formation}</div>
             <div style="font-size:0.9rem;color:var(--text-light);margin-bottom:0.8rem;">${c.desc}</div>
             ${c.note ? `<div style="font-size:0.8rem;background:#fff8e1;border-left:3px solid var(--accent);padding:0.4rem 0.7rem;border-radius:4px;text-align:left;margin-bottom:0.8rem;font-family:'Noto Sans JP';">⚠️ ${c.note}</div>` : ''}
             <div style="display:flex;flex-direction:column;gap:0.6rem;text-align:left;">
@@ -5299,8 +5399,8 @@ function renderTeOuyouLearn(){
                 </div>`).join('')}
             </div>
             <div style="display:flex;justify-content:center;gap:1rem;margin-top:1rem;">
-                <button onclick="teOuyouCardIdx=Math.max(0,teOuyouCardIdx-1);renderTeOuyouLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid var(--ocean);border-radius:var(--radius-sm);background:white;color:var(--ocean);font-weight:700;cursor:pointer;">◀ Anterior</button>
-                <button onclick="teOuyouCardIdx=Math.min(${cards.length-1},teOuyouCardIdx+1);renderTeOuyouLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid var(--ocean);border-radius:var(--radius-sm);background:white;color:var(--ocean);font-weight:700;cursor:pointer;">Siguiente ▶</button>
+                <button class="btn-card-nav" onclick="teOuyouCardIdx=Math.max(0,teOuyouCardIdx-1);renderTeOuyouLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid var(--ocean);border-radius:var(--radius-sm);background:white;color:var(--ocean-ink);font-weight:700;cursor:pointer;">◀ Anterior</button>
+                <button class="btn-card-nav" onclick="teOuyouCardIdx=Math.min(${cards.length-1},teOuyouCardIdx+1);renderTeOuyouLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid var(--ocean);border-radius:var(--radius-sm);background:white;color:var(--ocean-ink);font-weight:700;cursor:pointer;">Siguiente ▶</button>
             </div>
         </div>
         <button class="btn-practice" onclick="setGrammarMode('practice')">🎯 Practicar</button>
@@ -5322,18 +5422,18 @@ function renderTaLearn(){
                 <tr style="background:var(--cream);">
                     <th style="padding:0.3rem 0.5rem;text-align:left;color:var(--text-light);">Grupo</th>
                     <th style="padding:0.3rem 0.5rem;text-align:left;color:var(--text-light);">Terminación</th>
-                    <th style="padding:0.3rem 0.5rem;text-align:left;color:var(--primary);">た形</th>
+                    <th style="padding:0.3rem 0.5rem;text-align:left;color:var(--primary-ink);">た形</th>
                     <th style="padding:0.3rem 0.5rem;text-align:left;color:var(--text-light);">Ejemplo</th>
                 </tr>
-                <tr><td style="padding:0.25rem 0.5rem;">G1</td><td>く</td><td style="color:var(--primary);font-weight:700;">いた</td><td><ruby>書<rt>か</rt></ruby>く→<ruby>書<rt>か</rt></ruby>いた</td></tr>
-                <tr style="background:var(--cream);"><td style="padding:0.25rem 0.5rem;">G1</td><td>ぐ</td><td style="color:var(--primary);font-weight:700;">いだ</td><td><ruby>泳<rt>およ</rt></ruby>ぐ→<ruby>泳<rt>およ</rt></ruby>いだ</td></tr>
-                <tr><td style="padding:0.25rem 0.5rem;">G1</td><td>す</td><td style="color:var(--primary);font-weight:700;">した</td><td><ruby>話<rt>はな</rt></ruby>す→<ruby>話<rt>はな</rt></ruby>した</td></tr>
-                <tr style="background:var(--cream);"><td style="padding:0.25rem 0.5rem;">G1</td><td>む/ぶ/ぬ</td><td style="color:var(--primary);font-weight:700;">んだ</td><td><ruby>読<rt>よ</rt></ruby>む→<ruby>読<rt>よ</rt></ruby>んだ</td></tr>
-                <tr><td style="padding:0.25rem 0.5rem;">G1</td><td>る/う/つ</td><td style="color:var(--primary);font-weight:700;">った</td><td><ruby>買<rt>か</rt></ruby>う→<ruby>買<rt>か</rt></ruby>った</td></tr>
-                <tr style="background:var(--cream);"><td style="padding:0.25rem 0.5rem;">G2</td><td>る</td><td style="color:var(--primary);font-weight:700;">た</td><td><ruby>食<rt>た</rt></ruby>べる→<ruby>食<rt>た</rt></ruby>べた</td></tr>
-                <tr><td style="padding:0.25rem 0.5rem;">G3</td><td>する</td><td style="color:var(--primary);font-weight:700;">した</td><td><ruby>勉強<rt>べんきょう</rt></ruby>する→<ruby>勉強<rt>べんきょう</rt></ruby>した</td></tr>
-                <tr style="background:var(--cream);"><td style="padding:0.25rem 0.5rem;">G3</td><td>くる</td><td style="color:var(--primary);font-weight:700;">きた</td><td><ruby>来<rt>く</rt></ruby>る→<ruby>来<rt>き</rt></ruby>た</td></tr>
-                <tr><td style="padding:0.25rem 0.5rem;color:#E07A00;font-weight:700;">⚠️例外</td><td><ruby>行<rt>い</rt></ruby>く</td><td style="color:var(--primary);font-weight:700;"><ruby>行<rt>い</rt></ruby>った</td><td>—</td></tr>
+                <tr><td style="padding:0.25rem 0.5rem;">G1</td><td>く</td><td style="color:var(--primary-ink);font-weight:700;">いた</td><td><ruby>書<rt>か</rt></ruby>く→<ruby>書<rt>か</rt></ruby>いた</td></tr>
+                <tr style="background:var(--cream);"><td style="padding:0.25rem 0.5rem;">G1</td><td>ぐ</td><td style="color:var(--primary-ink);font-weight:700;">いだ</td><td><ruby>泳<rt>およ</rt></ruby>ぐ→<ruby>泳<rt>およ</rt></ruby>いだ</td></tr>
+                <tr><td style="padding:0.25rem 0.5rem;">G1</td><td>す</td><td style="color:var(--primary-ink);font-weight:700;">した</td><td><ruby>話<rt>はな</rt></ruby>す→<ruby>話<rt>はな</rt></ruby>した</td></tr>
+                <tr style="background:var(--cream);"><td style="padding:0.25rem 0.5rem;">G1</td><td>む/ぶ/ぬ</td><td style="color:var(--primary-ink);font-weight:700;">んだ</td><td><ruby>読<rt>よ</rt></ruby>む→<ruby>読<rt>よ</rt></ruby>んだ</td></tr>
+                <tr><td style="padding:0.25rem 0.5rem;">G1</td><td>る/う/つ</td><td style="color:var(--primary-ink);font-weight:700;">った</td><td><ruby>買<rt>か</rt></ruby>う→<ruby>買<rt>か</rt></ruby>った</td></tr>
+                <tr style="background:var(--cream);"><td style="padding:0.25rem 0.5rem;">G2</td><td>る</td><td style="color:var(--primary-ink);font-weight:700;">た</td><td><ruby>食<rt>た</rt></ruby>べる→<ruby>食<rt>た</rt></ruby>べた</td></tr>
+                <tr><td style="padding:0.25rem 0.5rem;">G3</td><td>する</td><td style="color:var(--primary-ink);font-weight:700;">した</td><td><ruby>勉強<rt>べんきょう</rt></ruby>する→<ruby>勉強<rt>べんきょう</rt></ruby>した</td></tr>
+                <tr style="background:var(--cream);"><td style="padding:0.25rem 0.5rem;">G3</td><td>くる</td><td style="color:var(--primary-ink);font-weight:700;">きた</td><td><ruby>来<rt>く</rt></ruby>る→<ruby>来<rt>き</rt></ruby>た</td></tr>
+                <tr><td style="padding:0.25rem 0.5rem;color:#E07A00;font-weight:700;">⚠️例外</td><td><ruby>行<rt>い</rt></ruby>く</td><td style="color:var(--primary-ink);font-weight:700;"><ruby>行<rt>い</rt></ruby>った</td><td>—</td></tr>
             </table>
         </div>
         <div class="grammar-card" style="text-align:center;">
@@ -5344,8 +5444,8 @@ function renderTaLearn(){
             <div style="font-family:'Noto Sans JP';font-size:2.4rem;font-weight:700;color:var(--primary);">${teRubyHtml(v.ta,v.tar)}</div>
             <div style="color:var(--text-light);font-size:0.9rem;margin-top:0.4rem;">${v.es}</div>
             <div style="display:flex;justify-content:center;gap:1rem;margin-top:1rem;">
-                <button onclick="taCardIdx=Math.max(0,taCardIdx-1);renderTaLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid var(--primary);border-radius:var(--radius-sm);background:white;color:var(--primary);font-weight:700;cursor:pointer;">◀ Anterior</button>
-                <button onclick="taCardIdx=Math.min(taVerbPool.length-1,taCardIdx+1);renderTaLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid var(--primary);border-radius:var(--radius-sm);background:white;color:var(--primary);font-weight:700;cursor:pointer;">Siguiente ▶</button>
+                <button class="btn-card-nav" onclick="taCardIdx=Math.max(0,taCardIdx-1);renderTaLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid var(--primary);border-radius:var(--radius-sm);background:white;color:var(--primary-ink);font-weight:700;cursor:pointer;">◀ Anterior</button>
+                <button class="btn-card-nav" onclick="taCardIdx=Math.min(taVerbPool.length-1,taCardIdx+1);renderTaLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid var(--primary);border-radius:var(--radius-sm);background:white;color:var(--primary-ink);font-weight:700;cursor:pointer;">Siguiente ▶</button>
             </div>
         </div>
         <button class="btn-practice" onclick="setGrammarMode('practice')">🎯 Practicar</button>
@@ -5430,7 +5530,7 @@ function renderTaOuyouLearn(){
             <div style="font-size:0.8rem;color:var(--text-light);margin-bottom:0.4rem;">${taOuyouCardIdx+1} / ${cards.length}</div>
             <div style="display:inline-block;background:var(--primary);color:white;border-radius:20px;padding:0.2rem 1rem;font-size:1rem;font-weight:700;font-family:'Noto Sans JP';margin-bottom:0.5rem;">${c.expr}</div>
             <div style="font-size:1.15rem;font-weight:700;color:var(--night);margin-bottom:0.3rem;">${c.title}</div>
-            <div style="font-size:0.85rem;background:var(--cream);border-radius:var(--radius-sm);padding:0.4rem 0.8rem;margin-bottom:0.5rem;color:var(--primary);font-family:'Noto Sans JP';">${c.formation}</div>
+            <div style="font-size:0.85rem;background:var(--cream);border-radius:var(--radius-sm);padding:0.4rem 0.8rem;margin-bottom:0.5rem;color:var(--primary-ink);font-family:'Noto Sans JP';">${c.formation}</div>
             <div style="font-size:0.9rem;color:var(--text-light);margin-bottom:0.8rem;">${c.desc}</div>
             ${c.note ? `<div style="font-size:0.8rem;background:#fff8e1;border-left:3px solid var(--accent);padding:0.4rem 0.7rem;border-radius:4px;text-align:left;margin-bottom:0.8rem;font-family:'Noto Sans JP';">⚠️ ${c.note}</div>` : ''}
             <div style="display:flex;flex-direction:column;gap:0.6rem;text-align:left;">
@@ -5441,8 +5541,8 @@ function renderTaOuyouLearn(){
                 </div>`).join('')}
             </div>
             <div style="display:flex;justify-content:center;gap:1rem;margin-top:1rem;">
-                <button onclick="taOuyouCardIdx=Math.max(0,taOuyouCardIdx-1);renderTaOuyouLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid var(--primary);border-radius:var(--radius-sm);background:white;color:var(--primary);font-weight:700;cursor:pointer;">◀ Anterior</button>
-                <button onclick="taOuyouCardIdx=Math.min(${cards.length-1},taOuyouCardIdx+1);renderTaOuyouLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid var(--primary);border-radius:var(--radius-sm);background:white;color:var(--primary);font-weight:700;cursor:pointer;">Siguiente ▶</button>
+                <button class="btn-card-nav" onclick="taOuyouCardIdx=Math.max(0,taOuyouCardIdx-1);renderTaOuyouLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid var(--primary);border-radius:var(--radius-sm);background:white;color:var(--primary-ink);font-weight:700;cursor:pointer;">◀ Anterior</button>
+                <button class="btn-card-nav" onclick="taOuyouCardIdx=Math.min(${cards.length-1},taOuyouCardIdx+1);renderTaOuyouLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid var(--primary);border-radius:var(--radius-sm);background:white;color:var(--primary-ink);font-weight:700;cursor:pointer;">Siguiente ▶</button>
             </div>
         </div>
         <button class="btn-practice" onclick="setGrammarMode('practice')">🎯 Practicar</button>
@@ -6067,8 +6167,8 @@ function renderNaiLearn(){
             <div style="font-family:'Noto Sans JP';font-size:2.4rem;font-weight:700;color:${naiColor};">${teRubyHtml(v.nai,v.nar)}</div>
             <div style="color:var(--text-light);font-size:0.9rem;margin-top:0.4rem;">${v.es}</div>
             <div style="display:flex;justify-content:center;gap:1rem;margin-top:1rem;">
-                <button onclick="naiCardIdx=Math.max(0,naiCardIdx-1);renderNaiLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid ${naiColor};border-radius:var(--radius-sm);background:white;color:${naiColor};font-weight:700;cursor:pointer;">◀ Anterior</button>
-                <button onclick="naiCardIdx=Math.min(naiVerbPool.length-1,naiCardIdx+1);renderNaiLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid ${naiColor};border-radius:var(--radius-sm);background:white;color:${naiColor};font-weight:700;cursor:pointer;">Siguiente ▶</button>
+                <button class="btn-card-nav" onclick="naiCardIdx=Math.max(0,naiCardIdx-1);renderNaiLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid ${naiColor};border-radius:var(--radius-sm);background:white;color:${naiColor};font-weight:700;cursor:pointer;">◀ Anterior</button>
+                <button class="btn-card-nav" onclick="naiCardIdx=Math.min(naiVerbPool.length-1,naiCardIdx+1);renderNaiLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid ${naiColor};border-radius:var(--radius-sm);background:white;color:${naiColor};font-weight:700;cursor:pointer;">Siguiente ▶</button>
             </div>
         </div>
         <button class="btn-practice" onclick="setGrammarMode('practice')">🎯 Practicar</button>
@@ -6144,8 +6244,8 @@ function renderNaiOuyouLearn(){
                 </div>`).join('')}
             </div>
             <div style="display:flex;justify-content:center;gap:1rem;margin-top:1rem;">
-                <button onclick="naiOuyouCardIdx=Math.max(0,naiOuyouCardIdx-1);renderNaiOuyouLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid ${naiColor};border-radius:var(--radius-sm);background:white;color:${naiColor};font-weight:700;cursor:pointer;">◀ Anterior</button>
-                <button onclick="naiOuyouCardIdx=Math.min(${cards.length-1},naiOuyouCardIdx+1);renderNaiOuyouLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid ${naiColor};border-radius:var(--radius-sm);background:white;color:${naiColor};font-weight:700;cursor:pointer;">Siguiente ▶</button>
+                <button class="btn-card-nav" onclick="naiOuyouCardIdx=Math.max(0,naiOuyouCardIdx-1);renderNaiOuyouLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid ${naiColor};border-radius:var(--radius-sm);background:white;color:${naiColor};font-weight:700;cursor:pointer;">◀ Anterior</button>
+                <button class="btn-card-nav" onclick="naiOuyouCardIdx=Math.min(${cards.length-1},naiOuyouCardIdx+1);renderNaiOuyouLearn();" style="padding:0.5rem 1.2rem;border:1.5px solid ${naiColor};border-radius:var(--radius-sm);background:white;color:${naiColor};font-weight:700;cursor:pointer;">Siguiente ▶</button>
             </div>
         </div>
         <button class="btn-practice" onclick="setGrammarMode('practice')">🎯 Practicar</button>
@@ -6478,23 +6578,23 @@ function renderAruLearn(){
             <div class="verb-table-scroll" style="margin-top:1rem;">
                 <table class="verb-table">
                     <tr><th>Tipo</th><th>Patrón</th><th>Predicado</th></tr>
-                    <tr><td>📦 cosa / evento</td><td>[に]〜が</td><td style="color:var(--ocean);font-weight:700;">あります</td></tr>
-                    <tr><td>🐾 persona / animal</td><td>[に]〜が</td><td style="color:var(--accent);font-weight:700;">います</td></tr>
+                    <tr><td>📦 cosa / evento</td><td>[に]〜が</td><td style="color:var(--ocean-ink);font-weight:700;">あります</td></tr>
+                    <tr><td>🐾 persona / animal</td><td>[に]〜が</td><td style="color:var(--accent-ink);font-weight:700;">います</td></tr>
                     <tr><td>📦 cosa (negación)</td><td>[に]〜が</td><td style="color:#999;">ありません</td></tr>
                     <tr><td>🐾 persona (negación)</td><td>[に]〜が</td><td style="color:#999;">いません</td></tr>
                 </table>
             </div>
-            <h4 style="margin-top:1.2rem;color:var(--primary);">📝 Ejemplos</h4>
+            <h4 style="margin-top:1.2rem;color:var(--primary-ink);">📝 Ejemplos</h4>
             <div style="display:grid;gap:0.6rem;margin-top:0.5rem;">
                 ${[
-                    {emoji:'📚', jp:'<ruby>机<rt>つくえ</rt></ruby>の<ruby>上<rt>うえ</rt></ruby>に<ruby>本<rt>ほん</rt></ruby>が<strong style="color:var(--ocean);">あります</strong>。', es:'Hay un libro sobre la mesa.'},
-                    {emoji:'🐕', jp:'<ruby>公園<rt>こうえん</rt></ruby>に<ruby>犬<rt>いぬ</rt></ruby>が<strong style="color:var(--accent);">います</strong>。', es:'Hay un perro en el parque.'},
-                    {emoji:'🚗', jp:'<ruby>私<rt>わたし</rt></ruby>は<ruby>車<rt>くるま</rt></ruby>が<strong style="color:var(--ocean);">あります</strong>。', es:'Tengo un auto.'},
-                    {emoji:'👨‍👦', jp:'<ruby>私<rt>わたし</rt></ruby>は<ruby>兄<rt>あに</rt></ruby>が<strong style="color:var(--accent);">います</strong>。', es:'Tengo un hermano mayor.'},
-                    {emoji:'📅', jp:'<ruby>明日<rt>あした</rt></ruby>テストが<strong style="color:var(--ocean);">あります</strong>。', es:'Mañana hay un examen.'},
-                    {emoji:'🏪', jp:'<ruby>駅<rt>えき</rt></ruby>の<ruby>前<rt>まえ</rt></ruby>にコンビニが<strong style="color:var(--ocean);">あります</strong>。', es:'Frente a la estación hay una tienda.'},
-                    {emoji:'🐱', jp:'<ruby>部屋<rt>へや</rt></ruby>の<ruby>中<rt>なか</rt></ruby>に<ruby>猫<rt>ねこ</rt></ruby>が<strong style="color:var(--accent);">います</strong>。', es:'Hay un gato dentro de la habitación.'},
-                    {emoji:'⏰', jp:'<ruby>今日<rt>きょう</rt></ruby><ruby>授業<rt>じゅぎょう</rt></ruby>が<strong style="color:var(--ocean);">あります</strong>。', es:'Hoy tengo clase.'},
+                    {emoji:'📚', jp:'<ruby>机<rt>つくえ</rt></ruby>の<ruby>上<rt>うえ</rt></ruby>に<ruby>本<rt>ほん</rt></ruby>が<strong style="color:var(--ocean-ink);">あります</strong>。', es:'Hay un libro sobre la mesa.'},
+                    {emoji:'🐕', jp:'<ruby>公園<rt>こうえん</rt></ruby>に<ruby>犬<rt>いぬ</rt></ruby>が<strong style="color:var(--accent-ink);">います</strong>。', es:'Hay un perro en el parque.'},
+                    {emoji:'🚗', jp:'<ruby>私<rt>わたし</rt></ruby>は<ruby>車<rt>くるま</rt></ruby>が<strong style="color:var(--ocean-ink);">あります</strong>。', es:'Tengo un auto.'},
+                    {emoji:'👨‍👦', jp:'<ruby>私<rt>わたし</rt></ruby>は<ruby>兄<rt>あに</rt></ruby>が<strong style="color:var(--accent-ink);">います</strong>。', es:'Tengo un hermano mayor.'},
+                    {emoji:'📅', jp:'<ruby>明日<rt>あした</rt></ruby>テストが<strong style="color:var(--ocean-ink);">あります</strong>。', es:'Mañana hay un examen.'},
+                    {emoji:'🏪', jp:'<ruby>駅<rt>えき</rt></ruby>の<ruby>前<rt>まえ</rt></ruby>にコンビニが<strong style="color:var(--ocean-ink);">あります</strong>。', es:'Frente a la estación hay una tienda.'},
+                    {emoji:'🐱', jp:'<ruby>部屋<rt>へや</rt></ruby>の<ruby>中<rt>なか</rt></ruby>に<ruby>猫<rt>ねこ</rt></ruby>が<strong style="color:var(--accent-ink);">います</strong>。', es:'Hay un gato dentro de la habitación.'},
+                    {emoji:'⏰', jp:'<ruby>今日<rt>きょう</rt></ruby><ruby>授業<rt>じゅぎょう</rt></ruby>が<strong style="color:var(--ocean-ink);">あります</strong>。', es:'Hoy tengo clase.'},
                 ].map(e=>`
                     <div style="background:#f8f9fa;border-radius:var(--radius-sm);padding:0.6rem 0.8rem;border-left:3px solid var(--ocean);">
                         <span style="font-size:1.1rem;">${e.emoji}</span>
@@ -6719,9 +6819,9 @@ function renderKuteLearn(){
     const ruleBox = isI
         ? `<div class="grammar-point">
             <p>📌 <strong>Adj-い → 〜くて</strong></p>
-            <p style="text-align:center;font-size:1.1rem;margin:0.5rem 0;"><strong>〜い → 〜<span style="color:var(--primary)">くて</span></strong></p>
-            <p style="color:var(--text-light);">Ej.: <strong><ruby>大<rt>おお</rt></ruby>きい</strong> → <strong><ruby>大<rt>おお</rt></ruby>き<span style="color:var(--primary)">くて</span></strong></p>
-            <p style="color:var(--text-light);">⚠️ Excepción: <strong>いい</strong> → <strong>よ<span style="color:var(--primary)">くて</span></strong></p>
+            <p style="text-align:center;font-size:1.1rem;margin:0.5rem 0;"><strong>〜い → 〜<span style="color:var(--primary-ink)">くて</span></strong></p>
+            <p style="color:var(--text-light);">Ej.: <strong><ruby>大<rt>おお</rt></ruby>きい</strong> → <strong><ruby>大<rt>おお</rt></ruby>き<span style="color:var(--primary-ink)">くて</span></strong></p>
+            <p style="color:var(--text-light);">⚠️ Excepción: <strong>いい</strong> → <strong>よ<span style="color:var(--primary-ink)">くて</span></strong></p>
           </div>
           <div class="grammar-point" style="margin-top:1rem;">
             <p>📌 <strong>Uso: conecta dos adjetivos en una oración.</strong></p>
@@ -6730,8 +6830,8 @@ function renderKuteLearn(){
           </div>`
         : `<div class="grammar-point">
             <p>📌 <strong>Adj-な → 〜で</strong></p>
-            <p style="text-align:center;font-size:1.1rem;margin:0.5rem 0;"><strong>Raíz ＋ <span style="color:var(--ocean)">で</span></strong></p>
-            <p style="color:var(--text-light);">Ej.: <strong><ruby>元気<rt>げんき</rt></ruby></strong> → <strong><ruby>元気<rt>げんき</rt></ruby><span style="color:var(--ocean)">で</span></strong></p>
+            <p style="text-align:center;font-size:1.1rem;margin:0.5rem 0;"><strong>Raíz ＋ <span style="color:var(--ocean-ink)">で</span></strong></p>
+            <p style="color:var(--text-light);">Ej.: <strong><ruby>元気<rt>げんき</rt></ruby></strong> → <strong><ruby>元気<rt>げんき</rt></ruby><span style="color:var(--ocean-ink)">で</span></strong></p>
           </div>
           <div class="grammar-point" style="margin-top:1rem;">
             <p>📌 <strong>Uso: conecta dos adjetivos en una oración.</strong></p>
@@ -9157,7 +9257,7 @@ function renderGimonLearn(){
             <div class="verb-table-scroll" style="margin-top:1rem;">
                 <table class="verb-table">
                     <tr><th>Palabra</th><th>Romaji</th><th>Significado</th><th>Partícula</th><th>Ejemplo</th></tr>
-                    ${gimonData.map(g=>`<tr><td style="font-size:1.1rem;font-weight:700">${g.w}</td><td style="color:var(--ocean)">${g.r}</td><td>${g.m}</td><td style="font-size:0.85rem">${g.p}</td><td>${g.ex}<button class="btn-speak" onclick="speak('${stripRuby(g.ex).replace(/'/g,"\\'")}',this)" title="Escuchar">🔊</button><br><small style="color:#888">${g.tr}</small></td></tr>`).join('')}
+                    ${gimonData.map(g=>`<tr><td style="font-size:1.1rem;font-weight:700">${g.w}</td><td style="color:var(--ocean-ink)">${g.r}</td><td>${g.m}</td><td style="font-size:0.85rem">${g.p}</td><td>${g.ex}<button class="btn-speak" onclick="speak('${stripRuby(g.ex).replace(/'/g,"\\'")}',this)" title="Escuchar">🔊</button><br><small style="color:#888">${g.tr}</small></td></tr>`).join('')}
                 </table>
             </div>
             <button class="btn-practice" onclick="setGrammarMode('practice')" style="margin-top:1rem;">🎯 Practicar</button>
@@ -9369,7 +9469,7 @@ function renderShijiLearn(){
                     </tr>
                     ${rows.map(r=>`
                         <tr>
-                            <td style="font-size:1.3rem;font-weight:900;color:var(--primary)">${r.kana}〜</td>
+                            <td style="font-size:1.3rem;font-weight:900;color:var(--primary-ink)">${r.kana}〜</td>
                             <td style="font-size:0.85rem;color:#666">${r.dist}</td>
                             <td><strong>${r.mono}</strong><br><small style="color:#888">${r.exMono}<br>${r.trMono}</small></td>
                             <td><strong>${r.adj}</strong><br><small style="color:#888">${r.exAdj}<br>${r.trAdj}</small></td>
@@ -9760,7 +9860,7 @@ function renderJoshiMatome(){
         <div class="grammar-card" style="text-align:center;">
             <div class="grammar-title">⭐ <ruby>総合練習<rt>そうごうれんしゅう</rt></ruby></div>
             <p style="color:var(--text-light);margin:1rem 0;">Repaso de todas las partículas</p>
-            <p style="font-size:0.9rem;color:var(--ocean);">5 ordenar + 5 espacio en blanco = 10 preguntas</p>
+            <p style="font-size:0.9rem;color:var(--ocean-ink);">5 ordenar + 5 espacio en blanco = 10 preguntas</p>
             <button class="btn-practice" onclick="startJoshiMatome()">🎯 Comenzar repaso</button>
         </div>
         <div id="joshi-quiz-area"></div>
@@ -10114,7 +10214,7 @@ function renderKanjiMatome(){
         <div class="grammar-card" style="text-align:center;">
             <div class="grammar-title">⭐ <ruby>総合練習<rt>そうごうれんしゅう</rt></ruby></div>
             <p style="color:var(--text-light);margin:1rem 0;">N5単語の読み方テスト</p>
-            <p style="font-size:0.9rem;color:var(--ocean);">10問ランダム</p>
+            <p style="font-size:0.9rem;color:var(--ocean-ink);">10問ランダム</p>
             <button class="btn-practice" onclick="startKanjiMatome()">🎯 Comenzar repaso</button>
         </div>
         <div id="kanji-quiz-area"></div>
@@ -10258,8 +10358,8 @@ function openKanjiModal(catIdx,kIdx){
     document.getElementById('m-char').innerHTML=`<span class="kanji-modal-char">${k.k}</span>`;
     document.getElementById('m-romaji').innerHTML=`
         <div class="kanji-modal-info">
-            <div class="kanji-info-row" style="align-items:center;"><span class="kanji-info-label">音読み<span class="btn-es">On'yomi</span></span><span class="kanji-info-value">${k.on} <small style="color:var(--ocean);font-size:0.8rem;">${kanaToRomaji(k.on)}</small>${k.on!=='-'?`<button class="btn-speak" onclick="speak('${k.on}',this)" title="Escuchar" style="margin-left:0.4rem;">🔊</button>`:''}</span></div>
-            <div class="kanji-info-row" style="align-items:center;"><span class="kanji-info-label">訓読み<span class="btn-es">Kun'yomi</span></span><span class="kanji-info-value">${k.kun} <small style="color:var(--ocean);font-size:0.8rem;">${kanaToRomaji(k.kun)}</small>${k.kun!=='-'?`<button class="btn-speak" onclick="speak('${k.kun}',this)" title="Escuchar" style="margin-left:0.4rem;">🔊</button>`:''}</span></div>
+            <div class="kanji-info-row" style="align-items:center;"><span class="kanji-info-label">音読み<span class="btn-es">On'yomi</span></span><span class="kanji-info-value">${k.on} <small style="color:var(--ocean-ink);font-size:0.8rem;">${kanaToRomaji(k.on)}</small>${k.on!=='-'?`<button class="btn-speak" onclick="speak('${k.on}',this)" title="Escuchar" style="margin-left:0.4rem;">🔊</button>`:''}</span></div>
+            <div class="kanji-info-row" style="align-items:center;"><span class="kanji-info-label">訓読み<span class="btn-es">Kun'yomi</span></span><span class="kanji-info-value">${k.kun} <small style="color:var(--ocean-ink);font-size:0.8rem;">${kanaToRomaji(k.kun)}</small>${k.kun!=='-'?`<button class="btn-speak" onclick="speak('${k.kun}',this)" title="Escuchar" style="margin-left:0.4rem;">🔊</button>`:''}</span></div>
             <div class="kanji-info-row"><span class="kanji-info-label">Significado:</span><span class="kanji-info-value">${k.m}</span></div>
             <div class="kanji-info-row"><span class="kanji-info-label">Trazo:</span><span class="kanji-info-value">${k.s}</span></div>
         </div>
@@ -10952,16 +11052,16 @@ const yoriLesson = {
 </table>
 </div>`,
     examples: [
-        ['<ruby>車<rt>くるま</rt></ruby><strong style="color:var(--primary)">より</strong><ruby>電車<rt>でんしゃ</rt></ruby><strong style="color:var(--ocean)">の<ruby>方<rt>ほう</rt></ruby>が</strong><ruby>速<rt>はや</rt></ruby>いです。','kuruma yori densha no hō ga hayai desu.','El tren es más rápido que el coche.'],
-        ['<ruby>夏<rt>なつ</rt></ruby><strong style="color:var(--primary)">より</strong><ruby>冬<rt>ふゆ</rt></ruby><strong style="color:var(--ocean)">の<ruby>方<rt>ほう</rt></ruby>が</strong><ruby>寒<rt>さむ</rt></ruby>いです。','natsu yori fuyu no hō ga samui desu.','El invierno es más frío que el verano.'],
-        ['コーヒー<strong style="color:var(--primary)">より</strong>お<ruby>茶<rt>ちゃ</rt></ruby><strong style="color:var(--ocean)">の<ruby>方<rt>ほう</rt></ruby>が</strong><ruby>好<rt>す</rt></ruby>きです。','kōhī yori ocha no hō ga suki desu.','Me gusta más el té que el café.'],
-        ['<ruby>東京<rt>とうきょう</rt></ruby><strong style="color:var(--accent)">と</strong><ruby>大阪<rt>おおさか</rt></ruby><strong style="color:var(--accent)">とどちらが</strong><ruby>大<rt>おお</rt></ruby>きいですか。','Tōkyō to Ōsaka to dochira ga ōkii desu ka.','¿Cuál es más grande, Tokio u Osaka?'],
-        ['<ruby>東京<rt>とうきょう</rt></ruby><strong style="color:var(--ocean)">の<ruby>方<rt>ほう</rt></ruby>が</strong><ruby>大<rt>おお</rt></ruby>きいです。','Tōkyō no hō ga ōkii desu.','Tokio es más grande.'],
-        ['<strong style="color:var(--accent)">どちらも</strong><ruby>有名<rt>ゆうめい</rt></ruby>です。','Dochira mo yūmei desu.','Ambas son famosas.'],
-        ['<ruby>果物<rt>くだもの</rt></ruby><strong style="color:var(--night)">の<ruby>中<rt>なか</rt></ruby>で</strong>りんご<strong style="color:var(--primary)">が<ruby>一番<rt>いちばん</rt></ruby></strong><ruby>好<rt>す</rt></ruby>きです。','kudamono no naka de ringo ga ichiban suki desu.','Entre las frutas, las manzanas son las que más me gustan.'],
-        ['<ruby>季節<rt>きせつ</rt></ruby><strong style="color:var(--night)">の<ruby>中<rt>なか</rt></ruby>で</strong><ruby>秋<rt>あき</rt></ruby><strong style="color:var(--primary)">が<ruby>一番<rt>いちばん</rt></ruby></strong><ruby>好<rt>す</rt></ruby>きです。','kisetsu no naka de aki ga ichiban suki desu.','De las estaciones, el otoño es el que más me gusta.'],
-        ['クラス<strong style="color:var(--night)">の<ruby>中<rt>なか</rt></ruby>で</strong><strong style="color:var(--accent)">だれが</strong><strong style="color:var(--primary)"><ruby>一番<rt>いちばん</rt></ruby></strong><ruby>背<rt>せ</rt></ruby>が<ruby>高<rt>たか</rt></ruby>いですか。','kurasu no naka de dare ga ichiban se ga takai desu ka.','¿Quién es el más alto de la clase?'],
-        ['この<ruby>中<rt>なか</rt></ruby>で<strong style="color:var(--accent)">どれが</strong><strong style="color:var(--primary)"><ruby>一番<rt>いちばん</rt></ruby></strong><ruby>安<rt>やす</rt></ruby>いですか。','kono naka de dore ga ichiban yasui desu ka.','¿Cuál de estos es el más barato?']
+        ['<ruby>車<rt>くるま</rt></ruby><strong style="color:var(--primary-ink)">より</strong><ruby>電車<rt>でんしゃ</rt></ruby><strong style="color:var(--ocean-ink)">の<ruby>方<rt>ほう</rt></ruby>が</strong><ruby>速<rt>はや</rt></ruby>いです。','kuruma yori densha no hō ga hayai desu.','El tren es más rápido que el coche.'],
+        ['<ruby>夏<rt>なつ</rt></ruby><strong style="color:var(--primary-ink)">より</strong><ruby>冬<rt>ふゆ</rt></ruby><strong style="color:var(--ocean-ink)">の<ruby>方<rt>ほう</rt></ruby>が</strong><ruby>寒<rt>さむ</rt></ruby>いです。','natsu yori fuyu no hō ga samui desu.','El invierno es más frío que el verano.'],
+        ['コーヒー<strong style="color:var(--primary-ink)">より</strong>お<ruby>茶<rt>ちゃ</rt></ruby><strong style="color:var(--ocean-ink)">の<ruby>方<rt>ほう</rt></ruby>が</strong><ruby>好<rt>す</rt></ruby>きです。','kōhī yori ocha no hō ga suki desu.','Me gusta más el té que el café.'],
+        ['<ruby>東京<rt>とうきょう</rt></ruby><strong style="color:var(--accent-ink)">と</strong><ruby>大阪<rt>おおさか</rt></ruby><strong style="color:var(--accent-ink)">とどちらが</strong><ruby>大<rt>おお</rt></ruby>きいですか。','Tōkyō to Ōsaka to dochira ga ōkii desu ka.','¿Cuál es más grande, Tokio u Osaka?'],
+        ['<ruby>東京<rt>とうきょう</rt></ruby><strong style="color:var(--ocean-ink)">の<ruby>方<rt>ほう</rt></ruby>が</strong><ruby>大<rt>おお</rt></ruby>きいです。','Tōkyō no hō ga ōkii desu.','Tokio es más grande.'],
+        ['<strong style="color:var(--accent-ink)">どちらも</strong><ruby>有名<rt>ゆうめい</rt></ruby>です。','Dochira mo yūmei desu.','Ambas son famosas.'],
+        ['<ruby>果物<rt>くだもの</rt></ruby><strong style="color:var(--night)">の<ruby>中<rt>なか</rt></ruby>で</strong>りんご<strong style="color:var(--primary-ink)">が<ruby>一番<rt>いちばん</rt></ruby></strong><ruby>好<rt>す</rt></ruby>きです。','kudamono no naka de ringo ga ichiban suki desu.','Entre las frutas, las manzanas son las que más me gustan.'],
+        ['<ruby>季節<rt>きせつ</rt></ruby><strong style="color:var(--night)">の<ruby>中<rt>なか</rt></ruby>で</strong><ruby>秋<rt>あき</rt></ruby><strong style="color:var(--primary-ink)">が<ruby>一番<rt>いちばん</rt></ruby></strong><ruby>好<rt>す</rt></ruby>きです。','kisetsu no naka de aki ga ichiban suki desu.','De las estaciones, el otoño es el que más me gusta.'],
+        ['クラス<strong style="color:var(--night)">の<ruby>中<rt>なか</rt></ruby>で</strong><strong style="color:var(--accent-ink)">だれが</strong><strong style="color:var(--primary-ink)"><ruby>一番<rt>いちばん</rt></ruby></strong><ruby>背<rt>せ</rt></ruby>が<ruby>高<rt>たか</rt></ruby>いですか。','kurasu no naka de dare ga ichiban se ga takai desu ka.','¿Quién es el más alto de la clase?'],
+        ['この<ruby>中<rt>なか</rt></ruby>で<strong style="color:var(--accent-ink)">どれが</strong><strong style="color:var(--primary-ink)"><ruby>一番<rt>いちばん</rt></ruby></strong><ruby>安<rt>やす</rt></ruby>いですか。','kono naka de dore ga ichiban yasui desu ka.','¿Cuál de estos es el más barato?']
     ]
 };
 
@@ -11128,12 +11228,12 @@ const douLesson = {
 </table>
 </div>`,
     examples: [
-        ['この<ruby>料理<rt>りょうり</rt></ruby>は<strong style="color:var(--primary)">どうですか</strong>。','Kono ryōri wa dō desu ka.','¿Qué te parece esta comida?'],
-        ['<ruby>日本語<rt>にほんご</rt></ruby>の<ruby>勉強<rt>べんきょう</rt></ruby>は<strong style="color:var(--primary)">どうですか</strong>。','Nihongo no benkyō wa dō desu ka.','¿Cómo van los estudios de japonés?'],
-        ['<ruby>今日<rt>きょう</rt></ruby>の<ruby>天気<rt>てんき</rt></ruby>は<strong style="color:var(--primary)">どうですか</strong>。','Kyō no tenki wa dō desu ka.','¿Cómo está el tiempo hoy?'],
-        ['コーヒーは<strong style="color:var(--ocean)">いかがですか</strong>。','Kōhī wa ikaga desu ka.','¿Le apetece un café? (formal)'],
-        ['<ruby>新<rt>あたら</rt></ruby>しい<ruby>仕事<rt>しごと</rt></ruby>は<strong style="color:var(--primary)">どうですか</strong>。','Atarashii shigoto wa dō desu ka.','¿Qué tal el nuevo trabajo?'],
-        ['<ruby>日本<rt>にほん</rt></ruby>の<ruby>生活<rt>せいかつ</rt></ruby>は<strong style="color:var(--primary)">どうですか</strong>。','Nihon no seikatsu wa dō desu ka.','¿Cómo es la vida en Japón?']
+        ['この<ruby>料理<rt>りょうり</rt></ruby>は<strong style="color:var(--primary-ink)">どうですか</strong>。','Kono ryōri wa dō desu ka.','¿Qué te parece esta comida?'],
+        ['<ruby>日本語<rt>にほんご</rt></ruby>の<ruby>勉強<rt>べんきょう</rt></ruby>は<strong style="color:var(--primary-ink)">どうですか</strong>。','Nihongo no benkyō wa dō desu ka.','¿Cómo van los estudios de japonés?'],
+        ['<ruby>今日<rt>きょう</rt></ruby>の<ruby>天気<rt>てんき</rt></ruby>は<strong style="color:var(--primary-ink)">どうですか</strong>。','Kyō no tenki wa dō desu ka.','¿Cómo está el tiempo hoy?'],
+        ['コーヒーは<strong style="color:var(--ocean-ink)">いかがですか</strong>。','Kōhī wa ikaga desu ka.','¿Le apetece un café? (formal)'],
+        ['<ruby>新<rt>あたら</rt></ruby>しい<ruby>仕事<rt>しごと</rt></ruby>は<strong style="color:var(--primary-ink)">どうですか</strong>。','Atarashii shigoto wa dō desu ka.','¿Qué tal el nuevo trabajo?'],
+        ['<ruby>日本<rt>にほん</rt></ruby>の<ruby>生活<rt>せいかつ</rt></ruby>は<strong style="color:var(--primary-ink)">どうですか</strong>。','Nihon no seikatsu wa dō desu ka.','¿Cómo es la vida en Japón?']
     ]
 };
 
@@ -11777,14 +11877,14 @@ const ichibanLesson = {
 </table>
 </div>`,
     examples: [
-        ['<ruby>果物<rt>くだもの</rt></ruby><strong style="color:var(--night)">のなかで</strong>りんご<strong style="color:var(--primary)">が<ruby>一番<rt>いちばん</rt></ruby></strong><ruby>好<rt>す</rt></ruby>きです。','kudamono no naka de ringo ga ichiban suki desu.','Entre las frutas, las manzanas son las que más me gustan.'],
-        ['<ruby>季節<rt>きせつ</rt></ruby><strong style="color:var(--night)">のなかで</strong><ruby>夏<rt>なつ</rt></ruby><strong style="color:var(--primary)">が<ruby>一番<rt>いちばん</rt></ruby></strong><ruby>暑<rt>あつ</rt></ruby>いです。','kisetsu no naka de natsu ga ichiban atsui desu.','De las estaciones, el verano es el más caluroso.'],
-        ['クラス<strong style="color:var(--night)">のなかで</strong><strong style="color:var(--accent)">だれが</strong><strong style="color:var(--primary)"><ruby>一番<rt>いちばん</rt></ruby></strong><ruby>背<rt>せ</rt></ruby>が<ruby>高<rt>たか</rt></ruby>いですか。','kurasu no naka de dare ga ichiban se ga takai desu ka.','¿Quién es el más alto de la clase?'],
-        ['この<ruby>中<rt>なか</rt></ruby>で<strong style="color:var(--accent)">どれが</strong><strong style="color:var(--primary)"><ruby>一番<rt>いちばん</rt></ruby></strong><ruby>安<rt>やす</rt></ruby>いですか。','kono naka de dore ga ichiban yasui desu ka.','¿Cuál de estos es el más barato?'],
-        ['<ruby>動物<rt>どうぶつ</rt></ruby><strong style="color:var(--night)">のなかで</strong><ruby>象<rt>ぞう</rt></ruby><strong style="color:var(--primary)">が<ruby>一番<rt>いちばん</rt></ruby></strong><ruby>大<rt>おお</rt></ruby>きいです。','doubutsu no naka de zou ga ichiban ookii desu.','Entre los animales, el elefante es el más grande.'],
-        ['<ruby>日本<rt>にほん</rt></ruby>の<ruby>山<rt>やま</rt></ruby><strong style="color:var(--night)">のなかで</strong><ruby>富士山<rt>ふじさん</rt></ruby><strong style="color:var(--primary)">が<ruby>一番<rt>いちばん</rt></ruby></strong><ruby>高<rt>たか</rt></ruby>いです。','nihon no yama no naka de fujisan ga ichiban takai desu.','De las montañas de Japón, el Monte Fuji es el más alto.'],
-        ['スポーツ<strong style="color:var(--night)">のなかで</strong>サッカー<strong style="color:var(--primary)">が<ruby>一番<rt>いちばん</rt></ruby></strong><ruby>好<rt>す</rt></ruby>きです。','supōtsu no naka de sakkā ga ichiban suki desu.','De los deportes, el fútbol es el que más me gusta.'],
-        ['<ruby>世界<rt>せかい</rt></ruby><strong style="color:var(--night)">のなかで</strong><strong style="color:var(--accent)">どこが</strong><strong style="color:var(--primary)"><ruby>一番<rt>いちばん</rt></ruby></strong><ruby>寒<rt>さむ</rt></ruby>いですか。','sekai no naka de doko ga ichiban samui desu ka.','¿Dónde es el lugar más frío del mundo?']
+        ['<ruby>果物<rt>くだもの</rt></ruby><strong style="color:var(--night)">のなかで</strong>りんご<strong style="color:var(--primary-ink)">が<ruby>一番<rt>いちばん</rt></ruby></strong><ruby>好<rt>す</rt></ruby>きです。','kudamono no naka de ringo ga ichiban suki desu.','Entre las frutas, las manzanas son las que más me gustan.'],
+        ['<ruby>季節<rt>きせつ</rt></ruby><strong style="color:var(--night)">のなかで</strong><ruby>夏<rt>なつ</rt></ruby><strong style="color:var(--primary-ink)">が<ruby>一番<rt>いちばん</rt></ruby></strong><ruby>暑<rt>あつ</rt></ruby>いです。','kisetsu no naka de natsu ga ichiban atsui desu.','De las estaciones, el verano es el más caluroso.'],
+        ['クラス<strong style="color:var(--night)">のなかで</strong><strong style="color:var(--accent-ink)">だれが</strong><strong style="color:var(--primary-ink)"><ruby>一番<rt>いちばん</rt></ruby></strong><ruby>背<rt>せ</rt></ruby>が<ruby>高<rt>たか</rt></ruby>いですか。','kurasu no naka de dare ga ichiban se ga takai desu ka.','¿Quién es el más alto de la clase?'],
+        ['この<ruby>中<rt>なか</rt></ruby>で<strong style="color:var(--accent-ink)">どれが</strong><strong style="color:var(--primary-ink)"><ruby>一番<rt>いちばん</rt></ruby></strong><ruby>安<rt>やす</rt></ruby>いですか。','kono naka de dore ga ichiban yasui desu ka.','¿Cuál de estos es el más barato?'],
+        ['<ruby>動物<rt>どうぶつ</rt></ruby><strong style="color:var(--night)">のなかで</strong><ruby>象<rt>ぞう</rt></ruby><strong style="color:var(--primary-ink)">が<ruby>一番<rt>いちばん</rt></ruby></strong><ruby>大<rt>おお</rt></ruby>きいです。','doubutsu no naka de zou ga ichiban ookii desu.','Entre los animales, el elefante es el más grande.'],
+        ['<ruby>日本<rt>にほん</rt></ruby>の<ruby>山<rt>やま</rt></ruby><strong style="color:var(--night)">のなかで</strong><ruby>富士山<rt>ふじさん</rt></ruby><strong style="color:var(--primary-ink)">が<ruby>一番<rt>いちばん</rt></ruby></strong><ruby>高<rt>たか</rt></ruby>いです。','nihon no yama no naka de fujisan ga ichiban takai desu.','De las montañas de Japón, el Monte Fuji es el más alto.'],
+        ['スポーツ<strong style="color:var(--night)">のなかで</strong>サッカー<strong style="color:var(--primary-ink)">が<ruby>一番<rt>いちばん</rt></ruby></strong><ruby>好<rt>す</rt></ruby>きです。','supōtsu no naka de sakkā ga ichiban suki desu.','De los deportes, el fútbol es el que más me gusta.'],
+        ['<ruby>世界<rt>せかい</rt></ruby><strong style="color:var(--night)">のなかで</strong><strong style="color:var(--accent-ink)">どこが</strong><strong style="color:var(--primary-ink)"><ruby>一番<rt>いちばん</rt></ruby></strong><ruby>寒<rt>さむ</rt></ruby>いですか。','sekai no naka de doko ga ichiban samui desu ka.','¿Dónde es el lugar más frío del mundo?']
     ]
 };
 
@@ -11929,14 +12029,14 @@ const naruLesson = {
 </table>
 </div>`,
     examples: [
-        ['<ruby>夏<rt>なつ</rt></ruby>は<ruby>暑<rt>あつ</rt></ruby><strong style="color:var(--primary)">くなります</strong>。','natsu wa atsuku narimasu.','En verano se vuelve caluroso.'],
-        ['<ruby>冬<rt>ふゆ</rt></ruby>は<ruby>寒<rt>さむ</rt></ruby><strong style="color:var(--primary)">くなりました</strong>。','fuyu wa samuku narimashita.','En invierno se puso frío.'],
-        ['<ruby>部屋<rt>へや</rt></ruby>がきれい<strong style="color:var(--primary)">になります</strong>。','heya ga kirei ni narimasu.','El cuarto se vuelve bonito.'],
-        ['<ruby>子<rt>こ</rt></ruby>どもが<ruby>元気<rt>げんき</rt></ruby><strong style="color:var(--primary)">になりました</strong>。','kodomo ga genki ni narimashita.','El niño se puso bien.'],
-        ['<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>先生<rt>せんせい</rt></ruby><strong style="color:var(--primary)">になります</strong>。','tanaka-san wa sensei ni narimasu.','El sr. Tanaka se convertirá en profesor.'],
-        ['<ruby>日本語<rt>にほんご</rt></ruby>が<ruby>上手<rt>じょうず</rt></ruby><strong style="color:var(--primary)">になりたいです</strong>。','nihongo ga jōzu ni naritai desu.','Quiero volverme bueno en japonés.'],
-        ['もうすぐ<ruby>春<rt>はる</rt></ruby><strong style="color:var(--primary)">になります</strong>。','mōsugu haru ni narimasu.','Pronto llegará la primavera.'],
-        ['<ruby>道<rt>みち</rt></ruby>が<ruby>広<rt>ひろ</rt></ruby><strong style="color:var(--primary)">くなりました</strong>。','michi ga hiroku narimashita.','La calle se amplió.']
+        ['<ruby>夏<rt>なつ</rt></ruby>は<ruby>暑<rt>あつ</rt></ruby><strong style="color:var(--primary-ink)">くなります</strong>。','natsu wa atsuku narimasu.','En verano se vuelve caluroso.'],
+        ['<ruby>冬<rt>ふゆ</rt></ruby>は<ruby>寒<rt>さむ</rt></ruby><strong style="color:var(--primary-ink)">くなりました</strong>。','fuyu wa samuku narimashita.','En invierno se puso frío.'],
+        ['<ruby>部屋<rt>へや</rt></ruby>がきれい<strong style="color:var(--primary-ink)">になります</strong>。','heya ga kirei ni narimasu.','El cuarto se vuelve bonito.'],
+        ['<ruby>子<rt>こ</rt></ruby>どもが<ruby>元気<rt>げんき</rt></ruby><strong style="color:var(--primary-ink)">になりました</strong>。','kodomo ga genki ni narimashita.','El niño se puso bien.'],
+        ['<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>先生<rt>せんせい</rt></ruby><strong style="color:var(--primary-ink)">になります</strong>。','tanaka-san wa sensei ni narimasu.','El sr. Tanaka se convertirá en profesor.'],
+        ['<ruby>日本語<rt>にほんご</rt></ruby>が<ruby>上手<rt>じょうず</rt></ruby><strong style="color:var(--primary-ink)">になりたいです</strong>。','nihongo ga jōzu ni naritai desu.','Quiero volverme bueno en japonés.'],
+        ['もうすぐ<ruby>春<rt>はる</rt></ruby><strong style="color:var(--primary-ink)">になります</strong>。','mōsugu haru ni narimasu.','Pronto llegará la primavera.'],
+        ['<ruby>道<rt>みち</rt></ruby>が<ruby>広<rt>ひろ</rt></ruby><strong style="color:var(--primary-ink)">くなりました</strong>。','michi ga hiroku narimashita.','La calle se amplió.']
     ]
 };
 
@@ -12081,12 +12181,12 @@ const setsuzokuLesson = {
 <p>📌 <strong>Conectores principales:</strong></p>
 <table style="width:100%;font-size:0.9rem;margin-top:0.4rem;border-collapse:collapse;">
   <tr style="background:#f0f0f0;"><th style="padding:0.4rem;">接続詞</th><th>Romaji</th><th>Función</th><th>Registro</th></tr>
-  <tr><td style="font-family:'Noto Sans JP';font-size:1.1rem;font-weight:700;padding:0.4rem;">そして</td><td style="color:var(--ocean);">soshite</td><td>Y / Y además / Y luego</td><td>Neutro</td></tr>
-  <tr><td style="font-family:'Noto Sans JP';font-size:1.1rem;font-weight:700;padding:0.4rem;">それから</td><td style="color:var(--ocean);">sorekara</td><td>Después / Y después</td><td>Neutro</td></tr>
-  <tr><td style="font-family:'Noto Sans JP';font-size:1.1rem;font-weight:700;padding:0.4rem;">でも</td><td style="color:var(--ocean);">demo</td><td>Pero / Sin embargo</td><td>Informal</td></tr>
-  <tr><td style="font-family:'Noto Sans JP';font-size:1.1rem;font-weight:700;padding:0.4rem;">しかし</td><td style="color:var(--ocean);">shikashi</td><td>Sin embargo / Pero</td><td>Formal</td></tr>
-  <tr><td style="font-family:'Noto Sans JP';font-size:1.1rem;font-weight:700;padding:0.4rem;">だから</td><td style="color:var(--ocean);">dakara</td><td>Por eso / Entonces</td><td>Informal</td></tr>
-  <tr><td style="font-family:'Noto Sans JP';font-size:1.1rem;font-weight:700;padding:0.4rem;">けど</td><td style="color:var(--ocean);">kedo</td><td>Pero (muy coloquial)</td><td>Coloquial</td></tr>
+  <tr><td style="font-family:'Noto Sans JP';font-size:1.1rem;font-weight:700;padding:0.4rem;">そして</td><td style="color:var(--ocean-ink);">soshite</td><td>Y / Y además / Y luego</td><td>Neutro</td></tr>
+  <tr><td style="font-family:'Noto Sans JP';font-size:1.1rem;font-weight:700;padding:0.4rem;">それから</td><td style="color:var(--ocean-ink);">sorekara</td><td>Después / Y después</td><td>Neutro</td></tr>
+  <tr><td style="font-family:'Noto Sans JP';font-size:1.1rem;font-weight:700;padding:0.4rem;">でも</td><td style="color:var(--ocean-ink);">demo</td><td>Pero / Sin embargo</td><td>Informal</td></tr>
+  <tr><td style="font-family:'Noto Sans JP';font-size:1.1rem;font-weight:700;padding:0.4rem;">しかし</td><td style="color:var(--ocean-ink);">shikashi</td><td>Sin embargo / Pero</td><td>Formal</td></tr>
+  <tr><td style="font-family:'Noto Sans JP';font-size:1.1rem;font-weight:700;padding:0.4rem;">だから</td><td style="color:var(--ocean-ink);">dakara</td><td>Por eso / Entonces</td><td>Informal</td></tr>
+  <tr><td style="font-family:'Noto Sans JP';font-size:1.1rem;font-weight:700;padding:0.4rem;">けど</td><td style="color:var(--ocean-ink);">kedo</td><td>Pero (muy coloquial)</td><td>Coloquial</td></tr>
 </table>
 </div>
 <div class="grammar-point" style="margin-top:0.8rem;">
@@ -12094,12 +12194,12 @@ const setsuzokuLesson = {
 <p style="margin-top:0.5rem;">📌 <strong>でも vs しかし:</strong> Ambos significan "pero/sin embargo". <strong>でも</strong> es informal y muy común en conversación; <strong>しかし</strong> es formal y se usa en textos escritos o discursos.</p>
 </div>`,
     examples: [
-        ['<ruby>勉強<rt>べんきょう</rt></ruby>します。<strong style="color:var(--primary)">そして</strong>、<ruby>音楽<rt>おんがく</rt></ruby>を<ruby>聞<rt>き</rt></ruby>きます。','benkyō shimasu. Soshite, ongaku o kikimasu.','Estudio. Y además escucho música.'],
-        ['<ruby>朝<rt>あさ</rt></ruby>ごはんを<ruby>食<rt>た</rt></ruby>べます。<strong style="color:var(--primary)">それから</strong>、<ruby>学校<rt>がっこう</rt></ruby>に<ruby>行<rt>い</rt></ruby>きます。','asagohan o tabemasu. Sorekara, gakkō ni ikimasu.','Desayuno. Después voy a la escuela.'],
-        ['<ruby>行<rt>い</rt></ruby>きたいです。<strong style="color:var(--primary)">でも</strong>、<ruby>時間<rt>じかん</rt></ruby>がありません。','ikitai desu. Demo, jikan ga arimasen.','Quiero ir. Pero no tengo tiempo.'],
-        ['<ruby>雨<rt>あめ</rt></ruby>が<ruby>降<rt>ふ</rt></ruby>りました。<strong style="color:var(--primary)">しかし</strong>、<ruby>外<rt>そと</rt></ruby>に<ruby>出<rt>で</rt></ruby>ました。','ame ga furimashita. Shikashi, soto ni demashita.','Llovió. Sin embargo, salí afuera.'],
-        ['<ruby>寒<rt>さむ</rt></ruby>いです。<strong style="color:var(--primary)">だから</strong>、コートを<ruby>着<rt>き</rt></ruby>ます。','samui desu. Dakara, kōto o kimasu.','Hace frío. Por eso me pongo el abrigo.'],
-        ['<ruby>日本語<rt>にほんご</rt></ruby>は<ruby>難<rt>むずか</rt></ruby>しいです。<strong style="color:var(--primary)">けど</strong>、<ruby>楽<rt>たの</rt></ruby>しいです。','nihongo wa muzukashii desu. Kedo, tanoshii desu.','El japonés es difícil. Pero es divertido.']
+        ['<ruby>勉強<rt>べんきょう</rt></ruby>します。<strong style="color:var(--primary-ink)">そして</strong>、<ruby>音楽<rt>おんがく</rt></ruby>を<ruby>聞<rt>き</rt></ruby>きます。','benkyō shimasu. Soshite, ongaku o kikimasu.','Estudio. Y además escucho música.'],
+        ['<ruby>朝<rt>あさ</rt></ruby>ごはんを<ruby>食<rt>た</rt></ruby>べます。<strong style="color:var(--primary-ink)">それから</strong>、<ruby>学校<rt>がっこう</rt></ruby>に<ruby>行<rt>い</rt></ruby>きます。','asagohan o tabemasu. Sorekara, gakkō ni ikimasu.','Desayuno. Después voy a la escuela.'],
+        ['<ruby>行<rt>い</rt></ruby>きたいです。<strong style="color:var(--primary-ink)">でも</strong>、<ruby>時間<rt>じかん</rt></ruby>がありません。','ikitai desu. Demo, jikan ga arimasen.','Quiero ir. Pero no tengo tiempo.'],
+        ['<ruby>雨<rt>あめ</rt></ruby>が<ruby>降<rt>ふ</rt></ruby>りました。<strong style="color:var(--primary-ink)">しかし</strong>、<ruby>外<rt>そと</rt></ruby>に<ruby>出<rt>で</rt></ruby>ました。','ame ga furimashita. Shikashi, soto ni demashita.','Llovió. Sin embargo, salí afuera.'],
+        ['<ruby>寒<rt>さむ</rt></ruby>いです。<strong style="color:var(--primary-ink)">だから</strong>、コートを<ruby>着<rt>き</rt></ruby>ます。','samui desu. Dakara, kōto o kimasu.','Hace frío. Por eso me pongo el abrigo.'],
+        ['<ruby>日本語<rt>にほんご</rt></ruby>は<ruby>難<rt>むずか</rt></ruby>しいです。<strong style="color:var(--primary-ink)">けど</strong>、<ruby>楽<rt>たの</rt></ruby>しいです。','nihongo wa muzukashii desu. Kedo, tanoshii desu.','El japonés es difícil. Pero es divertido.']
     ]
 };
 
@@ -13237,6 +13337,11 @@ function candosForUnit(unitId) {
         .sort((a, b) => candoEffOrder(a) - candoEffOrder(b));
 }
 
+/** Todos los Can-dos visibles (hidden:true excluidos), sin agrupar por unidad. */
+function candosForUnitAll() {
+    return (window.canDoData || []).filter(c => c.hidden !== true);
+}
+
 function getUnitCanDoScore(unitId) {
     const candos = candosForUnit(unitId);
     if (!candos.length) return null;
@@ -13505,7 +13610,7 @@ function renderPlansModal() {
     const p = PLANS[t];
     const paid = p.level > 0;
     const price = paid
-      ? `$${fmtUsd(p.priceUsd)}<span> USD/mes</span></div><div class="plan-price-usd">En Bolivia pagas el equivalente en Bs. por QR</div>`
+      ? `Bs ${p.priceBob}<span> /mes</span></div><div class="plan-price-usd">$${fmtUsd(p.priceUsd)} USD · paga en Bs. por QR</div>`
       : `Gratis</div>`;
     const lis = planBenefits(t).map(b => `<li class="${b.ok ? '' : 'off'}">${b.ok ? '✅' : '❌'} ${b.text}</li>`).join('');
     let action;
@@ -13539,9 +13644,9 @@ function openWhatsAppPlan(region, tier) {
   const emailLine = email ? `\nMi correo de acceso: ${email}` : '';
   let text;
   if (region === 'intl') {
-    text = `¡Hola! 😊 Quiero suscribirme al plan ${p.name} de NihongoMap ($${fmtUsd(p.priceUsd)} USD/mes). Estoy fuera de Bolivia.\n¿Me pueden enviar el enlace de pago con tarjeta, o los datos para pagar por AirTM o Binance, por favor?${emailLine}`;
+    text = `¡Hola! 😊 Quiero suscribirme al plan ${p.name} de NihongoMap (Bs ${p.priceBob}/mes · $${fmtUsd(p.priceUsd)} USD). Estoy fuera de Bolivia.\n¿Me pueden enviar el enlace de pago con tarjeta, o los datos para pagar por AirTM o Binance, por favor?${emailLine}`;
   } else {
-    text = `¡Hola! 😊 Quiero suscribirme al plan ${p.name} de NihongoMap ($${fmtUsd(p.priceUsd)} USD/mes, pagando el equivalente en Bs.). Estoy en Bolivia.\n¿Me pueden enviar el QR para hacer el pago, por favor?${emailLine}`;
+    text = `¡Hola! 😊 Quiero suscribirme al plan ${p.name} de NihongoMap (Bs ${p.priceBob}/mes · $${fmtUsd(p.priceUsd)} USD). Estoy en Bolivia.\n¿Me pueden enviar el QR para hacer el pago, por favor?${emailLine}`;
   }
   const url = 'https://wa.me/59176083176?text=' + encodeURIComponent(text);
   window.open(url, '_blank');
@@ -13863,7 +13968,7 @@ function showTrazarChar() {
                 <button class="kana-prac-tab ${trazarMode==='blank'?'active':''}" onclick="setTrazarMode('blank')" style="font-size:0.8rem;padding:0.3rem 0.7rem;">③ Libre</button>
             </div>
             <div style="font-size:0.85rem;color:#888;margin-bottom:0.15rem;">${trazarIdx+1} / ${total}</div>
-            <div style="font-size:1rem;color:var(--primary);font-weight:700;margin-bottom:0.4rem;">${item.r}${strokeCount ? ' — '+strokeCount+' trazo'+(strokeCount>1?'s':'') : ''}</div>
+            <div style="font-size:1rem;color:var(--primary-ink);font-weight:700;margin-bottom:0.4rem;">${item.r}${strokeCount ? ' — '+strokeCount+' trazo'+(strokeCount>1?'s':'') : ''}</div>
             ${needsRef ? `<div style="display:flex;align-items:center;justify-content:center;gap:0.75rem;margin-bottom:0.5rem;">
                 <canvas id="trazar-mini" width="80" height="80" style="border:1.5px solid #e0d8cc;border-radius:10px;background:#fff;display:block;"></canvas>
                 <div style="font-size:0.75rem;color:#888;max-width:100px;">Ver guía →<br>escribe de memoria</div>
@@ -14435,26 +14540,30 @@ function grantXP(amount) {
 // los gates (canUse/consume), el modal de planes, los mensajes de bloqueo y el perfil leen de PLANS.
 //   limits.<clave>: { max, per } = cupo (per: 'day' | 'week' | 'month'; max: Infinity = ilimitado; max: 0 = no incluido)
 //                   true / false = función incluida / no incluida
-//   priceUsd = precio mensual en USD (único precio que se muestra). En Bolivia se paga el equivalente en Bs. por QR
-//   al tipo de cambio de la plataforma de pago (se cotiza por WhatsApp). Medios: QR (Bolivia) · tarjeta (enlace Takenos)/AirTM/Binance (extranjero).
+//   priceUsd  = precio mensual en USD.
+//   priceBob  = precio mensual en bolivianos, ANCLADO a NM_BOB_PER_USD (tasa de referencia elegida
+//               por el negocio el 2026-10-13). Es el precio que se muestra primero: el público es
+//               boliviano y razona en Bs. Editar NM_BOB_PER_USD actualiza todos los planes.
+//               Medios: QR (Bolivia) · tarjeta (enlace)/AirTM/Binance (extranjero).
 // Para añadir un plan (p. ej. Intermedio): una entrada nueva aquí + su nombre en PLAN_ORDER.
-// El servidor (functions/plans.js) tiene su propia copia de tier/precio; la verifica verify_app_static.js [A20].
+// verify_app_static.js [A20] verifica la auto-consistencia de este bloque (orden, niveles, precio 0 del primero).
 // ============================================================
 /* PLANS_START */
+const NM_BOB_PER_USD = 12.10;   // tasa de referencia acordada (Bs. por 1 USD). Revisar trimestralmente.
 const PLANS = {
   inicial: {
-    level: 0, name: 'Inicial', priceUsd: 0,
+    level: 0, name: 'Inicial', priceUsd: 0, priceBob: 0,
     extras: ['Todas las lecciones y Can-dos', 'Hiragana, katakana y kanji con trazos', '🔊 Audio y pronunciación'],
     limits: {
       practice:  { max: 3, per: 'day' },
       listening: { max: 1, per: 'day' },
-      lectura:   { max: 0, per: 'day' },
+      lectura:   { max: 1, per: 'day' },
       reto:      { max: 1, per: 'month' },
       simulacro: false, dictado: false, soporte: false
     }
   },
   basico: {
-    level: 1, name: 'Básico', priceUsd: 4,
+    level: 1, name: 'Básico', priceUsd: 4, priceBob: 48,
     extras: ['Todo lo del plan Inicial'],
     limits: {
       practice:  { max: 10, per: 'day' },
@@ -14465,7 +14574,7 @@ const PLANS = {
     }
   },
   premium: {
-    level: 2, name: 'Premium', priceUsd: 7.5, featured: true,
+    level: 2, name: 'Premium', priceUsd: 7.5, priceBob: 91, featured: true,
     extras: ['Todo lo del plan Básico, sin límites diarios'],
     limits: {
       practice:  { max: Infinity, per: 'day' },
@@ -14535,7 +14644,7 @@ function planLimitText(key, tier) {
   switch (key) {
     case 'practice':  return unlimited ? 'Práctica sin límites' : `${n} ronda${n === 1 ? '' : 's'} de práctica por día`;
     case 'listening': return unlimited ? 'Escucha sin límites' : `${n} ronda${n === 1 ? '' : 's'} de escucha por día`;
-    case 'lectura':   return unlimited ? 'Lectura JLPT sin límites' : (n > 0 ? `${n} práctica${n === 1 ? '' : 's'} de lectura JLPT por día` : 'Práctica de lectura JLPT');
+    case 'lectura':   return unlimited ? 'Lectura sin límites' : (n > 0 ? `${n} práctica${n === 1 ? '' : 's'} de lectura por día` : 'Práctica de lectura');
     case 'reto':      return unlimited ? 'Retos de conversación sin límites' : `${n} reto${n === 1 ? '' : 's'} de conversación ${per}`;
     case 'simulacro': return 'Simulacro JLPT N5 completo';
     case 'dictado':   return 'Dictado escrito en Escuchar';
@@ -14889,7 +14998,7 @@ function renderGateUpsell(containerId, o) {
         <button onclick="submitTeacherCode('${codeId}','${msgId}',()=>{${retry}})" class="btn btn-secondary" style="width:100%;padding:0.7rem">Canjear código</button>
         <p id="${msgId}" style="font-family:'DM Sans',sans-serif;font-size:0.82rem;margin:0.6rem 0 0;text-align:center"></p>
       </div>
-      <button onclick="${back}" class="btn btn-secondary" style="width:100%;padding:0.8rem">← Volver</button>
+      <button onclick="${back}" class="btn btn-secondary" style="width:100%;padding:0.8rem">${o.backLabel || '← Volver'}</button>
     </div>`;
 }
 
@@ -15083,6 +15192,18 @@ function renderUnit(unitId) {
     const badge = isExtra
       ? `<span class="cando-card__badge cando-card__badge--extra">⭐ Desafío extra</span>`
       : `<span class="cando-card__badge">Unit ${unitId} · Can-do ${++reqNum}</span>`;
+    // Anticipar qué contiene esta lección: antes el estudiante no sabía si había escucha o lectura
+    // hasta que aparecía el botón correspondiente tras aprobar.
+    const parts = [
+      !!(cd.practice && (cd.practice.items || []).length) ? 'práctica' : null,
+      !!(cd.escuchar && (cd.escuchar.items || []).length) ? 'escucha' : null,
+      !!(cd.lectura && (cd.lectura.items || []).length) ? 'lectura' : null,
+      ((window.NM_SCRIPTS || {})[cd.id] || []).length ? 'reto' : null
+    ].filter(Boolean);
+    const partsHtml = parts.length
+      ? `<p class="cando-card__parts">Incluye: ${parts.join(' · ')}</p>`
+      : '';
+    const ctaLabel = prog.status === 'done' ? 'Repasar' : (prog.status === 'inprogress' ? 'Continuar' : 'Empezar');
     return `
       <article class="cando-card${isExtra ? ' cando-card--extra' : ''}" data-cando="${cd.id}" data-status="${prog.status}">
         <header class="cando-card__head">
@@ -15091,9 +15212,10 @@ function renderUnit(unitId) {
         </header>
         <h3 class="cando-card__title">${statusLabel} ${cd.es}</h3>
         <p class="cando-card__goal" lang="ja">${cd.jaGoal}</p>
+        ${partsHtml}
         <footer class="cando-card__foot">
-          <button class="btn btn-primary" onclick="openCanDo('${cd.id}')">Empezar</button>
-          <span class="cando-card__xp">+50 XP</span>
+          <button class="btn btn-primary" onclick="openCanDo('${cd.id}')">${ctaLabel}</button>
+          <span class="cando-card__xp">${prog.status === 'done' ? 'Completado' : '+50 XP'}</span>
         </footer>
       </article>`;
   }).join('');
@@ -15149,31 +15271,55 @@ function openCanDo(canDoId) {
 
   document.getElementById('scenario-back-btn').onclick = () => renderUnit(unitId);
   showSection('scenario', document.getElementById('nav-roadmap'));
-  updateStepVisibility(!!(cd.traceChars && cd.traceChars.length));
+  updateStepVisibility(
+    !!(cd.traceChars && cd.traceChars.length),
+    !!(cd.escuchar && (cd.escuchar.items || []).length),
+    !!(cd.lectura && (cd.lectura.items || []).length)
+  );
   setScenarioStep('scenario');
   renderScenarioView(cd);
 }
 
 /** ステップインジケーターを更新する */
+const NM_SCENARIO_STEPS = ['scenario','explain','trazar','practice','escuchar','lectura','challenge'];
 function setScenarioStep(step) {
-  ['scenario','explain','trazar','practice','challenge'].forEach(s => {
+  NM_SCENARIO_STEPS.forEach(s => {
     const el = document.getElementById('step-' + s);
     if (el) el.dataset.active = (s === step) ? 'true' : 'false';
   });
 }
 
-/** traceChars の有無でステップ表示を切り替える */
-function updateStepVisibility(hasTraza) {
-  const sep = document.getElementById('step-sep-trazar');
-  const step = document.getElementById('step-trazar');
-  const prac = document.getElementById('step-practice');
-  const cha  = document.getElementById('step-challenge');
-  if (sep)  sep.style.display  = hasTraza ? '' : 'none';
-  if (step) step.style.display = hasTraza ? '' : 'none';
-  // Trazar有りなら番号を④⑤に、なしなら③④に
-  if (step) step.textContent  = '③ Trazar';
-  if (prac) prac.textContent  = hasTraza ? '④ Práctica' : '③ Práctica';
-  if (cha)  cha.textContent   = hasTraza ? '⑤ Reto'     : '④ Reto';
+/** traceChars / escuchar / lectura の有無でステップ表示と番号を切り替える。
+ *  番号は「表示されているステップ」に 1 始まりで振り直す（隠しステップは数えない）。 */
+function updateStepVisibility(hasTraza, hasEscuchar, hasLectura) {
+  const show = {
+    trazar: !!hasTraza,
+    escuchar: !!hasEscuchar,
+    lectura: !!hasLectura
+  };
+  Object.keys(show).forEach(s => {
+    const step = document.getElementById('step-' + s);
+    const sep  = document.getElementById('step-sep-' + s);
+    const vis  = show[s] ? '' : 'none';
+    if (step) step.style.display = vis;
+    if (sep)  sep.style.display  = vis;
+  });
+  // 現在の Can-do に合わせてラベルを振り直す
+  const on = {
+    trazar: !!show.trazar,
+    practice: true, escuchar: show.escuchar, lectura: show.lectura,
+    challenge: true
+  };
+  let n = 1;
+  const labels = { scenario:'Escena', explain:'Gramática', trazar:'Trazar', practice:'Práctica',
+                   escuchar:'Escuchar', lectura:'Lectura', challenge:'Reto' };
+  ['scenario','explain','trazar','practice','escuchar','lectura','challenge'].forEach(s => {
+    if (s === 'trazar' && !on.trazar) return;
+    if (s === 'escuchar' && !on.escuchar) return;
+    if (s === 'lectura' && !on.lectura) return;
+    const el = document.getElementById('step-' + s);
+    if (el) el.textContent = `${n++}. ${labels[s]}`;
+  });
 }
 
 /** シナリオ表示（ヒント3段階・🔊ボタン） */
@@ -15406,7 +15552,7 @@ function showCanDoTrazarChar() {
         <button class="kana-prac-tab ${trazarMode==='gray'?'active':''}"  onclick="setCanDoTrazarMode('gray')">② Gris</button>
         <button class="kana-prac-tab ${trazarMode==='blank'?'active':''}" onclick="setCanDoTrazarMode('blank')">③ Libre</button>
       </div>
-      <div style="font-size:1rem;color:var(--primary);font-weight:700;margin-bottom:0.4rem">${item.r}${sc?' — '+sc+' trazo'+(sc>1?'s':''):''}</div>
+      <div style="font-size:1rem;color:var(--primary-ink);font-weight:700;margin-bottom:0.4rem">${item.r}${sc?' — '+sc+' trazo'+(sc>1?'s':''):''}</div>
       ${needsRef ? `<div style="display:flex;align-items:center;justify-content:center;gap:0.75rem;margin-bottom:0.5rem">
         <canvas id="trazar-mini" width="80" height="80" style="border:1.5px solid #e0d8cc;border-radius:10px;background:#fff"></canvas>
         <div style="font-size:0.75rem;color:#888;max-width:90px">Ver guía →<br>escribe de memoria</div>
@@ -15469,7 +15615,9 @@ function openPracticeView() {
   const cd = (window.canDoData || []).find(c => c.id === currentCanDoId);
   if (!cd) return;
   setScenarioStep('practice');
-  // Cupo diario según el plan (PLANS.<plan>.limits.practice・Reintentar incluido)。教師コード解放=Premium。
+  // Cupo diario según el plan (PLANS.<plan>.limits.practice)。
+  // canUse（ブロック判定）は入口で。consume（枠消費）は showPracticeResult（ラウンド完了時）に移した：
+  // 従来は開始前に消費していたため「← Volver」で中断しただけで 1 回分の枠を消費していた。
   if (!canUse('practice.unlimited').ok) {
     renderGateUpsell('scenario-content', {
       icon: '🎯',
@@ -15480,7 +15628,6 @@ function openPracticeView() {
     });
     return;
   }
-  consume('practice.unlimited');
   // 元データを破壊しないよう浅いコピーを作り、選択肢をシャッフルして answer を追従させる
   // （mc/fill/conv は正解が answer:0 に偏っており、先頭固定だと内容を読まず当てられてしまうため）
   _practiceItems  = cd.practice.items.map(it => ({ ...it }));
@@ -15505,7 +15652,7 @@ function renderPracticeItem() {
   const item  = _practiceItems[_practiceIdx];
   const total = _practiceItems.length;
   const prog  = `${_practiceIdx + 1} / ${total}`;
-  const pct   = Math.round((_practiceIdx / total) * 100);
+  const pct   = Math.round(((_practiceIdx + 1) / total) * 100);
 
   let bodyHtml = '';
   if (item.type === 'mc' || item.type === 'fill') {
@@ -15552,11 +15699,16 @@ function renderPracticeItem() {
 
   const jaDisplay = item.ja ? `<p class="prac-ja" lang="ja">${item.ja}</p>` : '';
 
+  // Umbral de aprobación visible: el estudiante no debe descubrir la nota necesaria al fallar.
+  const _cd = (window.canDoData || []).find(c => c.id === currentCanDoId);
+  const need = Math.ceil(((_cd && _cd.practice && _cd.practice.passRate) || 0.8) * total);
+
   document.getElementById('scenario-content').innerHTML = `
     <div class="prac-header">
       <span class="prac-prog">${prog}</span>
       <div class="prac-bar-bg"><div class="prac-bar" style="width:${pct}%"></div></div>
     </div>
+    <div class="prac-meta">Necesitas ${need} de ${total} para aprobar</div>
     <div class="prac-card">
       <p class="prac-prompt">${item.promptEs || item.prompt || ''}</p>
       ${jaDisplay}
@@ -15653,7 +15805,19 @@ function checkPracticeReorder() {
 function showPracticeExplain(correct, text) {
   const exp = document.createElement('div');
   exp.className = 'placement-exp';
-  exp.innerHTML = (correct ? '✅ ' : '❌ ') + (text || (correct ? '¡Correcto!' : ''));
+  // Fallback cuando falta explainEs: SIEMPRE mostrar la respuesta correcta.
+  // Antes salía solo "❌" (cadena vacía) y la app avanzaba sola: refuerzo negativo sin información.
+  let html;
+  if (correct) {
+    html = '✅ ' + (text || '¡Correcto!');
+  } else {
+    const item = _practiceItems[_practiceIdx];
+    const correctOpt = item && Array.isArray(item.options) ? stripRuby(item.options[item.answer]) : '';
+    html = '❌ ' + (text
+      ? text
+      : (correctOpt ? `Respuesta correcta: <strong>${correctOpt}</strong>` : 'Respuesta incorrecta.'));
+  }
+  exp.innerHTML = html;
   document.querySelector('.prac-card').appendChild(exp);
   setTimeout(advancePractice, 1600);
 }
@@ -15683,6 +15847,8 @@ function showPracticeResult() {
     attempts: (getCanDoProgress(currentCanDoId).attempts || 0) + 1
   });
   const xpGain = passed ? awardStepXP(currentCanDoId, 'practice', 20, 5) : 0;
+  // ラウンドを実際に終えた時点で枠を消費する（開始時ではなく）。途中で抜けても消費しない。
+  consume('practice.unlimited');
 
   const nextBtn = passed
     ? (hasEscuchar
@@ -15711,7 +15877,8 @@ function showPracticeResult() {
 function startEscucharPart() {
   const cd = (window.canDoData || []).find(c => c.id === currentCanDoId);
   if (!cd || !cd.escuchar) { openChallengeView(); return; }
-  // Cupo diario según el plan (PLANS.<plan>.limits.listening)。
+  setScenarioStep('escuchar');
+  // Cupo diario según el plan (PLANS.<plan>.limits.listening)。consume は showEscucharResult に移動。
   if (!canUse('listening.practice').ok) {
     renderGateUpsell('scenario-content', {
       icon: '🔊',
@@ -15722,7 +15889,6 @@ function startEscucharPart() {
     });
     return;
   }
-  consume('listening.practice');
   // 元データを破壊しないよう浅いコピーを作り、選択肢をシャッフルして answer を追従させる
   // （audio_mc/meaning/match は正解が answer:0 に偏っており、先頭固定だと内容を聞かず当てられてしまうため）
   // _origIdx = 元データ内の item 順（0始まり）。描画時シャッフルしても音声ファイル名
@@ -15748,7 +15914,7 @@ function renderEscucharItem() {
   const item  = _escucharItems[_escucharIdx];
   const total = _escucharItems.length;
   const prog  = `${_escucharIdx + 1} / ${total}`;
-  const pct   = Math.round((_escucharIdx / total) * 100);
+  const pct   = Math.round(((_escucharIdx + 1) / total) * 100);
 
   let bodyHtml = '';
   if (item.type === 'audio_mc') {
@@ -15796,7 +15962,7 @@ function renderEscucharItem() {
   document.getElementById('scenario-content').innerHTML = `
     <div class="prac-header">
       <div style="display:flex;align-items:center;gap:0.5rem">
-        <span style="font-size:0.72rem;font-weight:700;color:var(--ocean);text-transform:uppercase;letter-spacing:0.05em">🔊 Escuchar — Parte 2</span>
+        <span style="font-size:0.72rem;font-weight:700;color:var(--ocean-ink);text-transform:uppercase;letter-spacing:0.05em">🔊 Escuchar — Parte 2</span>
         <span class="prac-prog">${prog}</span>
       </div>
       <div class="prac-bar-bg"><div class="prac-bar" style="width:${pct}%;background:var(--ocean)"></div></div>
@@ -15876,7 +16042,15 @@ function checkEscucharDictation() {
 function _showEscucharExplain(correct, msg) {
   const exp = document.createElement('div');
   exp.className = 'placement-exp';
-  exp.innerHTML = (correct ? '✅ ' : '❌ ') + (msg || (correct ? '¡Correcto!' : ''));
+  // Sin explainEs: mostrar siempre la respuesta correcta (antes salía solo "❌").
+  const item = _escucharItems[_escucharIdx];
+  let tail;
+  if (correct) tail = msg || '¡Correcto!';
+  else {
+    const ans = item ? String(item.answer || '').replace(/<[^>]*>/g, '') : '';
+    tail = msg || (ans ? `Respuesta: <strong>${ans}</strong>` : 'Respuesta incorrecta.');
+  }
+  exp.innerHTML = (correct ? '✅ ' : '❌ ') + tail;
   document.querySelector('.prac-card').appendChild(exp);
   setTimeout(advanceEscuchar, 1800);
 }
@@ -15899,6 +16073,8 @@ function showEscucharResult() {
   const pctDisp  = Math.round(pct * 100);
 
   const xpGain = passed ? awardStepXP(currentCanDoId, 'escuchar', 15, 5) : 0;
+  // ラウンド完了時点で枠を消費する（開始時ではなく）。
+  consume('listening.practice');
   const hasLectura = passed && cd && cd.lectura && (cd.lectura.items || []).length > 0;
 
   document.getElementById('scenario-content').innerHTML = `
@@ -15927,6 +16103,20 @@ function showEscucharResult() {
 function startLecturaPart() {
   const cd = (window.canDoData || []).find(c => c.id === currentCanDoId);
   if (!cd || !cd.lectura || !(cd.lectura.items || []).length) { openChallengeView(); return; }
+  setScenarioStep('lectura');
+  // Can-do 内 Lectura も日次枠の対象（PLANS.<plan>.limits.lectura）。.Retu は止めない：
+  // ブロック時は「Reto へ進む」経路を必ず残す（学習を止めない）。
+  if (!canUse('lectura.drill').ok) {
+    renderGateUpsell('scenario-content', {
+      icon: '📄',
+      title: 'Límite diario de lectura',
+      message: gateMessage('lectura') + '<br><br>Puedes seguir con el reto de conversación sin problema.',
+      retryJs: 'startLecturaPart()',
+      backJs: 'openChallengeView()',
+      backLabel: '💬 Ir al Reto (sin límite)'
+    });
+    return;
+  }
   // 元データを破壊しないよう浅いコピーを作り、選択肢をシャッフルして answer を追従させる
   // （read_mc は正解が answer:0 に偏りがちで、先頭固定だと本文を読まず当てられてしまうため）
   _lecturaItems = cd.lectura.items.map(it => ({ ...it }));
@@ -15948,7 +16138,7 @@ function renderLecturaItem() {
   const item  = _lecturaItems[_lecturaIdx];
   const total = _lecturaItems.length;
   const prog  = `${_lecturaIdx + 1} / ${total}`;
-  const pct   = Math.round((_lecturaIdx / total) * 100);
+  const pct   = Math.round(((_lecturaIdx + 1) / total) * 100);
 
   const opts = item.options.map((o, i) =>
     `<button class="placement-opt" onclick="checkLecturaAnswer(${i})">${o}</button>`
@@ -15957,7 +16147,7 @@ function renderLecturaItem() {
   document.getElementById('scenario-content').innerHTML = `
     <div class="prac-header">
       <div style="display:flex;align-items:center;gap:0.5rem">
-        <span style="font-size:0.72rem;font-weight:700;color:var(--ocean);text-transform:uppercase;letter-spacing:0.05em">📄 Lectura — Parte 3</span>
+        <span style="font-size:0.72rem;font-weight:700;color:var(--ocean-ink);text-transform:uppercase;letter-spacing:0.05em">📄 Lectura — Parte 3</span>
         <span class="prac-prog">${prog}</span>
       </div>
       <div class="prac-bar-bg"><div class="prac-bar" style="width:${pct}%;background:var(--ocean)"></div></div>
@@ -15980,7 +16170,12 @@ function checkLecturaAnswer(idx) {
   });
   const exp = document.createElement('div');
   exp.className = 'placement-exp';
-  exp.innerHTML = (correct ? '✅ ' : '❌ ') + (item.explainEs || (correct ? '¡Correcto!' : ''));
+  // Sin explainEs: mostrar siempre la respuesta correcta (antes salía solo "❌").
+  const ansOpt = item && Array.isArray(item.options) ? stripRuby(item.options[item.answer]) : '';
+  const tail = correct
+    ? (item.explainEs || '¡Correcto!')
+    : (item.explainEs || (ansOpt ? `Respuesta correcta: <strong>${ansOpt}</strong>` : 'Respuesta incorrecta.'));
+  exp.innerHTML = (correct ? '✅ ' : '❌ ') + tail;
   document.querySelector('.prac-card').appendChild(exp);
   setTimeout(advanceLectura, 2000);
 }
@@ -16003,6 +16198,8 @@ function showLecturaResult() {
   const pctDisp  = Math.round(pct * 100);
 
   const xpGain = passed ? awardStepXP(currentCanDoId, 'lectura', 15, 5) : 0;
+  // ラウンド完了時点で枠を消費する（開始時ではなく）。
+  consume('lectura.drill');
 
   document.getElementById('scenario-content').innerHTML = `
     <div style="text-align:center;padding:2.5rem 1rem">
@@ -16190,7 +16387,7 @@ function ensureChallengeCSS() {
   .reto-tabs{display:flex;gap:.5rem;justify-content:center;margin-bottom:1rem;flex-wrap:wrap}
   .reto-tab{border:1px solid #E0E0E0;background:#fff;border-radius:999px;padding:.4rem .9rem;font:600 .82rem 'DM Sans',sans-serif;cursor:pointer;color:var(--night)}
   .reto-tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
-  .reto-tab.done{border-color:var(--ocean);color:var(--ocean)}
+  .reto-tab.done{border-color:var(--ocean);color:var(--ocean-ink)}
   .reto-tab.active.done{background:var(--ocean);color:#fff}
   .reto-setting{background:#FDF6EC;border-radius:var(--radius-md);padding:.7rem 1rem;font:.85rem/1.4 'DM Sans',sans-serif;color:#6b5b4a;margin-bottom:1rem}
   .reto-chat{display:flex;flex-direction:column;gap:.7rem;margin-bottom:1rem}
@@ -16200,7 +16397,7 @@ function ensureChallengeCSS() {
   .reto-bubble.user{align-self:flex-end;background:var(--ocean);color:#fff;border-bottom-right-radius:4px}
   .reto-bubble .r-speak{background:none;border:none;cursor:pointer;font-size:1rem;margin-left:.3rem;opacity:.7}
   .reto-turn{background:#fff;border:1px dashed #D8C9B8;border-radius:var(--radius-md);padding:.9rem}
-  .reto-task{font:600 .9rem 'DM Sans',sans-serif;color:var(--primary);margin:0 0 .6rem}
+  .reto-task{font:600 .9rem 'DM Sans',sans-serif;color:var(--primary-ink);margin:0 0 .6rem}
   .reto-hint{margin-bottom:.5rem;font-size:.88rem;color:#666}
   .reto-hint .rh-romaji,.reto-hint .rh-es{display:none;margin:.15rem 0}
   .reto-hint.show-romaji .rh-romaji{display:block}
@@ -16208,19 +16405,19 @@ function ensureChallengeCSS() {
   .reto-input-row{display:flex;gap:.4rem;align-items:center}
   #challenge-input{flex:1;padding:.6rem .8rem;border:1px solid #ccc;border-radius:10px;font-size:1.05rem;box-sizing:border-box}
   .reto-mic,.reto-send{border:none;border-radius:10px;padding:.55rem .7rem;cursor:pointer;font-size:1.1rem;line-height:1}
-  .reto-mic{background:#FCE8E6;color:var(--primary)}
+  .reto-mic{background:#FCE8E6;color:var(--primary-ink)}
   .reto-mic.listening{background:var(--primary);color:#fff;animation:retoPulse 1s infinite}
   .reto-send{background:var(--ocean);color:#fff}
   .reto-aux{display:flex;gap:1rem;margin-top:.55rem}
   .reto-aux button{background:none;border:none;color:var(--night);opacity:.7;font:600 .8rem 'DM Sans',sans-serif;cursor:pointer;padding:0}
   .reto-fb{margin-top:.5rem;font:600 .92rem 'DM Sans',sans-serif;min-height:1.2em}
-  .reto-fb.ok{color:var(--ocean)} .reto-fb.ng{color:var(--primary)}
+  .reto-fb.ok{color:var(--ocean-ink)} .reto-fb.ng{color:var(--primary-ink)}
   @keyframes retoPulse{0%,100%{opacity:1}50%{opacity:.45}}
   .reto-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:9999}
   .reto-modal{background:#fff;border-radius:var(--radius-lg);padding:1.5rem;max-width:340px;width:90%}
   .reto-modal h3{margin:0 0 .6rem}
   .reto-modal label{display:block;font:600 .82rem 'DM Sans',sans-serif;margin:.7rem 0 .25rem}
-  .reto-modal input,.reto-modal select{width:100%;padding:.55rem;border:1px solid #ccc;border-radius:8px;font-size:1rem;box-sizing:border-box}
+  .reto-modal input,.reto-modal select{width:100%;padding:.55rem;min-height:44px;border:1px solid #ccc;border-radius:8px;font-size:1rem;box-sizing:border-box}
   `;
   document.head.appendChild(s);
 }
@@ -16230,12 +16427,29 @@ function openChallengeView() {
   ensureChallengeCSS();
   const scripts = (window.NM_SCRIPTS || {})[currentCanDoId];
   if (!scripts || !scripts.length) {
-    // 台本未作成の Can-do は従来のプレースホルダー
+    // 台本未作成の Can-do：以前は「✅ Completar」で 3スター+50XP を無条件付与していた（＝何もせず完了できる）。
+    // ボタンだけ消すと done への経路が無く、？（Reto が完了ゲート）ユニットの 80% が永久に未達になる。
+    // 方針：完了は許すが (a) 実際に合格したステップだけでスターを算出 (b) 何を終えたかを明示 (c) 確認を挟む。
+    const prog0 = getCanDoProgress(currentCanDoId);
+    const doneSteps = [['practice', 'Práctica'], ['escuchar', 'Escucha'], ['lectura', 'Lectura']]
+      .filter(([f]) => (prog0.xpAwarded || {})[f]);
     document.getElementById('scenario-content').innerHTML = `
-      <div style="text-align:center;padding:3rem 1rem">
-        <p style="font-size:2rem">🎯</p>
-        <p style="font-family:'DM Sans',sans-serif;color:var(--night);opacity:0.6">Reto conversacional — próximamente</p>
-        <button class="btn btn-primary" style="margin-top:1.5rem" onclick="completeCandoDone()">✅ Completar</button>
+      <div style="max-width:460px;margin:0 auto;text-align:center;padding:2.5rem 1rem">
+        <p style="font-size:2rem;margin:0 0 0.5rem">🎯</p>
+        <h2 style="font:800 1.3rem 'Outfit',sans-serif;color:var(--night);margin:0 0 0.6rem">Reto de conversación — próximamente</h2>
+        <p style="font-family:'DM Sans',sans-serif;color:var(--text-light);font-size:0.9rem;line-height:1.6;margin:0 0 1.2rem">
+          Esta lección todavía no tiene conversación grabada. Ya terminaste:
+          ${doneSteps.length
+            ? `<strong style="color:var(--ocean-ink)">${doneSteps.map(([, l]) => l).join(' · ')}</strong>.`
+            : 'la parte práctica.'}
+          <br>Puedes marcar la lección como completada cuando quieras; no te quita XP ni puntos.
+        </p>
+        <button class="btn btn-primary" style="width:100%;margin-bottom:0.6rem"
+          onclick="completeCandoDone({ noChallenge: true })">Marcar lección como completada</button>
+        <button class="btn btn-secondary" style="width:100%" onclick="openExplainView()">📖 Repasar la gramática</button>
+        <p style="font:500 0.78rem 'DM Sans',sans-serif;color:var(--text-light);margin:0.9rem 0 0">
+          Las estrellas se ganan en cada paso que apruebes, no aquí.
+        </p>
       </div>`;
     return;
   }
@@ -16377,7 +16591,7 @@ function renderChallengeResult() {
     if (cd && cd.traceChars && cd.traceChars.length) addLearnedChars(cd.traceChars.map(t => t.c));
   }
   let bonus = '';
-  if (firstTime && count === st.scripts.length) { grantXP(30); bonus = `<p style="color:var(--accent);font-weight:700">🎉 ¡Completaste las 3 conversaciones! +30 XP</p>`; }
+  if (firstTime && count === st.scripts.length) { grantXP(30); bonus = `<p style="color:var(--accent-ink);font-weight:700">🎉 ¡Completaste las 3 conversaciones! +30 XP</p>`; }
   const stars = '★'.repeat(Math.min(3, count)) + '☆'.repeat(Math.max(0, 3 - count));
   const remaining = st.scripts.map((s, i) => i).filter(i => !done[i]);
   const moreBtn = remaining.length ? `<button class="btn btn-secondary" onclick="pickChallengeScript(${remaining[0]})">➕ Otra conversación (${count}/${st.scripts.length})</button>` : '';
@@ -16387,8 +16601,8 @@ function renderChallengeResult() {
       <p style="font-size:2.2rem">🎉</p>
       <p lang="ja" style="font-size:1.2rem;font-weight:700">${applyProfilePlaceholders(sc.closingJa)}</p>
       <p style="color:#666">${applyProfilePlaceholders(sc.closingEs)}</p>
-      <p style="font-size:1.6rem;color:var(--accent);margin:.5rem 0">${stars}</p>
-      ${firstTime ? '<p style="color:var(--ocean);font-weight:700">+20 XP</p>' : ''}
+      <p style="font-size:1.6rem;color:var(--accent-ink);margin:.5rem 0">${stars}</p>
+      ${firstTime ? '<p style="color:var(--ocean-ink);font-weight:700">+20 XP</p>' : ''}
       ${bonus}
       <div style="display:flex;flex-direction:column;gap:.6rem;max-width:280px;margin:1.2rem auto 0">
         ${moreBtn}
@@ -16450,15 +16664,35 @@ function saveProfileFromModal() {
   if (typeof cb === 'function') cb();
 }
 
-/** Can-do を完了扱いにしてXPを付与 */
-function completeCandoDone() {
+/** Can-do を完了扱いにしてXPを付与
+ *  @param {{noChallenge?:boolean}} [opts] - noChallenge=true は「台本なし」で完了した場合。
+ *    会話 Zanmaiしてないのに challengePassed=true / stars=3 を書かない（記録の整合性）。 */
+function completeCandoDone(opts) {
   if (!currentCanDoId) return;
-  saveCanDoProgress(currentCanDoId, {
-    status: 'done',
-    challengePassed: true,
-    lastDoneAt: new Date().toISOString(),
-    stars: 3
-  });
+  const noChal = !!(opts && opts.noChallenge);
+  if (noChal) {
+    const prog = getCanDoProgress(currentCanDoId);
+    const a = prog.xpAwarded || {};
+    // 実際に合格したステップ数 = スター（最大3）。会話 retolo ない Can-do で 3スターを振らない。
+    const stars = (a.practice ? 1 : 0) + (a.escuchar ? 1 : 0) + (a.lectura ? 1 : 0);
+    const msg = stars >= 3
+      ? 'Completaste los 3 pasos de esta lección. ¡Buen trabajo! 🎉'
+      : `Completaste esta lección (${stars} de 3 pasos con estrellas).`;
+    if (!confirm(msg + '\n\n¿Volver al mapa?')) return;
+    saveCanDoProgress(currentCanDoId, {
+      status: 'done',
+      challengePassed: false,
+      lastDoneAt: new Date().toISOString(),
+      stars: Math.min(3, stars)
+    });
+  } else {
+    saveCanDoProgress(currentCanDoId, {
+      status: 'done',
+      challengePassed: true,
+      lastDoneAt: new Date().toISOString(),
+      stars: 3
+    });
+  }
   // traceChars を一括で学習済みに登録
   const cd = (window.canDoData || []).find(c => c.id === currentCanDoId);
   if (cd && cd.traceChars && cd.traceChars.length) {
@@ -28495,7 +28729,9 @@ function renderProfile() {
   const user   = (typeof firebase !== 'undefined' && firebase.auth().currentUser) || null;
   const prog   = nmGetProgress();
   const done   = Object.values(prog).filter(p => p.status === 'done').length;
-  const total  = (window.canDoData || []).length;
+  // Contar solo los Can-dos visibles: canDoData incluye los `hidden:true` que candosForUnit filtra,
+  // por lo que antes mostraba "done/85" y nunca llegaba a completarse.
+  const total  = candosForUnitAll().length;
   const tier   = planTier();
   const cfg    = PLANS[tier];
   const isPaid = cfg.level > 0;
@@ -28696,7 +28932,7 @@ const jlptQuestionBank = [
 ];
 
 const _jlptPassage = `<div style="background:#F0F7F6;border-left:4px solid var(--ocean);border-radius:var(--radius-md);padding:1rem 1.2rem;margin-bottom:1rem;font-family:'Noto Sans JP',sans-serif;font-size:0.88rem;line-height:1.9">
-  <p style="margin:0 0 0.4rem;font:700 0.75rem 'DM Sans',sans-serif;color:var(--ocean);text-transform:uppercase;letter-spacing:0.04em">📄 Lee el texto</p>
+  <p style="margin:0 0 0.4rem;font:700 0.75rem 'DM Sans',sans-serif;color:var(--ocean-ink);text-transform:uppercase;letter-spacing:0.04em">📄 Lee el texto</p>
   <p style="margin:0 0 0.6rem">マリアは まいあさ <u>6じ</u>に おきます。おきてから、ジョギングを します。それから、シャワーを あびて、あさごはんを たべます。がっこうへ いく まえに、コーヒーを のみます。</p>
   <p style="margin:0 0 0.6rem">きのう、ともだちと えいがを みました。えいがを みたあとで、すしを たべました。とても おいしかったです。</p>
   <p style="margin:0">にほんへ いったことが ありますか。マリアは まだ ありません。でも、いつか いきたいです。</p>
@@ -28719,7 +28955,7 @@ const JLPT_SECTIONS = [
 
 function jlptPassageHtml(lines) {
   return `<div style="background:#F0F7F6;border-left:4px solid var(--ocean);border-radius:var(--radius-md);padding:1rem 1.2rem;margin-bottom:1rem;font-family:'Noto Sans JP',sans-serif;font-size:0.88rem;line-height:1.9">
-  <p style="margin:0 0 0.4rem;font:700 0.75rem 'DM Sans',sans-serif;color:var(--ocean);text-transform:uppercase;letter-spacing:0.04em">📄 Lee el texto</p>
+  <p style="margin:0 0 0.4rem;font:700 0.75rem 'DM Sans',sans-serif;color:var(--ocean-ink);text-transform:uppercase;letter-spacing:0.04em">📄 Lee el texto</p>
   ${lines.map(l => `<p style="margin:0 0 0.6rem">${l}</p>`).join('')}
 </div>`;
 }
@@ -28760,7 +28996,7 @@ function renderJlpt() {
     const info = exInfo(id);
     return `<button onclick="startJlptTest('${id}')" class="jlpt-exam-card" data-exam="${id}"
       style="display:flex;align-items:center;gap:0.8rem;width:100%;text-align:left;background:#fff;border:2px solid ${info.passed ? 'var(--ocean)' : '#E8E8E8'};border-radius:var(--radius-md);padding:0.75rem 1rem;margin-bottom:0.55rem;cursor:pointer;font-family:'DM Sans',sans-serif">
-      <span style="font:800 1.3rem 'Outfit',sans-serif;color:var(--primary)">${i + 1}</span>
+      <span style="font:800 1.3rem 'Outfit',sans-serif;color:var(--primary-ink)">${i + 1}</span>
       <span style="flex:1;line-height:1.35"><strong style="color:var(--night)">Examen ${i + 1}</strong><br><span style="font-size:0.78rem;color:var(--text-light)">${n} preguntas${info.best ? ' · mejor: ' + info.best + '%' : ''}</span></span>
       <span style="font-size:1.2rem">${info.passed ? '✅' : '▶️'}</span>
     </button>`;
@@ -28962,7 +29198,7 @@ function showJlptResults() {
     const r = rows.find(x => x.s.id === id);
     return r && r.score / r.max < 0.6 ? `<div style="background:#FFF3CD;border-radius:var(--radius-md);padding:0.65rem 1rem;margin-bottom:0.6rem;text-align:left;font-size:0.82rem;font-family:'DM Sans',sans-serif">${msg} — ${btn}</div>` : '';
   };
-  const btnStyle = "background:none;border:none;color:var(--primary);font-weight:700;cursor:pointer;font-size:0.82rem;padding:0";
+  const btnStyle = "background:none;border:none;color:var(--primary-ink);font-weight:700;cursor:pointer;font-size:0.82rem;padding:0";
 
   document.getElementById('jlpt-content').innerHTML = `
     <div style="max-width:480px;margin:0 auto;padding:1.5rem 1rem;text-align:center">
@@ -29156,7 +29392,7 @@ function renderLectDrillQuestion() {
   const optHtml = it.options.map((o, i) => `
     <button class="placement-opt" onclick="checkLectDrillAnswer(${i})"
       style="text-align:left;width:100%;margin-bottom:0.5rem;padding:0.7rem 1rem;background:#fff;border:2px solid #E8E8E8;border-radius:var(--radius-md);font-family:'DM Sans',sans-serif;font-size:0.9rem;cursor:pointer;transition:border-color 0.15s">
-      <span style="font-weight:700;color:var(--ocean);margin-right:0.5rem">${['A','B','C','D'][i]}.</span>${o}
+      <span style="font-weight:700;color:var(--ocean-ink);margin-right:0.5rem">${['A','B','C','D'][i]}.</span>${o}
     </button>`).join('');
 
   document.getElementById('jlpt-content').innerHTML = `
@@ -29168,7 +29404,7 @@ function renderLectDrillQuestion() {
         <span style="font:700 0.78rem 'DM Sans',sans-serif;color:var(--text-light);white-space:nowrap">${num} / ${total}</span>
       </div>
       <div class="lectura-passage" lang="ja">
-        <p style="margin:0 0 0.4rem;font:700 0.72rem 'DM Sans',sans-serif;color:var(--ocean);text-transform:uppercase;letter-spacing:0.04em">${LECT_KIND_LABEL[it.kind] || '📄 Texto'} — Lee el texto</p>
+        <p style="margin:0 0 0.4rem;font:700 0.72rem 'DM Sans',sans-serif;color:var(--ocean-ink);text-transform:uppercase;letter-spacing:0.04em">${LECT_KIND_LABEL[it.kind] || '📄 Texto'} — Lee el texto</p>
         ${it.passage}
       </div>
       <div style="background:#fff;border-radius:var(--radius-lg);padding:1.2rem 1.4rem;margin-bottom:0.75rem;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
