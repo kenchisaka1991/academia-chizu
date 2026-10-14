@@ -411,6 +411,46 @@ playScenarioAudio("audio/u3_kanji_l1.opus", "なまえはマリアです。", bt
 - ビルド・テスト・lint なし。動作確認は `python -m http.server 8080`
 - 実装完了後は必ず未実装リストを `✅完了` に更新すること
 
+### 🎨 A4 · インクトークン（2026-10-14 追加）
+
+- **テキスト用の別トークンを追加**: `--primary-ink:#C1121F` / `--ocean-ink:#1A6B5A` / `--accent-ink:#9A5A18`。`--text-light` は `#6B7B8C` → `#55677A` に濃くした。
+- **使い分けの厳密なルール**:
+  1. 明るい背景（白・`--cream`・淡い-brand チント）の上のテキスト → **`var(--*-ink)`** を使う
+  2. brand 色の塗り（`.btn-primary` / `.tab.active` など）の上のテキスト → **`#fff` のまま**
+  3. 塗り・境界・グラデーション → **`var(--primary)` / `--ocean` / `--accent` のまま**（絶対に変えない）
+- **`.xxx.active` の白指定には触らない**: `.mode-tab` は `color:var(--primary-ink)` になるが `.mode-tab.active{background:var(--primary);color:white}` は詳細度で勝つのでそのまま。境界だけ `border-color` は brand 色のまま。
+- 2026-10-14 時点で **179 行**を ink へ置換済み（`.placement-opt.correct/.wrong`・`.ex-es`・`.btn-pista-aq`・`.btn-primary`/`.btn-secondary` に加えて、タブ/バッジ/表/インライン style 全部）。
+- **検証済み**: 置換前後で `var(--*-ink)` → `var(--*)` に戻した行が旧行と完全一致すること（＝塗り・境界・グラデーションに触れていないこと）をスクリプトで確認。
+
+### ♿ A11y ブロック（2026-10-14・Bloque A 完了）
+
+すべて **index.html のメイン `<style>` 内**（`.conv-audio-btn` の直後、ファイル先頭付近）。**`ensureChallengeCSS()` が実行時に注入する CSS は別の `<style id="nm-reto-css">`** で、この2つは混同しないこと。
+
+- **A1 `prefers-reduced-motion: reduce`** — `<style>` 最後の単一ブロック。装飾（header / pin / map marker / `.reto-mic.listening` / `.btn-audio-play.speaking`）と全 `transition` を止め、**状態フィードバック（correct/incorrect/audio）は色だけ残す**。`.placement-opt.correct/.wrong` と `.masu-opt.correct/.wrong` も `animation:none !important`。
+  - ⚠️ **注入 CSS との優先順位**: `ensureChallengeCSS()` は `document.head` に**後から** append するので通常なら負けるが、このブロックは `!important` を使っているため**必ず勝つ**。実測（Playwright, `reduced_motion='reduce'`）で `.reto-mic.listening` → `animation-name: none` を確認済み。CSS を注入側へ複製する必要はない。
+- **A2 bottom-nav の safe-area** — `height: calc(60px + env(safe-area-inset-bottom, 0px))` ＋ `body { padding-bottom: calc(60px + env(...) + 0.75rem) }`。inset は**消費せず上乗せ**（`box-sizing:border-box` 前提）。
+- **A3 タップターゲット 44px の床** — 約24セレクタに `min-height:44px` をまとめた**単一ブロック**。padding を目視で上げる方法では line-height 次第で 44px に届かないため、ここが唯一の真実。
+  - **レイアウトを崩す control には `min-height` ではなく `::after` 44px**（既存パターン: `.btn-speak` / `.btn-hint` / `.lesson-tab`）。`position:relative` ＋ `::after{position:absolute;...;width/height:44px}`。
+  - 実例: ロードマップの **`.kanji-badge`**（20×20）。`min-height` は却下（11個が並ぶので 44px に広げるとカードが崩れる）。→ `position:relative` ＋ `::after` 44px（`.kanji-badge::after` と `.node-kanji-link::after`）。**`.node-kanji` に `min-height:44px`** を足し、insignia の `::after` が常に行内に収まるようにした（行は元から ~44px 高）。`::after` は隣の insignia へ食い込むが、**行内の要素は全て同じ行き先**（その単元の kanji）なので実害なし。**insignia を束ねる親要素（`.node-kanji-badges`）を作るのは却下** — flex item が1個増えると `3/5` と `→ Kanji` が別行に落ちてカードが +13〜37px 伸びる（実測済み）。
+  - テキストリンク（footer・`#plans-modal`）は **`padding: .9rem 0` を付けるだけ**。`::after` は効かない — inline の包含ブロックに対する abs-pos の `width:100%` は Chromium で `0px` に落ちる（実測）。`display:inline-block` だと atomic 化して `<p class="footer">` が 34px → 51px に伸びる（実測）。**inline の縦 padding は line box を動かさない**ので、これが唯一の解（実測: link 17px のメール欄が 45.8px、2行の WhatsApp 欄が 61px、footer/p の箱は不変）。
+- **A4** → 前の節を参照。
+- **A5 `.nav-btn span` 0.62rem → 0.75rem**（ラベル可読性）。PC サイドバーは 0.88rem。
+
+#### ⚠️ 引き継ぎの訂正（2026-10-14）
+
+引き継ぎ資料にあった記述「`.word-chip` と `.conv-audio-btn` は `ensureChallengeCSS()` の注入 CSS にある」は **誤り**。両方は **メイン `<style>` に静的に書いてある**。
+
+- `.word-chip` → `<style>` の `/* ===== Práctica ===== */` 直後（`.reorder-bank` の次）
+- `.conv-audio-btn` → `<style>` の `/* ===== conv（会話応答）問題 ===== */` 直後（`.conv-bubble-text .conv-hint` の次）
+
+**`ensureChallengeCSS()` が注入するのは `.reto-*` 系だけ**（`.reto-tabs` / `.reto-bubble` / `.reto-input-row` / `.reto-mic` / `.reto-modal` … ＋ `@keyframes retoPulse`）。プロフィールモーダル（`#prof-name` / `#prof-country`）は `.reto-modal` の中にあるので、**その入力欄のスタイルは `ensureChallengeCSS()` 側**にある（`.reto-modal input,.reto-modal select{min-height:44px}`）。新クラスは `.reto-*` 以外へ増やさないこと。
+
+#### 検証
+
+- 静的: `node scripts/verify_app_static.js`（FAIL 0）
+- E2E: `python scripts/verify_app_e2e.py`（26/26）※ viewport 1280×720 のため**モバイルの tap target は検出できない**
+- モバイル 375px は**手動**で見た: 約80画面（roadmap/unit/全11 unit/全26文法タブ×learn+practice/kanji/vocab/kana×4/placement/scenario/práctica/escuchar/lectura/reto/JLPT×3/profile/profile modal/planes/legal）を Playwright で走査し、`rect ∪ ::before/::after` の実面积为 44×44 未満のコントロールが**0件**であることを確認。
+
 ---
 
 ## NihongoMap Phase 1 — 実装進捗
