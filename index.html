@@ -16647,15 +16647,18 @@ function renderScenarioView(cd) {
       </div>`;
   }).join('');
 
+  // En el mini curso la guía superior es el único control para pasar de etapa.
+  // Evita que el botón genérico al final de la escena compita con ella.
+  const beginnerGuided = nmBeginnerUsesDirectReto(cd.id);
   document.getElementById('scenario-content').innerHTML = `
     <div class="scenario-context">
       <h3 class="scenario-title">${cd.scenario.title}</h3>
       <p class="scenario-ctx-es">${cd.scenario.contextEs}</p>
     </div>
     <div class="scenario-lines">${lines}</div>
-    <div style="text-align:center;margin-top:1.5rem">
+    ${beginnerGuided ? '' : `<div style="text-align:center;margin-top:1.5rem">
       <button class="btn btn-primary" onclick="openExplainView()">Siguiente</button>
-    </div>`;
+    </div>`}`;
   nmInjectBeginnerLessonGuide('scenario');
   nmQueueTutorial('scenario');
 }
